@@ -102,9 +102,14 @@
     <h3 class="text-xl font-bold mb-6 text-center">Mi Progreso</h3>
     <nav class="space-y-2 text-sm">
       <a href="#dashboard" data-section="dashboard" class="block py-2 px-3 rounded hover:bg-gray-700 transition-colors">📊 Dashboard</a>
+      <a href="#entreno-hoy" data-section="entreno-hoy" class="block py-2 px-3 rounded hover:bg-gray-700 transition-colors">📝 Entreno Hoy</a>
+      <a href="#cardio-hoy" data-section="cardio-hoy" class="block py-2 px-3 rounded hover:bg-gray-700 transition-colors">🏃‍♂️ Cardio Hoy</a>
+      <a href="#registro-neat" data-section="registro-neat" class="block py-2 px-3 rounded hover:bg-gray-700 transition-colors">🚶 NEAT</a>
       <a href="#registro-pesos" data-section="registro-pesos" class="block py-2 px-3 rounded hover:bg-gray-700 transition-colors">🏋️ Registro Pesos</a>
       <a href="#registro-cardio" data-section="registro-cardio" class="block py-2 px-3 rounded hover:bg-gray-700 transition-colors">🏃 Registro Cardio</a>
       <a href="#pautas-dieta" data-section="pautas-dieta" class="block py-2 px-3 rounded hover:bg-gray-700 transition-colors">🥗 Pautas Dieta</a>
+      <a href="#gestion-plan" data-section="gestion-plan" class="block py-2 px-3 rounded hover:bg-gray-700 transition-colors">🧭 Gestión Plan</a>
+      <a href="#perfil" data-section="perfil" class="block py-2 px-3 rounded hover:bg-gray-700 transition-colors">👤 Perfil</a>
     </nav>
   </aside>
 
@@ -121,6 +126,10 @@
           <div>
             <label class="block text-sm font-medium mb-2">Peso (kg)</label>
             <input type="number" id="quick-weight" step="0.1" placeholder="85.0" class="w-full">
+          </div>
+          <div>
+            <label class="block text-sm font-medium mb-2">Cintura (cm)</label>
+            <input type="number" id="quick-waist" step="0.1" placeholder="85" class="w-full">
           </div>
           <div>
             <label class="block text-sm font-medium mb-2">Entrenamiento</label>
@@ -168,6 +177,7 @@
           <div class="space-y-3">
             <div class="flex justify-between"><span class="text-sm text-gray-600">Peso</span><span id="estado-peso-display" class="font-bold">85.0 kg</span></div>
             <div class="flex justify-between"><span class="text-sm text-gray-600">Cintura</span><span id="estado-cintura-display" class="font-bold">? cm</span></div>
+            <div class="flex justify-between"><span class="text-sm text-gray-600">Grasa</span><span id="bodyfat-display" class="font-bold">? %</span></div>
             <div class="w-full bg-gray-200 rounded-full h-2 mt-3"><div id="peso-progress-bar" class="bg-gradient-to-r from-blue-500 to-blue-600 h-2 rounded-full transition-all duration-500" style="width:0%"></div></div>
           </div>
         </div>
@@ -200,6 +210,149 @@
         </div>
         <div id="calendar-semanal" class="grid grid-cols-1 md:grid-cols-7 gap-3"></div>
         <p class="text-xs text-gray-500 mt-3">Arrastra actividades. Colores: 🔵 Pull · 🟢 Push · 🟡 Piernas · 🔴 Cardio · ⚪ Descanso</p>
+      </div>
+    </section>
+
+    <!-- NUEVA SECCIÓN: Entreno de Hoy (ligera y enfocada a reps) -->
+    <section id="entreno-hoy" class="section">
+      <h1 class="text-2xl font-bold mb-4">📝 Entreno de Hoy</h1>
+      <div class="bg-white p-4 rounded-xl shadow mb-4">
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-3">
+          <div>
+            <label class="text-sm font-medium">Día planificado</label>
+            <input id="entreno-dia-hoy" class="mt-1 p-2 border rounded w-full" readonly />
+          </div>
+          <div>
+            <label class="text-sm font-medium">Microciclo actual</label>
+            <input id="entreno-microciclo" type="number" min="1" class="mt-1 p-2 border rounded w-full" />
+          </div>
+          <div class="md:col-span-2 flex items-end gap-2">
+            <button id="btn-refrescar-entreno" class="px-3 py-2 bg-blue-600 text-white rounded">🔄 Refrescar</button>
+            <button id="btn-aprender-entreno" class="px-3 py-2 bg-emerald-600 text-white rounded">🧠 Ajustar recomendaciones</button>
+          </div>
+        </div>
+      </div>
+      <div class="bg-white p-4 rounded-xl shadow overflow-x-auto">
+        <table class="min-w-full border simplified-table">
+          <thead>
+            <tr class="bg-blue-600 text-white text-sm"><th class="p-2">Ejercicio</th><th class="p-2">Peso reco.</th><th class="p-2">Rango reps</th><th class="p-2">Reps</th><th class="p-2">Peso usado</th><th class="p-2">Estado</th></tr>
+          </thead>
+          <tbody id="tbody-entreno-hoy"></tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- NUEVA SECCIÓN: Cardio de Hoy -->
+    <section id="cardio-hoy" class="section">
+      <h1 class="text-2xl font-bold mb-4">🏃‍♂️ Cardio de Hoy</h1>
+      <div class="bg-white p-4 rounded-xl shadow mb-4">
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-3">
+          <div>
+            <label class="text-sm font-medium">Microciclo actual</label>
+            <input id="cardio-microciclo" type="number" min="1" class="mt-1 p-2 border rounded w-full" />
+          </div>
+          <div>
+            <label class="text-sm font-medium">Sesión sugerida</label>
+            <input id="cardio-sesion" class="mt-1 p-2 border rounded w-full" readonly />
+          </div>
+          <div class="md:col-span-2 flex items-end gap-2">
+            <button id="btn-refrescar-cardio" class="px-3 py-2 bg-blue-600 text-white rounded">🔄 Refrescar</button>
+            <button id="btn-aprender-cardio" class="px-3 py-2 bg-emerald-600 text-white rounded">🧠 Ajustar recomendaciones</button>
+          </div>
+        </div>
+      </div>
+      <div class="bg-white p-4 rounded-xl shadow">
+        <div id="cardio-plan-texto" class="text-sm text-gray-700 mb-3"></div>
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
+          <div>
+            <label class="text-sm font-medium">KM realizados</label>
+            <input id="cardio-km-hoy" type="number" step="0.1" class="mt-1 p-2 border rounded w-full" />
+          </div>
+          <div>
+            <label class="text-sm font-medium">Tiempo (min)</label>
+            <input id="cardio-tiempo-hoy" type="number" class="mt-1 p-2 border rounded w-full" />
+          </div>
+          <div class="flex items-end">
+            <button id="btn-guardar-cardio-hoy" class="px-4 py-2 bg-blue-600 text-white rounded w-full">💾 Guardar</button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- NUEVA SECCIÓN: NEAT -->
+    <section id="registro-neat" class="section">
+      <h1 class="text-2xl font-bold mb-4">🚶 NEAT (Actividad diaria)</h1>
+      <div class="bg-white p-4 rounded-xl shadow mb-4">
+        <div class="grid grid-cols-1 md:grid-cols-5 gap-3">
+          <div>
+            <label class="text-sm font-medium">Pasos</label>
+            <input id="neat-steps" type="number" class="mt-1 p-2 border rounded w-full" />
+          </div>
+          <div>
+            <label class="text-sm font-medium">Tiempo (min)</label>
+            <input id="neat-min" type="number" class="mt-1 p-2 border rounded w-full" />
+          </div>
+          <div>
+            <label class="text-sm font-medium">Velocidad (km/h)</label>
+            <input id="neat-vel" type="number" step="0.1" class="mt-1 p-2 border rounded w-full" />
+          </div>
+          <div>
+            <label class="text-sm font-medium">Distancia (km)</label>
+            <input id="neat-km" type="number" step="0.1" class="mt-1 p-2 border rounded w-full" />
+          </div>
+          <div class="flex items-end">
+            <button id="btn-guardar-neat" class="px-4 py-2 bg-blue-600 text-white rounded w-full">💾 Guardar NEAT</button>
+          </div>
+        </div>
+      </div>
+      <div class="bg-white p-4 rounded-xl shadow overflow-x-auto">
+        <div class="mb-2 text-sm">Calorías NEAT hoy: <span id="neat-cal-hoy" class="font-semibold">0</span> kcal</div>
+        <table class="min-w-full border simplified-table">
+          <thead><tr class="bg-blue-600 text-white text-sm"><th class="p-2">Fecha</th><th class="p-2">Pasos</th><th class="p-2">Tiempo</th><th class="p-2">Velocidad</th><th class="p-2">Distancia</th><th class="p-2">Kcal</th></tr></thead>
+          <tbody id="tabla-neat"></tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- NUEVA SECCIÓN: Gestión Plan -->
+    <section id="gestion-plan" class="section">
+      <h1 class="text-2xl font-bold mb-4">🧭 Gestión de Plan</h1>
+      <div class="bg-white p-4 rounded-xl shadow mb-4">
+        <p class="text-sm text-gray-600 mb-2">Pega aquí tu plan en texto (IA) con el formato "Día X: Tipo" y ejercicios por líneas:</p>
+        <textarea id="plan-texto" rows="8" class="w-full p-2 border rounded" placeholder="Día 1: Pull\nBent over rows: Top 30kg 6-8; Resto 25kg 8-10 x2\n...\nDía 2: Push\n..."></textarea>
+        <div class="flex gap-2 mt-3">
+          <button id="btn-parse-plan" class="px-4 py-2 bg-blue-600 text-white rounded">📥 Importar desde texto</button>
+          <label class="px-4 py-2 bg-gray-200 rounded cursor-pointer">📂 Cargar JSON<input id="input-json" type="file" accept="application/json" class="hidden"></label>
+        </div>
+        <div id="plan-feedback" class="text-sm mt-2"></div>
+      </div>
+    </section>
+
+    <!-- NUEVA SECCIÓN: Perfil -->
+    <section id="perfil" class="section">
+      <h1 class="text-2xl font-bold mb-4">👤 Perfil</h1>
+      <div class="bg-white p-4 rounded-xl shadow">
+        <div class="grid grid-cols-1 md:grid-cols-5 gap-3">
+          <div>
+            <label class="text-sm font-medium">Sexo</label>
+            <select id="perfil-sexo" class="mt-1 p-2 border rounded w-full"><option value="M">Masculino</option><option value="F">Femenino</option></select>
+          </div>
+          <div>
+            <label class="text-sm font-medium">Altura (cm)</label>
+            <input id="perfil-altura" type="number" class="mt-1 p-2 border rounded w-full" />
+          </div>
+          <div>
+            <label class="text-sm font-medium">Cuello (cm)</label>
+            <input id="perfil-cuello" type="number" class="mt-1 p-2 border rounded w-full" />
+          </div>
+          <div>
+            <label class="text-sm font-medium">Microciclo actual</label>
+            <input id="perfil-microciclo" type="number" min="1" class="mt-1 p-2 border rounded w-full" />
+          </div>
+          <div class="flex items-end">
+            <button id="btn-guardar-perfil" class="px-4 py-2 bg-blue-600 text-white rounded w-full">💾 Guardar Perfil</button>
+          </div>
+        </div>
       </div>
     </section>
 
@@ -401,11 +554,16 @@ let planSemanal = JSON.parse(localStorage.getItem('planSemanal')) || [
 ];
 let adherenciaDiaria = JSON.parse(localStorage.getItem('adherenciaDiaria')) || {};
 
+// Perfil y ajustes (persistidos)
+let perfil = JSON.parse(localStorage.getItem('perfil')) || { sexo:'M', alturaCm:null, cuelloCm:null, microcicloActual:1 };
+let ajustesEntreno = JSON.parse(localStorage.getItem('ajustesEntreno')) || {};
+let ajustesCardio = JSON.parse(localStorage.getItem('ajustesCardio')) || {};
+let neat = JSON.parse(localStorage.getItem('neat')) || [];
 const q=(s,d=document)=>d.querySelector(s), qa=(s,d=document)=>Array.from(d.querySelectorAll(s));
 const todayISO=()=>new Date().toISOString().split('T')[0];
 const daysName=['Domingo','Lunes','Martes','Miércoles','Jueves','Viernes','Sábado'];
 const getTodayName=(d=new Date())=>daysName[d.getDay()];
-const saveAll=()=>{ localStorage.setItem('estado',JSON.stringify(estado)); localStorage.setItem('pesos',JSON.stringify(pesos)); localStorage.setItem('cardio',JSON.stringify(cardio)); localStorage.setItem('dieta',JSON.stringify(dieta)); localStorage.setItem('planSemanal',JSON.stringify(planSemanal)); localStorage.setItem('adherenciaDiaria',JSON.stringify(adherenciaDiaria)); };
+const saveAll=()=>{ localStorage.setItem('estado',JSON.stringify(estado)); localStorage.setItem('pesos',JSON.stringify(pesos)); localStorage.setItem('cardio',JSON.stringify(cardio)); localStorage.setItem('dieta',JSON.stringify(dieta)); localStorage.setItem('planSemanal',JSON.stringify(planSemanal)); localStorage.setItem('adherenciaDiaria',JSON.stringify(adherenciaDiaria)); localStorage.setItem('perfil',JSON.stringify(perfil)); localStorage.setItem('ajustesEntreno',JSON.stringify(ajustesEntreno)); localStorage.setItem('ajustesCardio',JSON.stringify(ajustesCardio)); localStorage.setItem('neat',JSON.stringify(neat)); };
 
 /* NUEVAS FUNCIONALIDADES - Toast Notifications */
 function showToast(message, type = 'success') {
@@ -432,9 +590,27 @@ function setLoading(element, isLoading) {
   }
 }
 
+/* NUEVAS UTILIDADES - Cálculo % graso (US Navy aprox) */
+function calcularPorcentajeGrasa(sexo, alturaCm, cuelloCm, cinturaCm, caderaCm){
+  // Validaciones básicas
+  if(!alturaCm || !cuelloCm || !cinturaCm) return null;
+  const altura = parseFloat(alturaCm); const cuello = parseFloat(cuelloCm); const cintura = parseFloat(cinturaCm);
+  if(!(altura>0) || !(cuello>0) || !(cintura>0) || cintura<=cuello) return null;
+  const log10 = (x)=>Math.log(x)/Math.log(10);
+  let bf;
+  if(sexo==='F'){
+    if(!caderaCm) return null; const cadera=parseFloat(caderaCm); if(!(cadera>0)) return null;
+    bf = 495 / (1.29579 - 0.35004*log10(cintura + cadera - cuello) + 0.22100*log10(altura)) - 450;
+  }else{
+    bf = 495 / (1.0324 - 0.19077*log10(cintura - cuello) + 0.15456*log10(altura)) - 450;
+  }
+  return isFinite(bf)? Math.max(3, Math.min(60, bf)) : null;
+}
+
 /* NUEVAS FUNCIONALIDADES - Quick Entry */
-function handleQuickSave() {
+function handleQuickSave(){
   const weight = parseFloat(q('#quick-weight').value);
+  const waist = parseFloat(q('#quick-waist').value);
   const workout = q('#quick-workout').value;
   const cardioKm = parseFloat(q('#quick-cardio').value);
   
@@ -443,8 +619,9 @@ function handleQuickSave() {
   let savedItems = [];
   
   if (weight && weight > 0) {
-    guardarPesajeHoy(weight);
+    guardarPesajeHoy(weight, isNaN(waist)? null : waist);
     savedItems.push('Peso');
+    if(!isNaN(waist) && waist>0) savedItems.push('Cintura');
     hasData = true;
   }
   
@@ -455,18 +632,9 @@ function handleQuickSave() {
   }
   
   if (cardioKm && cardioKm > 0) {
-    // Guardar cardio rápido
     const fecha = todayISO();
     cardio = cardio.filter(c => c.fecha !== fecha);
-    cardio.push({
-      fecha,
-      microciclo: 1,
-      sesionId: 1,
-      km: cardioKm,
-      tiempo: Math.round(cardioKm * 7), // Estimación de tiempo
-      ritmo: Math.round(cardioKm * 7) / cardioKm,
-      calorias: Math.round(cardioKm * 7 * 10)
-    });
+    cardio.push({ fecha, microciclo: perfil.microcicloActual||1, sesionId: getSesionIdForToday(), km: cardioKm, tiempo: Math.round(cardioKm * 7), ritmo: Math.round(cardioKm * 7) / cardioKm, calorias: Math.round(cardioKm * 7 * 10) });
     actualizarAdherenciaTask('cardio', true);
     savedItems.push('Cardio');
     hasData = true;
@@ -475,13 +643,10 @@ function handleQuickSave() {
   if (hasData) {
     saveAll();
     showToast(`✅ Guardado: ${savedItems.join(', ')}`);
-    
-    // Limpiar formulario
     q('#quick-weight').value = '';
+    q('#quick-waist').value = '';
     q('#quick-workout').value = '';
     q('#quick-cardio').value = '';
-    
-    // Actualizar UI
     actualizarProgresoGeneral();
     actualizarTodoList();
     actualizarGraficoPeso();
@@ -521,7 +686,7 @@ qa('a[data-section]').forEach(a=>a.addEventListener('click',e=>{
 }));
 function showSection(id){
   qa('.section').forEach(s=>s.classList.remove('active')); q('#'+id).classList.add('active'); window.scrollTo({top:0,behavior:'smooth'});
-  if(id==='registro-pesos') inicializarTablaPesos(); if(id==='registro-cardio') inicializarTablaCardio(); if(id==='pautas-dieta') inicializarTablaDieta();
+  if(id==='registro-pesos') inicializarTablaPesos(); if(id==='registro-cardio') inicializarTablaCardio(); if(id==='pautas-dieta') inicializarTablaDieta(); if(id==='entreno-hoy') renderEntrenoHoy(); if(id==='cardio-hoy') renderCardioHoy(); if(id==='registro-neat') inicializarNeat(); if(id==='gestion-plan') inicializarGestionPlan(); if(id==='perfil') inicializarPerfil();
 }
 
 /* progress/adherence */
@@ -534,8 +699,11 @@ function actualizarProgresoGeneral(){
   const pTemp=(diasTrans/diasTot)*100; const pPeso=Math.min(((pIni-ultimo.peso)/(pIni-pObj))*100,100);
   const pTotal=Math.max(pTemp*0.3 + pPeso*0.7,0);
   const circ=2*Math.PI*40; q('#progress-circle').style.strokeDasharray=`${(pTotal/100)*circ} ${circ}`;
-  q('#progress-percentage').textContent=`${Math.round(pTotal)}%`; q('#estado-peso-display').textContent=`${ultimo.peso.toFixed(1)} kg`; q('#estado-cintura-display').textContent=ultimo.cintura?`${ultimo.cintura.toFixed(1)} cm`:'? cm';
+  q('#progress-percentage').textContent=`${Math.round(pTotal)}%`; q('#estado-peso-display').textContent=`${ultimo.peso.toFixed(1)} kg`; q('#estado-cintura-display').textContent=ultimo.cintura?`${parseFloat(ultimo.cintura).toFixed(1)} cm`:'? cm';
   q('#peso-progress-bar').style.width=`${Math.max(0,pPeso)}%`;
+  // Calcular y mostrar % graso si hay datos suficientes en perfil
+  const bf = calcularPorcentajeGrasa(perfil.sexo||'M', perfil.alturaCm, perfil.cuelloCm, ultimo.cintura, perfil.caderaCm);
+  q('#bodyfat-display').textContent = (bf!=null)? `${bf.toFixed(1)}%` : '? %';
 }
 
 /* todo list (includes pesaje diario) */
@@ -545,6 +713,7 @@ function actualizarTodoList(){
   const items=[];
   if(planHoy.some(t=>t.includes('Pull')||t.includes('Push')||t.includes('Piernas'))) items.push({id:'pesos',label:'Entreno de Pesos'});
   if(planHoy.includes('Cardio')) items.push({id:'cardio',label:'Cardio'});
+  items.push({id:'neat',label:'NEAT (andar/movimiento)'});
   items.push({id:'dieta',label:'Dieta (~1800 kcal)'}); items.push({id:'ayuno',label:'Ayuno 16/8'});
   
   items.forEach(t=>{
@@ -567,15 +736,18 @@ function actualizarAdherenciaTask(id,val){
   showToast(val ? `✅ ${id} completado` : `❌ ${id} desmarcado`);
 }
 
-/* guardar pesaje diario */
-function guardarPesajeHoy(value){
+/* guardar pesaje diario (ahora acepta cintura opcional) */
+function guardarPesajeHoy(value, cinturaVal=null){
   if(!value || isNaN(value) || value<=0){ showToast('⚠️ Ingresa un peso válido', 'error'); return; }
   const fecha=todayISO();
+  // Si existe registro previo del día, preserva cintura si no se provee
+  const previo = estado.find(e=>e.fecha===fecha);
+  const cintura = (cinturaVal!=null && cinturaVal!=='') ? parseFloat(cinturaVal) : (previo? previo.cintura : null);
   estado = estado.filter(e=>e.fecha!==fecha);
-  estado.push({fecha, peso: parseFloat(value), cintura: null});
+  estado.push({fecha, peso: parseFloat(value), cintura: cintura});
   estado.sort((a,b)=>new Date(a.fecha)-new Date(b.fecha));
   saveAll();
-  showToast(`✅ Peso guardado: ${value} kg`);
+  showToast(`✅ Peso guardado${cintura?` y cintura ${cintura} cm`:''}: ${parseFloat(value)} kg`);
   actualizarProgresoGeneral(); actualizarGraficoPeso(); actualizarTodoList();
 }
 
@@ -707,7 +879,7 @@ window.guardarCardioSimple = function(input, microciclo, sesionId) {
   saveAll();
   row.cells[4].className = 'p-2 border text-sm bg-green-500 text-white';
   row.cells[4].textContent = '✅ Completado';
-  showToast(`✅ Cardio guardado: ${km}km en ${tiempo}min`);
+  showToast(`✅ Cardio guardado: ${km} km en ${tiempo} min`);
   actualizarAdherenciaTask('cardio', true);
   inicializarTablaCardio();
 };
@@ -755,10 +927,200 @@ function inicializarTablaDieta(){
   }); 
 }
 
+/* NUEVO: Entreno de Hoy (UI y guardado ligero) */
+function renderEntrenoHoy(){
+  const hoy = getTodayName();
+  const hoyPlan = planSemanal.find(p=>p.dia===hoy)?.tareas?.find(t=>t.startsWith('Día')) || null;
+  q('#entreno-dia-hoy').value = hoyPlan || 'Descanso';
+  q('#entreno-microciclo').value = perfil.microcicloActual || 1;
+  const tbody=q('#tbody-entreno-hoy'); tbody.innerHTML='';
+  if(!hoyPlan || !mesociclo[hoyPlan]){ tbody.innerHTML = '<tr><td class="p-2 border text-sm" colspan="6">No hay entreno planificado hoy.</td></tr>'; return; }
+  const ejercicios = mesociclo[hoyPlan];
+  ejercicios.forEach((ej, idx)=>{
+    const setTop = ej.sets && ej.sets[0] ? ej.sets[0] : {peso:0,reps:'8-10'};
+    const key = `${hoyPlan}|${ej.ejercicio}|${perfil.microcicloActual}`;
+    const recoPeso = (ajustesEntreno[key] && ajustesEntreno[key].pesoReco) ? ajustesEntreno[key].pesoReco : setTop.peso;
+    const rango = setTop.reps || '8-10';
+    const prev = pesos.find(p=>p.dia===hoyPlan && p.ejercicio===ej.ejercicio && String(p.microciclo)===String(perfil.microcicloActual));
+    const repsPrev = prev?.reps || '';
+    const pesoPrev = prev?.peso || recoPeso;
+    const tr = document.createElement('tr');
+    tr.innerHTML = `<td class="p-2 border text-sm">${ej.ejercicio}</td>
+      <td class="p-2 border text-sm">${recoPeso}</td>
+      <td class="p-2 border text-sm">${rango}</td>
+      <td class="p-2 border"><input type="number" class="w-20 p-1 border rounded" value="${repsPrev}" data-dia="${hoyPlan}" data-ej="${ej.ejercicio}" data-mc="${perfil.microcicloActual}" onchange="guardarEntrenoHoyInput(this)"></td>
+      <td class="p-2 border"><input type="number" class="w-20 p-1 border rounded" value="${pesoPrev}" data-dia="${hoyPlan}" data-ej="${ej.ejercicio}" data-mc="${perfil.microcicloActual}" onchange="guardarEntrenoHoyInput(this)"></td>
+      <td class="p-2 border text-sm">${(prev && prev.reps>0)?'✅ Completado':'⏳ Pendiente'}</td>`;
+    tbody.appendChild(tr);
+  });
+}
+
+// Guardar entrada de Entreno Hoy (detecta si cambió reps o peso)
+window.guardarEntrenoHoyInput = function(input){
+  const tr = input.closest('tr');
+  const dia = input.dataset.dia; const ejercicio = input.dataset.ej; const microciclo = parseInt(input.dataset.mc);
+  const reps = parseInt(tr.cells[3].querySelector('input').value)||0; const peso = parseFloat(tr.cells[4].querySelector('input').value)||0;
+  pesos = pesos.filter(p => !(p.dia===dia && p.ejercicio===ejercicio && String(p.microciclo)===String(microciclo)));
+  if(peso>0 || reps>0){ pesos.push({dia, ejercicio, microciclo, peso, reps, fecha: todayISO()}); }
+  saveAll();
+  if(reps>0){ actualizarAdherenciaTask('pesos', true); showToast(`✅ ${ejercicio} guardado`); }
+}
+
+// Algoritmo sencillo de ajuste de peso recomendado según reps logradas
+function aprenderAjustesEntreno(){
+  const hoyPlan = q('#entreno-dia-hoy').value; if(!mesociclo[hoyPlan]) return;
+  (mesociclo[hoyPlan]||[]).forEach(ej=>{
+    const key = `${hoyPlan}|${ej.ejercicio}|${perfil.microcicloActual}`;
+    const setTop = ej.sets && ej.sets[0] ? ej.sets[0] : {peso:0,reps:'8-10'};
+    const recoBase = (ajustesEntreno[key] && ajustesEntreno[key].pesoReco) ? ajustesEntreno[key].pesoReco : setTop.peso;
+    const prev = pesos.find(p=>p.dia===hoyPlan && p.ejercicio===ej.ejercicio && String(p.microciclo)===String(perfil.microcicloActual));
+    if(!prev) return;
+    const rango = String(setTop.reps||'8-10');
+    const [lo,hi] = rango.includes('-')? rango.split('-').map(n=>parseInt(n.trim())) : [parseInt(rango)||8, parseInt(rango)||10];
+    let nuevo=recoBase;
+    if(prev.reps>=hi+1) nuevo = Math.round(recoBase*1.025*10)/10; // +2.5%
+    else if(prev.reps<=lo-1) nuevo = Math.max(1, Math.round(recoBase*0.975*10)/10); // -2.5%
+    ajustesEntreno[key] = {pesoReco: nuevo};
+  });
+  saveAll();
+  showToast('🧠 Recomendaciones de peso ajustadas');
+  renderEntrenoHoy();
+}
+
+/* Cardio de Hoy: sugiere sesión en función del día y guarda */
+function getSesionIdForToday(){
+  const d=getTodayName(); if(d==='Lunes'||d==='Martes') return 1; if(d==='Miércoles'||d==='Jueves') return 2; if(d==='Viernes'||d==='Sábado') return 3; return 1;
+}
+function renderCardioHoy(){
+  q('#cardio-microciclo').value = perfil.microcicloActual||1;
+  const mc = parseInt(perfil.microcicloActual||1);
+  const sesionId = getSesionIdForToday();
+  q('#cardio-sesion').value = `Sesión ${sesionId}`;
+  const cfg = (mesociclo.Cardio||[]).find(c=>String(c.microciclo)===String(mc));
+  const ses = cfg? cfg.sesiones.find(s=>s.id===sesionId): null;
+  const key = `${mc}|${sesionId}`;
+  const recoKm = (ajustesCardio[key] && ajustesCardio[key].kmReco)? ajustesCardio[key].kmReco : (ses? ses.km : 3.0);
+  q('#cardio-plan-texto').textContent = ses? (ses.plan || `Correr ${recoKm} km`) : 'No hay plan cardio definido para este microciclo';
+  q('#cardio-km-hoy').value = '';
+  q('#cardio-tiempo-hoy').value = '';
+}
+function guardarCardioHoy(){
+  const mc=parseInt(q('#cardio-microciclo').value)||1; const sesionId=getSesionIdForToday();
+  const km=parseFloat(q('#cardio-km-hoy').value)||0; const tiempo=parseInt(q('#cardio-tiempo-hoy').value)||0;
+  if(km<=0 || tiempo<=0){ showToast('⚠️ KM y tiempo deben ser > 0', 'error'); return; }
+  const fecha=todayISO();
+  cardio = cardio.filter(c=> !(String(c.microciclo)===String(mc) && c.sesionId===sesionId && c.fecha===fecha));
+  cardio.push({fecha, microciclo:mc, sesionId, km, tiempo, ritmo: tiempo/km, calorias: Math.round(tiempo * (tiempo/km > 6 ? 10 : 12))});
+  saveAll();
+  actualizarAdherenciaTask('cardio', true);
+  showToast(`✅ Cardio guardado: ${km} km en ${tiempo} min`);
+}
+function aprenderAjustesCardio(){
+  const mc = parseInt(perfil.microcicloActual||1); const sesionId=getSesionIdForToday();
+  const key = `${mc}|${sesionId}`;
+  const hoy = todayISO(); const reg = cardio.find(c=>c.fecha===hoy && String(c.microciclo)===String(mc) && c.sesionId===sesionId);
+  if(!reg){ showToast('ℹ️ Registra el cardio de hoy para ajustar', 'warning'); return; }
+  const cfg = (mesociclo.Cardio||[]).find(c=>String(c.microciclo)===String(mc));
+  const ses = cfg? cfg.sesiones.find(s=>s.id===sesionId): null; const baseKm = ses? ses.km : reg.km;
+  // Ajuste simple: si el ritmo fue <= 6 min/km y completó km base, sube +0.2 km; si >7, baja -0.2 km
+  let nuevo = baseKm;
+  if(reg.ritmo<=6) nuevo = Math.round((baseKm+0.2)*10)/10; else if(reg.ritmo>7) nuevo = Math.max(1, Math.round((baseKm-0.2)*10)/10);
+  ajustesCardio[key] = {kmReco: nuevo};
+  saveAll();
+  showToast('🧠 Recomendaciones de cardio ajustadas');
+  renderCardioHoy();
+}
+
+/* NEAT: logging y calorías estimadas */
+function estimateMetForWalking(speed){ if(!speed||speed<=0) return 3.0; if(speed<3) return 2.0; if(speed<4) return 2.8; if(speed<5) return 3.3; if(speed<6) return 3.8; if(speed<7) return 4.3; return 5.0; }
+function calcularKcalNeat({steps, minutes, speed, km}){
+  const w = (estado.length? estado[estado.length-1].peso : 80) || 80; // kg
+  let kcal=0;
+  if(steps && steps>0){ const perStep = w*0.0005; kcal += steps*perStep; }
+  if(minutes && minutes>0){ const v = (speed && speed>0) ? speed : (km && km>0 ? (km/(minutes/60)) : null); const MET = estimateMetForWalking(v); kcal += MET * w * (minutes/60); }
+  return Math.round(kcal);
+}
+function inicializarNeat(){
+  const tbody=q('#tabla-neat'); tbody.innerHTML='';
+  const hoy=todayISO(); let hoyKcal=0;
+  neat.filter(n=>!!n).forEach(n=>{ const tr=tbody.insertRow(); tr.innerHTML=`<td class="p-2 border text-sm">${n.fecha}</td><td class="p-2 border text-sm">${n.steps||''}</td><td class="p-2 border text-sm">${n.minutes||''}</td><td class="p-2 border text-sm">${n.speed||''}</td><td class="p-2 border text-sm">${n.km||''}</td><td class="p-2 border text-sm">${n.kcal||0}</td>`; if(n.fecha===hoy) hoyKcal+=n.kcal||0; });
+  q('#neat-cal-hoy').textContent = hoyKcal;
+}
+function guardarNeat(){
+  const steps=parseInt(q('#neat-steps').value)||0; const minutes=parseInt(q('#neat-min').value)||0; const speed=parseFloat(q('#neat-vel').value)||0; const km=parseFloat(q('#neat-km').value)||0; const fecha=todayISO();
+  if(steps<=0 && minutes<=0 && km<=0){ showToast('⚠️ Introduce al menos un dato de NEAT', 'error'); return; }
+  const kcal = calcularKcalNeat({steps, minutes, speed, km});
+  neat = neat.filter(n=>!(n.fecha===fecha && n.steps===steps && n.minutes===minutes && n.km===km));
+  neat.push({fecha, steps: steps||null, minutes: minutes||null, speed: speed||null, km: km||null, kcal});
+  saveAll();
+  actualizarAdherenciaTask('neat', true);
+  showToast(`✅ NEAT guardado: ${kcal} kcal`);
+  inicializarNeat();
+}
+
+/* Gestión del plan: parse desde texto + import JSON */
+function inicializarGestionPlan(){ q('#plan-feedback').textContent=''; }
+function parsePlanTexto(texto){
+  // Parser simple basado en líneas. Formato esperado:
+  // Día X: Tipo\nEjercicio: Top 30kg 6-8; Resto 25kg 8-10 x2
+  const res = {};
+  let diaActual=null;
+  texto.split(/\n+/).map(l=>l.trim()).forEach(line=>{
+    if(!line) return;
+    const dMatch = line.match(/^D[ií]a\s*\d+\s*:\s*(.+)$/i);
+    if(dMatch){ diaActual = line.replace(/\s+/g,' ').trim(); res[diaActual] = []; return; }
+    if(!diaActual) return;
+    const [ejercicioPart, setsPart] = line.split(/:\s*/);
+    if(!ejercicioPart) return;
+    const ejercicio = ejercicioPart.trim();
+    const sets=[];
+    if(setsPart){
+      setsPart.split(/;\s*/).forEach(s=>{
+        const tipo = /top/i.test(s)?'Top':'Normal';
+        const pesoMatch = s.match(/(\d+(?:\.\d+)?)\s*kg/i); const repsMatch = s.match(/(\d+\s*-\s*\d+|>\s*\d+)/i); const countMatch = s.match(/x\s*(\d+)/i);
+        sets.push({ tipo, peso: pesoMatch? parseFloat(pesoMatch[1]): 0, reps: repsMatch? repsMatch[1].replace(/\s+/g,'') : '8-10', count: countMatch? parseInt(countMatch[1]): (tipo==='Top'?1:2) });
+      });
+    }
+    res[diaActual].push({ ejercicio, sets, microciclo:[perfil.microcicloActual||1,'Descarga'] });
+  });
+  return res;
+}
+
 /* init */
 document.addEventListener('DOMContentLoaded',()=>{
   // Quick entry functionality
   q('#quick-save').addEventListener('click', handleQuickSave);
+  
+  // Entreno hoy
+  q('#btn-refrescar-entreno').addEventListener('click', ()=>{ perfil.microcicloActual=parseInt(q('#entreno-microciclo').value)||perfil.microcicloActual; saveAll(); renderEntrenoHoy(); });
+  q('#btn-aprender-entreno').addEventListener('click', aprenderAjustesEntreno);
+  
+  // Cardio hoy
+  q('#btn-refrescar-cardio').addEventListener('click', ()=>{ perfil.microcicloActual=parseInt(q('#cardio-microciclo').value)||perfil.microcicloActual; saveAll(); renderCardioHoy(); });
+  q('#btn-aprender-cardio').addEventListener('click', aprenderAjustesCardio);
+  q('#btn-guardar-cardio-hoy').addEventListener('click', guardarCardioHoy);
+  
+  // NEAT
+  q('#btn-guardar-neat').addEventListener('click', guardarNeat);
+  
+  // Perfil
+  q('#btn-guardar-perfil').addEventListener('click', guardarPerfil);
+  
+  // Gestión plan
+  q('#btn-parse-plan').addEventListener('click', ()=>{
+    try{
+      const parsed = parsePlanTexto(q('#plan-texto').value||'');
+      if(Object.keys(parsed).length===0){ q('#plan-feedback').textContent='⚠️ No se encontraron días.'; q('#plan-feedback').className='text-sm text-yellow-600'; return; }
+      // Mezcla con mesociclo actual
+      Object.keys(parsed).forEach(k=>{ if(!mesociclo[k]) mesociclo[k]=parsed[k]; else mesociclo[k]=parsed[k]; });
+      saveAll();
+      q('#plan-feedback').textContent='✅ Plan importado'; q('#plan-feedback').className='text-sm text-green-600';
+      inicializarTablaPesos(); renderEntrenoHoy();
+    }catch(err){ console.warn(err); q('#plan-feedback').textContent='❌ Error al parsear'; q('#plan-feedback').className='text-sm text-red-600'; }
+  });
+  q('#input-json').addEventListener('change', (e)=>{
+    const file=e.target.files[0]; if(!file) return; const reader=new FileReader(); reader.onload=()=>{ try{ const data=JSON.parse(reader.result); if(data.estado) estado=data.estado; if(data.pesos) pesos=data.pesos; if(data.cardio) cardio=data.cardio; if(data.dieta) dieta=data.dieta; if(data.planSemanal) planSemanal=data.planSemanal; if(data.adherenciaDiaria) adherenciaDiaria=data.adherenciaDiaria; if(data.perfil) perfil=data.perfil; if(data.ajustesEntreno) ajustesEntreno=data.ajustesEntreno; if(data.ajustesCardio) ajustesCardio=data.ajustesCardio; if(data.neat) neat=data.neat; saveAll(); showToast('✅ Datos importados'); actualizarProgresoGeneral(); actualizarCalendarioSemanal(); inicializarTablaPesos(); inicializarTablaCardio(); inicializarTablaDieta(); renderEntrenoHoy(); renderCardioHoy(); inicializarNeat(); }catch(err){ console.warn(err); showToast('❌ Error al importar', 'error'); } }; reader.readAsText(file);
+  });
   
   // attach filters
   q('#filtro-microciclo').addEventListener('change', inicializarTablaPesos);
@@ -777,13 +1139,17 @@ document.addEventListener('DOMContentLoaded',()=>{
   inicializarTablaPesos(); 
   inicializarTablaCardio(); 
   inicializarTablaDieta();
+  renderEntrenoHoy();
+  renderCardioHoy();
+  inicializarNeat();
+  inicializarPerfil();
   
   // periodic light refresh
   setInterval(()=>{ actualizarProgresoGeneral(); actualizarTodoList(); actualizarGraficoAdherencia(); },30000);
   
   // export
   q('#btn-export').addEventListener('click',()=>{ 
-    const data={estado,pesos,cardio,dieta,planSemanal,adherenciaDiaria}; 
+    const data={estado,pesos,cardio,dieta,planSemanal,adherenciaDiaria,perfil,ajustesEntreno,ajustesCardio,neat}; 
     const blob=new Blob([JSON.stringify(data,null,2)],{type:'application/json'}); 
     const a=document.createElement('a'); 
     a.href=URL.createObjectURL(blob); 
