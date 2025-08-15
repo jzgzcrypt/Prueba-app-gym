@@ -7,7 +7,7 @@ import { ToastContainer } from '@/components/ToastContainer';
 import { ProgressCircle } from '@/components/ProgressCircle';
 import { WorkoutModal } from '@/components/WorkoutModal';
 import { WeeklyCalendar } from '@/components/WeeklyCalendar';
-import { WeightEntry, CardioEntry, DietEntry, DailyAdherence, WorkoutEntry } from '@/types';
+import { WeightEntry, CardioEntry, DietEntry, DailyAdherence, WorkoutEntry, Exercise } from '@/types';
 
 export default function Dashboard() {
   const { showToast } = useToast();
@@ -58,17 +58,26 @@ export default function Dashboard() {
     setDietProtein('');
   };
 
-  const handleWorkoutComplete = (workout: WorkoutEntry) => {
+  const handleWorkoutComplete = (exercises: Exercise[]) => {
+    const workout: WorkoutEntry = {
+      fecha: todayISO(),
+      tipo: workoutType,
+      ejercicios: exercises,
+      completado: true,
+      duracion: 60,
+      notas: `Entrenamiento ${workoutType} completado`
+    };
+    
     const newWorkouts = [...workouts, workout];
     setWorkouts(newWorkouts);
     
     const fecha = todayISO();
     const newAdherencia = { ...adherenciaDiaria };
     if (!newAdherencia[fecha]) newAdherencia[fecha] = {};
-    newAdherencia[fecha].pesos = true;
+    newAdherencia[fecha].workout = true;
     
     setAdherenciaDiaria(newAdherencia);
-    showToast(`🎯 ¡Entrenamiento ${workout.tipo} completado!`);
+    showToast(`🎯 ¡Entrenamiento ${workoutType} completado!`);
     closeModal();
   };
 
