@@ -110,13 +110,13 @@ export function WeeklyCalendar({ isOpen, onClose }: WeeklyCalendarProps) {
 
   return (
     <div className="modal-overlay" onClick={onClose}>
-      <div className="modal-content max-w-2xl max-h-[90vh] overflow-y-auto" onClick={(e) => e.stopPropagation()}>
-        <div className="modal-header">
+      <div className="modal-content max-w-2xl max-h-[90vh] flex flex-col" onClick={(e) => e.stopPropagation()}>
+        <div className="modal-header flex-shrink-0">
           <button className="modal-close" onClick={onClose}>×</button>
           <h3>📅 Plan Semanal</h3>
         </div>
         
-        <div className="modal-body">
+        <div className="modal-body flex-1 overflow-y-auto">
           <div className="grid grid-cols-1 gap-4">
             {Object.entries(weeklyPlan).map(([day, plan]) => (
               <div 

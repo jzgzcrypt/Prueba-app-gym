@@ -173,9 +173,6 @@ export function WorkoutModal({ isOpen, onClose, onComplete, workoutType }: Worko
                 <div className="flex items-center justify-between mb-4">
                   <div>
                     <h4 className="font-semibold text-lg">{exercise.nombre}</h4>
-                    {exercise.pesoSugerido && exercise.pesoSugerido > 0 && (
-                      <p className="text-sm text-gray-600">Peso sugerido: {exercise.pesoSugerido} kg</p>
-                    )}
                   </div>
                   <button
                     onClick={() => completeExercise(exerciseIndex)}

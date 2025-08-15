@@ -12,7 +12,7 @@ import { WeightEntry, CardioEntry, DietEntry, DailyAdherence, WorkoutEntry, Exer
 export default function Dashboard() {
   const { showToast } = useToast();
   const [activeModal, setActiveModal] = useState<string | null>(null);
-  const [activeSection, setActiveSection] = useState<'today' | 'progress' | 'history' | 'settings'>('today');
+  const [activeSection, setActiveSection] = useState<'today' | 'mesociclo' | 'history' | 'settings'>('today');
   const [workoutType] = useState('Pull');
   
   // Local storage hooks
@@ -274,9 +274,9 @@ export default function Dashboard() {
       </div>
       
       {/* Progress Overview */}
-      <div className="px-6 pb-4">
+      <div className="px-6 pb-6">
         <div className="clean-card text-center">
-          <div className="flex justify-center mb-3">
+          <div className="flex justify-center mb-4">
             <ProgressCircle progress={progress} />
           </div>
           <p className="text-sm text-gray-600">Progreso del día</p>
@@ -366,66 +366,96 @@ export default function Dashboard() {
     </div>
   );
 
-  const renderProgressSection = () => (
-    <div className="min-h-screen pb-20 p-6">
-      <h1 className="text-2xl font-bold text-center mb-6">Progreso</h1>
-      
-      {/* Weekly Stats */}
-      <div className="mobile-card">
-        <h3 className="font-semibold mb-4">Esta Semana</h3>
-        <div className="grid grid-cols-2 gap-4">
-          <div className="text-center">
-            <div className="text-2xl font-bold text-blue-600">
-              {Object.keys(adherenciaDiaria).filter(date => {
-                const weekStart = new Date();
-                weekStart.setDate(weekStart.getDate() - weekStart.getDay());
-                const weekEnd = new Date(weekStart);
-                weekEnd.setDate(weekEnd.getDate() + 6);
-                const checkDate = new Date(date);
-                return checkDate >= weekStart && checkDate <= weekEnd && adherenciaDiaria[date].pesos;
-              }).length}
-            </div>
-            <div className="text-sm text-gray-600">Entrenamientos</div>
-          </div>
-          <div className="text-center">
-            <div className="text-2xl font-bold text-green-600">
-              {Object.keys(adherenciaDiaria).filter(date => {
-                const weekStart = new Date();
-                weekStart.setDate(weekStart.getDate() - weekStart.getDay());
-                const weekEnd = new Date(weekStart);
-                weekEnd.setDate(weekEnd.getDate() + 6);
-                const checkDate = new Date(date);
-                return checkDate >= weekStart && checkDate <= weekEnd && adherenciaDiaria[date].cardio;
-              }).length}
-            </div>
-            <div className="text-sm text-gray-600">Sesiones Cardio</div>
-          </div>
-        </div>
-      </div>
+  const renderMesocicloSection = () => {
+    const mesociclo = {
+      semana: 1,
+      objetivo: "Hipertrofia",
+      volumen: "Alto",
+      intensidad: "Media",
+      microciclos: [
+        {
+          id: 1,
+          nombre: "Microciclo 1 - Adaptación",
+          dias: [
+            { dia: "Lunes", entrenamiento: "Push", ejercicios: ["Press de Banca", "Press Militar", "Fondos", "Extensiones Tríceps"] },
+            { dia: "Martes", entrenamiento: "Pull", ejercicios: ["Dominadas", "Remo con Barra", "Curl Bíceps", "Face Pulls"] },
+            { dia: "Miércoles", entrenamiento: "Piernas", ejercicios: ["Sentadillas", "Peso Muerto", "Extensiones Cuádriceps", "Curl Femoral"] },
+            { dia: "Jueves", entrenamiento: "Push", ejercicios: ["Press de Banca", "Press Militar", "Fondos", "Extensiones Tríceps"] },
+            { dia: "Viernes", entrenamiento: "Pull", ejercicios: ["Dominadas", "Remo con Barra", "Curl Bíceps", "Face Pulls"] },
+            { dia: "Sábado", entrenamiento: "Piernas", ejercicios: ["Sentadillas", "Peso Muerto", "Extensiones Cuádriceps", "Curl Femoral"] },
+            { dia: "Domingo", entrenamiento: "Descanso", ejercicios: [] }
+          ]
+        },
+        {
+          id: 2,
+          nombre: "Microciclo 2 - Intensificación",
+          dias: [
+            { dia: "Lunes", entrenamiento: "Push", ejercicios: ["Press de Banca", "Press Militar", "Fondos", "Extensiones Tríceps"] },
+            { dia: "Martes", entrenamiento: "Pull", ejercicios: ["Dominadas", "Remo con Barra", "Curl Bíceps", "Face Pulls"] },
+            { dia: "Miércoles", entrenamiento: "Piernas", ejercicios: ["Sentadillas", "Peso Muerto", "Extensiones Cuádriceps", "Curl Femoral"] },
+            { dia: "Jueves", entrenamiento: "Push", ejercicios: ["Press de Banca", "Press Militar", "Fondos", "Extensiones Tríceps"] },
+            { dia: "Viernes", entrenamiento: "Pull", ejercicios: ["Dominadas", "Remo con Barra", "Curl Bíceps", "Face Pulls"] },
+            { dia: "Sábado", entrenamiento: "Piernas", ejercicios: ["Sentadillas", "Peso Muerto", "Extensiones Cuádriceps", "Curl Femoral"] },
+            { dia: "Domingo", entrenamiento: "Descanso", ejercicios: [] }
+          ]
+        }
+      ]
+    };
 
-      {/* Weight Progress */}
-      {estado.length > 0 && (
-        <div className="mobile-card mt-4">
-          <h3 className="font-semibold mb-4">Evolución del Peso</h3>
-          <div className="space-y-3">
-            {estado.slice(-7).map((entry, index) => (
-              <div key={entry.fecha} className="flex justify-between items-center">
-                <span className="text-sm text-gray-600">
-                  {new Date(entry.fecha).toLocaleDateString('es-ES', { day: '2-digit', month: '2-digit' })}
-                </span>
-                <span className="font-semibold">{entry.peso.toFixed(1)} kg</span>
-                {index > 0 && (
-                  <span className={`text-xs ${entry.peso < estado[index - 1].peso ? 'text-green-600' : 'text-red-600'}`}>
-                    {entry.peso < estado[index - 1].peso ? '↓' : '↑'} {Math.abs(entry.peso - estado[index - 1].peso).toFixed(1)}
-                  </span>
-                )}
+    return (
+      <div className="min-h-screen pb-20">
+        <div className="nav-clean p-6">
+          <h1 className="text-2xl font-bold text-primary">Mesociclo</h1>
+        </div>
+        <div className="p-6">
+          <div className="clean-card mb-6">
+            <h2 className="text-xl font-semibold mb-4">Información General</h2>
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <p className="text-sm text-gray-600">Semana</p>
+                <p className="font-semibold">{mesociclo.semana}</p>
+              </div>
+              <div>
+                <p className="text-sm text-gray-600">Objetivo</p>
+                <p className="font-semibold">{mesociclo.objetivo}</p>
+              </div>
+              <div>
+                <p className="text-sm text-gray-600">Volumen</p>
+                <p className="font-semibold">{mesociclo.volumen}</p>
+              </div>
+              <div>
+                <p className="text-sm text-gray-600">Intensidad</p>
+                <p className="font-semibold">{mesociclo.intensidad}</p>
+              </div>
+            </div>
+          </div>
+
+          <div className="space-y-6">
+            {mesociclo.microciclos.map((microciclo) => (
+              <div key={microciclo.id} className="clean-card">
+                <h3 className="text-lg font-semibold mb-4">{microciclo.nombre}</h3>
+                <div className="space-y-3">
+                  {microciclo.dias.map((dia, index) => (
+                    <div key={index} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                      <div>
+                        <p className="font-medium">{dia.dia}</p>
+                        <p className="text-sm text-gray-600">{dia.entrenamiento}</p>
+                      </div>
+                      <div className="text-right">
+                        <p className="text-sm text-gray-600">
+                          {dia.ejercicios.length > 0 ? `${dia.ejercicios.length} ejercicios` : 'Descanso'}
+                        </p>
+                      </div>
+                    </div>
+                  ))}
+                </div>
               </div>
             ))}
           </div>
         </div>
-      )}
-    </div>
-  );
+      </div>
+    );
+  };
 
   const renderHistorySection = () => (
     <div className="min-h-screen pb-20 p-6">
@@ -537,7 +567,7 @@ export default function Dashboard() {
       {/* Mobile Dashboard */}
       <div className="block md:hidden">
         {activeSection === 'today' && renderTodaySection()}
-        {activeSection === 'progress' && renderProgressSection()}
+        {activeSection === 'mesociclo' && renderMesocicloSection()}
         {activeSection === 'history' && renderHistorySection()}
         {activeSection === 'settings' && renderSettingsSection()}
         
@@ -552,11 +582,11 @@ export default function Dashboard() {
               <span className="text-xs mt-1">Hoy</span>
             </div>
             <div 
-              className={`bottom-nav-item cursor-pointer ${activeSection === 'progress' ? 'active' : ''}`}
-              onClick={() => setActiveSection('progress')}
+              className={`bottom-nav-item cursor-pointer ${activeSection === 'mesociclo' ? 'active' : ''}`}
+              onClick={() => setActiveSection('mesociclo')}
             >
-              <span className="text-2xl">📈</span>
-              <span className="text-xs mt-1">Progreso</span>
+              <span className="text-2xl">📊</span>
+              <span className="text-xs mt-1">Mesociclo</span>
             </div>
             <div 
               className={`bottom-nav-item cursor-pointer ${activeSection === 'history' ? 'active' : ''}`}
