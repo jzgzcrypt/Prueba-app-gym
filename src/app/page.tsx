@@ -929,96 +929,96 @@ export default function Dashboard() {
 
     return (
       <div className="min-h-screen pb-20">
-        <div className="nav-clean p-6">
-          <h1 className="text-2xl font-bold text-primary">{mesociclo.nombre}</h1>
-          <p className="text-gray-600 mt-1">{mesociclo.duracion}</p>
+        <div className="nav-clean p-4 md:p-6">
+          <h1 className="text-xl md:text-2xl font-bold text-primary">{mesociclo.nombre}</h1>
+          <p className="text-sm md:text-base text-gray-600 mt-1">{mesociclo.duracion}</p>
         </div>
         
-        <div className="p-6">
+        <div className="p-4 md:p-6">
           {/* Información General */}
-          <div className="clean-card mb-6">
-            <h2 className="text-xl font-semibold mb-4">Información General</h2>
-            <div className="space-y-4">
+          <div className="clean-card mb-4 md:mb-6">
+            <h2 className="text-lg md:text-xl font-semibold mb-3 md:mb-4">Información General</h2>
+            <div className="space-y-3 md:space-y-4">
               <div>
-                <p className="text-sm text-gray-600">Objetivo</p>
-                <p className="font-semibold">{mesociclo.objetivo}</p>
+                <p className="text-xs md:text-sm text-gray-600">Objetivo</p>
+                <p className="text-sm md:text-base font-semibold">{mesociclo.objetivo}</p>
               </div>
               <div>
-                <p className="text-sm text-gray-600">Estructura</p>
-                <p className="font-semibold">{mesociclo.estructura}</p>
+                <p className="text-xs md:text-sm text-gray-600">Estructura</p>
+                <p className="text-sm md:text-base font-semibold">{mesociclo.estructura}</p>
               </div>
               <div>
-                <p className="text-sm text-gray-600">Intensidad</p>
-                <p className="font-semibold">{mesociclo.intensidad}</p>
+                <p className="text-xs md:text-sm text-gray-600">Intensidad</p>
+                <p className="text-sm md:text-base font-semibold">{mesociclo.intensidad}</p>
               </div>
               <div>
-                <p className="text-sm text-gray-600">Cardio</p>
-                <p className="font-semibold">{mesociclo.cardio}</p>
+                <p className="text-xs md:text-sm text-gray-600">Cardio</p>
+                <p className="text-sm md:text-base font-semibold">{mesociclo.cardio}</p>
               </div>
               <div>
-                <p className="text-sm text-gray-600">Dieta</p>
-                <p className="font-semibold">{mesociclo.dieta}</p>
+                <p className="text-xs md:text-sm text-gray-600">Dieta</p>
+                <p className="text-sm md:text-base font-semibold">{mesociclo.dieta}</p>
               </div>
             </div>
           </div>
 
           {/* Volumen por Grupo Muscular */}
-          <div className="clean-card mb-6">
-            <h2 className="text-xl font-semibold mb-4">Volumen por Grupo Muscular</h2>
-            <div className="grid grid-cols-2 gap-4">
+          <div className="clean-card mb-4 md:mb-6">
+            <h2 className="text-lg md:text-xl font-semibold mb-3 md:mb-4">Volumen por Grupo Muscular</h2>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 md:gap-4">
               <div className="flex justify-between items-center p-3 bg-gray-50 rounded-lg">
-                <span className="font-medium">Espalda</span>
-                <span className="text-primary font-semibold">{mesociclo.volumen.espalda}</span>
+                <span className="text-sm md:text-base font-medium">Espalda</span>
+                <span className="text-sm md:text-base text-primary font-semibold">{mesociclo.volumen.espalda}</span>
               </div>
               <div className="flex justify-between items-center p-3 bg-gray-50 rounded-lg">
-                <span className="font-medium">Bíceps</span>
-                <span className="text-primary font-semibold">{mesociclo.volumen.biceps}</span>
+                <span className="text-sm md:text-base font-medium">Bíceps</span>
+                <span className="text-sm md:text-base text-primary font-semibold">{mesociclo.volumen.biceps}</span>
               </div>
               <div className="flex justify-between items-center p-3 bg-gray-50 rounded-lg">
-                <span className="font-medium">Pecho</span>
-                <span className="text-primary font-semibold">{mesociclo.volumen.pecho}</span>
+                <span className="text-sm md:text-base font-medium">Pecho</span>
+                <span className="text-sm md:text-base text-primary font-semibold">{mesociclo.volumen.pecho}</span>
               </div>
               <div className="flex justify-between items-center p-3 bg-gray-50 rounded-lg">
-                <span className="font-medium">Hombros</span>
-                <span className="text-primary font-semibold">{mesociclo.volumen.hombros}</span>
+                <span className="text-sm md:text-base font-medium">Hombros</span>
+                <span className="text-sm md:text-base text-primary font-semibold">{mesociclo.volumen.hombros}</span>
               </div>
               <div className="flex justify-between items-center p-3 bg-gray-50 rounded-lg">
-                <span className="font-medium">Tríceps</span>
-                <span className="text-primary font-semibold">{mesociclo.volumen.triceps}</span>
+                <span className="text-sm md:text-base font-medium">Tríceps</span>
+                <span className="text-sm md:text-base text-primary font-semibold">{mesociclo.volumen.triceps}</span>
               </div>
               <div className="flex justify-between items-center p-3 bg-gray-50 rounded-lg">
-                <span className="font-medium">Piernas</span>
-                <span className="text-primary font-semibold">{mesociclo.volumen.piernas}</span>
+                <span className="text-sm md:text-base font-medium">Piernas</span>
+                <span className="text-sm md:text-base text-primary font-semibold">{mesociclo.volumen.piernas}</span>
               </div>
             </div>
           </div>
 
-                      <div className="space-y-6">
+                      <div className="space-y-4 md:space-y-6">
               {mesociclo.microciclos.map((microciclo) => (
                 <div key={microciclo.id} className="clean-card">
-                  <div className="mb-4">
-                    <h3 className="text-lg font-semibold">{microciclo.nombre}</h3>
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-3 mt-3">
+                  <div className="mb-3 md:mb-4">
+                    <h3 className="text-base md:text-lg font-semibold">{microciclo.nombre}</h3>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-2 md:gap-3 mt-2 md:mt-3">
                       <div className="p-2 bg-blue-50 rounded-lg">
                         <p className="text-xs text-blue-600 font-medium">Objetivo</p>
-                        <p className="text-sm">{microciclo.objetivo}</p>
+                        <p className="text-xs md:text-sm">{microciclo.objetivo}</p>
                       </div>
                       <div className="p-2 bg-green-50 rounded-lg">
                         <p className="text-xs text-green-600 font-medium">Intensidad</p>
-                        <p className="text-sm">{microciclo.intensidad}</p>
+                        <p className="text-xs md:text-sm">{microciclo.intensidad}</p>
                       </div>
-                      <div className="p-2 bg-orange-50 rounded-lg">
+                      <div className="p-2 bg-orange-50 rounded-lg sm:col-span-2 md:col-span-1">
                         <p className="text-xs text-orange-600 font-medium">Cardio</p>
-                        <p className="text-sm">{microciclo.cardio}</p>
+                        <p className="text-xs md:text-sm">{microciclo.cardio}</p>
                       </div>
                     </div>
                   </div>
                   
-                  <div className="space-y-3">
+                  <div className="space-y-2 md:space-y-3">
                     {microciclo.dias.map((dia, index) => (
                       <div 
                         key={index} 
-                        className="flex items-center justify-between p-4 bg-gray-50 rounded-lg cursor-pointer hover:bg-gray-100 transition-colors border-l-4 border-primary"
+                        className="flex items-center justify-between p-3 md:p-4 bg-gray-50 rounded-lg cursor-pointer hover:bg-gray-100 transition-colors border-l-4 border-primary"
                         onClick={() => {
                           setSelectedWorkout({
                             dia: dia.dia,
@@ -1029,18 +1029,18 @@ export default function Dashboard() {
                           openModal('workout-details');
                         }}
                       >
-                        <div className="flex-1">
-                          <div className="flex items-center gap-3">
-                            <div className="w-10 h-10 bg-primary rounded-full flex items-center justify-center text-white font-bold text-sm">
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-center gap-2 md:gap-3">
+                            <div className="w-8 h-8 md:w-10 md:h-10 bg-primary rounded-full flex items-center justify-center text-white font-bold text-xs md:text-sm flex-shrink-0">
                               {index + 1}
                             </div>
-                            <div>
-                              <p className="font-semibold text-lg">{dia.dia}</p>
-                              <p className="text-sm text-gray-600">{dia.entrenamiento}</p>
+                            <div className="min-w-0 flex-1">
+                              <p className="font-semibold text-sm md:text-lg truncate">{dia.dia}</p>
+                              <p className="text-xs md:text-sm text-gray-600 truncate">{dia.entrenamiento}</p>
                             </div>
                           </div>
                           {dia.cardio && (
-                            <div className="mt-2 flex items-center gap-2">
+                            <div className="mt-2 flex items-center gap-1 md:gap-2 flex-wrap">
                               <span className="text-xs bg-blue-100 text-blue-700 px-2 py-1 rounded-full">
                                 🏃 {dia.cardio.tipo}
                               </span>
@@ -1050,14 +1050,14 @@ export default function Dashboard() {
                             </div>
                           )}
                         </div>
-                        <div className="text-right">
-                          <div className="flex items-center gap-2">
-                            <span className="text-sm font-medium text-gray-700">
+                        <div className="text-right flex-shrink-0 ml-2">
+                          <div className="flex items-center gap-1 md:gap-2">
+                            <span className="text-xs md:text-sm font-medium text-gray-700">
                               {dia.ejercicios.length > 0 ? `${dia.ejercicios.length} ejercicios` : 'Descanso'}
                             </span>
-                            <span className="text-primary">→</span>
+                            <span className="text-primary text-sm md:text-base">→</span>
                           </div>
-                          <p className="text-xs text-gray-400 mt-1">Toca para ver detalles</p>
+                          <p className="text-xs text-gray-400 mt-1 hidden sm:block">Toca para ver detalles</p>
                         </div>
                       </div>
                     ))}
@@ -1475,34 +1475,34 @@ export default function Dashboard() {
 
       {activeModal === 'workout-details' && selectedWorkout && (
         <div className="modal-overlay" onClick={closeModal}>
-          <div className="modal-content max-h-[90vh] flex flex-col" onClick={(e) => e.stopPropagation()}>
+          <div className="modal-content max-h-[90vh] flex flex-col mx-4 md:mx-auto" onClick={(e) => e.stopPropagation()}>
             <div className="modal-header flex-shrink-0">
               <button className="modal-close" onClick={closeModal}>×</button>
-              <h3>🏋️ {selectedWorkout.dia} - {selectedWorkout.entrenamiento}</h3>
+              <h3 className="text-base md:text-lg">🏋️ {selectedWorkout.dia} - {selectedWorkout.entrenamiento}</h3>
             </div>
             
             <div className="modal-body flex-1 overflow-y-auto">
-              <div className="space-y-6">
+              <div className="space-y-4 md:space-y-6">
                 {/* Cardio */}
                 {selectedWorkout.cardio && (
                   <div className="clean-card">
-                    <div className="flex items-center gap-3 mb-4">
-                      <div className="w-10 h-10 bg-blue-500 rounded-full flex items-center justify-center text-white">
+                    <div className="flex items-center gap-2 md:gap-3 mb-3 md:mb-4">
+                      <div className="w-8 h-8 md:w-10 md:h-10 bg-blue-500 rounded-full flex items-center justify-center text-white text-sm md:text-base">
                         🏃
                       </div>
                       <div>
-                        <h4 className="font-semibold text-lg">Cardio</h4>
-                        <p className="text-sm text-gray-600">{selectedWorkout.cardio.tipo}</p>
+                        <h4 className="font-semibold text-base md:text-lg">Cardio</h4>
+                        <p className="text-xs md:text-sm text-gray-600">{selectedWorkout.cardio.tipo}</p>
                       </div>
                     </div>
-                    <div className="grid grid-cols-2 gap-4">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 md:gap-4">
                       <div className="p-3 bg-blue-50 rounded-lg">
                         <p className="text-xs text-blue-600 font-medium">Duración</p>
-                        <p className="font-semibold">{selectedWorkout.cardio.duracion} minutos</p>
+                        <p className="text-sm md:text-base font-semibold">{selectedWorkout.cardio.duracion} minutos</p>
                       </div>
                       <div className="p-3 bg-blue-50 rounded-lg">
                         <p className="text-xs text-blue-600 font-medium">Intensidad</p>
-                        <p className="font-semibold">{selectedWorkout.cardio.intensidad}</p>
+                        <p className="text-sm md:text-base font-semibold">{selectedWorkout.cardio.intensidad}</p>
                       </div>
                     </div>
                   </div>
@@ -1510,39 +1510,41 @@ export default function Dashboard() {
 
                 {/* Ejercicios */}
                 <div className="clean-card">
-                  <div className="flex items-center gap-3 mb-4">
-                    <div className="w-10 h-10 bg-primary rounded-full flex items-center justify-center text-white">
+                  <div className="flex items-center gap-2 md:gap-3 mb-3 md:mb-4">
+                    <div className="w-8 h-8 md:w-10 md:h-10 bg-primary rounded-full flex items-center justify-center text-white text-sm md:text-base">
                       💪
                     </div>
                     <div>
-                      <h4 className="font-semibold text-lg">Ejercicios</h4>
-                      <p className="text-sm text-gray-600">{selectedWorkout.ejercicios.length} ejercicios</p>
+                      <h4 className="font-semibold text-base md:text-lg">Ejercicios</h4>
+                      <p className="text-xs md:text-sm text-gray-600">{selectedWorkout.ejercicios.length} ejercicios</p>
                     </div>
                   </div>
                   
-                  <div className="space-y-3">
+                  <div className="space-y-2 md:space-y-3">
                     {selectedWorkout.ejercicios.map((ejercicio, index) => (
-                      <div key={index} className="flex items-start gap-3 p-3 bg-gray-50 rounded-lg">
-                        <div className="w-6 h-6 bg-primary rounded-full flex items-center justify-center text-white text-xs font-bold flex-shrink-0 mt-1">
+                      <div key={index} className="flex items-start gap-2 md:gap-3 p-3 bg-gray-50 rounded-lg">
+                        <div className="w-5 h-5 md:w-6 md:h-6 bg-primary rounded-full flex items-center justify-center text-white text-xs font-bold flex-shrink-0 mt-1">
                           {index + 1}
                         </div>
-                        <div className="flex-1">
-                          <p className="font-medium text-sm">{ejercicio}</p>
-                          {ejercicio.includes('REST PAUSE') && (
-                            <span className="inline-block mt-1 text-xs bg-orange-100 text-orange-700 px-2 py-1 rounded-full">
-                              Rest Pause
-                            </span>
-                          )}
-                          {ejercicio.includes('DROP SET') && (
-                            <span className="inline-block mt-1 text-xs bg-red-100 text-red-700 px-2 py-1 rounded-full">
-                              Drop Set
-                            </span>
-                          )}
-                          {ejercicio.includes('PARCIALES') && (
-                            <span className="inline-block mt-1 text-xs bg-purple-100 text-purple-700 px-2 py-1 rounded-full">
-                              Parciales
-                            </span>
-                          )}
+                        <div className="flex-1 min-w-0">
+                          <p className="font-medium text-xs md:text-sm break-words">{ejercicio}</p>
+                          <div className="flex flex-wrap gap-1 mt-1">
+                            {ejercicio.includes('REST PAUSE') && (
+                              <span className="inline-block text-xs bg-orange-100 text-orange-700 px-2 py-1 rounded-full">
+                                Rest Pause
+                              </span>
+                            )}
+                            {ejercicio.includes('DROP SET') && (
+                              <span className="inline-block text-xs bg-red-100 text-red-700 px-2 py-1 rounded-full">
+                                Drop Set
+                              </span>
+                            )}
+                            {ejercicio.includes('PARCIALES') && (
+                              <span className="inline-block text-xs bg-purple-100 text-purple-700 px-2 py-1 rounded-full">
+                                Parciales
+                              </span>
+                            )}
+                          </div>
                         </div>
                       </div>
                     ))}
@@ -1551,8 +1553,8 @@ export default function Dashboard() {
 
                 {/* Notas */}
                 <div className="clean-card">
-                  <h4 className="font-semibold mb-3">📝 Notas</h4>
-                  <div className="space-y-2 text-sm text-gray-600">
+                  <h4 className="font-semibold mb-2 md:mb-3 text-sm md:text-base">📝 Notas</h4>
+                  <div className="space-y-1 md:space-y-2 text-xs md:text-sm text-gray-600">
                     <p>• Descansa 2-3 minutos entre series</p>
                     <p>• Mantén la técnica correcta en todos los ejercicios</p>
                     <p>• Si no puedes completar las repeticiones objetivo, reduce el peso</p>
@@ -1562,8 +1564,8 @@ export default function Dashboard() {
               </div>
             </div>
             
-            <div className="flex gap-3 flex-shrink-0 p-4 border-t border-gray-200">
-              <button onClick={closeModal} className="btn-elegant btn-secondary flex-1">
+            <div className="flex gap-2 md:gap-3 flex-shrink-0 p-3 md:p-4 border-t border-gray-200">
+              <button onClick={closeModal} className="btn-elegant btn-secondary flex-1 text-sm md:text-base">
                 Cerrar
               </button>
               <button 
@@ -1571,7 +1573,7 @@ export default function Dashboard() {
                   closeModal();
                   openModal('workout');
                 }} 
-                className="btn-elegant btn-primary flex-1"
+                className="btn-elegant btn-primary flex-1 text-sm md:text-base"
               >
                 🎯 Iniciar Entrenamiento
               </button>
