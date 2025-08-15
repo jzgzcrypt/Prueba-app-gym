@@ -439,7 +439,7 @@ export default function Dashboard() {
       
       {/* Today's Tasks */}
       <div className="px-6">
-        <h2 className="text-xl font-semibold mb-4">Hoy toca:</h2>
+        <h2 className="text-xl font-semibold mb-4">🎯 Hoy toca:</h2>
         
         {/* Current Day Info */}
         {(() => {
@@ -1138,7 +1138,7 @@ export default function Dashboard() {
             >
               <div className="flex items-center gap-3">
                 <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center">
-                  <span className="text-blue-600 text-sm">ℹ️</span>
+                  <span className="text-blue-600 text-sm">📊</span>
                 </div>
                 <h2 className="text-lg md:text-xl font-semibold text-left">Información General</h2>
               </div>
@@ -1459,7 +1459,7 @@ export default function Dashboard() {
               className={`bottom-nav-item cursor-pointer ${activeSection === 'mesociclo' ? 'active' : ''}`}
               onClick={() => setActiveSection('mesociclo')}
             >
-              <span className="text-2xl">📊</span>
+              <span className="text-2xl">📋</span>
               <span className="text-xs mt-1">Mesociclo</span>
             </div>
             <div 
