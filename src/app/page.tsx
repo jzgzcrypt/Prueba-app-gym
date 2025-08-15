@@ -239,11 +239,11 @@ export default function Dashboard() {
   const renderTodaySection = () => (
     <div className="min-h-screen pb-20">
       {/* Header */}
-      <div className="bg-white shadow-sm p-6">
+      <div className="nav-modern p-6">
         <div className="flex items-center justify-between">
           <div className="flex-1"></div>
           <div className="text-center flex-1">
-            <h1 className="text-2xl font-bold">Mi Entrenamiento</h1>
+            <h1 className="text-2xl font-bold text-gradient">Mi Entrenamiento</h1>
             <p className="text-gray-600 mt-2">
               Hoy es {new Date().toLocaleDateString('es-ES', { 
                 weekday: 'long', 
@@ -256,7 +256,7 @@ export default function Dashboard() {
           <div className="flex-1 flex justify-end">
             <button 
               onClick={() => openModal('calendar')}
-              className="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center hover:bg-blue-200 transition-colors"
+              className="w-12 h-12 glass rounded-full flex items-center justify-center hover:scale-110 transition-all"
             >
               <span className="text-xl">📅</span>
             </button>
@@ -266,7 +266,7 @@ export default function Dashboard() {
       
       {/* Progress Overview */}
       <div className="p-6">
-        <div className="mobile-card text-center">
+        <div className="modern-card text-center">
           <div className="flex justify-center mb-4">
             <ProgressCircle progress={progress} />
           </div>
@@ -279,10 +279,10 @@ export default function Dashboard() {
         <h2 className="text-xl font-semibold mb-4">Hoy toca:</h2>
         
         {/* Weight Entry */}
-        <div className="mobile-card cursor-pointer hover:scale-[1.02] transition-transform" onClick={() => openModal('weight')}>
+        <div className="modern-card cursor-pointer hover:scale-[1.02] transition-transform" onClick={() => openModal('weight')}>
           <div className="flex items-center justify-between">
             <div className="flex items-center">
-              <div className="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center mr-4">
+              <div className="w-12 h-12 bg-gradient-to-r from-blue-400 to-blue-500 rounded-full flex items-center justify-center mr-4 shadow-lg">
                 <span className="text-2xl">⚖️</span>
               </div>
               <div>
@@ -298,10 +298,10 @@ export default function Dashboard() {
         </div>
         
         {/* Workout Entry */}
-        <div className="mobile-card cursor-pointer hover:scale-[1.02] transition-transform" onClick={() => openModal('workout')}>
+        <div className="modern-card cursor-pointer hover:scale-[1.02] transition-transform" onClick={() => openModal('workout')}>
           <div className="flex items-center justify-between">
             <div className="flex items-center">
-              <div className="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center mr-4">
+              <div className="w-12 h-12 bg-gradient-to-r from-green-400 to-green-500 rounded-full flex items-center justify-center mr-4 shadow-lg">
                 <span className="text-2xl">🏋️</span>
               </div>
               <div>
@@ -317,10 +317,10 @@ export default function Dashboard() {
         </div>
         
         {/* Cardio Entry */}
-        <div className="mobile-card cursor-pointer hover:scale-[1.02] transition-transform" onClick={() => openModal('cardio')}>
+        <div className="modern-card cursor-pointer hover:scale-[1.02] transition-transform" onClick={() => openModal('cardio')}>
           <div className="flex items-center justify-between">
             <div className="flex items-center">
-              <div className="w-12 h-12 bg-red-100 rounded-full flex items-center justify-center mr-4">
+              <div className="w-12 h-12 bg-gradient-to-r from-red-400 to-red-500 rounded-full flex items-center justify-center mr-4 shadow-lg">
                 <span className="text-2xl">🏃</span>
               </div>
               <div>
@@ -336,10 +336,10 @@ export default function Dashboard() {
         </div>
         
         {/* Diet Entry */}
-        <div className="mobile-card cursor-pointer hover:scale-[1.02] transition-transform" onClick={() => openModal('diet')}>
+        <div className="modern-card cursor-pointer hover:scale-[1.02] transition-transform" onClick={() => openModal('diet')}>
           <div className="flex items-center justify-between">
             <div className="flex items-center">
-              <div className="w-12 h-12 bg-yellow-100 rounded-full flex items-center justify-center mr-4">
+              <div className="w-12 h-12 bg-gradient-to-r from-yellow-400 to-yellow-500 rounded-full flex items-center justify-center mr-4 shadow-lg">
                 <span className="text-2xl">🥗</span>
               </div>
               <div>
@@ -522,42 +522,42 @@ export default function Dashboard() {
   );
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100">
+    <div className="min-h-screen">
       <ToastContainer />
       
       {/* Mobile Dashboard */}
-      <div className="mobile-only">
+      <div className="block md:hidden">
         {activeSection === 'today' && renderTodaySection()}
         {activeSection === 'progress' && renderProgressSection()}
         {activeSection === 'history' && renderHistorySection()}
         {activeSection === 'settings' && renderSettingsSection()}
         
         {/* Mobile Navigation */}
-        <div className="mobile-nav">
+        <div className="bottom-nav">
           <div className="grid grid-cols-4 gap-2 px-4">
             <div 
-              className={`mobile-nav-item cursor-pointer ${activeSection === 'today' ? 'active' : ''}`}
+              className={`bottom-nav-item cursor-pointer ${activeSection === 'today' ? 'active' : ''}`}
               onClick={() => setActiveSection('today')}
             >
               <span className="text-2xl">📊</span>
               <span className="text-xs mt-1">Hoy</span>
             </div>
             <div 
-              className={`mobile-nav-item cursor-pointer ${activeSection === 'progress' ? 'active' : ''}`}
+              className={`bottom-nav-item cursor-pointer ${activeSection === 'progress' ? 'active' : ''}`}
               onClick={() => setActiveSection('progress')}
             >
               <span className="text-2xl">📈</span>
               <span className="text-xs mt-1">Progreso</span>
             </div>
             <div 
-              className={`mobile-nav-item cursor-pointer ${activeSection === 'history' ? 'active' : ''}`}
+              className={`bottom-nav-item cursor-pointer ${activeSection === 'history' ? 'active' : ''}`}
               onClick={() => setActiveSection('history')}
             >
               <span className="text-2xl">📋</span>
               <span className="text-xs mt-1">Historial</span>
             </div>
             <div 
-              className={`mobile-nav-item cursor-pointer ${activeSection === 'settings' ? 'active' : ''}`}
+              className={`bottom-nav-item cursor-pointer ${activeSection === 'settings' ? 'active' : ''}`}
               onClick={() => setActiveSection('settings')}
             >
               <span className="text-2xl">⚙️</span>
@@ -568,7 +568,7 @@ export default function Dashboard() {
       </div>
 
       {/* Desktop Dashboard */}
-      <div className="desktop-only">
+      <div className="hidden md:block">
         <div className="min-h-screen p-6">
           <div className="max-w-4xl mx-auto">
             <h1 className="text-3xl font-bold text-center mb-8">Mi Entrenamiento</h1>
@@ -685,7 +685,7 @@ export default function Dashboard() {
 
       {/* Modals */}
       {activeModal === 'weight' && (
-        <div className="modal active" onClick={closeModal}>
+        <div className="modal-overlay" onClick={closeModal}>
           <div className="modal-content" onClick={(e) => e.stopPropagation()}>
             <div className="modal-header">
               <button className="modal-close" onClick={closeModal}>×</button>
@@ -701,14 +701,14 @@ export default function Dashboard() {
                     onChange={(e) => setWeightInput(e.target.value)}
                     step="0.1" 
                     placeholder="85.0" 
-                    className="modal-input"
+                    className="input-modern"
                   />
                 </div>
-                <div className="modal-actions">
-                  <button onClick={closeModal} className="modal-button modal-button-secondary">
+                <div className="flex gap-3">
+                  <button onClick={closeModal} className="btn-modern btn-secondary flex-1">
                     Cancelar
                   </button>
-                  <button onClick={saveWeight} className="modal-button modal-button-primary">
+                  <button onClick={saveWeight} className="btn-modern btn-primary flex-1">
                     💾 Guardar
                   </button>
                 </div>
@@ -735,7 +735,7 @@ export default function Dashboard() {
       )}
 
       {activeModal === 'cardio' && (
-        <div className="modal active" onClick={closeModal}>
+        <div className="modal-overlay" onClick={closeModal}>
           <div className="modal-content" onClick={(e) => e.stopPropagation()}>
             <div className="modal-header">
               <button className="modal-close" onClick={closeModal}>×</button>
@@ -751,7 +751,7 @@ export default function Dashboard() {
                     onChange={(e) => setCardioKm(e.target.value)}
                     step="0.1" 
                     placeholder="3.5" 
-                    className="modal-input"
+                    className="input-modern"
                   />
                 </div>
                 <div>
@@ -761,14 +761,14 @@ export default function Dashboard() {
                     value={cardioTime}
                     onChange={(e) => setCardioTime(e.target.value)}
                     placeholder="25" 
-                    className="modal-input"
+                    className="input-modern"
                   />
                 </div>
-                <div className="modal-actions">
-                  <button onClick={closeModal} className="modal-button modal-button-secondary">
+                <div className="flex gap-3">
+                  <button onClick={closeModal} className="btn-modern btn-secondary flex-1">
                     Cancelar
                   </button>
-                  <button onClick={saveCardio} className="modal-button modal-button-primary">
+                  <button onClick={saveCardio} className="btn-modern btn-primary flex-1">
                     💾 Guardar
                   </button>
                 </div>
@@ -779,7 +779,7 @@ export default function Dashboard() {
       )}
 
       {activeModal === 'diet' && (
-        <div className="modal active" onClick={closeModal}>
+        <div className="modal-overlay" onClick={closeModal}>
           <div className="modal-content" onClick={(e) => e.stopPropagation()}>
             <div className="modal-header">
               <button className="modal-close" onClick={closeModal}>×</button>
@@ -794,7 +794,7 @@ export default function Dashboard() {
                     value={dietCalories}
                     onChange={(e) => setDietCalories(e.target.value)}
                     placeholder="1800" 
-                    className="modal-input"
+                    className="input-modern"
                   />
                 </div>
                 <div>
@@ -804,14 +804,14 @@ export default function Dashboard() {
                     value={dietProtein}
                     onChange={(e) => setDietProtein(e.target.value)}
                     placeholder="150" 
-                    className="modal-input"
+                    className="input-modern"
                   />
                 </div>
-                <div className="modal-actions">
-                  <button onClick={closeModal} className="modal-button modal-button-secondary">
+                <div className="flex gap-3">
+                  <button onClick={closeModal} className="btn-modern btn-secondary flex-1">
                     Cancelar
                   </button>
-                  <button onClick={saveDiet} className="modal-button modal-button-primary">
+                  <button onClick={saveDiet} className="btn-modern btn-primary flex-1">
                     💾 Guardar
                   </button>
                 </div>

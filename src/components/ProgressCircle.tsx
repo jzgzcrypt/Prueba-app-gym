@@ -18,29 +18,28 @@ export function ProgressCircle({
   const strokeDasharray = `${(progress / 100) * circumference} ${circumference}`;
 
   return (
-    <div className={`progress-circle ${className}`} style={{ width: size, height: size }}>
-      <svg viewBox={`0 0 ${size} ${size}`} style={{ width: size, height: size }}>
+    <div className={`relative ${className}`} style={{ width: size, height: size }}>
+      <svg className="progress-ring" viewBox={`0 0 ${size} ${size}`} style={{ width: size, height: size }}>
         <circle
+          className="progress-bg"
           cx={size / 2}
           cy={size / 2}
           r={radius}
-          stroke="#e5e7eb"
           strokeWidth={strokeWidth}
           fill="none"
         />
         <circle
+          className="progress-fill"
           cx={size / 2}
           cy={size / 2}
           r={radius}
-          stroke="#3b82f6"
           strokeWidth={strokeWidth}
           fill="none"
-          strokeLinecap="round"
           strokeDasharray={strokeDasharray}
         />
       </svg>
       <div className="absolute inset-0 flex items-center justify-center">
-        <span className="text-2xl font-bold text-blue-600">{Math.round(progress)}%</span>
+        <span className="text-2xl font-bold text-gradient">{Math.round(progress)}%</span>
       </div>
     </div>
   );

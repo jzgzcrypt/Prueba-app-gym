@@ -129,7 +129,7 @@ export function WorkoutModal({ isOpen, onClose, onComplete, workoutType }: Worko
   if (!isOpen) return null;
 
   return (
-    <div className="modal active" onClick={onClose}>
+    <div className="modal-overlay" onClick={onClose}>
       <div className="modal-content max-h-[90vh] flex flex-col" onClick={(e) => e.stopPropagation()}>
         <div className="modal-header flex-shrink-0">
           <button className="modal-close" onClick={onClose}>×</button>
@@ -218,17 +218,17 @@ export function WorkoutModal({ isOpen, onClose, onComplete, workoutType }: Worko
           </div>
         </div>
         
-        <div className="modal-actions flex-shrink-0">
-          <button onClick={onClose} className="modal-button modal-button-secondary">
+        <div className="flex gap-3 flex-shrink-0">
+          <button onClick={onClose} className="btn-modern btn-secondary flex-1">
             Cancelar
           </button>
           <button
             onClick={handleComplete}
             disabled={!isWorkoutComplete()}
-            className={`modal-button ${
+            className={`btn-modern flex-1 ${
               isWorkoutComplete() 
-                ? 'modal-button-primary' 
-                : 'modal-button-secondary opacity-50 cursor-not-allowed'
+                ? 'btn-primary' 
+                : 'btn-secondary opacity-50 cursor-not-allowed'
             }`}
           >
             🎯 Completar Entrenamiento
