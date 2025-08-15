@@ -519,6 +519,21 @@ body {
   }
 }
 
+@keyframes slideDown {
+  from {
+    max-height: 0;
+    opacity: 0;
+  }
+  to {
+    max-height: 500px;
+    opacity: 1;
+  }
+}
+
+.animate-slideDown {
+  animation: slideDown 0.3s ease-out;
+}
+
 /* Mobile Optimizations */
 @media (max-width: 768px) {
   .clean-card {

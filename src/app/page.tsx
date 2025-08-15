@@ -20,6 +20,15 @@ export default function Dashboard() {
     ejercicios: string[];
     cardio?: { tipo: string; duracion: number; intensidad: string; };
   } | null>(null);
+  const [expandedSections, setExpandedSections] = useState<{
+    info: boolean;
+    volumen: boolean;
+    microciclos: { [key: number]: boolean };
+  }>({
+    info: false,
+    volumen: false,
+    microciclos: {}
+  });
   
   // Local storage hooks
   const [estado, setEstado] = useLocalStorage<WeightEntry[]>('estado', []);
@@ -52,6 +61,23 @@ export default function Dashboard() {
 
   const openModal = (type: string) => {
     setActiveModal(type);
+  };
+
+  const toggleSection = (section: 'info' | 'volumen') => {
+    setExpandedSections(prev => ({
+      ...prev,
+      [section]: !prev[section]
+    }));
+  };
+
+  const toggleMicrociclo = (microcicloId: number) => {
+    setExpandedSections(prev => ({
+      ...prev,
+      microciclos: {
+        ...prev.microciclos,
+        [microcicloId]: !prev.microciclos[microcicloId]
+      }
+    }));
   };
 
   const closeModal = () => {
@@ -937,131 +963,197 @@ export default function Dashboard() {
         <div className="p-4 md:p-6">
           {/* Información General */}
           <div className="clean-card mb-4 md:mb-6">
-            <h2 className="text-lg md:text-xl font-semibold mb-3 md:mb-4">Información General</h2>
-            <div className="space-y-3 md:space-y-4">
-              <div>
-                <p className="text-xs md:text-sm text-gray-600">Objetivo</p>
-                <p className="text-sm md:text-base font-semibold">{mesociclo.objetivo}</p>
+            <button 
+              onClick={() => toggleSection('info')}
+              className="w-full flex items-center justify-between p-3 md:p-4 hover:bg-gray-50 rounded-lg transition-colors"
+            >
+              <div className="flex items-center gap-3">
+                <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center">
+                  <span className="text-blue-600 text-sm">ℹ️</span>
+                </div>
+                <h2 className="text-lg md:text-xl font-semibold text-left">Información General</h2>
               </div>
-              <div>
-                <p className="text-xs md:text-sm text-gray-600">Estructura</p>
-                <p className="text-sm md:text-base font-semibold">{mesociclo.estructura}</p>
+              <span className={`text-gray-400 transition-transform duration-200 ${expandedSections.info ? 'rotate-180' : ''}`}>
+                ▼
+              </span>
+            </button>
+            
+            {expandedSections.info && (
+              <div className="px-3 md:px-4 pb-3 md:pb-4 space-y-3 md:space-y-4 animate-fadeIn">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 md:gap-4">
+                  <div className="p-3 bg-blue-50 rounded-lg">
+                    <p className="text-xs text-blue-600 font-medium">Objetivo</p>
+                    <p className="text-sm md:text-base font-semibold">{mesociclo.objetivo}</p>
+                  </div>
+                  <div className="p-3 bg-green-50 rounded-lg">
+                    <p className="text-xs text-green-600 font-medium">Estructura</p>
+                    <p className="text-sm md:text-base font-semibold">{mesociclo.estructura}</p>
+                  </div>
+                  <div className="p-3 bg-orange-50 rounded-lg">
+                    <p className="text-xs text-orange-600 font-medium">Intensidad</p>
+                    <p className="text-sm md:text-base font-semibold">{mesociclo.intensidad}</p>
+                  </div>
+                  <div className="p-3 bg-purple-50 rounded-lg">
+                    <p className="text-xs text-purple-600 font-medium">Cardio</p>
+                    <p className="text-sm md:text-base font-semibold">{mesociclo.cardio}</p>
+                  </div>
+                </div>
+                <div className="p-3 bg-yellow-50 rounded-lg">
+                  <p className="text-xs text-yellow-600 font-medium">Dieta</p>
+                  <p className="text-sm md:text-base font-semibold">{mesociclo.dieta}</p>
+                </div>
               </div>
-              <div>
-                <p className="text-xs md:text-sm text-gray-600">Intensidad</p>
-                <p className="text-sm md:text-base font-semibold">{mesociclo.intensidad}</p>
-              </div>
-              <div>
-                <p className="text-xs md:text-sm text-gray-600">Cardio</p>
-                <p className="text-sm md:text-base font-semibold">{mesociclo.cardio}</p>
-              </div>
-              <div>
-                <p className="text-xs md:text-sm text-gray-600">Dieta</p>
-                <p className="text-sm md:text-base font-semibold">{mesociclo.dieta}</p>
-              </div>
-            </div>
+            )}
           </div>
 
           {/* Volumen por Grupo Muscular */}
           <div className="clean-card mb-4 md:mb-6">
-            <h2 className="text-lg md:text-xl font-semibold mb-3 md:mb-4">Volumen por Grupo Muscular</h2>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 md:gap-4">
-              <div className="flex justify-between items-center p-3 bg-gray-50 rounded-lg">
-                <span className="text-sm md:text-base font-medium">Espalda</span>
-                <span className="text-sm md:text-base text-primary font-semibold">{mesociclo.volumen.espalda}</span>
+            <button 
+              onClick={() => toggleSection('volumen')}
+              className="w-full flex items-center justify-between p-3 md:p-4 hover:bg-gray-50 rounded-lg transition-colors"
+            >
+              <div className="flex items-center gap-3">
+                <div className="w-8 h-8 bg-green-100 rounded-full flex items-center justify-center">
+                  <span className="text-green-600 text-sm">💪</span>
+                </div>
+                <h2 className="text-lg md:text-xl font-semibold text-left">Volumen por Grupo Muscular</h2>
               </div>
-              <div className="flex justify-between items-center p-3 bg-gray-50 rounded-lg">
-                <span className="text-sm md:text-base font-medium">Bíceps</span>
-                <span className="text-sm md:text-base text-primary font-semibold">{mesociclo.volumen.biceps}</span>
+              <span className={`text-gray-400 transition-transform duration-200 ${expandedSections.volumen ? 'rotate-180' : ''}`}>
+                ▼
+              </span>
+            </button>
+            
+            {expandedSections.volumen && (
+              <div className="px-3 md:px-4 pb-3 md:pb-4 animate-fadeIn">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 md:gap-4">
+                  <div className="flex justify-between items-center p-3 bg-gray-50 rounded-lg">
+                    <span className="text-sm md:text-base font-medium">Espalda</span>
+                    <span className="text-sm md:text-base text-primary font-semibold">{mesociclo.volumen.espalda}</span>
+                  </div>
+                  <div className="flex justify-between items-center p-3 bg-gray-50 rounded-lg">
+                    <span className="text-sm md:text-base font-medium">Bíceps</span>
+                    <span className="text-sm md:text-base text-primary font-semibold">{mesociclo.volumen.biceps}</span>
+                  </div>
+                  <div className="flex justify-between items-center p-3 bg-gray-50 rounded-lg">
+                    <span className="text-sm md:text-base font-medium">Pecho</span>
+                    <span className="text-sm md:text-base text-primary font-semibold">{mesociclo.volumen.pecho}</span>
+                  </div>
+                  <div className="flex justify-between items-center p-3 bg-gray-50 rounded-lg">
+                    <span className="text-sm md:text-base font-medium">Hombros</span>
+                    <span className="text-sm md:text-base text-primary font-semibold">{mesociclo.volumen.hombros}</span>
+                  </div>
+                  <div className="flex justify-between items-center p-3 bg-gray-50 rounded-lg">
+                    <span className="text-sm md:text-base font-medium">Tríceps</span>
+                    <span className="text-sm md:text-base text-primary font-semibold">{mesociclo.volumen.triceps}</span>
+                  </div>
+                  <div className="flex justify-between items-center p-3 bg-gray-50 rounded-lg">
+                    <span className="text-sm md:text-base font-medium">Piernas</span>
+                    <span className="text-sm md:text-base text-primary font-semibold">{mesociclo.volumen.piernas}</span>
+                  </div>
+                </div>
               </div>
-              <div className="flex justify-between items-center p-3 bg-gray-50 rounded-lg">
-                <span className="text-sm md:text-base font-medium">Pecho</span>
-                <span className="text-sm md:text-base text-primary font-semibold">{mesociclo.volumen.pecho}</span>
-              </div>
-              <div className="flex justify-between items-center p-3 bg-gray-50 rounded-lg">
-                <span className="text-sm md:text-base font-medium">Hombros</span>
-                <span className="text-sm md:text-base text-primary font-semibold">{mesociclo.volumen.hombros}</span>
-              </div>
-              <div className="flex justify-between items-center p-3 bg-gray-50 rounded-lg">
-                <span className="text-sm md:text-base font-medium">Tríceps</span>
-                <span className="text-sm md:text-base text-primary font-semibold">{mesociclo.volumen.triceps}</span>
-              </div>
-              <div className="flex justify-between items-center p-3 bg-gray-50 rounded-lg">
-                <span className="text-sm md:text-base font-medium">Piernas</span>
-                <span className="text-sm md:text-base text-primary font-semibold">{mesociclo.volumen.piernas}</span>
-              </div>
-            </div>
+            )}
           </div>
 
-                      <div className="space-y-4 md:space-y-6">
+                      <div className="space-y-3 md:space-y-4">
               {mesociclo.microciclos.map((microciclo) => (
                 <div key={microciclo.id} className="clean-card">
-                  <div className="mb-3 md:mb-4">
-                    <h3 className="text-base md:text-lg font-semibold">{microciclo.nombre}</h3>
-                    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-2 md:gap-3 mt-2 md:mt-3">
-                      <div className="p-2 bg-blue-50 rounded-lg">
-                        <p className="text-xs text-blue-600 font-medium">Objetivo</p>
-                        <p className="text-xs md:text-sm">{microciclo.objetivo}</p>
+                  <button 
+                    onClick={() => toggleMicrociclo(microciclo.id)}
+                    className="w-full flex items-center justify-between p-3 md:p-4 hover:bg-gray-50 rounded-lg transition-colors"
+                  >
+                    <div className="flex items-center gap-3">
+                      <div className="w-8 h-8 bg-purple-100 rounded-full flex items-center justify-center">
+                        <span className="text-purple-600 text-sm font-bold">{microciclo.id}</span>
                       </div>
-                      <div className="p-2 bg-green-50 rounded-lg">
-                        <p className="text-xs text-green-600 font-medium">Intensidad</p>
-                        <p className="text-xs md:text-sm">{microciclo.intensidad}</p>
-                      </div>
-                      <div className="p-2 bg-orange-50 rounded-lg sm:col-span-2 md:col-span-1">
-                        <p className="text-xs text-orange-600 font-medium">Cardio</p>
-                        <p className="text-xs md:text-sm">{microciclo.cardio}</p>
+                      <div className="text-left">
+                        <h3 className="text-base md:text-lg font-semibold">{microciclo.nombre}</h3>
+                        <p className="text-xs text-gray-500">{microciclo.objetivo}</p>
                       </div>
                     </div>
-                  </div>
+                    <div className="flex items-center gap-2">
+                      <div className="hidden sm:flex items-center gap-1">
+                        <span className="text-xs bg-blue-100 text-blue-700 px-2 py-1 rounded-full">
+                          {microciclo.intensidad.split(' ')[0]}
+                        </span>
+                        <span className="text-xs bg-orange-100 text-orange-700 px-2 py-1 rounded-full">
+                          {microciclo.cardio.split(' ')[0]}
+                        </span>
+                      </div>
+                      <span className={`text-gray-400 transition-transform duration-200 ${expandedSections.microciclos[microciclo.id] ? 'rotate-180' : ''}`}>
+                        ▼
+                      </span>
+                    </div>
+                  </button>
                   
-                  <div className="space-y-2 md:space-y-3">
-                    {microciclo.dias.map((dia, index) => (
-                      <div 
-                        key={index} 
-                        className="flex items-center justify-between p-3 md:p-4 bg-gray-50 rounded-lg cursor-pointer hover:bg-gray-100 transition-colors border-l-4 border-primary"
-                        onClick={() => {
-                          setSelectedWorkout({
-                            dia: dia.dia,
-                            entrenamiento: dia.entrenamiento,
-                            ejercicios: dia.ejercicios,
-                            cardio: dia.cardio
-                          });
-                          openModal('workout-details');
-                        }}
-                      >
-                        <div className="flex-1 min-w-0">
-                          <div className="flex items-center gap-2 md:gap-3">
-                            <div className="w-8 h-8 md:w-10 md:h-10 bg-primary rounded-full flex items-center justify-center text-white font-bold text-xs md:text-sm flex-shrink-0">
-                              {index + 1}
-                            </div>
-                            <div className="min-w-0 flex-1">
-                              <p className="font-semibold text-sm md:text-lg truncate">{dia.dia}</p>
-                              <p className="text-xs md:text-sm text-gray-600 truncate">{dia.entrenamiento}</p>
-                            </div>
-                          </div>
-                          {dia.cardio && (
-                            <div className="mt-2 flex items-center gap-1 md:gap-2 flex-wrap">
-                              <span className="text-xs bg-blue-100 text-blue-700 px-2 py-1 rounded-full">
-                                🏃 {dia.cardio.tipo}
-                              </span>
-                              <span className="text-xs text-gray-500">
-                                {dia.cardio.duracion}min • {dia.cardio.intensidad}
-                              </span>
-                            </div>
-                          )}
+                  {expandedSections.microciclos[microciclo.id] && (
+                    <div className="px-3 md:px-4 pb-3 md:pb-4 animate-fadeIn">
+                      {/* Información del microciclo */}
+                      <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 md:gap-3 mb-3 md:mb-4">
+                        <div className="p-2 bg-blue-50 rounded-lg">
+                          <p className="text-xs text-blue-600 font-medium">Objetivo</p>
+                          <p className="text-xs md:text-sm">{microciclo.objetivo}</p>
                         </div>
-                        <div className="text-right flex-shrink-0 ml-2">
-                          <div className="flex items-center gap-1 md:gap-2">
-                            <span className="text-xs md:text-sm font-medium text-gray-700">
-                              {dia.ejercicios.length > 0 ? `${dia.ejercicios.length} ejercicios` : 'Descanso'}
-                            </span>
-                            <span className="text-primary text-sm md:text-base">→</span>
-                          </div>
-                          <p className="text-xs text-gray-400 mt-1 hidden sm:block">Toca para ver detalles</p>
+                        <div className="p-2 bg-green-50 rounded-lg">
+                          <p className="text-xs text-green-600 font-medium">Intensidad</p>
+                          <p className="text-xs md:text-sm">{microciclo.intensidad}</p>
+                        </div>
+                        <div className="p-2 bg-orange-50 rounded-lg">
+                          <p className="text-xs text-orange-600 font-medium">Cardio</p>
+                          <p className="text-xs md:text-sm">{microciclo.cardio}</p>
                         </div>
                       </div>
-                    ))}
-                  </div>
+                      
+                      {/* Días de entrenamiento */}
+                      <div className="space-y-2">
+                        {microciclo.dias.map((dia, index) => (
+                          <div 
+                            key={index} 
+                            className="flex items-center justify-between p-2 md:p-3 bg-gray-50 rounded-lg cursor-pointer hover:bg-gray-100 transition-colors border-l-3 border-primary"
+                            onClick={() => {
+                              setSelectedWorkout({
+                                dia: dia.dia,
+                                entrenamiento: dia.entrenamiento,
+                                ejercicios: dia.ejercicios,
+                                cardio: dia.cardio
+                              });
+                              openModal('workout-details');
+                            }}
+                          >
+                            <div className="flex-1 min-w-0">
+                              <div className="flex items-center gap-2">
+                                <div className="w-6 h-6 md:w-8 md:h-8 bg-primary rounded-full flex items-center justify-center text-white font-bold text-xs flex-shrink-0">
+                                  {index + 1}
+                                </div>
+                                <div className="min-w-0 flex-1">
+                                  <p className="font-semibold text-sm truncate">{dia.dia}</p>
+                                  <p className="text-xs text-gray-600 truncate">{dia.entrenamiento}</p>
+                                </div>
+                              </div>
+                              {dia.cardio && (
+                                <div className="mt-1 flex items-center gap-1">
+                                  <span className="text-xs bg-blue-100 text-blue-700 px-1.5 py-0.5 rounded-full">
+                                    🏃 {dia.cardio.tipo}
+                                  </span>
+                                  <span className="text-xs text-gray-500">
+                                    {dia.cardio.duracion}min
+                                  </span>
+                                </div>
+                              )}
+                            </div>
+                            <div className="text-right flex-shrink-0 ml-2">
+                              <div className="flex items-center gap-1">
+                                <span className="text-xs font-medium text-gray-700">
+                                  {dia.ejercicios.length > 0 ? `${dia.ejercicios.length} ejercicios` : 'Descanso'}
+                                </span>
+                                <span className="text-primary text-sm">→</span>
+                              </div>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
                 </div>
               ))}
             </div>
