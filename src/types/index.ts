@@ -18,6 +18,8 @@ export interface Exercise {
   series: Set[];
   completado: boolean;
   pesoSugerido?: number; // Peso sugerido del mesociclo
+  repeticionesObjetivo?: number; // Repeticiones objetivo (ej: 10-12)
+  progresion?: Progresion; // Historial de progresión
 }
 
 export interface Set {
@@ -25,6 +27,19 @@ export interface Set {
   repeticiones: number;
   completado: boolean;
   rpe?: number; // Rate of Perceived Exertion (1-10)
+}
+
+export interface Progresion {
+  ejercicio: string;
+  historial: {
+    fecha: string;
+    peso: number;
+    repeticiones: number;
+    rpe?: number;
+  }[];
+  pesoActual: number;
+  repeticionesObjetivo: number;
+  proximoAjuste?: 'peso' | 'repeticiones' | 'mantener';
 }
 
 export interface CardioEntry {
@@ -74,6 +89,9 @@ export interface Mesociclo {
   volumen: string;
   intensidad: string;
   pesos: {
+    [ejercicio: string]: number;
+  };
+  repeticionesObjetivo: {
     [ejercicio: string]: number;
   };
 }

@@ -377,26 +377,96 @@ export default function Dashboard() {
           id: 1,
           nombre: "Microciclo 1 - Adaptación",
           dias: [
-            { dia: "Lunes", entrenamiento: "Push", ejercicios: ["Press de Banca", "Press Militar", "Fondos", "Extensiones Tríceps"] },
-            { dia: "Martes", entrenamiento: "Pull", ejercicios: ["Dominadas", "Remo con Barra", "Curl Bíceps", "Face Pulls"] },
-            { dia: "Miércoles", entrenamiento: "Piernas", ejercicios: ["Sentadillas", "Peso Muerto", "Extensiones Cuádriceps", "Curl Femoral"] },
-            { dia: "Jueves", entrenamiento: "Push", ejercicios: ["Press de Banca", "Press Militar", "Fondos", "Extensiones Tríceps"] },
-            { dia: "Viernes", entrenamiento: "Pull", ejercicios: ["Dominadas", "Remo con Barra", "Curl Bíceps", "Face Pulls"] },
-            { dia: "Sábado", entrenamiento: "Piernas", ejercicios: ["Sentadillas", "Peso Muerto", "Extensiones Cuádriceps", "Curl Femoral"] },
-            { dia: "Domingo", entrenamiento: "Descanso", ejercicios: [] }
+            { 
+              dia: "Lunes", 
+              entrenamiento: "Push", 
+              ejercicios: ["Press de Banca", "Press Militar", "Fondos", "Extensiones Tríceps"],
+              cardio: { tipo: "Ligero", duracion: 20, intensidad: "Baja" }
+            },
+            { 
+              dia: "Martes", 
+              entrenamiento: "Pull", 
+              ejercicios: ["Dominadas", "Remo con Barra", "Curl Bíceps", "Face Pulls"],
+              cardio: { tipo: "Moderado", duracion: 25, intensidad: "Media" }
+            },
+            { 
+              dia: "Miércoles", 
+              entrenamiento: "Piernas", 
+              ejercicios: ["Sentadillas", "Peso Muerto", "Extensiones Cuádriceps", "Curl Femoral"],
+              cardio: { tipo: "Intenso", duracion: 30, intensidad: "Alta" }
+            },
+            { 
+              dia: "Jueves", 
+              entrenamiento: "Push", 
+              ejercicios: ["Press de Banca", "Press Militar", "Fondos", "Extensiones Tríceps"],
+              cardio: { tipo: "Ligero", duracion: 20, intensidad: "Baja" }
+            },
+            { 
+              dia: "Viernes", 
+              entrenamiento: "Pull", 
+              ejercicios: ["Dominadas", "Remo con Barra", "Curl Bíceps", "Face Pulls"],
+              cardio: { tipo: "Moderado", duracion: 25, intensidad: "Media" }
+            },
+            { 
+              dia: "Sábado", 
+              entrenamiento: "Piernas", 
+              ejercicios: ["Sentadillas", "Peso Muerto", "Extensiones Cuádriceps", "Curl Femoral"],
+              cardio: { tipo: "Intenso", duracion: 30, intensidad: "Alta" }
+            },
+            { 
+              dia: "Domingo", 
+              entrenamiento: "Descanso", 
+              ejercicios: [],
+              cardio: null
+            }
           ]
         },
         {
           id: 2,
           nombre: "Microciclo 2 - Intensificación",
           dias: [
-            { dia: "Lunes", entrenamiento: "Push", ejercicios: ["Press de Banca", "Press Militar", "Fondos", "Extensiones Tríceps"] },
-            { dia: "Martes", entrenamiento: "Pull", ejercicios: ["Dominadas", "Remo con Barra", "Curl Bíceps", "Face Pulls"] },
-            { dia: "Miércoles", entrenamiento: "Piernas", ejercicios: ["Sentadillas", "Peso Muerto", "Extensiones Cuádriceps", "Curl Femoral"] },
-            { dia: "Jueves", entrenamiento: "Push", ejercicios: ["Press de Banca", "Press Militar", "Fondos", "Extensiones Tríceps"] },
-            { dia: "Viernes", entrenamiento: "Pull", ejercicios: ["Dominadas", "Remo con Barra", "Curl Bíceps", "Face Pulls"] },
-            { dia: "Sábado", entrenamiento: "Piernas", ejercicios: ["Sentadillas", "Peso Muerto", "Extensiones Cuádriceps", "Curl Femoral"] },
-            { dia: "Domingo", entrenamiento: "Descanso", ejercicios: [] }
+            { 
+              dia: "Lunes", 
+              entrenamiento: "Push", 
+              ejercicios: ["Press de Banca", "Press Militar", "Fondos", "Extensiones Tríceps"],
+              cardio: { tipo: "Ligero", duracion: 20, intensidad: "Baja" }
+            },
+            { 
+              dia: "Martes", 
+              entrenamiento: "Pull", 
+              ejercicios: ["Dominadas", "Remo con Barra", "Curl Bíceps", "Face Pulls"],
+              cardio: { tipo: "Moderado", duracion: 25, intensidad: "Media" }
+            },
+            { 
+              dia: "Miércoles", 
+              entrenamiento: "Piernas", 
+              ejercicios: ["Sentadillas", "Peso Muerto", "Extensiones Cuádriceps", "Curl Femoral"],
+              cardio: { tipo: "Intenso", duracion: 30, intensidad: "Alta" }
+            },
+            { 
+              dia: "Jueves", 
+              entrenamiento: "Push", 
+              ejercicios: ["Press de Banca", "Press Militar", "Fondos", "Extensiones Tríceps"],
+              cardio: { tipo: "Ligero", duracion: 20, intensidad: "Baja" }
+            },
+            { 
+              dia: "Viernes", 
+              entrenamiento: "Pull", 
+              ejercicios: ["Dominadas", "Remo con Barra", "Curl Bíceps", "Face Pulls"],
+              cardio: { tipo: "Moderado", duracion: 25, intensidad: "Media" }
+            },
+            { 
+              dia: "Sábado", 
+              entrenamiento: "Piernas", 
+              ejercicios: ["Sentadillas", "Peso Muerto", "Extensiones Cuádriceps", "Curl Femoral"],
+              cardio: { tipo: "Intenso", duracion: 30, intensidad: "Alta" }
+            },
+            { 
+              dia: "Domingo", 
+              entrenamiento: "Descanso", 
+              ejercicios: [],
+              cardio: null
+            }
           ]
         }
       ]
@@ -436,15 +506,23 @@ export default function Dashboard() {
                 <h3 className="text-lg font-semibold mb-4">{microciclo.nombre}</h3>
                 <div className="space-y-3">
                   {microciclo.dias.map((dia, index) => (
-                    <div key={index} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                    <div 
+                      key={index} 
+                      className="flex items-center justify-between p-3 bg-gray-50 rounded-lg cursor-pointer hover:bg-gray-100 transition-colors"
+                      onClick={() => openModal('workout-details')}
+                    >
                       <div>
                         <p className="font-medium">{dia.dia}</p>
                         <p className="text-sm text-gray-600">{dia.entrenamiento}</p>
+                        {dia.cardio && (
+                          <p className="text-xs text-blue-600">+ {dia.cardio.tipo} ({dia.cardio.duracion}min)</p>
+                        )}
                       </div>
                       <div className="text-right">
                         <p className="text-sm text-gray-600">
                           {dia.ejercicios.length > 0 ? `${dia.ejercicios.length} ejercicios` : 'Descanso'}
                         </p>
+                        <span className="text-xs text-gray-400">Toca para ver</span>
                       </div>
                     </div>
                   ))}

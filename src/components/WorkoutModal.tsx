@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { Exercise, Set, Mesociclo } from '@/types';
+import { Exercise, Set, Mesociclo, Progresion } from '@/types';
 
 interface WorkoutModalProps {
   isOpen: boolean;
@@ -30,7 +30,67 @@ const getCurrentMesociclo = (): Mesociclo => {
       'Peso Muerto': 120,
       'Extensiones Cuádriceps': 60,
       'Curl Femoral': 40
+    },
+    repeticionesObjetivo: {
+      'Press de Banca': 10,
+      'Press Militar': 10,
+      'Fondos': 12,
+      'Extensiones Tríceps': 12,
+      'Dominadas': 8,
+      'Remo con Barra': 10,
+      'Curl Bíceps': 12,
+      'Face Pulls': 15,
+      'Sentadillas': 8,
+      'Peso Muerto': 6,
+      'Extensiones Cuádriceps': 12,
+      'Curl Femoral': 12
     }
+  };
+};
+
+// Algoritmo de progresión automática
+const calcularProgresion = (ejercicio: string, series: Set[], pesoActual: number, repeticionesObjetivo: number): Progresion => {
+  const repeticionesPromedio = series.reduce((sum, set) => sum + set.repeticiones, 0) / series.length;
+  const pesoPromedio = series.reduce((sum, set) => sum + set.peso, 0) / series.length;
+  
+  let proximoAjuste: 'peso' | 'repeticiones' | 'mantener' = 'mantener';
+  let nuevoPeso = pesoActual;
+  let nuevasRepeticiones = repeticionesObjetivo;
+
+  // Si todas las series están completadas
+  if (series.every(set => set.completado)) {
+    // Si hice más repeticiones de las objetivo en todas las series
+    if (repeticionesPromedio > repeticionesObjetivo + 2) {
+      proximoAjuste = 'peso';
+      nuevoPeso = pesoActual + 2.5; // Subir 2.5kg
+    }
+    // Si hice las repeticiones objetivo pero con RPE bajo
+    else if (repeticionesPromedio >= repeticionesObjetivo && series.every(set => (set.rpe || 0) < 8)) {
+      proximoAjuste = 'peso';
+      nuevoPeso = pesoActual + 2.5;
+    }
+    // Si hice menos repeticiones de las objetivo
+    else if (repeticionesPromedio < repeticionesObjetivo - 2) {
+      proximoAjuste = 'repeticiones';
+      nuevasRepeticiones = Math.max(repeticionesObjetivo - 2, 6);
+    }
+    // Si hice las repeticiones objetivo con RPE alto
+    else if (repeticionesPromedio >= repeticionesObjetivo && series.every(set => (set.rpe || 0) >= 8)) {
+      proximoAjuste = 'mantener';
+    }
+  }
+
+  return {
+    ejercicio,
+    historial: [{
+      fecha: new Date().toISOString().split('T')[0],
+      peso: pesoPromedio,
+      repeticiones: repeticionesPromedio,
+      rpe: series.reduce((sum, set) => sum + (set.rpe || 0), 0) / series.length
+    }],
+    pesoActual: nuevoPeso,
+    repeticionesObjetivo: nuevasRepeticiones,
+    proximoAjuste
   };
 };
 
@@ -43,25 +103,29 @@ const getWorkoutExercises = (type: string): Exercise[] => {
         nombre: 'Press de Banca', 
         series: Array(4).fill(null).map(() => ({ peso: mesociclo.pesos['Press de Banca'] || 0, repeticiones: 0, completado: false })), 
         completado: false,
-        pesoSugerido: mesociclo.pesos['Press de Banca']
+        pesoSugerido: mesociclo.pesos['Press de Banca'],
+        repeticionesObjetivo: mesociclo.repeticionesObjetivo['Press de Banca']
       },
       { 
         nombre: 'Press Militar', 
         series: Array(3).fill(null).map(() => ({ peso: mesociclo.pesos['Press Militar'] || 0, repeticiones: 0, completado: false })), 
         completado: false,
-        pesoSugerido: mesociclo.pesos['Press Militar']
+        pesoSugerido: mesociclo.pesos['Press Militar'],
+        repeticionesObjetivo: mesociclo.repeticionesObjetivo['Press Militar']
       },
       { 
         nombre: 'Fondos', 
         series: Array(3).fill(null).map(() => ({ peso: 0, repeticiones: 0, completado: false })), 
         completado: false,
-        pesoSugerido: 0
+        pesoSugerido: 0,
+        repeticionesObjetivo: mesociclo.repeticionesObjetivo['Fondos']
       },
       { 
         nombre: 'Extensiones Tríceps', 
         series: Array(3).fill(null).map(() => ({ peso: mesociclo.pesos['Extensiones Tríceps'] || 0, repeticiones: 0, completado: false })), 
         completado: false,
-        pesoSugerido: mesociclo.pesos['Extensiones Tríceps']
+        pesoSugerido: mesociclo.pesos['Extensiones Tríceps'],
+        repeticionesObjetivo: mesociclo.repeticionesObjetivo['Extensiones Tríceps']
       }
     ],
     'Pull': [
@@ -69,25 +133,29 @@ const getWorkoutExercises = (type: string): Exercise[] => {
         nombre: 'Dominadas', 
         series: Array(4).fill(null).map(() => ({ peso: 0, repeticiones: 0, completado: false })), 
         completado: false,
-        pesoSugerido: 0
+        pesoSugerido: 0,
+        repeticionesObjetivo: mesociclo.repeticionesObjetivo['Dominadas']
       },
       { 
         nombre: 'Remo con Barra', 
         series: Array(4).fill(null).map(() => ({ peso: mesociclo.pesos['Remo con Barra'] || 0, repeticiones: 0, completado: false })), 
         completado: false,
-        pesoSugerido: mesociclo.pesos['Remo con Barra']
+        pesoSugerido: mesociclo.pesos['Remo con Barra'],
+        repeticionesObjetivo: mesociclo.repeticionesObjetivo['Remo con Barra']
       },
       { 
         nombre: 'Curl Bíceps', 
         series: Array(3).fill(null).map(() => ({ peso: mesociclo.pesos['Curl Bíceps'] || 0, repeticiones: 0, completado: false })), 
         completado: false,
-        pesoSugerido: mesociclo.pesos['Curl Bíceps']
+        pesoSugerido: mesociclo.pesos['Curl Bíceps'],
+        repeticionesObjetivo: mesociclo.repeticionesObjetivo['Curl Bíceps']
       },
       { 
         nombre: 'Face Pulls', 
         series: Array(3).fill(null).map(() => ({ peso: mesociclo.pesos['Face Pulls'] || 0, repeticiones: 0, completado: false })), 
         completado: false,
-        pesoSugerido: mesociclo.pesos['Face Pulls']
+        pesoSugerido: mesociclo.pesos['Face Pulls'],
+        repeticionesObjetivo: mesociclo.repeticionesObjetivo['Face Pulls']
       }
     ],
     'Piernas': [
@@ -95,25 +163,29 @@ const getWorkoutExercises = (type: string): Exercise[] => {
         nombre: 'Sentadillas', 
         series: Array(4).fill(null).map(() => ({ peso: mesociclo.pesos['Sentadillas'] || 0, repeticiones: 0, completado: false })), 
         completado: false,
-        pesoSugerido: mesociclo.pesos['Sentadillas']
+        pesoSugerido: mesociclo.pesos['Sentadillas'],
+        repeticionesObjetivo: mesociclo.repeticionesObjetivo['Sentadillas']
       },
       { 
         nombre: 'Peso Muerto', 
         series: Array(3).fill(null).map(() => ({ peso: mesociclo.pesos['Peso Muerto'] || 0, repeticiones: 0, completado: false })), 
         completado: false,
-        pesoSugerido: mesociclo.pesos['Peso Muerto']
+        pesoSugerido: mesociclo.pesos['Peso Muerto'],
+        repeticionesObjetivo: mesociclo.repeticionesObjetivo['Peso Muerto']
       },
       { 
         nombre: 'Extensiones Cuádriceps', 
         series: Array(3).fill(null).map(() => ({ peso: mesociclo.pesos['Extensiones Cuádriceps'] || 0, repeticiones: 0, completado: false })), 
         completado: false,
-        pesoSugerido: mesociclo.pesos['Extensiones Cuádriceps']
+        pesoSugerido: mesociclo.pesos['Extensiones Cuádriceps'],
+        repeticionesObjetivo: mesociclo.repeticionesObjetivo['Extensiones Cuádriceps']
       },
       { 
         nombre: 'Curl Femoral', 
         series: Array(3).fill(null).map(() => ({ peso: mesociclo.pesos['Curl Femoral'] || 0, repeticiones: 0, completado: false })), 
         completado: false,
-        pesoSugerido: mesociclo.pesos['Curl Femoral']
+        pesoSugerido: mesociclo.pesos['Curl Femoral'],
+        repeticionesObjetivo: mesociclo.repeticionesObjetivo['Curl Femoral']
       }
     ]
   };
@@ -142,6 +214,17 @@ export function WorkoutModal({ isOpen, onClose, onComplete, workoutType }: Worko
   const completeExercise = (exerciseIndex: number) => {
     const newExercises = [...exercises];
     newExercises[exerciseIndex].completado = true;
+    
+    // Calcular progresión automática
+    const ejercicio = newExercises[exerciseIndex];
+    const progresion = calcularProgresion(
+      ejercicio.nombre,
+      ejercicio.series,
+      ejercicio.pesoSugerido || 0,
+      ejercicio.repeticionesObjetivo || 10
+    );
+    
+    newExercises[exerciseIndex].progresion = progresion;
     setExercises(newExercises);
   };
 
@@ -173,6 +256,16 @@ export function WorkoutModal({ isOpen, onClose, onComplete, workoutType }: Worko
                 <div className="flex items-center justify-between mb-4">
                   <div>
                     <h4 className="font-semibold text-lg">{exercise.nombre}</h4>
+                    <p className="text-sm text-gray-600">
+                      Objetivo: {exercise.repeticionesObjetivo} repeticiones
+                    </p>
+                    {exercise.progresion && (
+                      <p className="text-xs text-blue-600">
+                        Próximo: {exercise.progresion.proximoAjuste === 'peso' ? `Subir a ${exercise.progresion.pesoActual}kg` : 
+                                  exercise.progresion.proximoAjuste === 'repeticiones' ? `Bajar a ${exercise.progresion.repeticionesObjetivo} reps` : 
+                                  'Mantener'}
+                      </p>
+                    )}
                   </div>
                   <button
                     onClick={() => completeExercise(exerciseIndex)}
@@ -194,6 +287,7 @@ export function WorkoutModal({ isOpen, onClose, onComplete, workoutType }: Worko
                         <th>Serie</th>
                         <th>Peso (kg)</th>
                         <th>Reps</th>
+                        <th>RPE</th>
                         <th>Estado</th>
                       </tr>
                     </thead>
@@ -216,8 +310,20 @@ export function WorkoutModal({ isOpen, onClose, onComplete, workoutType }: Worko
                               type="number"
                               value={set.repeticiones || ''}
                               onChange={(e) => updateSet(exerciseIndex, setIndex, 'repeticiones', Number(e.target.value))}
-                              placeholder="0"
+                              placeholder={exercise.repeticionesObjetivo?.toString() || "0"}
                               className="input-compact w-20"
+                              disabled={set.completado}
+                            />
+                          </td>
+                          <td>
+                            <input
+                              type="number"
+                              value={set.rpe || ''}
+                              onChange={(e) => updateSet(exerciseIndex, setIndex, 'rpe', Number(e.target.value))}
+                              placeholder="0"
+                              min="1"
+                              max="10"
+                              className="input-compact w-16"
                               disabled={set.completado}
                             />
                           </td>
