@@ -1,92 +1,44 @@
 'use client';
 
 import { useState } from 'react';
-import { Exercise, WorkoutEntry } from '@/types';
+import { Exercise, Set } from '@/types';
 
 interface WorkoutModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onComplete: (workout: WorkoutEntry) => void;
+  onComplete: (exercises: Exercise[]) => void;
   workoutType: string;
 }
 
 const getWorkoutExercises = (type: string): Exercise[] => {
-  const exercises: { [key: string]: Exercise[] } = {
-    'Pull': [
-      {
-        nombre: 'Dominadas',
-        series: Array(4).fill(null).map(() => ({ peso: 0, repeticiones: 0, completado: false })),
-        completado: false
-      },
-      {
-        nombre: 'Remo con Barra',
-        series: Array(4).fill(null).map(() => ({ peso: 0, repeticiones: 0, completado: false })),
-        completado: false
-      },
-      {
-        nombre: 'Curl de Bíceps',
-        series: Array(3).fill(null).map(() => ({ peso: 0, repeticiones: 0, completado: false })),
-        completado: false
-      },
-      {
-        nombre: 'Face Pulls',
-        series: Array(3).fill(null).map(() => ({ peso: 0, repeticiones: 0, completado: false })),
-        completado: false
-      }
-    ],
+  const exercises = {
     'Push': [
-      {
-        nombre: 'Press de Banca',
-        series: Array(4).fill(null).map(() => ({ peso: 0, repeticiones: 0, completado: false })),
-        completado: false
-      },
-      {
-        nombre: 'Press Militar',
-        series: Array(3).fill(null).map(() => ({ peso: 0, repeticiones: 0, completado: false })),
-        completado: false
-      },
-      {
-        nombre: 'Fondos en Paralelas',
-        series: Array(3).fill(null).map(() => ({ peso: 0, repeticiones: 0, completado: false })),
-        completado: false
-      },
-      {
-        nombre: 'Extensiones de Tríceps',
-        series: Array(3).fill(null).map(() => ({ peso: 0, repeticiones: 0, completado: false })),
-        completado: false
-      }
+      { nombre: 'Press de Banca', series: Array(4).fill(null).map(() => ({ peso: 0, repeticiones: 0, completado: false })) },
+      { nombre: 'Press Militar', series: Array(3).fill(null).map(() => ({ peso: 0, repeticiones: 0, completado: false })) },
+      { nombre: 'Fondos', series: Array(3).fill(null).map(() => ({ peso: 0, repeticiones: 0, completado: false })) },
+      { nombre: 'Extensiones Tríceps', series: Array(3).fill(null).map(() => ({ peso: 0, repeticiones: 0, completado: false })) }
+    ],
+    'Pull': [
+      { nombre: 'Dominadas', series: Array(4).fill(null).map(() => ({ peso: 0, repeticiones: 0, completado: false })) },
+      { nombre: 'Remo con Barra', series: Array(4).fill(null).map(() => ({ peso: 0, repeticiones: 0, completado: false })) },
+      { nombre: 'Curl Bíceps', series: Array(3).fill(null).map(() => ({ peso: 0, repeticiones: 0, completado: false })) },
+      { nombre: 'Face Pulls', series: Array(3).fill(null).map(() => ({ peso: 0, repeticiones: 0, completado: false })) }
     ],
     'Piernas': [
-      {
-        nombre: 'Sentadillas',
-        series: Array(4).fill(null).map(() => ({ peso: 0, repeticiones: 0, completado: false })),
-        completado: false
-      },
-      {
-        nombre: 'Peso Muerto',
-        series: Array(3).fill(null).map(() => ({ peso: 0, repeticiones: 0, completado: false })),
-        completado: false
-      },
-      {
-        nombre: 'Extensiones de Cuádriceps',
-        series: Array(3).fill(null).map(() => ({ peso: 0, repeticiones: 0, completado: false })),
-        completado: false
-      },
-      {
-        nombre: 'Curl de Femoral',
-        series: Array(3).fill(null).map(() => ({ peso: 0, repeticiones: 0, completado: false })),
-        completado: false
-      }
+      { nombre: 'Sentadillas', series: Array(4).fill(null).map(() => ({ peso: 0, repeticiones: 0, completado: false })) },
+      { nombre: 'Peso Muerto', series: Array(3).fill(null).map(() => ({ peso: 0, repeticiones: 0, completado: false })) },
+      { nombre: 'Extensiones Cuádriceps', series: Array(3).fill(null).map(() => ({ peso: 0, repeticiones: 0, completado: false })) },
+      { nombre: 'Curl Femoral', series: Array(3).fill(null).map(() => ({ peso: 0, repeticiones: 0, completado: false })) }
     ]
   };
-
-  return exercises[type] || [];
+  
+  return exercises[type as keyof typeof exercises] || exercises['Push'];
 };
 
 export function WorkoutModal({ isOpen, onClose, onComplete, workoutType }: WorkoutModalProps) {
   const [exercises, setExercises] = useState<Exercise[]>(getWorkoutExercises(workoutType));
 
-  const updateSet = (exerciseIndex: number, setIndex: number, field: 'peso' | 'repeticiones', value: number) => {
+  const updateSet = (exerciseIndex: number, setIndex: number, field: keyof Set, value: number) => {
     const newExercises = [...exercises];
     newExercises[exerciseIndex].series[setIndex] = {
       ...newExercises[exerciseIndex].series[setIndex],
@@ -109,21 +61,13 @@ export function WorkoutModal({ isOpen, onClose, onComplete, workoutType }: Worko
 
   const isWorkoutComplete = () => {
     return exercises.every(exercise => 
-      exercise.completado && 
-      exercise.series.every(set => set.completado && set.peso > 0 && set.repeticiones > 0)
+      exercise.completado && exercise.series.every(set => set.completado)
     );
   };
 
   const handleComplete = () => {
-    const workout: WorkoutEntry = {
-      fecha: new Date().toISOString().split('T')[0],
-      tipo: workoutType,
-      ejercicios: exercises,
-      completado: true,
-      duracion: 60,
-      notas: `Entrenamiento ${workoutType} completado`
-    };
-    onComplete(workout);
+    onComplete(exercises);
+    onClose();
   };
 
   if (!isOpen) return null;
@@ -133,99 +77,95 @@ export function WorkoutModal({ isOpen, onClose, onComplete, workoutType }: Worko
       <div className="modal-content max-h-[90vh] flex flex-col" onClick={(e) => e.stopPropagation()}>
         <div className="modal-header flex-shrink-0">
           <button className="modal-close" onClick={onClose}>×</button>
-          <h3>🏋️ {workoutType}</h3>
+          <h3>🏋️ {workoutType} - Entrenamiento</h3>
         </div>
         
         <div className="modal-body flex-1 overflow-y-auto">
           <div className="space-y-6">
             {exercises.map((exercise, exerciseIndex) => (
-              <div key={exerciseIndex} className="bg-gradient-to-br from-gray-50 to-white rounded-3xl p-6 border border-gray-100 shadow-sm">
-                <div className="flex items-center justify-between mb-6">
-                  <h4 className="text-xl font-bold text-gray-800">
-                    {exercise.nombre}
-                  </h4>
-                  <div className={`w-8 h-8 rounded-full border-2 flex items-center justify-center transition-all ${
-                    exercise.completado 
-                      ? 'bg-gradient-to-r from-green-400 to-green-500 border-green-500 text-white shadow-lg' 
-                      : 'border-gray-300 bg-white'
-                  }`}>
-                    {exercise.completado && '✓'}
-                  </div>
+              <div key={exerciseIndex} className="clean-card">
+                <div className="flex items-center justify-between mb-4">
+                  <h4 className="font-semibold text-lg">{exercise.nombre}</h4>
+                  <button
+                    onClick={() => completeExercise(exerciseIndex)}
+                    disabled={exercise.completado}
+                    className={`btn-elegant btn-small ${
+                      exercise.completado 
+                        ? 'btn-success' 
+                        : 'btn-secondary'
+                    }`}
+                  >
+                    {exercise.completado ? '✅ Completado' : 'Completar'}
+                  </button>
                 </div>
                 
-                <div className="space-y-4">
-                  {exercise.series.map((set, setIndex) => (
-                    <div key={setIndex} className="flex items-center gap-4 p-4 bg-white rounded-2xl border border-gray-100 shadow-sm">
-                      <span className="text-sm font-semibold text-gray-500 w-6 text-center">
-                        {setIndex + 1}
-                      </span>
-                      
-                      <div className="flex-1 flex gap-3">
-                        <div className="flex-1">
-                          <input
-                            type="number"
-                            placeholder="Peso"
-                            value={set.peso || ''}
-                            onChange={(e) => updateSet(exerciseIndex, setIndex, 'peso', Number(e.target.value))}
-                            className="w-full px-4 py-3 bg-gray-50 border-2 border-gray-200 rounded-xl text-lg font-medium text-gray-800 transition-all focus:border-blue-400 focus:bg-white focus:outline-none"
-                            min="0"
-                          />
-                        </div>
-                        
-                        <div className="flex items-center text-gray-400 font-bold text-lg">
-                          ×
-                        </div>
-                        
-                        <div className="flex-1">
-                          <input
-                            type="number"
-                            placeholder="Reps"
-                            value={set.repeticiones || ''}
-                            onChange={(e) => updateSet(exerciseIndex, setIndex, 'repeticiones', Number(e.target.value))}
-                            className="w-full px-4 py-3 bg-gray-50 border-2 border-gray-200 rounded-xl text-lg font-medium text-gray-800 transition-all focus:border-blue-400 focus:bg-white focus:outline-none"
-                            min="0"
-                          />
-                        </div>
-                      </div>
-                      
-                      <button
-                        onClick={() => completeSet(exerciseIndex, setIndex)}
-                        className={`w-10 h-10 rounded-full border-2 flex items-center justify-center transition-all ${
-                          set.completado
-                            ? 'bg-gradient-to-r from-green-400 to-green-500 border-green-500 text-white shadow-lg'
-                            : 'border-gray-300 bg-white hover:border-green-400 hover:shadow-md'
-                        }`}
-                      >
-                        {set.completado && '✓'}
-                      </button>
-                    </div>
-                  ))}
+                <div className="overflow-x-auto">
+                  <table className="table-compact">
+                    <thead>
+                      <tr>
+                        <th>Serie</th>
+                        <th>Peso (kg)</th>
+                        <th>Reps</th>
+                        <th>Estado</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {exercise.series.map((set, setIndex) => (
+                        <tr key={setIndex}>
+                          <td className="font-medium">{setIndex + 1}</td>
+                          <td>
+                            <input
+                              type="number"
+                              value={set.peso || ''}
+                              onChange={(e) => updateSet(exerciseIndex, setIndex, 'peso', Number(e.target.value))}
+                              placeholder="0"
+                              className="input-compact w-20"
+                              disabled={set.completado}
+                            />
+                          </td>
+                          <td>
+                            <input
+                              type="number"
+                              value={set.repeticiones || ''}
+                              onChange={(e) => updateSet(exerciseIndex, setIndex, 'repeticiones', Number(e.target.value))}
+                              placeholder="0"
+                              className="input-compact w-20"
+                              disabled={set.completado}
+                            />
+                          </td>
+                          <td>
+                            <button
+                              onClick={() => completeSet(exerciseIndex, setIndex)}
+                              disabled={set.completado || !set.peso || !set.repeticiones}
+                              className={`btn-elegant btn-small ${
+                                set.completado 
+                                  ? 'btn-success' 
+                                  : (!set.peso || !set.repeticiones)
+                                    ? 'btn-secondary opacity-50 cursor-not-allowed'
+                                    : 'btn-primary'
+                              }`}
+                            >
+                              {set.completado ? '✅' : 'Completar'}
+                            </button>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
                 </div>
-                
-                <button
-                  onClick={() => completeExercise(exerciseIndex)}
-                  disabled={!exercise.series.every(set => set.completado && set.peso > 0 && set.repeticiones > 0)}
-                  className={`mt-6 w-full py-4 px-6 rounded-2xl font-semibold text-lg transition-all ${
-                    exercise.completado
-                      ? 'bg-gradient-to-r from-green-400 to-green-500 text-white shadow-lg'
-                      : 'bg-gray-100 text-gray-500 hover:bg-gray-200'
-                  }`}
-                >
-                  {exercise.completado ? '✅ Ejercicio Completado' : 'Completar Ejercicio'}
-                </button>
               </div>
             ))}
           </div>
         </div>
         
-        <div className="flex gap-3 flex-shrink-0">
-          <button onClick={onClose} className="btn-modern btn-secondary flex-1">
+        <div className="flex gap-3 flex-shrink-0 p-4 border-t border-gray-200">
+          <button onClick={onClose} className="btn-elegant btn-secondary flex-1">
             Cancelar
           </button>
           <button
             onClick={handleComplete}
             disabled={!isWorkoutComplete()}
-            className={`btn-modern flex-1 ${
+            className={`btn-elegant flex-1 ${
               isWorkoutComplete() 
                 ? 'btn-primary' 
                 : 'btn-secondary opacity-50 cursor-not-allowed'

@@ -239,11 +239,11 @@ export default function Dashboard() {
   const renderTodaySection = () => (
     <div className="min-h-screen pb-20">
       {/* Header */}
-      <div className="nav-modern p-6">
+      <div className="nav-clean p-6">
         <div className="flex items-center justify-between">
           <div className="flex-1"></div>
           <div className="text-center flex-1">
-            <h1 className="text-2xl font-bold text-gradient">Mi Entrenamiento</h1>
+            <h1 className="text-2xl font-bold text-primary">Mi Entrenamiento</h1>
             <p className="text-gray-600 mt-2">
               Hoy es {new Date().toLocaleDateString('es-ES', { 
                 weekday: 'long', 
@@ -256,7 +256,7 @@ export default function Dashboard() {
           <div className="flex-1 flex justify-end">
             <button 
               onClick={() => openModal('calendar')}
-              className="w-12 h-12 glass rounded-full flex items-center justify-center hover:scale-110 transition-all"
+              className="w-12 h-12 bg-primary rounded-full flex items-center justify-center hover:scale-110 transition-all text-white"
             >
               <span className="text-xl">📅</span>
             </button>
@@ -266,7 +266,7 @@ export default function Dashboard() {
       
       {/* Progress Overview */}
       <div className="p-6">
-        <div className="modern-card text-center">
+        <div className="clean-card text-center">
           <div className="flex justify-center mb-4">
             <ProgressCircle progress={progress} />
           </div>
@@ -279,7 +279,7 @@ export default function Dashboard() {
         <h2 className="text-xl font-semibold mb-4">Hoy toca:</h2>
         
         {/* Weight Entry */}
-        <div className="modern-card cursor-pointer hover:scale-[1.02] transition-transform" onClick={() => openModal('weight')}>
+        <div className="clean-card cursor-pointer hover:scale-[1.02] transition-transform" onClick={() => openModal('weight')}>
           <div className="flex items-center justify-between">
             <div className="flex items-center">
               <div className="w-12 h-12 bg-gradient-to-r from-blue-400 to-blue-500 rounded-full flex items-center justify-center mr-4 shadow-lg">
@@ -298,7 +298,7 @@ export default function Dashboard() {
         </div>
         
         {/* Workout Entry */}
-        <div className="modern-card cursor-pointer hover:scale-[1.02] transition-transform" onClick={() => openModal('workout')}>
+        <div className="clean-card cursor-pointer hover:scale-[1.02] transition-transform" onClick={() => openModal('workout')}>
           <div className="flex items-center justify-between">
             <div className="flex items-center">
               <div className="w-12 h-12 bg-gradient-to-r from-green-400 to-green-500 rounded-full flex items-center justify-center mr-4 shadow-lg">
@@ -317,7 +317,7 @@ export default function Dashboard() {
         </div>
         
         {/* Cardio Entry */}
-        <div className="modern-card cursor-pointer hover:scale-[1.02] transition-transform" onClick={() => openModal('cardio')}>
+        <div className="clean-card cursor-pointer hover:scale-[1.02] transition-transform" onClick={() => openModal('cardio')}>
           <div className="flex items-center justify-between">
             <div className="flex items-center">
               <div className="w-12 h-12 bg-gradient-to-r from-red-400 to-red-500 rounded-full flex items-center justify-center mr-4 shadow-lg">
@@ -336,7 +336,7 @@ export default function Dashboard() {
         </div>
         
         {/* Diet Entry */}
-        <div className="modern-card cursor-pointer hover:scale-[1.02] transition-transform" onClick={() => openModal('diet')}>
+        <div className="clean-card cursor-pointer hover:scale-[1.02] transition-transform" onClick={() => openModal('diet')}>
           <div className="flex items-center justify-between">
             <div className="flex items-center">
               <div className="w-12 h-12 bg-gradient-to-r from-yellow-400 to-yellow-500 rounded-full flex items-center justify-center mr-4 shadow-lg">
@@ -701,14 +701,14 @@ export default function Dashboard() {
                     onChange={(e) => setWeightInput(e.target.value)}
                     step="0.1" 
                     placeholder="85.0" 
-                    className="input-modern"
+                    className="input-compact"
                   />
                 </div>
                 <div className="flex gap-3">
-                  <button onClick={closeModal} className="btn-modern btn-secondary flex-1">
+                  <button onClick={closeModal} className="btn-elegant btn-secondary flex-1">
                     Cancelar
                   </button>
-                  <button onClick={saveWeight} className="btn-modern btn-primary flex-1">
+                  <button onClick={saveWeight} className="btn-elegant btn-primary flex-1">
                     💾 Guardar
                   </button>
                 </div>
@@ -751,7 +751,7 @@ export default function Dashboard() {
                     onChange={(e) => setCardioKm(e.target.value)}
                     step="0.1" 
                     placeholder="3.5" 
-                    className="input-modern"
+                    className="input-compact"
                   />
                 </div>
                 <div>
@@ -761,14 +761,14 @@ export default function Dashboard() {
                     value={cardioTime}
                     onChange={(e) => setCardioTime(e.target.value)}
                     placeholder="25" 
-                    className="input-modern"
+                    className="input-compact"
                   />
                 </div>
                 <div className="flex gap-3">
-                  <button onClick={closeModal} className="btn-modern btn-secondary flex-1">
+                  <button onClick={closeModal} className="btn-elegant btn-secondary flex-1">
                     Cancelar
                   </button>
-                  <button onClick={saveCardio} className="btn-modern btn-primary flex-1">
+                  <button onClick={saveCardio} className="btn-elegant btn-primary flex-1">
                     💾 Guardar
                   </button>
                 </div>
@@ -794,7 +794,7 @@ export default function Dashboard() {
                     value={dietCalories}
                     onChange={(e) => setDietCalories(e.target.value)}
                     placeholder="1800" 
-                    className="input-modern"
+                    className="input-compact"
                   />
                 </div>
                 <div>
@@ -804,14 +804,14 @@ export default function Dashboard() {
                     value={dietProtein}
                     onChange={(e) => setDietProtein(e.target.value)}
                     placeholder="150" 
-                    className="input-modern"
+                    className="input-compact"
                   />
                 </div>
                 <div className="flex gap-3">
-                  <button onClick={closeModal} className="btn-modern btn-secondary flex-1">
+                  <button onClick={closeModal} className="btn-elegant btn-secondary flex-1">
                     Cancelar
                   </button>
-                  <button onClick={saveDiet} className="btn-modern btn-primary flex-1">
+                  <button onClick={saveDiet} className="btn-elegant btn-primary flex-1">
                     💾 Guardar
                   </button>
                 </div>

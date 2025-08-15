@@ -73,23 +73,22 @@ const getWeeklyPlan = (): WeeklyPlan => {
   return plan;
 };
 
-const getActivityColor = (type: string, intensidad?: string): string => {
-  if (type === 'Descanso') return 'from-gray-400 to-gray-500';
-  
+const getActivityColor = (type: string): string => {
   switch (type) {
-    case 'Push': return 'from-blue-500 to-blue-600';
-    case 'Pull': return 'from-green-500 to-green-600';
-    case 'Piernas': return 'from-purple-500 to-purple-600';
-    default: return 'from-blue-500 to-blue-600';
+    case 'Push': return 'var(--primary-500)';
+    case 'Pull': return 'var(--success-500)';
+    case 'Piernas': return 'var(--warning-500)';
+    case 'Descanso': return 'var(--gray-500)';
+    default: return 'var(--primary-500)';
   }
 };
 
 const getCardioColor = (intensidad: string): string => {
   switch (intensidad) {
-    case 'Baja': return 'from-yellow-400 to-yellow-500';
-    case 'Media': return 'from-orange-400 to-orange-500';
-    case 'Alta': return 'from-red-400 to-red-500';
-    default: return 'from-yellow-400 to-yellow-500';
+    case 'Baja': return 'var(--warning-400)';
+    case 'Media': return 'var(--warning-500)';
+    case 'Alta': return 'var(--danger-500)';
+    default: return 'var(--warning-400)';
   }
 };
 
@@ -111,40 +110,42 @@ export function WeeklyCalendar({ isOpen, onClose }: WeeklyCalendarProps) {
 
   return (
     <div className="modal-overlay" onClick={onClose}>
-      <div className="modal-content max-w-4xl max-h-[90vh] overflow-y-auto" onClick={(e) => e.stopPropagation()}>
+      <div className="modal-content max-w-2xl" onClick={(e) => e.stopPropagation()}>
         <div className="modal-header">
           <button className="modal-close" onClick={onClose}>×</button>
           <h3>📅 Plan Semanal</h3>
         </div>
         
         <div className="modal-body">
-          <div className="calendar-grid">
+          <div className="grid grid-cols-1 gap-4">
             {Object.entries(weeklyPlan).map(([day, plan]) => (
               <div 
                 key={day} 
-                className={`modern-card ${day === today ? 'ring-2 ring-blue-400 ring-opacity-50' : ''}`}
+                className={`clean-card ${day === today ? 'ring-2 ring-blue-400 ring-opacity-50' : ''}`}
               >
                 {/* Day Header */}
-                <div className="flex items-center justify-between mb-6">
-                  <h4 className={`text-xl font-bold ${day === today ? 'text-blue-600' : 'text-gray-800'}`}>
+                <div className="flex items-center justify-between mb-4">
+                  <h4 className={`text-lg font-semibold ${day === today ? 'text-blue-600' : 'text-gray-800'}`}>
                     {day}
                   </h4>
                   {day === today && (
-                    <span className="px-3 py-1 bg-blue-500 text-white text-sm font-semibold rounded-full">
+                    <span className="px-2 py-1 bg-blue-500 text-white text-xs font-semibold rounded-full">
                       Hoy
                     </span>
                   )}
                 </div>
                 
                 {/* Activity Blocks */}
-                <div className="space-y-4">
+                <div className="space-y-3">
                   {/* Main Workout Block */}
-                  <div className={`activity-block ${plan.descanso ? 'success' : ''}`} 
-                       style={{ background: `linear-gradient(135deg, ${plan.descanso ? '#22c55e' : '#0ea5e9'} 0%, ${plan.descanso ? '#16a34a' : '#0284c7'} 100%)` }}>
+                  <div 
+                    className="activity-block" 
+                    style={{ background: getActivityColor(plan.entrenamiento) }}
+                  >
                     <div className="flex items-center">
-                      <span className="text-3xl mr-4">{getActivityIcon(plan.entrenamiento)}</span>
+                      <span className="text-2xl mr-3">{getActivityIcon(plan.entrenamiento)}</span>
                       <div className="flex-1">
-                        <div className="font-bold text-xl mb-1">{plan.entrenamiento}</div>
+                        <div className="font-bold text-lg">{plan.entrenamiento}</div>
                         {!plan.descanso && (
                           <div className="text-sm opacity-90">
                             {plan.ejercicios.length} ejercicios
@@ -156,12 +157,14 @@ export function WeeklyCalendar({ isOpen, onClose }: WeeklyCalendarProps) {
                   
                   {/* Cardio Block */}
                   {plan.cardio && (
-                    <div className="activity-block warning" 
-                         style={{ background: `linear-gradient(135deg, ${getCardioColor(plan.cardio.intensidad).includes('yellow') ? '#fbbf24' : getCardioColor(plan.cardio.intensidad).includes('orange') ? '#fb923c' : '#f87171'} 0%, ${getCardioColor(plan.cardio.intensidad).includes('yellow') ? '#f59e0b' : getCardioColor(plan.cardio.intensidad).includes('orange') ? '#ea580c' : '#dc2626'} 100%)` }}>
+                    <div 
+                      className="activity-block" 
+                      style={{ background: getCardioColor(plan.cardio.intensidad) }}
+                    >
                       <div className="flex items-center">
-                        <span className="text-2xl mr-4">🏃</span>
+                        <span className="text-xl mr-3">🏃</span>
                         <div className="flex-1">
-                          <div className="font-bold text-lg mb-1">{plan.cardio.tipo}</div>
+                          <div className="font-bold">{plan.cardio.tipo}</div>
                           <div className="text-sm opacity-90">
                             {plan.cardio.duracion} min • {plan.cardio.intensidad}
                           </div>
