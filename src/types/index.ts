@@ -5,20 +5,30 @@ export interface WeightEntry {
 }
 
 export interface WorkoutEntry {
-  dia: string;
-  ejercicio: string;
-  microciclo: number | string;
-  tipo: string;
-  setIndex: number;
-  peso: number;
-  reps: number;
-  rango: string;
   fecha: string;
+  tipo: string;
+  ejercicios: Exercise[];
+  completado: boolean;
+  duracion?: number;
+  notas?: string;
+}
+
+export interface Exercise {
+  nombre: string;
+  series: Set[];
+  completado: boolean;
+}
+
+export interface Set {
+  peso: number;
+  repeticiones: number;
+  completado: boolean;
+  rpe?: number; // Rate of Perceived Exertion (1-10)
 }
 
 export interface CardioEntry {
   fecha: string;
-  microciclo: number | string;
+  microciclo: number;
   sesionId: number;
   km: number;
   tiempo: number;
@@ -36,29 +46,29 @@ export interface DietEntry {
 }
 
 export interface DailyAdherence {
-  [date: string]: {
+  [fecha: string]: {
     pesos?: boolean;
     cardio?: boolean;
     dieta?: boolean;
-    ayuno?: boolean;
-    pesaje?: boolean;
   };
 }
 
 export interface WeeklyPlan {
-  dia: string;
-  tareas: string[];
+  [dia: string]: {
+    entrenamiento: string;
+    ejercicios: string[];
+    cardio?: {
+      tipo: string;
+      duracion: number;
+      intensidad: string;
+    };
+    descanso?: boolean;
+  };
 }
 
 export interface Mesociclo {
-  [key: string]: Array<{
-    ejercicio: string;
-    sets: Array<{
-      tipo: string;
-      peso: number;
-      reps: string;
-      count?: number;
-    }>;
-    microciclo: Array<number | string>;
-  }>;
+  semana: number;
+  objetivo: string;
+  volumen: string;
+  intensidad: string;
 }

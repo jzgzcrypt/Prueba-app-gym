@@ -5,17 +5,21 @@ import { useLocalStorage } from '@/hooks/useLocalStorage';
 import { useToast } from '@/hooks/useToast';
 import { ToastContainer } from '@/components/ToastContainer';
 import { ProgressCircle } from '@/components/ProgressCircle';
-import { WeightEntry, CardioEntry, DietEntry, DailyAdherence } from '@/types';
+import { WorkoutModal } from '@/components/WorkoutModal';
+import { WeeklyCalendar } from '@/components/WeeklyCalendar';
+import { WeightEntry, CardioEntry, DietEntry, DailyAdherence, WorkoutEntry } from '@/types';
 
 export default function Dashboard() {
   const { showToast } = useToast();
   const [activeModal, setActiveModal] = useState<string | null>(null);
   const [activeSection, setActiveSection] = useState<'today' | 'progress' | 'history' | 'settings'>('today');
+  const [workoutType, setWorkoutType] = useState('Pull');
   
   // Local storage hooks
   const [estado, setEstado] = useLocalStorage<WeightEntry[]>('estado', []);
   const [cardio, setCardio] = useLocalStorage<CardioEntry[]>('cardio', []);
   const [dieta, setDieta] = useLocalStorage<DietEntry[]>('dieta', []);
+  const [workouts, setWorkouts] = useLocalStorage<WorkoutEntry[]>('workouts', []);
   const [adherenciaDiaria, setAdherenciaDiaria] = useLocalStorage<DailyAdherence>('adherenciaDiaria', {});
 
   // Form states
@@ -53,6 +57,20 @@ export default function Dashboard() {
     setCardioTime('');
     setDietCalories('');
     setDietProtein('');
+  };
+
+  const handleWorkoutComplete = (workout: WorkoutEntry) => {
+    const newWorkouts = [...workouts, workout];
+    setWorkouts(newWorkouts);
+    
+    const fecha = todayISO();
+    const newAdherencia = { ...adherenciaDiaria };
+    if (!newAdherencia[fecha]) newAdherencia[fecha] = {};
+    newAdherencia[fecha].pesos = true;
+    
+    setAdherenciaDiaria(newAdherencia);
+    showToast(`🎯 ¡Entrenamiento ${workout.tipo} completado!`);
+    closeModal();
   };
 
   const saveWeight = () => {
@@ -219,19 +237,41 @@ export default function Dashboard() {
 
   const progress = calculateProgress();
 
+  const getWorkoutDescription = (type: string): string => {
+    switch (type) {
+      case 'Pull': return 'Espalda y Bíceps';
+      case 'Push': return 'Pecho y Tríceps';
+      case 'Piernas': return 'Piernas y Glúteos';
+      default: return 'Entrenamiento';
+    }
+  };
+
   const renderTodaySection = () => (
     <div className="min-h-screen pb-20">
       {/* Header */}
       <div className="bg-white shadow-sm p-6">
-        <h1 className="text-2xl font-bold text-center">Mi Entrenamiento</h1>
-        <p className="text-center text-gray-600 mt-2">
-          Hoy es {new Date().toLocaleDateString('es-ES', { 
-            weekday: 'long', 
-            year: 'numeric', 
-            month: 'long', 
-            day: 'numeric' 
-          })}
-        </p>
+        <div className="flex items-center justify-between">
+          <div className="flex-1"></div>
+          <div className="text-center flex-1">
+            <h1 className="text-2xl font-bold">Mi Entrenamiento</h1>
+            <p className="text-gray-600 mt-2">
+              Hoy es {new Date().toLocaleDateString('es-ES', { 
+                weekday: 'long', 
+                year: 'numeric', 
+                month: 'long', 
+                day: 'numeric' 
+              })}
+            </p>
+          </div>
+          <div className="flex-1 flex justify-end">
+            <button 
+              onClick={() => openModal('calendar')}
+              className="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center hover:bg-blue-200 transition-colors"
+            >
+              <span className="text-xl">📅</span>
+            </button>
+          </div>
+        </div>
       </div>
       
       {/* Progress Overview */}
@@ -276,12 +316,12 @@ export default function Dashboard() {
               </div>
               <div>
                 <h3 className="font-semibold">Entrenamiento</h3>
-                <p className="text-sm text-gray-600">Pull - Espalda y Bíceps</p>
+                <p className="text-sm text-gray-600">{workoutType} - {getWorkoutDescription(workoutType)}</p>
               </div>
             </div>
             <div className="text-right">
               <div className={getStatusClass('workout')}>{getStatus('workout')}</div>
-              <div className="text-xs text-gray-500">Toca para registrar</div>
+              <div className="text-xs text-gray-500">Toca para entrenar</div>
             </div>
           </div>
         </div>
@@ -657,26 +697,31 @@ export default function Dashboard() {
       {activeModal === 'weight' && (
         <div className="modal active" onClick={closeModal}>
           <div className="modal-content" onClick={(e) => e.stopPropagation()}>
-            <h3 className="text-xl font-bold mb-6 text-center">Pesaje Diario</h3>
-            <div className="space-y-4">
-              <div>
-                <label className="block text-sm font-medium mb-2">Peso (kg)</label>
-                <input 
-                  type="number" 
-                  value={weightInput}
-                  onChange={(e) => setWeightInput(e.target.value)}
-                  step="0.1" 
-                  placeholder="85.0" 
-                  className="w-full p-4 border rounded-lg text-lg"
-                />
-              </div>
-              <div className="flex gap-3">
-                <button onClick={closeModal} className="flex-1 py-3 px-4 bg-gray-200 rounded-lg">
-                  Cancelar
-                </button>
-                <button onClick={saveWeight} className="flex-1 py-3 px-4 bg-blue-600 text-white rounded-lg">
-                  Guardar
-                </button>
+            <div className="modal-header">
+              <button className="modal-close" onClick={closeModal}>×</button>
+              <h3>⚖️ Pesaje Diario</h3>
+            </div>
+            <div className="modal-body">
+              <div className="space-y-4">
+                <div>
+                  <label className="block text-sm font-medium mb-2 text-gray-700">Peso (kg)</label>
+                  <input 
+                    type="number" 
+                    value={weightInput}
+                    onChange={(e) => setWeightInput(e.target.value)}
+                    step="0.1" 
+                    placeholder="85.0" 
+                    className="modal-input"
+                  />
+                </div>
+                <div className="modal-actions">
+                  <button onClick={closeModal} className="modal-button modal-button-secondary">
+                    Cancelar
+                  </button>
+                  <button onClick={saveWeight} className="modal-button modal-button-primary">
+                    💾 Guardar
+                  </button>
+                </div>
               </div>
             </div>
           </div>
@@ -684,89 +729,59 @@ export default function Dashboard() {
       )}
 
       {activeModal === 'workout' && (
-        <div className="modal active" onClick={closeModal}>
-          <div className="modal-content" onClick={(e) => e.stopPropagation()}>
-            <h3 className="text-xl font-bold mb-6 text-center">Entrenamiento</h3>
-            <div className="space-y-4">
-              <div>
-                <label className="block text-sm font-medium mb-2">Tipo de Entrenamiento</label>
-                <select 
-                  value={workoutType}
-                  onChange={(e) => setWorkoutType(e.target.value)}
-                  className="w-full p-4 border rounded-lg text-lg"
-                >
-                  <option value="Pull">🏋️ Pull - Espalda y Bíceps</option>
-                  <option value="Push">💪 Push - Pecho y Tríceps</option>
-                  <option value="Piernas">🦵 Piernas</option>
-                  <option value="Descanso">😴 Descanso</option>
-                </select>
-              </div>
-              <div>
-                <label className="block text-sm font-medium mb-2">¿Completaste el entrenamiento?</label>
-                <div className="flex gap-3">
-                  <button 
-                    onClick={() => saveWorkout(true)} 
-                    className="flex-1 py-3 px-4 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors"
-                  >
-                    ✅ Sí, completado
-                  </button>
-                  <button 
-                    onClick={() => saveWorkout(false)} 
-                    className="flex-1 py-3 px-4 bg-gray-200 rounded-lg hover:bg-gray-300 transition-colors"
-                  >
-                    ❌ No, cancelado
-                  </button>
-                </div>
-              </div>
-              {workoutType !== 'Descanso' && (
-                <div className="bg-blue-50 p-4 rounded-lg">
-                  <h4 className="font-semibold text-blue-800 mb-2">💡 Tips para {workoutType}:</h4>
-                  <ul className="text-sm text-blue-700 space-y-1">
-                    <li>• Calienta bien antes de empezar</li>
-                    <li>• Mantén buena forma en todos los ejercicios</li>
-                    <li>• Respeta los tiempos de descanso</li>
-                    <li>• Hidrátate durante el entrenamiento</li>
-                  </ul>
-                </div>
-              )}
-            </div>
-          </div>
-        </div>
+        <WorkoutModal
+          isOpen={activeModal === 'workout'}
+          onClose={closeModal}
+          onComplete={handleWorkoutComplete}
+          workoutType={workoutType}
+        />
+      )}
+
+      {activeModal === 'calendar' && (
+        <WeeklyCalendar
+          isOpen={activeModal === 'calendar'}
+          onClose={closeModal}
+        />
       )}
 
       {activeModal === 'cardio' && (
         <div className="modal active" onClick={closeModal}>
           <div className="modal-content" onClick={(e) => e.stopPropagation()}>
-            <h3 className="text-xl font-bold mb-6 text-center">Cardio</h3>
-            <div className="space-y-4">
-              <div>
-                <label className="block text-sm font-medium mb-2">Distancia (km)</label>
-                <input 
-                  type="number" 
-                  value={cardioKm}
-                  onChange={(e) => setCardioKm(e.target.value)}
-                  step="0.1" 
-                  placeholder="3.5" 
-                  className="w-full p-4 border rounded-lg text-lg"
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium mb-2">Tiempo (min)</label>
-                <input 
-                  type="number" 
-                  value={cardioTime}
-                  onChange={(e) => setCardioTime(e.target.value)}
-                  placeholder="25" 
-                  className="w-full p-4 border rounded-lg text-lg"
-                />
-              </div>
-              <div className="flex gap-3">
-                <button onClick={closeModal} className="flex-1 py-3 px-4 bg-gray-200 rounded-lg">
-                  Cancelar
-                </button>
-                <button onClick={saveCardio} className="flex-1 py-3 px-4 bg-blue-600 text-white rounded-lg">
-                  Guardar
-                </button>
+            <div className="modal-header">
+              <button className="modal-close" onClick={closeModal}>×</button>
+              <h3>🏃 Cardio</h3>
+            </div>
+            <div className="modal-body">
+              <div className="space-y-4">
+                <div>
+                  <label className="block text-sm font-medium mb-2 text-gray-700">Distancia (km)</label>
+                  <input 
+                    type="number" 
+                    value={cardioKm}
+                    onChange={(e) => setCardioKm(e.target.value)}
+                    step="0.1" 
+                    placeholder="3.5" 
+                    className="modal-input"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium mb-2 text-gray-700">Tiempo (min)</label>
+                  <input 
+                    type="number" 
+                    value={cardioTime}
+                    onChange={(e) => setCardioTime(e.target.value)}
+                    placeholder="25" 
+                    className="modal-input"
+                  />
+                </div>
+                <div className="modal-actions">
+                  <button onClick={closeModal} className="modal-button modal-button-secondary">
+                    Cancelar
+                  </button>
+                  <button onClick={saveCardio} className="modal-button modal-button-primary">
+                    💾 Guardar
+                  </button>
+                </div>
               </div>
             </div>
           </div>
@@ -776,35 +791,40 @@ export default function Dashboard() {
       {activeModal === 'diet' && (
         <div className="modal active" onClick={closeModal}>
           <div className="modal-content" onClick={(e) => e.stopPropagation()}>
-            <h3 className="text-xl font-bold mb-6 text-center">Dieta</h3>
-            <div className="space-y-4">
-              <div>
-                <label className="block text-sm font-medium mb-2">Calorías</label>
-                <input 
-                  type="number" 
-                  value={dietCalories}
-                  onChange={(e) => setDietCalories(e.target.value)}
-                  placeholder="1800" 
-                  className="w-full p-4 border rounded-lg text-lg"
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium mb-2">Proteínas (g)</label>
-                <input 
-                  type="number" 
-                  value={dietProtein}
-                  onChange={(e) => setDietProtein(e.target.value)}
-                  placeholder="150" 
-                  className="w-full p-4 border rounded-lg text-lg"
-                />
-              </div>
-              <div className="flex gap-3">
-                <button onClick={closeModal} className="flex-1 py-3 px-4 bg-gray-200 rounded-lg">
-                  Cancelar
-                </button>
-                <button onClick={saveDiet} className="flex-1 py-3 px-4 bg-blue-600 text-white rounded-lg">
-                  Guardar
-                </button>
+            <div className="modal-header">
+              <button className="modal-close" onClick={closeModal}>×</button>
+              <h3>🥗 Dieta</h3>
+            </div>
+            <div className="modal-body">
+              <div className="space-y-4">
+                <div>
+                  <label className="block text-sm font-medium mb-2 text-gray-700">Calorías</label>
+                  <input 
+                    type="number" 
+                    value={dietCalories}
+                    onChange={(e) => setDietCalories(e.target.value)}
+                    placeholder="1800" 
+                    className="modal-input"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium mb-2 text-gray-700">Proteínas (g)</label>
+                  <input 
+                    type="number" 
+                    value={dietProtein}
+                    onChange={(e) => setDietProtein(e.target.value)}
+                    placeholder="150" 
+                    className="modal-input"
+                  />
+                </div>
+                <div className="modal-actions">
+                  <button onClick={closeModal} className="modal-button modal-button-secondary">
+                    Cancelar
+                  </button>
+                  <button onClick={saveDiet} className="modal-button modal-button-primary">
+                    💾 Guardar
+                  </button>
+                </div>
               </div>
             </div>
           </div>
