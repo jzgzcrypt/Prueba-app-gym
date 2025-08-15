@@ -274,9 +274,9 @@ export default function Dashboard() {
       </div>
       
       {/* Progress Overview */}
-      <div className="p-6">
+      <div className="px-6 pb-4">
         <div className="clean-card text-center">
-          <div className="flex justify-center mb-4">
+          <div className="flex justify-center mb-3">
             <ProgressCircle progress={progress} />
           </div>
           <p className="text-sm text-gray-600">Progreso del día</p>

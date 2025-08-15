@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { Exercise, Set } from '@/types';
+import { Exercise, Set, Mesociclo } from '@/types';
 
 interface WorkoutModalProps {
   isOpen: boolean;
@@ -10,25 +10,111 @@ interface WorkoutModalProps {
   workoutType: string;
 }
 
+const getCurrentMesociclo = (): Mesociclo => {
+  // Simular mesociclo actual - en una app real esto vendría de la base de datos
+  return {
+    semana: 1,
+    objetivo: "Hipertrofia",
+    volumen: "Alto",
+    intensidad: "Media",
+    pesos: {
+      'Press de Banca': 80,
+      'Press Militar': 50,
+      'Fondos': 0, // Peso corporal
+      'Extensiones Tríceps': 25,
+      'Dominadas': 0, // Peso corporal
+      'Remo con Barra': 70,
+      'Curl Bíceps': 20,
+      'Face Pulls': 15,
+      'Sentadillas': 100,
+      'Peso Muerto': 120,
+      'Extensiones Cuádriceps': 60,
+      'Curl Femoral': 40
+    }
+  };
+};
+
 const getWorkoutExercises = (type: string): Exercise[] => {
+  const mesociclo = getCurrentMesociclo();
+  
   const exercises = {
     'Push': [
-      { nombre: 'Press de Banca', series: Array(4).fill(null).map(() => ({ peso: 0, repeticiones: 0, completado: false })), completado: false },
-      { nombre: 'Press Militar', series: Array(3).fill(null).map(() => ({ peso: 0, repeticiones: 0, completado: false })), completado: false },
-      { nombre: 'Fondos', series: Array(3).fill(null).map(() => ({ peso: 0, repeticiones: 0, completado: false })), completado: false },
-      { nombre: 'Extensiones Tríceps', series: Array(3).fill(null).map(() => ({ peso: 0, repeticiones: 0, completado: false })), completado: false }
+      { 
+        nombre: 'Press de Banca', 
+        series: Array(4).fill(null).map(() => ({ peso: mesociclo.pesos['Press de Banca'] || 0, repeticiones: 0, completado: false })), 
+        completado: false,
+        pesoSugerido: mesociclo.pesos['Press de Banca']
+      },
+      { 
+        nombre: 'Press Militar', 
+        series: Array(3).fill(null).map(() => ({ peso: mesociclo.pesos['Press Militar'] || 0, repeticiones: 0, completado: false })), 
+        completado: false,
+        pesoSugerido: mesociclo.pesos['Press Militar']
+      },
+      { 
+        nombre: 'Fondos', 
+        series: Array(3).fill(null).map(() => ({ peso: 0, repeticiones: 0, completado: false })), 
+        completado: false,
+        pesoSugerido: 0
+      },
+      { 
+        nombre: 'Extensiones Tríceps', 
+        series: Array(3).fill(null).map(() => ({ peso: mesociclo.pesos['Extensiones Tríceps'] || 0, repeticiones: 0, completado: false })), 
+        completado: false,
+        pesoSugerido: mesociclo.pesos['Extensiones Tríceps']
+      }
     ],
     'Pull': [
-      { nombre: 'Dominadas', series: Array(4).fill(null).map(() => ({ peso: 0, repeticiones: 0, completado: false })), completado: false },
-      { nombre: 'Remo con Barra', series: Array(4).fill(null).map(() => ({ peso: 0, repeticiones: 0, completado: false })), completado: false },
-      { nombre: 'Curl Bíceps', series: Array(3).fill(null).map(() => ({ peso: 0, repeticiones: 0, completado: false })), completado: false },
-      { nombre: 'Face Pulls', series: Array(3).fill(null).map(() => ({ peso: 0, repeticiones: 0, completado: false })), completado: false }
+      { 
+        nombre: 'Dominadas', 
+        series: Array(4).fill(null).map(() => ({ peso: 0, repeticiones: 0, completado: false })), 
+        completado: false,
+        pesoSugerido: 0
+      },
+      { 
+        nombre: 'Remo con Barra', 
+        series: Array(4).fill(null).map(() => ({ peso: mesociclo.pesos['Remo con Barra'] || 0, repeticiones: 0, completado: false })), 
+        completado: false,
+        pesoSugerido: mesociclo.pesos['Remo con Barra']
+      },
+      { 
+        nombre: 'Curl Bíceps', 
+        series: Array(3).fill(null).map(() => ({ peso: mesociclo.pesos['Curl Bíceps'] || 0, repeticiones: 0, completado: false })), 
+        completado: false,
+        pesoSugerido: mesociclo.pesos['Curl Bíceps']
+      },
+      { 
+        nombre: 'Face Pulls', 
+        series: Array(3).fill(null).map(() => ({ peso: mesociclo.pesos['Face Pulls'] || 0, repeticiones: 0, completado: false })), 
+        completado: false,
+        pesoSugerido: mesociclo.pesos['Face Pulls']
+      }
     ],
     'Piernas': [
-      { nombre: 'Sentadillas', series: Array(4).fill(null).map(() => ({ peso: 0, repeticiones: 0, completado: false })), completado: false },
-      { nombre: 'Peso Muerto', series: Array(3).fill(null).map(() => ({ peso: 0, repeticiones: 0, completado: false })), completado: false },
-      { nombre: 'Extensiones Cuádriceps', series: Array(3).fill(null).map(() => ({ peso: 0, repeticiones: 0, completado: false })), completado: false },
-      { nombre: 'Curl Femoral', series: Array(3).fill(null).map(() => ({ peso: 0, repeticiones: 0, completado: false })), completado: false }
+      { 
+        nombre: 'Sentadillas', 
+        series: Array(4).fill(null).map(() => ({ peso: mesociclo.pesos['Sentadillas'] || 0, repeticiones: 0, completado: false })), 
+        completado: false,
+        pesoSugerido: mesociclo.pesos['Sentadillas']
+      },
+      { 
+        nombre: 'Peso Muerto', 
+        series: Array(3).fill(null).map(() => ({ peso: mesociclo.pesos['Peso Muerto'] || 0, repeticiones: 0, completado: false })), 
+        completado: false,
+        pesoSugerido: mesociclo.pesos['Peso Muerto']
+      },
+      { 
+        nombre: 'Extensiones Cuádriceps', 
+        series: Array(3).fill(null).map(() => ({ peso: mesociclo.pesos['Extensiones Cuádriceps'] || 0, repeticiones: 0, completado: false })), 
+        completado: false,
+        pesoSugerido: mesociclo.pesos['Extensiones Cuádriceps']
+      },
+      { 
+        nombre: 'Curl Femoral', 
+        series: Array(3).fill(null).map(() => ({ peso: mesociclo.pesos['Curl Femoral'] || 0, repeticiones: 0, completado: false })), 
+        completado: false,
+        pesoSugerido: mesociclo.pesos['Curl Femoral']
+      }
     ]
   };
   
@@ -85,7 +171,12 @@ export function WorkoutModal({ isOpen, onClose, onComplete, workoutType }: Worko
             {exercises.map((exercise, exerciseIndex) => (
               <div key={exerciseIndex} className="clean-card">
                 <div className="flex items-center justify-between mb-4">
-                  <h4 className="font-semibold text-lg">{exercise.nombre}</h4>
+                  <div>
+                    <h4 className="font-semibold text-lg">{exercise.nombre}</h4>
+                    {exercise.pesoSugerido && exercise.pesoSugerido > 0 && (
+                      <p className="text-sm text-gray-600">Peso sugerido: {exercise.pesoSugerido} kg</p>
+                    )}
+                  </div>
                   <button
                     onClick={() => completeExercise(exerciseIndex)}
                     disabled={exercise.completado}
@@ -118,7 +209,7 @@ export function WorkoutModal({ isOpen, onClose, onComplete, workoutType }: Worko
                               type="number"
                               value={set.peso || ''}
                               onChange={(e) => updateSet(exerciseIndex, setIndex, 'peso', Number(e.target.value))}
-                              placeholder="0"
+                              placeholder={exercise.pesoSugerido ? exercise.pesoSugerido.toString() : "0"}
                               className="input-compact w-20"
                               disabled={set.completado}
                             />

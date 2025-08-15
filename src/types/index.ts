@@ -17,6 +17,7 @@ export interface Exercise {
   nombre: string;
   series: Set[];
   completado: boolean;
+  pesoSugerido?: number; // Peso sugerido del mesociclo
 }
 
 export interface Set {
@@ -72,4 +73,7 @@ export interface Mesociclo {
   objetivo: string;
   volumen: string;
   intensidad: string;
+  pesos: {
+    [ejercicio: string]: number;
+  };
 }

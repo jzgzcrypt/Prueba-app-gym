@@ -110,7 +110,7 @@ export function WeeklyCalendar({ isOpen, onClose }: WeeklyCalendarProps) {
 
   return (
     <div className="modal-overlay" onClick={onClose}>
-      <div className="modal-content max-w-2xl" onClick={(e) => e.stopPropagation()}>
+      <div className="modal-content max-w-2xl max-h-[90vh] overflow-y-auto" onClick={(e) => e.stopPropagation()}>
         <div className="modal-header">
           <button className="modal-close" onClick={onClose}>×</button>
           <h3>📅 Plan Semanal</h3>
