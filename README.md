@@ -98,6 +98,14 @@ src/
 - ✅ **Carga cognitiva**: Mínima
 - ✅ **Feedback visual**: Inmediato
 
+## 🔄 Última Actualización
+
+- ✅ **Integración completa del mesociclo** con el dashboard
+- ✅ **Secciones colapsables** para mejor organización
+- ✅ **Seguimiento de entrenamiento en tiempo real** con datos del mesociclo
+- ✅ **Calendario semanal** conectado al plan de entrenamiento
+- ✅ **Modal de entrenamiento** con ejercicios específicos del mesociclo
+
 ## 🚀 Deploy
 
 ### Vercel (Recomendado)
