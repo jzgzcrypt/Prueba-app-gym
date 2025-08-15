@@ -8,8 +8,6 @@ interface WeeklyCalendarProps {
 }
 
 const getWeeklyPlan = (): WeeklyPlan => {
-  const today = new Date();
-  const dayOfWeek = today.getDay(); // 0 = Sunday, 1 = Monday, etc.
   
   const plan: WeeklyPlan = {
     'Lunes': {

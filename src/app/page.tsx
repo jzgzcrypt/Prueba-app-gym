@@ -13,7 +13,7 @@ export default function Dashboard() {
   const { showToast } = useToast();
   const [activeModal, setActiveModal] = useState<string | null>(null);
   const [activeSection, setActiveSection] = useState<'today' | 'progress' | 'history' | 'settings'>('today');
-  const [workoutType, setWorkoutType] = useState('Pull');
+  const [workoutType] = useState('Pull');
   
   // Local storage hooks
   const [estado, setEstado] = useLocalStorage<WeightEntry[]>('estado', []);
@@ -89,16 +89,7 @@ export default function Dashboard() {
     closeModal();
   };
 
-  const saveWorkout = (completed: boolean) => {
-    const fecha = todayISO();
-    const newAdherencia = { ...adherenciaDiaria };
-    if (!newAdherencia[fecha]) newAdherencia[fecha] = {};
-    newAdherencia[fecha].pesos = completed;
-    
-    setAdherenciaDiaria(newAdherencia);
-    showToast(completed ? '✅ Entrenamiento completado' : '❌ Entrenamiento cancelado');
-    closeModal();
-  };
+
 
   const saveCardio = () => {
     const km = parseFloat(cardioKm);

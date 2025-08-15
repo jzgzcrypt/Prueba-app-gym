@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { Exercise, Set, WorkoutEntry } from '@/types';
+import { Exercise, WorkoutEntry } from '@/types';
 
 interface WorkoutModalProps {
   isOpen: boolean;
@@ -85,8 +85,6 @@ const getWorkoutExercises = (type: string): Exercise[] => {
 
 export function WorkoutModal({ isOpen, onClose, onComplete, workoutType }: WorkoutModalProps) {
   const [exercises, setExercises] = useState<Exercise[]>(getWorkoutExercises(workoutType));
-  const [currentExercise, setCurrentExercise] = useState(0);
-  const [currentSet, setCurrentSet] = useState(0);
 
   const updateSet = (exerciseIndex: number, setIndex: number, field: 'peso' | 'repeticiones', value: number) => {
     const newExercises = [...exercises];
