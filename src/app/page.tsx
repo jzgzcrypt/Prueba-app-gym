@@ -14,6 +14,12 @@ export default function Dashboard() {
   const [activeModal, setActiveModal] = useState<string | null>(null);
   const [activeSection, setActiveSection] = useState<'today' | 'mesociclo' | 'history' | 'settings'>('today');
   const [workoutType] = useState('Pull');
+  const [selectedWorkout, setSelectedWorkout] = useState<{
+    dia: string;
+    entrenamiento: string;
+    ejercicios: string[];
+    cardio?: { tipo: string; duracion: number; intensidad: string; };
+  } | null>(null);
   
   // Local storage hooks
   const [estado, setEstado] = useLocalStorage<WeightEntry[]>('estado', []);
@@ -368,104 +374,553 @@ export default function Dashboard() {
 
   const renderMesocicloSection = () => {
     const mesociclo = {
-      semana: 1,
-      objetivo: "Hipertrofia",
-      volumen: "Alto",
-      intensidad: "Media",
+      nombre: "Mesociclo 1 Definitivo - Definición",
+      duracion: "6 semanas (Agosto - Mediados Septiembre)",
+      objetivo: "Definición muscular con enfoque estético",
+      estructura: "5 días entrenamiento en ciclo de 9 días (4 días push/pull, 1 día piernas, 4 descansos flexibles)",
+      volumen: {
+        espalda: "14-16 series",
+        biceps: "10-12 series", 
+        pecho: "9 series",
+        hombros: "10-12 series",
+        triceps: "9 series",
+        piernas: "8 series"
+      },
+      intensidad: "RIR 3 (microciclos 1-2), RIR 2 (microciclo 3), RIR 1-2 (microciclo 4), RIR 1-0 (microciclo 5)",
+      cardio: "3-4 sesiones/semana (25-30 min, trote continuo + intervalos intensos)",
+      dieta: "~1800 kcal/día, ayuno intermitente 16/8 opcional desde semana 3",
       microciclos: [
         {
           id: 1,
-          nombre: "Microciclo 1 - Adaptación",
+          nombre: "Microciclo 1 - Adaptación (Semana 1)",
+          objetivo: "Técnica, reacondicionamiento",
+          intensidad: "RIR 3, sin técnicas intensivas",
+          cardio: "3 sesiones, trote continuo + intervalos suaves",
           dias: [
             { 
-              dia: "Lunes", 
-              entrenamiento: "Push", 
-              ejercicios: ["Press de Banca", "Press Militar", "Fondos", "Extensiones Tríceps"],
-              cardio: { tipo: "Ligero", duracion: 20, intensidad: "Baja" }
+              dia: "Día 1", 
+              entrenamiento: "Pull (Espalda, Bíceps, Core)", 
+              ejercicios: [
+                "Bent over rows con mancuernas (1x8-10 + 2x10-12)",
+                "Jalón polea alta pecho apoyado unilateral (3x8-10)",
+                "Remo polea pecho apoyado unilateral (2x8-10)",
+                "Face pull polea alta boca arriba (2x12-15)",
+                "Low cable rear delt row (2x12-15)",
+                "Curl alterno con mancuernas (1x6-8 + 2x10-12)",
+                "Curl bayesian en polea (2x10-12)",
+                "Crunch abdominal en polea alta (2x12-15)"
+              ],
+              cardio: { tipo: "Trote continuo", duracion: 25, intensidad: "6:30-7:00 min/km + intervalos suaves" }
             },
             { 
-              dia: "Martes", 
-              entrenamiento: "Pull", 
-              ejercicios: ["Dominadas", "Remo con Barra", "Curl Bíceps", "Face Pulls"],
-              cardio: { tipo: "Moderado", duracion: 25, intensidad: "Media" }
+              dia: "Día 2", 
+              entrenamiento: "Push (Pecho, Hombros, Tríceps, Core)", 
+              ejercicios: [
+                "Press inclinado multipower 45º (1x5-7 + 2x8-10)",
+                "Contractora pectoral máquina inclinada (2x10-12)",
+                "Press en máquina (2x8-10)",
+                "Elevaciones laterales polea con muñequera (2x12-15)",
+                "Elevaciones laterales mancuernas (2x>15)",
+                "Press francés mancuernas (1x8-10 + 2x10-12)",
+                "Extensión tríceps katana polea baja (2x8-10)",
+                "Crunch abdominal en polea alta (2x12-15)"
+              ],
+              cardio: { tipo: "Trote continuo", duracion: 25, intensidad: "6:30-7:00 min/km + intervalos suaves" }
             },
             { 
-              dia: "Miércoles", 
-              entrenamiento: "Piernas", 
-              ejercicios: ["Sentadillas", "Peso Muerto", "Extensiones Cuádriceps", "Curl Femoral"],
-              cardio: { tipo: "Intenso", duracion: 30, intensidad: "Alta" }
+              dia: "Día 3", 
+              entrenamiento: "Piernas (Frecuencia 1)", 
+              ejercicios: [
+                "Aducción de cadera en máquina (2x12-15)",
+                "Prensa 45º (1x6-8 + 2x8-10)",
+                "Sentadilla búlgara énfasis glúteo (1x6-8 + 2x8-10)",
+                "Curl femoral en máquina (2x12-15)",
+                "Extensión de rodilla en máquina (2x12-15)",
+                "Elevaciones de talones en máquina (2x12-15)"
+              ],
+              cardio: { tipo: "Trote continuo", duracion: 25, intensidad: "6:30-7:00 min/km + intervalos suaves" }
             },
             { 
-              dia: "Jueves", 
-              entrenamiento: "Push", 
-              ejercicios: ["Press de Banca", "Press Militar", "Fondos", "Extensiones Tríceps"],
-              cardio: { tipo: "Ligero", duracion: 20, intensidad: "Baja" }
+              dia: "Día 4", 
+              entrenamiento: "Pull (Espalda, Bíceps, Core)", 
+              ejercicios: [
+                "Bent over rows con mancuernas (1x6-8 + 2x8-10)",
+                "Jalón polea alta pecho apoyado unilateral (1x8-10 + 1x8-10)",
+                "Máquina remo espalda alta (2x8-10)",
+                "Pullover polea alta rodillas banco 60º (2x8-12)",
+                "Face pull polea alta boca arriba (2x12-15)",
+                "Low cable rear delt row (2x12-15)",
+                "Curl barra Z (1x6-8 + 1x10-12)",
+                "Curl bayesian en polea (2x10-12)",
+                "Ab wheel (2x12-15)"
+              ],
+              cardio: { tipo: "Trote continuo", duracion: 25, intensidad: "6:30-7:00 min/km + intervalos suaves" }
             },
             { 
-              dia: "Viernes", 
-              entrenamiento: "Pull", 
-              ejercicios: ["Dominadas", "Remo con Barra", "Curl Bíceps", "Face Pulls"],
-              cardio: { tipo: "Moderado", duracion: 25, intensidad: "Media" }
+              dia: "Día 5", 
+              entrenamiento: "Push (Pecho, Hombros, Tríceps, Core)", 
+              ejercicios: [
+                "Press inclinado multipower 30º (1x6-8 + 2x8-10)",
+                "Contractora pectoral en máquina (2x10-12)",
+                "Press militar mancuernas banco inclinado (1x7-9 + 1x9-11)",
+                "Elevaciones laterales polea con muñequera (3x12-15)",
+                "Elevaciones laterales mancuernas (2x>15)",
+                "Press francés barra Z 30º (1x8-10 + 1x10-12)",
+                "Extensión tríceps katana polea baja (3x8-10)",
+                "Crunch abdominal en polea alta (2x12-15)"
+              ],
+              cardio: { tipo: "Trote continuo", duracion: 25, intensidad: "6:30-7:00 min/km + intervalos suaves" }
             },
             { 
-              dia: "Sábado", 
-              entrenamiento: "Piernas", 
-              ejercicios: ["Sentadillas", "Peso Muerto", "Extensiones Cuádriceps", "Curl Femoral"],
-              cardio: { tipo: "Intenso", duracion: 30, intensidad: "Alta" }
-            },
-            { 
-              dia: "Domingo", 
-              entrenamiento: "Descanso", 
-              ejercicios: [],
-              cardio: null
+              dia: "Descanso", 
+              entrenamiento: "Descanso activo", 
+              ejercicios: ["Estiramientos", "Movilidad", "Recuperación"],
+              cardio: { tipo: "Caminata ligera", duracion: 20, intensidad: "Recuperación" }
             }
           ]
         },
         {
           id: 2,
-          nombre: "Microciclo 2 - Intensificación",
+          nombre: "Microciclo 2 - Confianza (Semana 2)",
+          objetivo: "Confianza en movimientos",
+          intensidad: "RIR 2-3, aumentar pesos ~5-10%",
+          cardio: "3 sesiones, intervalos más rápidos",
           dias: [
             { 
-              dia: "Lunes", 
-              entrenamiento: "Push", 
-              ejercicios: ["Press de Banca", "Press Militar", "Fondos", "Extensiones Tríceps"],
-              cardio: { tipo: "Ligero", duracion: 20, intensidad: "Baja" }
+              dia: "Día 1", 
+              entrenamiento: "Pull (Espalda, Bíceps, Core)", 
+              ejercicios: [
+                "Bent over rows con mancuernas (1x8-10 + 2x10-12)",
+                "Jalón polea alta pecho apoyado unilateral (3x8-10)",
+                "Remo polea pecho apoyado unilateral (2x8-10)",
+                "Face pull polea alta boca arriba (2x12-15)",
+                "Low cable rear delt row (2x12-15)",
+                "Curl alterno con mancuernas (1x6-8 + 2x10-12)",
+                "Curl bayesian en polea (2x10-12)",
+                "Crunch abdominal en polea alta (2x12-15)"
+              ],
+              cardio: { tipo: "Trote + intervalos", duracion: 25, intensidad: "6:15-6:45 min/km + intervalos más rápidos" }
             },
             { 
-              dia: "Martes", 
-              entrenamiento: "Pull", 
-              ejercicios: ["Dominadas", "Remo con Barra", "Curl Bíceps", "Face Pulls"],
-              cardio: { tipo: "Moderado", duracion: 25, intensidad: "Media" }
+              dia: "Día 2", 
+              entrenamiento: "Push (Pecho, Hombros, Tríceps, Core)", 
+              ejercicios: [
+                "Press inclinado multipower 45º (1x5-7 + 2x8-10)",
+                "Contractora pectoral máquina inclinada (2x10-12)",
+                "Press en máquina (2x8-10)",
+                "Elevaciones laterales polea con muñequera (2x12-15)",
+                "Elevaciones laterales mancuernas (2x>15)",
+                "Press francés mancuernas (1x8-10 + 2x10-12)",
+                "Extensión tríceps katana polea baja (2x8-10)",
+                "Crunch abdominal en polea alta (2x12-15)"
+              ],
+              cardio: { tipo: "Trote + intervalos", duracion: 25, intensidad: "6:15-6:45 min/km + intervalos más rápidos" }
             },
             { 
-              dia: "Miércoles", 
-              entrenamiento: "Piernas", 
-              ejercicios: ["Sentadillas", "Peso Muerto", "Extensiones Cuádriceps", "Curl Femoral"],
-              cardio: { tipo: "Intenso", duracion: 30, intensidad: "Alta" }
+              dia: "Día 3", 
+              entrenamiento: "Piernas (Frecuencia 1)", 
+              ejercicios: [
+                "Aducción de cadera en máquina (2x12-15)",
+                "Prensa 45º (1x6-8 + 2x8-10)",
+                "Sentadilla búlgara énfasis glúteo (1x6-8 + 2x8-10)",
+                "Curl femoral en máquina (2x12-15)",
+                "Extensión de rodilla en máquina (2x12-15)",
+                "Elevaciones de talones en máquina (2x12-15)"
+              ],
+              cardio: { tipo: "Trote + intervalos", duracion: 25, intensidad: "6:15-6:45 min/km + intervalos más rápidos" }
             },
             { 
-              dia: "Jueves", 
-              entrenamiento: "Push", 
-              ejercicios: ["Press de Banca", "Press Militar", "Fondos", "Extensiones Tríceps"],
-              cardio: { tipo: "Ligero", duracion: 20, intensidad: "Baja" }
+              dia: "Día 4", 
+              entrenamiento: "Pull (Espalda, Bíceps, Core)", 
+              ejercicios: [
+                "Bent over rows con mancuernas (1x6-8 + 2x8-10)",
+                "Jalón polea alta pecho apoyado unilateral (1x8-10 + 1x8-10)",
+                "Máquina remo espalda alta (2x8-10)",
+                "Pullover polea alta rodillas banco 60º (2x8-12)",
+                "Face pull polea alta boca arriba (2x12-15)",
+                "Low cable rear delt row (2x12-15)",
+                "Curl barra Z (1x6-8 + 1x10-12)",
+                "Curl bayesian en polea (2x10-12)",
+                "Ab wheel (2x12-15)"
+              ],
+              cardio: { tipo: "Trote + intervalos", duracion: 25, intensidad: "6:15-6:45 min/km + intervalos más rápidos" }
             },
             { 
-              dia: "Viernes", 
-              entrenamiento: "Pull", 
-              ejercicios: ["Dominadas", "Remo con Barra", "Curl Bíceps", "Face Pulls"],
-              cardio: { tipo: "Moderado", duracion: 25, intensidad: "Media" }
+              dia: "Día 5", 
+              entrenamiento: "Push (Pecho, Hombros, Tríceps, Core)", 
+              ejercicios: [
+                "Press inclinado multipower 30º (1x6-8 + 2x8-10)",
+                "Contractora pectoral en máquina (2x10-12)",
+                "Press militar mancuernas banco inclinado (1x7-9 + 1x9-11)",
+                "Elevaciones laterales polea con muñequera (3x12-15)",
+                "Elevaciones laterales mancuernas (2x>15)",
+                "Press francés barra Z 30º (1x8-10 + 1x10-12)",
+                "Extensión tríceps katana polea baja (3x8-10)",
+                "Crunch abdominal en polea alta (2x12-15)"
+              ],
+              cardio: { tipo: "Trote + intervalos", duracion: 25, intensidad: "6:15-6:45 min/km + intervalos más rápidos" }
             },
             { 
-              dia: "Sábado", 
-              entrenamiento: "Piernas", 
-              ejercicios: ["Sentadillas", "Peso Muerto", "Extensiones Cuádriceps", "Curl Femoral"],
-              cardio: { tipo: "Intenso", duracion: 30, intensidad: "Alta" }
+              dia: "Descanso", 
+              entrenamiento: "Descanso activo", 
+              ejercicios: ["Estiramientos", "Movilidad", "Recuperación"],
+              cardio: { tipo: "Caminata ligera", duracion: 20, intensidad: "Recuperación" }
+            }
+          ]
+        },
+        {
+          id: 3,
+          nombre: "Microciclo 3 - Intensidad (Semana 3)",
+          objetivo: "Introducir intensidad",
+          intensidad: "RIR 2, rest pause en 1-2 ejercicios/día",
+          cardio: "3-4 sesiones, más duración",
+          dias: [
+            { 
+              dia: "Día 1", 
+              entrenamiento: "Pull (Espalda, Bíceps, Core)", 
+              ejercicios: [
+                "Bent over rows con mancuernas (1x8-10 + 2x10-12)",
+                "Jalón polea alta pecho apoyado unilateral (3x8-10) + REST PAUSE",
+                "Remo polea pecho apoyado unilateral (2x8-10)",
+                "Face pull polea alta boca arriba (2x12-15)",
+                "Low cable rear delt row (2x12-15)",
+                "Curl alterno con mancuernas (1x6-8 + 2x10-12)",
+                "Curl bayesian en polea (2x10-12) + REST PAUSE",
+                "Crunch abdominal en polea alta (2x12-15)"
+              ],
+              cardio: { tipo: "Trote + intervalos intensos", duracion: 25, intensidad: "6:15-6:30 min/km + intervalos a 5:00 min/km" }
             },
             { 
-              dia: "Domingo", 
-              entrenamiento: "Descanso", 
-              ejercicios: [],
-              cardio: null
+              dia: "Día 2", 
+              entrenamiento: "Push (Pecho, Hombros, Tríceps, Core)", 
+              ejercicios: [
+                "Press inclinado multipower 45º (1x5-7 + 2x8-10)",
+                "Contractora pectoral máquina inclinada (2x10-12) + REST PAUSE",
+                "Press en máquina (2x8-10)",
+                "Elevaciones laterales polea con muñequera (2x12-15) + REST PAUSE",
+                "Elevaciones laterales mancuernas (2x>15)",
+                "Press francés mancuernas (1x8-10 + 2x10-12)",
+                "Extensión tríceps katana polea baja (2x8-10) + REST PAUSE",
+                "Crunch abdominal en polea alta (2x12-15)"
+              ],
+              cardio: { tipo: "Trote + intervalos intensos", duracion: 25, intensidad: "6:15-6:30 min/km + intervalos a 5:00 min/km" }
+            },
+            { 
+              dia: "Día 3", 
+              entrenamiento: "Piernas (Frecuencia 1)", 
+              ejercicios: [
+                "Aducción de cadera en máquina (2x12-15)",
+                "Prensa 45º (1x6-8 + 2x8-10)",
+                "Sentadilla búlgara énfasis glúteo (1x6-8 + 2x8-10)",
+                "Curl femoral en máquina (2x12-15)",
+                "Extensión de rodilla en máquina (2x12-15)",
+                "Elevaciones de talones en máquina (2x12-15) + REST PAUSE"
+              ],
+              cardio: { tipo: "Trote + intervalos intensos", duracion: 25, intensidad: "6:15-6:30 min/km + intervalos a 5:00 min/km" }
+            },
+            { 
+              dia: "Día 4", 
+              entrenamiento: "Pull (Espalda, Bíceps, Core)", 
+              ejercicios: [
+                "Bent over rows con mancuernas (1x6-8 + 2x8-10)",
+                "Jalón polea alta pecho apoyado unilateral (1x8-10 + 1x8-10)",
+                "Máquina remo espalda alta (2x8-10) + REST PAUSE",
+                "Pullover polea alta rodillas banco 60º (2x8-12)",
+                "Face pull polea alta boca arriba (2x12-15)",
+                "Low cable rear delt row (2x12-15)",
+                "Curl barra Z (1x6-8 + 1x10-12)",
+                "Curl bayesian en polea (2x10-12) + REST PAUSE",
+                "Ab wheel (2x12-15)"
+              ],
+              cardio: { tipo: "Trote + intervalos intensos", duracion: 25, intensidad: "6:15-6:30 min/km + intervalos a 5:00 min/km" }
+            },
+            { 
+              dia: "Día 5", 
+              entrenamiento: "Push (Pecho, Hombros, Tríceps, Core)", 
+              ejercicios: [
+                "Press inclinado multipower 30º (1x6-8 + 2x8-10)",
+                "Contractora pectoral en máquina (2x10-12) + REST PAUSE",
+                "Press militar mancuernas banco inclinado (1x7-9 + 1x9-11)",
+                "Elevaciones laterales polea con muñequera (3x12-15) + REST PAUSE",
+                "Elevaciones laterales mancuernas (2x>15)",
+                "Press francés barra Z 30º (1x8-10 + 1x10-12)",
+                "Extensión tríceps katana polea baja (3x8-10) + REST PAUSE",
+                "Crunch abdominal en polea alta (2x12-15)"
+              ],
+              cardio: { tipo: "Trote + intervalos intensos", duracion: 25, intensidad: "6:15-6:30 min/km + intervalos a 5:00 min/km" }
+            },
+            { 
+              dia: "Descanso", 
+              entrenamiento: "Descanso activo", 
+              ejercicios: ["Estiramientos", "Movilidad", "Recuperación"],
+              cardio: { tipo: "Caminata ligera", duracion: 20, intensidad: "Recuperación" }
+            }
+          ]
+        },
+        {
+          id: 4,
+          nombre: "Microciclo 4 - Adaptación (Semana 4)",
+          objetivo: "Adaptación a intensidad",
+          intensidad: "RIR 1-2, rest pause en 2-3 ejercicios/día",
+          cardio: "Añadir parciales en elevaciones laterales, más intervalos",
+          dias: [
+            { 
+              dia: "Día 1", 
+              entrenamiento: "Pull (Espalda, Bíceps, Core)", 
+              ejercicios: [
+                "Bent over rows con mancuernas (1x8-10 + 2x10-12) + REST PAUSE",
+                "Jalón polea alta pecho apoyado unilateral (3x8-10) + REST PAUSE",
+                "Remo polea pecho apoyado unilateral (2x8-10)",
+                "Face pull polea alta boca arriba (2x12-15)",
+                "Low cable rear delt row (2x12-15)",
+                "Curl alterno con mancuernas (1x6-8 + 2x10-12) + REST PAUSE",
+                "Curl bayesian en polea (2x10-12) + REST PAUSE",
+                "Crunch abdominal en polea alta (2x12-15) + REST PAUSE"
+              ],
+              cardio: { tipo: "Trote + intervalos + parciales", duracion: 27, intensidad: "6:00-6:30 min/km + intervalos a 5:00 min/km" }
+            },
+            { 
+              dia: "Día 2", 
+              entrenamiento: "Push (Pecho, Hombros, Tríceps, Core)", 
+              ejercicios: [
+                "Press inclinado multipower 45º (1x5-7 + 2x8-10) + REST PAUSE",
+                "Contractora pectoral máquina inclinada (2x10-12) + REST PAUSE",
+                "Press en máquina (2x8-10)",
+                "Elevaciones laterales polea con muñequera (2x12-15) + REST PAUSE + PARCIALES",
+                "Elevaciones laterales mancuernas (2x>15)",
+                "Press francés mancuernas (1x8-10 + 2x10-12) + REST PAUSE",
+                "Extensión tríceps katana polea baja (2x8-10) + REST PAUSE",
+                "Crunch abdominal en polea alta (2x12-15) + REST PAUSE"
+              ],
+              cardio: { tipo: "Trote + intervalos + parciales", duracion: 27, intensidad: "6:00-6:30 min/km + intervalos a 5:00 min/km" }
+            },
+            { 
+              dia: "Día 3", 
+              entrenamiento: "Piernas (Frecuencia 1)", 
+              ejercicios: [
+                "Aducción de cadera en máquina (2x12-15)",
+                "Prensa 45º (1x6-8 + 2x8-10) + REST PAUSE",
+                "Sentadilla búlgara énfasis glúteo (1x6-8 + 2x8-10) + REST PAUSE",
+                "Curl femoral en máquina (2x12-15) + REST PAUSE",
+                "Extensión de rodilla en máquina (2x12-15) + REST PAUSE",
+                "Elevaciones de talones en máquina (2x12-15) + REST PAUSE"
+              ],
+              cardio: { tipo: "Trote + intervalos + parciales", duracion: 27, intensidad: "6:00-6:30 min/km + intervalos a 5:00 min/km" }
+            },
+            { 
+              dia: "Día 4", 
+              entrenamiento: "Pull (Espalda, Bíceps, Core)", 
+              ejercicios: [
+                "Bent over rows con mancuernas (1x6-8 + 2x8-10) + REST PAUSE",
+                "Jalón polea alta pecho apoyado unilateral (1x8-10 + 1x8-10)",
+                "Máquina remo espalda alta (2x8-10) + REST PAUSE",
+                "Pullover polea alta rodillas banco 60º (2x8-12) + REST PAUSE",
+                "Face pull polea alta boca arriba (2x12-15)",
+                "Low cable rear delt row (2x12-15)",
+                "Curl barra Z (1x6-8 + 1x10-12) + REST PAUSE",
+                "Curl bayesian en polea (2x10-12) + REST PAUSE",
+                "Ab wheel (2x12-15) + REST PAUSE"
+              ],
+              cardio: { tipo: "Trote + intervalos + parciales", duracion: 27, intensidad: "6:00-6:30 min/km + intervalos a 5:00 min/km" }
+            },
+            { 
+              dia: "Día 5", 
+              entrenamiento: "Push (Pecho, Hombros, Tríceps, Core)", 
+              ejercicios: [
+                "Press inclinado multipower 30º (1x6-8 + 2x8-10) + REST PAUSE",
+                "Contractora pectoral en máquina (2x10-12) + REST PAUSE",
+                "Press militar mancuernas banco inclinado (1x7-9 + 1x9-11)",
+                "Elevaciones laterales polea con muñequera (3x12-15) + REST PAUSE + PARCIALES",
+                "Elevaciones laterales mancuernas (2x>15) + PARCIALES",
+                "Press francés barra Z 30º (1x8-10 + 1x10-12) + REST PAUSE",
+                "Extensión tríceps katana polea baja (3x8-10) + REST PAUSE",
+                "Crunch abdominal en polea alta (2x12-15) + REST PAUSE"
+              ],
+              cardio: { tipo: "Trote + intervalos + parciales", duracion: 27, intensidad: "6:00-6:30 min/km + intervalos a 5:00 min/km" }
+            },
+            { 
+              dia: "Descanso", 
+              entrenamiento: "Descanso activo", 
+              ejercicios: ["Estiramientos", "Movilidad", "Recuperación"],
+              cardio: { tipo: "Caminata ligera", duracion: 20, intensidad: "Recuperación" }
+            }
+          ]
+        },
+        {
+          id: 5,
+          nombre: "Microciclo 5 - Pico (Semana 5)",
+          objetivo: "Pico de estímulo",
+          intensidad: "RIR 1-0, rest pause en 3-4 ejercicios/día, drop sets en 1-2",
+          cardio: "Ritmos más rápidos, 4 sesiones si posible",
+          dias: [
+            { 
+              dia: "Día 1", 
+              entrenamiento: "Pull (Espalda, Bíceps, Core)", 
+              ejercicios: [
+                "Bent over rows con mancuernas (1x8-10 + 2x10-12) + REST PAUSE",
+                "Jalón polea alta pecho apoyado unilateral (3x8-10) + REST PAUSE",
+                "Remo polea pecho apoyado unilateral (2x8-10)",
+                "Face pull polea alta boca arriba (2x12-15)",
+                "Low cable rear delt row (2x12-15)",
+                "Curl alterno con mancuernas (1x6-8 + 2x10-12) + REST PAUSE",
+                "Curl bayesian en polea (2x10-12) + DROP SET",
+                "Crunch abdominal en polea alta (2x12-15) + REST PAUSE"
+              ],
+              cardio: { tipo: "Trote + intervalos rápidos", duracion: 30, intensidad: "6:00-6:15 min/km + intervalos a 4:45 min/km" }
+            },
+            { 
+              dia: "Día 2", 
+              entrenamiento: "Push (Pecho, Hombros, Tríceps, Core)", 
+              ejercicios: [
+                "Press inclinado multipower 45º (1x5-7 + 2x8-10) + REST PAUSE",
+                "Contractora pectoral máquina inclinada (2x10-12) + DROP SET",
+                "Press en máquina (2x8-10) + REST PAUSE",
+                "Elevaciones laterales polea con muñequera (2x12-15) + REST PAUSE + PARCIALES",
+                "Elevaciones laterales mancuernas (2x>15) + PARCIALES",
+                "Press francés mancuernas (1x8-10 + 2x10-12) + REST PAUSE",
+                "Extensión tríceps katana polea baja (2x8-10) + DROP SET",
+                "Crunch abdominal en polea alta (2x12-15) + REST PAUSE"
+              ],
+              cardio: { tipo: "Trote + intervalos rápidos", duracion: 30, intensidad: "6:00-6:15 min/km + intervalos a 4:45 min/km" }
+            },
+            { 
+              dia: "Día 3", 
+              entrenamiento: "Piernas (Frecuencia 1)", 
+              ejercicios: [
+                "Aducción de cadera en máquina (2x12-15)",
+                "Prensa 45º (1x6-8 + 2x8-10) + REST PAUSE",
+                "Sentadilla búlgara énfasis glúteo (1x6-8 + 2x8-10) + REST PAUSE",
+                "Curl femoral en máquina (2x12-15) + REST PAUSE",
+                "Extensión de rodilla en máquina (2x12-15) + REST PAUSE",
+                "Elevaciones de talones en máquina (2x12-15) + REST PAUSE"
+              ],
+              cardio: { tipo: "Trote + intervalos rápidos", duracion: 30, intensidad: "6:00-6:15 min/km + intervalos a 4:45 min/km" }
+            },
+            { 
+              dia: "Día 4", 
+              entrenamiento: "Pull (Espalda, Bíceps, Core)", 
+              ejercicios: [
+                "Bent over rows con mancuernas (1x6-8 + 2x8-10) + REST PAUSE",
+                "Jalón polea alta pecho apoyado unilateral (1x8-10 + 1x8-10)",
+                "Máquina remo espalda alta (2x8-10) + REST PAUSE",
+                "Pullover polea alta rodillas banco 60º (2x8-12) + REST PAUSE",
+                "Face pull polea alta boca arriba (2x12-15) + DROP SET",
+                "Low cable rear delt row (2x12-15)",
+                "Curl barra Z (1x6-8 + 1x10-12) + REST PAUSE",
+                "Curl bayesian en polea (2x10-12) + DROP SET",
+                "Ab wheel (2x12-15) + REST PAUSE"
+              ],
+              cardio: { tipo: "Trote + intervalos rápidos", duracion: 30, intensidad: "6:00-6:15 min/km + intervalos a 4:45 min/km" }
+            },
+            { 
+              dia: "Día 5", 
+              entrenamiento: "Push (Pecho, Hombros, Tríceps, Core)", 
+              ejercicios: [
+                "Press inclinado multipower 30º (1x6-8 + 2x8-10) + REST PAUSE",
+                "Contractora pectoral en máquina (2x10-12) + DROP SET",
+                "Press militar mancuernas banco inclinado (1x7-9 + 1x9-11)",
+                "Elevaciones laterales polea con muñequera (3x12-15) + REST PAUSE + PARCIALES",
+                "Elevaciones laterales mancuernas (2x10-12) + PARCIALES",
+                "Press francés barra Z 30º (1x8-10 + 1x10-12) + REST PAUSE",
+                "Extensión tríceps katana polea baja (3x8-10) + DROP SET",
+                "Crunch abdominal en polea alta (2x12-15) + REST PAUSE"
+              ],
+              cardio: { tipo: "Trote + intervalos rápidos", duracion: 30, intensidad: "6:00-6:15 min/km + intervalos a 4:45 min/km" }
+            },
+            { 
+              dia: "Descanso", 
+              entrenamiento: "Descanso activo", 
+              ejercicios: ["Estiramientos", "Movilidad", "Recuperación"],
+              cardio: { tipo: "Caminata ligera", duracion: 20, intensidad: "Recuperación" }
+            }
+          ]
+        },
+        {
+          id: 6,
+          nombre: "Descarga (Semana 6)",
+          objetivo: "Recuperación activa",
+          intensidad: "RIR 3, 1-2 series/exercicio, pesos ~50%",
+          cardio: "2-3 sesiones ligeras",
+          dias: [
+            { 
+              dia: "Día 1", 
+              entrenamiento: "Pull (Espalda, Bíceps, Core)", 
+              ejercicios: [
+                "Bent over rows con mancuernas (1x8-10 + 1x10-12)",
+                "Jalón polea alta pecho apoyado unilateral (2x8-10)",
+                "Remo polea pecho apoyado unilateral (1x8-10)",
+                "Face pull polea alta boca arriba (1x12-15)",
+                "Low cable rear delt row (1x12-15)",
+                "Curl alterno con mancuernas (1x6-8 + 1x10-12)",
+                "Curl bayesian en polea (1x10-12)",
+                "Crunch abdominal en polea alta (1x12-15)"
+              ],
+              cardio: { tipo: "Trote ligero", duracion: 20, intensidad: "6:30-7:00 min/km" }
+            },
+            { 
+              dia: "Día 2", 
+              entrenamiento: "Push (Pecho, Hombros, Tríceps, Core)", 
+              ejercicios: [
+                "Press inclinado multipower 45º (1x5-7 + 1x8-10)",
+                "Contractora pectoral máquina inclinada (1x10-12)",
+                "Press en máquina (1x8-10)",
+                "Elevaciones laterales polea con muñequera (1x12-15)",
+                "Elevaciones laterales mancuernas (1x>15)",
+                "Press francés mancuernas (1x8-10 + 1x10-12)",
+                "Extensión tríceps katana polea baja (1x8-10)",
+                "Crunch abdominal en polea alta (1x12-15)"
+              ],
+              cardio: { tipo: "Trote ligero", duracion: 20, intensidad: "6:30-7:00 min/km" }
+            },
+            { 
+              dia: "Día 3", 
+              entrenamiento: "Piernas (Frecuencia 1)", 
+              ejercicios: [
+                "Aducción de cadera en máquina (1x12-15)",
+                "Prensa 45º (1x6-8 + 1x8-10)",
+                "Sentadilla búlgara énfasis glúteo (1x6-8 + 1x8-10)",
+                "Curl femoral en máquina (1x12-15)",
+                "Extensión de rodilla en máquina (1x12-15)",
+                "Elevaciones de talones en máquina (1x12-15)"
+              ],
+              cardio: { tipo: "Trote ligero", duracion: 20, intensidad: "6:30-7:00 min/km" }
+            },
+            { 
+              dia: "Día 4", 
+              entrenamiento: "Pull (Espalda, Bíceps, Core)", 
+              ejercicios: [
+                "Bent over rows con mancuernas (1x6-8 + 1x8-10)",
+                "Jalón polea alta pecho apoyado unilateral (1x8-10 + 1x8-10)",
+                "Máquina remo espalda alta (1x8-10)",
+                "Pullover polea alta rodillas banco 60º (1x8-12)",
+                "Face pull polea alta boca arriba (1x12-15)",
+                "Low cable rear delt row (1x12-15)",
+                "Curl barra Z (1x6-8 + 1x10-12)",
+                "Curl bayesian en polea (1x10-12)",
+                "Ab wheel (1x12-15)"
+              ],
+              cardio: { tipo: "Trote ligero", duracion: 20, intensidad: "6:30-7:00 min/km" }
+            },
+            { 
+              dia: "Día 5", 
+              entrenamiento: "Push (Pecho, Hombros, Tríceps, Core)", 
+              ejercicios: [
+                "Press inclinado multipower 30º (1x6-8 + 1x8-10)",
+                "Contractora pectoral en máquina (1x10-12)",
+                "Press militar mancuernas banco inclinado (1x7-9 + 1x9-11)",
+                "Elevaciones laterales polea con muñequera (2x12-15)",
+                "Elevaciones laterales mancuernas (1x>15)",
+                "Press francés barra Z 30º (1x8-10 + 1x10-12)",
+                "Extensión tríceps katana polea baja (2x8-10)",
+                "Crunch abdominal en polea alta (1x12-15)"
+              ],
+              cardio: { tipo: "Trote ligero", duracion: 20, intensidad: "6:30-7:00 min/km" }
+            },
+            { 
+              dia: "Descanso", 
+              entrenamiento: "Descanso activo", 
+              ejercicios: ["Estiramientos", "Movilidad", "Recuperación"],
+              cardio: { tipo: "Caminata ligera", duracion: 20, intensidad: "Recuperación" }
             }
           ]
         }
@@ -475,61 +930,141 @@ export default function Dashboard() {
     return (
       <div className="min-h-screen pb-20">
         <div className="nav-clean p-6">
-          <h1 className="text-2xl font-bold text-primary">Mesociclo</h1>
+          <h1 className="text-2xl font-bold text-primary">{mesociclo.nombre}</h1>
+          <p className="text-gray-600 mt-1">{mesociclo.duracion}</p>
         </div>
+        
         <div className="p-6">
+          {/* Información General */}
           <div className="clean-card mb-6">
             <h2 className="text-xl font-semibold mb-4">Información General</h2>
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <p className="text-sm text-gray-600">Semana</p>
-                <p className="font-semibold">{mesociclo.semana}</p>
-              </div>
+            <div className="space-y-4">
               <div>
                 <p className="text-sm text-gray-600">Objetivo</p>
                 <p className="font-semibold">{mesociclo.objetivo}</p>
               </div>
               <div>
-                <p className="text-sm text-gray-600">Volumen</p>
-                <p className="font-semibold">{mesociclo.volumen}</p>
+                <p className="text-sm text-gray-600">Estructura</p>
+                <p className="font-semibold">{mesociclo.estructura}</p>
               </div>
               <div>
                 <p className="text-sm text-gray-600">Intensidad</p>
                 <p className="font-semibold">{mesociclo.intensidad}</p>
               </div>
+              <div>
+                <p className="text-sm text-gray-600">Cardio</p>
+                <p className="font-semibold">{mesociclo.cardio}</p>
+              </div>
+              <div>
+                <p className="text-sm text-gray-600">Dieta</p>
+                <p className="font-semibold">{mesociclo.dieta}</p>
+              </div>
             </div>
           </div>
 
-          <div className="space-y-6">
-            {mesociclo.microciclos.map((microciclo) => (
-              <div key={microciclo.id} className="clean-card">
-                <h3 className="text-lg font-semibold mb-4">{microciclo.nombre}</h3>
-                <div className="space-y-3">
-                  {microciclo.dias.map((dia, index) => (
-                    <div 
-                      key={index} 
-                      className="flex items-center justify-between p-3 bg-gray-50 rounded-lg cursor-pointer hover:bg-gray-100 transition-colors"
-                      onClick={() => openModal('workout-details')}
-                    >
-                      <div>
-                        <p className="font-medium">{dia.dia}</p>
-                        <p className="text-sm text-gray-600">{dia.entrenamiento}</p>
-                        {dia.cardio && (
-                          <p className="text-xs text-blue-600">+ {dia.cardio.tipo} ({dia.cardio.duracion}min)</p>
-                        )}
+          {/* Volumen por Grupo Muscular */}
+          <div className="clean-card mb-6">
+            <h2 className="text-xl font-semibold mb-4">Volumen por Grupo Muscular</h2>
+            <div className="grid grid-cols-2 gap-4">
+              <div className="flex justify-between items-center p-3 bg-gray-50 rounded-lg">
+                <span className="font-medium">Espalda</span>
+                <span className="text-primary font-semibold">{mesociclo.volumen.espalda}</span>
+              </div>
+              <div className="flex justify-between items-center p-3 bg-gray-50 rounded-lg">
+                <span className="font-medium">Bíceps</span>
+                <span className="text-primary font-semibold">{mesociclo.volumen.biceps}</span>
+              </div>
+              <div className="flex justify-between items-center p-3 bg-gray-50 rounded-lg">
+                <span className="font-medium">Pecho</span>
+                <span className="text-primary font-semibold">{mesociclo.volumen.pecho}</span>
+              </div>
+              <div className="flex justify-between items-center p-3 bg-gray-50 rounded-lg">
+                <span className="font-medium">Hombros</span>
+                <span className="text-primary font-semibold">{mesociclo.volumen.hombros}</span>
+              </div>
+              <div className="flex justify-between items-center p-3 bg-gray-50 rounded-lg">
+                <span className="font-medium">Tríceps</span>
+                <span className="text-primary font-semibold">{mesociclo.volumen.triceps}</span>
+              </div>
+              <div className="flex justify-between items-center p-3 bg-gray-50 rounded-lg">
+                <span className="font-medium">Piernas</span>
+                <span className="text-primary font-semibold">{mesociclo.volumen.piernas}</span>
+              </div>
+            </div>
+          </div>
+
+                      <div className="space-y-6">
+              {mesociclo.microciclos.map((microciclo) => (
+                <div key={microciclo.id} className="clean-card">
+                  <div className="mb-4">
+                    <h3 className="text-lg font-semibold">{microciclo.nombre}</h3>
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-3 mt-3">
+                      <div className="p-2 bg-blue-50 rounded-lg">
+                        <p className="text-xs text-blue-600 font-medium">Objetivo</p>
+                        <p className="text-sm">{microciclo.objetivo}</p>
                       </div>
-                      <div className="text-right">
-                        <p className="text-sm text-gray-600">
-                          {dia.ejercicios.length > 0 ? `${dia.ejercicios.length} ejercicios` : 'Descanso'}
-                        </p>
-                        <span className="text-xs text-gray-400">Toca para ver</span>
+                      <div className="p-2 bg-green-50 rounded-lg">
+                        <p className="text-xs text-green-600 font-medium">Intensidad</p>
+                        <p className="text-sm">{microciclo.intensidad}</p>
+                      </div>
+                      <div className="p-2 bg-orange-50 rounded-lg">
+                        <p className="text-xs text-orange-600 font-medium">Cardio</p>
+                        <p className="text-sm">{microciclo.cardio}</p>
                       </div>
                     </div>
-                  ))}
+                  </div>
+                  
+                  <div className="space-y-3">
+                    {microciclo.dias.map((dia, index) => (
+                      <div 
+                        key={index} 
+                        className="flex items-center justify-between p-4 bg-gray-50 rounded-lg cursor-pointer hover:bg-gray-100 transition-colors border-l-4 border-primary"
+                        onClick={() => {
+                          setSelectedWorkout({
+                            dia: dia.dia,
+                            entrenamiento: dia.entrenamiento,
+                            ejercicios: dia.ejercicios,
+                            cardio: dia.cardio
+                          });
+                          openModal('workout-details');
+                        }}
+                      >
+                        <div className="flex-1">
+                          <div className="flex items-center gap-3">
+                            <div className="w-10 h-10 bg-primary rounded-full flex items-center justify-center text-white font-bold text-sm">
+                              {index + 1}
+                            </div>
+                            <div>
+                              <p className="font-semibold text-lg">{dia.dia}</p>
+                              <p className="text-sm text-gray-600">{dia.entrenamiento}</p>
+                            </div>
+                          </div>
+                          {dia.cardio && (
+                            <div className="mt-2 flex items-center gap-2">
+                              <span className="text-xs bg-blue-100 text-blue-700 px-2 py-1 rounded-full">
+                                🏃 {dia.cardio.tipo}
+                              </span>
+                              <span className="text-xs text-gray-500">
+                                {dia.cardio.duracion}min • {dia.cardio.intensidad}
+                              </span>
+                            </div>
+                          )}
+                        </div>
+                        <div className="text-right">
+                          <div className="flex items-center gap-2">
+                            <span className="text-sm font-medium text-gray-700">
+                              {dia.ejercicios.length > 0 ? `${dia.ejercicios.length} ejercicios` : 'Descanso'}
+                            </span>
+                            <span className="text-primary">→</span>
+                          </div>
+                          <p className="text-xs text-gray-400 mt-1">Toca para ver detalles</p>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
                 </div>
-              </div>
-            ))}
-          </div>
+              ))}
+            </div>
         </div>
       </div>
     );
@@ -933,6 +1468,113 @@ export default function Dashboard() {
                   </button>
                 </div>
               </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {activeModal === 'workout-details' && selectedWorkout && (
+        <div className="modal-overlay" onClick={closeModal}>
+          <div className="modal-content max-h-[90vh] flex flex-col" onClick={(e) => e.stopPropagation()}>
+            <div className="modal-header flex-shrink-0">
+              <button className="modal-close" onClick={closeModal}>×</button>
+              <h3>🏋️ {selectedWorkout.dia} - {selectedWorkout.entrenamiento}</h3>
+            </div>
+            
+            <div className="modal-body flex-1 overflow-y-auto">
+              <div className="space-y-6">
+                {/* Cardio */}
+                {selectedWorkout.cardio && (
+                  <div className="clean-card">
+                    <div className="flex items-center gap-3 mb-4">
+                      <div className="w-10 h-10 bg-blue-500 rounded-full flex items-center justify-center text-white">
+                        🏃
+                      </div>
+                      <div>
+                        <h4 className="font-semibold text-lg">Cardio</h4>
+                        <p className="text-sm text-gray-600">{selectedWorkout.cardio.tipo}</p>
+                      </div>
+                    </div>
+                    <div className="grid grid-cols-2 gap-4">
+                      <div className="p-3 bg-blue-50 rounded-lg">
+                        <p className="text-xs text-blue-600 font-medium">Duración</p>
+                        <p className="font-semibold">{selectedWorkout.cardio.duracion} minutos</p>
+                      </div>
+                      <div className="p-3 bg-blue-50 rounded-lg">
+                        <p className="text-xs text-blue-600 font-medium">Intensidad</p>
+                        <p className="font-semibold">{selectedWorkout.cardio.intensidad}</p>
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {/* Ejercicios */}
+                <div className="clean-card">
+                  <div className="flex items-center gap-3 mb-4">
+                    <div className="w-10 h-10 bg-primary rounded-full flex items-center justify-center text-white">
+                      💪
+                    </div>
+                    <div>
+                      <h4 className="font-semibold text-lg">Ejercicios</h4>
+                      <p className="text-sm text-gray-600">{selectedWorkout.ejercicios.length} ejercicios</p>
+                    </div>
+                  </div>
+                  
+                  <div className="space-y-3">
+                    {selectedWorkout.ejercicios.map((ejercicio, index) => (
+                      <div key={index} className="flex items-start gap-3 p-3 bg-gray-50 rounded-lg">
+                        <div className="w-6 h-6 bg-primary rounded-full flex items-center justify-center text-white text-xs font-bold flex-shrink-0 mt-1">
+                          {index + 1}
+                        </div>
+                        <div className="flex-1">
+                          <p className="font-medium text-sm">{ejercicio}</p>
+                          {ejercicio.includes('REST PAUSE') && (
+                            <span className="inline-block mt-1 text-xs bg-orange-100 text-orange-700 px-2 py-1 rounded-full">
+                              Rest Pause
+                            </span>
+                          )}
+                          {ejercicio.includes('DROP SET') && (
+                            <span className="inline-block mt-1 text-xs bg-red-100 text-red-700 px-2 py-1 rounded-full">
+                              Drop Set
+                            </span>
+                          )}
+                          {ejercicio.includes('PARCIALES') && (
+                            <span className="inline-block mt-1 text-xs bg-purple-100 text-purple-700 px-2 py-1 rounded-full">
+                              Parciales
+                            </span>
+                          )}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Notas */}
+                <div className="clean-card">
+                  <h4 className="font-semibold mb-3">📝 Notas</h4>
+                  <div className="space-y-2 text-sm text-gray-600">
+                    <p>• Descansa 2-3 minutos entre series</p>
+                    <p>• Mantén la técnica correcta en todos los ejercicios</p>
+                    <p>• Si no puedes completar las repeticiones objetivo, reduce el peso</p>
+                    <p>• Los ejercicios con técnicas especiales (Rest Pause, Drop Set) son opcionales si te sientes fatigado</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+            
+            <div className="flex gap-3 flex-shrink-0 p-4 border-t border-gray-200">
+              <button onClick={closeModal} className="btn-elegant btn-secondary flex-1">
+                Cerrar
+              </button>
+              <button 
+                onClick={() => {
+                  closeModal();
+                  openModal('workout');
+                }} 
+                className="btn-elegant btn-primary flex-1"
+              >
+                🎯 Iniciar Entrenamiento
+              </button>
             </div>
           </div>
         </div>
