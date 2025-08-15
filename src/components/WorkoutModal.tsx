@@ -13,22 +13,22 @@ interface WorkoutModalProps {
 const getWorkoutExercises = (type: string): Exercise[] => {
   const exercises = {
     'Push': [
-      { nombre: 'Press de Banca', series: Array(4).fill(null).map(() => ({ peso: 0, repeticiones: 0, completado: false })) },
-      { nombre: 'Press Militar', series: Array(3).fill(null).map(() => ({ peso: 0, repeticiones: 0, completado: false })) },
-      { nombre: 'Fondos', series: Array(3).fill(null).map(() => ({ peso: 0, repeticiones: 0, completado: false })) },
-      { nombre: 'Extensiones Tríceps', series: Array(3).fill(null).map(() => ({ peso: 0, repeticiones: 0, completado: false })) }
+      { nombre: 'Press de Banca', series: Array(4).fill(null).map(() => ({ peso: 0, repeticiones: 0, completado: false })), completado: false },
+      { nombre: 'Press Militar', series: Array(3).fill(null).map(() => ({ peso: 0, repeticiones: 0, completado: false })), completado: false },
+      { nombre: 'Fondos', series: Array(3).fill(null).map(() => ({ peso: 0, repeticiones: 0, completado: false })), completado: false },
+      { nombre: 'Extensiones Tríceps', series: Array(3).fill(null).map(() => ({ peso: 0, repeticiones: 0, completado: false })), completado: false }
     ],
     'Pull': [
-      { nombre: 'Dominadas', series: Array(4).fill(null).map(() => ({ peso: 0, repeticiones: 0, completado: false })) },
-      { nombre: 'Remo con Barra', series: Array(4).fill(null).map(() => ({ peso: 0, repeticiones: 0, completado: false })) },
-      { nombre: 'Curl Bíceps', series: Array(3).fill(null).map(() => ({ peso: 0, repeticiones: 0, completado: false })) },
-      { nombre: 'Face Pulls', series: Array(3).fill(null).map(() => ({ peso: 0, repeticiones: 0, completado: false })) }
+      { nombre: 'Dominadas', series: Array(4).fill(null).map(() => ({ peso: 0, repeticiones: 0, completado: false })), completado: false },
+      { nombre: 'Remo con Barra', series: Array(4).fill(null).map(() => ({ peso: 0, repeticiones: 0, completado: false })), completado: false },
+      { nombre: 'Curl Bíceps', series: Array(3).fill(null).map(() => ({ peso: 0, repeticiones: 0, completado: false })), completado: false },
+      { nombre: 'Face Pulls', series: Array(3).fill(null).map(() => ({ peso: 0, repeticiones: 0, completado: false })), completado: false }
     ],
     'Piernas': [
-      { nombre: 'Sentadillas', series: Array(4).fill(null).map(() => ({ peso: 0, repeticiones: 0, completado: false })) },
-      { nombre: 'Peso Muerto', series: Array(3).fill(null).map(() => ({ peso: 0, repeticiones: 0, completado: false })) },
-      { nombre: 'Extensiones Cuádriceps', series: Array(3).fill(null).map(() => ({ peso: 0, repeticiones: 0, completado: false })) },
-      { nombre: 'Curl Femoral', series: Array(3).fill(null).map(() => ({ peso: 0, repeticiones: 0, completado: false })) }
+      { nombre: 'Sentadillas', series: Array(4).fill(null).map(() => ({ peso: 0, repeticiones: 0, completado: false })), completado: false },
+      { nombre: 'Peso Muerto', series: Array(3).fill(null).map(() => ({ peso: 0, repeticiones: 0, completado: false })), completado: false },
+      { nombre: 'Extensiones Cuádriceps', series: Array(3).fill(null).map(() => ({ peso: 0, repeticiones: 0, completado: false })), completado: false },
+      { nombre: 'Curl Femoral', series: Array(3).fill(null).map(() => ({ peso: 0, repeticiones: 0, completado: false })), completado: false }
     ]
   };
   

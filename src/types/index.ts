@@ -50,6 +50,7 @@ export interface DailyAdherence {
     pesos?: boolean;
     cardio?: boolean;
     dieta?: boolean;
+    workout?: boolean;
   };
 }
 
