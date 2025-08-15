@@ -10,6 +10,7 @@ import { WeightEntry, CardioEntry, DietEntry, DailyAdherence } from '@/types';
 export default function Dashboard() {
   const { showToast } = useToast();
   const [activeModal, setActiveModal] = useState<string | null>(null);
+  const [activeSection, setActiveSection] = useState<'today' | 'progress' | 'history' | 'settings'>('today');
   
   // Local storage hooks
   const [estado, setEstado] = useLocalStorage<WeightEntry[]>('estado', []);
@@ -218,134 +219,317 @@ export default function Dashboard() {
 
   const progress = calculateProgress();
 
+  const renderTodaySection = () => (
+    <div className="min-h-screen pb-20">
+      {/* Header */}
+      <div className="bg-white shadow-sm p-6">
+        <h1 className="text-2xl font-bold text-center">Mi Entrenamiento</h1>
+        <p className="text-center text-gray-600 mt-2">
+          Hoy es {new Date().toLocaleDateString('es-ES', { 
+            weekday: 'long', 
+            year: 'numeric', 
+            month: 'long', 
+            day: 'numeric' 
+          })}
+        </p>
+      </div>
+      
+      {/* Progress Overview */}
+      <div className="p-6">
+        <div className="mobile-card text-center">
+          <div className="flex justify-center mb-4">
+            <ProgressCircle progress={progress} />
+          </div>
+          <p className="text-sm text-gray-600">Progreso del día</p>
+        </div>
+      </div>
+      
+      {/* Today's Tasks */}
+      <div className="px-6">
+        <h2 className="text-xl font-semibold mb-4">Hoy toca:</h2>
+        
+        {/* Weight Entry */}
+        <div className="mobile-card cursor-pointer hover:scale-[1.02] transition-transform" onClick={() => openModal('weight')}>
+          <div className="flex items-center justify-between">
+            <div className="flex items-center">
+              <div className="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center mr-4">
+                <span className="text-2xl">⚖️</span>
+              </div>
+              <div>
+                <h3 className="font-semibold">Pesaje Diario</h3>
+                <p className="text-sm text-gray-600">Registra tu peso de hoy</p>
+              </div>
+            </div>
+            <div className="text-right">
+              <div className={getStatusClass('weight')}>{getStatus('weight')}</div>
+              <div className="text-xs text-gray-500">Toca para registrar</div>
+            </div>
+          </div>
+        </div>
+        
+        {/* Workout Entry */}
+        <div className="mobile-card cursor-pointer hover:scale-[1.02] transition-transform" onClick={() => openModal('workout')}>
+          <div className="flex items-center justify-between">
+            <div className="flex items-center">
+              <div className="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center mr-4">
+                <span className="text-2xl">🏋️</span>
+              </div>
+              <div>
+                <h3 className="font-semibold">Entrenamiento</h3>
+                <p className="text-sm text-gray-600">Pull - Espalda y Bíceps</p>
+              </div>
+            </div>
+            <div className="text-right">
+              <div className={getStatusClass('workout')}>{getStatus('workout')}</div>
+              <div className="text-xs text-gray-500">Toca para registrar</div>
+            </div>
+          </div>
+        </div>
+        
+        {/* Cardio Entry */}
+        <div className="mobile-card cursor-pointer hover:scale-[1.02] transition-transform" onClick={() => openModal('cardio')}>
+          <div className="flex items-center justify-between">
+            <div className="flex items-center">
+              <div className="w-12 h-12 bg-red-100 rounded-full flex items-center justify-center mr-4">
+                <span className="text-2xl">🏃</span>
+              </div>
+              <div>
+                <h3 className="font-semibold">Cardio</h3>
+                <p className="text-sm text-gray-600">25 min - 3.5 km</p>
+              </div>
+            </div>
+            <div className="text-right">
+              <div className={getStatusClass('cardio')}>{getStatus('cardio')}</div>
+              <div className="text-xs text-gray-500">Toca para registrar</div>
+            </div>
+          </div>
+        </div>
+        
+        {/* Diet Entry */}
+        <div className="mobile-card cursor-pointer hover:scale-[1.02] transition-transform" onClick={() => openModal('diet')}>
+          <div className="flex items-center justify-between">
+            <div className="flex items-center">
+              <div className="w-12 h-12 bg-yellow-100 rounded-full flex items-center justify-center mr-4">
+                <span className="text-2xl">🥗</span>
+              </div>
+              <div>
+                <h3 className="font-semibold">Dieta</h3>
+                <p className="text-sm text-gray-600">1800 kcal - 150g proteínas</p>
+              </div>
+            </div>
+            <div className="text-right">
+              <div className={getStatusClass('diet')}>{getStatus('diet')}</div>
+              <div className="text-xs text-gray-500">Toca para registrar</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+
+  const renderProgressSection = () => (
+    <div className="min-h-screen pb-20 p-6">
+      <h1 className="text-2xl font-bold text-center mb-6">Progreso</h1>
+      
+      {/* Weekly Stats */}
+      <div className="mobile-card">
+        <h3 className="font-semibold mb-4">Esta Semana</h3>
+        <div className="grid grid-cols-2 gap-4">
+          <div className="text-center">
+            <div className="text-2xl font-bold text-blue-600">
+              {Object.keys(adherenciaDiaria).filter(date => {
+                const weekStart = new Date();
+                weekStart.setDate(weekStart.getDate() - weekStart.getDay());
+                const weekEnd = new Date(weekStart);
+                weekEnd.setDate(weekEnd.getDate() + 6);
+                const checkDate = new Date(date);
+                return checkDate >= weekStart && checkDate <= weekEnd && adherenciaDiaria[date].pesos;
+              }).length}
+            </div>
+            <div className="text-sm text-gray-600">Entrenamientos</div>
+          </div>
+          <div className="text-center">
+            <div className="text-2xl font-bold text-green-600">
+              {Object.keys(adherenciaDiaria).filter(date => {
+                const weekStart = new Date();
+                weekStart.setDate(weekStart.getDate() - weekStart.getDay());
+                const weekEnd = new Date(weekStart);
+                weekEnd.setDate(weekEnd.getDate() + 6);
+                const checkDate = new Date(date);
+                return checkDate >= weekStart && checkDate <= weekEnd && adherenciaDiaria[date].cardio;
+              }).length}
+            </div>
+            <div className="text-sm text-gray-600">Sesiones Cardio</div>
+          </div>
+        </div>
+      </div>
+
+      {/* Weight Progress */}
+      {estado.length > 0 && (
+        <div className="mobile-card mt-4">
+          <h3 className="font-semibold mb-4">Evolución del Peso</h3>
+          <div className="space-y-3">
+            {estado.slice(-7).map((entry, index) => (
+              <div key={entry.fecha} className="flex justify-between items-center">
+                <span className="text-sm text-gray-600">
+                  {new Date(entry.fecha).toLocaleDateString('es-ES', { day: '2-digit', month: '2-digit' })}
+                </span>
+                <span className="font-semibold">{entry.peso.toFixed(1)} kg</span>
+                {index > 0 && (
+                  <span className={`text-xs ${entry.peso < estado[index - 1].peso ? 'text-green-600' : 'text-red-600'}`}>
+                    {entry.peso < estado[index - 1].peso ? '↓' : '↑'} {Math.abs(entry.peso - estado[index - 1].peso).toFixed(1)}
+                  </span>
+                )}
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+    </div>
+  );
+
+  const renderHistorySection = () => (
+    <div className="min-h-screen pb-20 p-6">
+      <h1 className="text-2xl font-bold text-center mb-6">Historial</h1>
+      
+      {/* Recent Activities */}
+      <div className="space-y-4">
+        {Object.keys(adherenciaDiaria)
+          .sort((a, b) => new Date(b).getTime() - new Date(a).getTime())
+          .slice(0, 10)
+          .map(date => {
+            const adherence = adherenciaDiaria[date];
+            const activities = [];
+            if (adherence.pesos) activities.push('🏋️ Entrenamiento');
+            if (adherence.cardio) activities.push('🏃 Cardio');
+            if (adherence.dieta) activities.push('🥗 Dieta');
+            
+            return (
+              <div key={date} className="mobile-card">
+                <div className="flex justify-between items-start">
+                  <div>
+                    <h3 className="font-semibold">
+                      {new Date(date).toLocaleDateString('es-ES', { 
+                        weekday: 'long', 
+                        day: '2-digit', 
+                        month: 'long' 
+                      })}
+                    </h3>
+                    <div className="mt-2 space-y-1">
+                      {activities.map((activity, index) => (
+                        <div key={index} className="text-sm text-gray-600 flex items-center">
+                          <span className="mr-2">✅</span>
+                          {activity}
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                  <div className="text-right">
+                    <div className="text-sm text-gray-500">
+                      {Math.round((activities.length / 3) * 100)}%
+                    </div>
+                  </div>
+                </div>
+              </div>
+            );
+          })}
+      </div>
+    </div>
+  );
+
+  const renderSettingsSection = () => (
+    <div className="min-h-screen pb-20 p-6">
+      <h1 className="text-2xl font-bold text-center mb-6">Ajustes</h1>
+      
+      <div className="space-y-4">
+        <div className="mobile-card">
+          <h3 className="font-semibold mb-4">Datos</h3>
+          <div className="space-y-3">
+            <button 
+              onClick={() => {
+                const data = { estado, cardio, dieta, adherenciaDiaria };
+                const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = 'gym-data.json';
+                a.click();
+                URL.revokeObjectURL(url);
+                showToast('✅ Datos exportados');
+              }}
+              className="w-full bg-blue-600 text-white py-3 px-4 rounded-lg hover:bg-blue-700 transition-colors"
+            >
+              📥 Exportar Datos
+            </button>
+            <button 
+              onClick={() => {
+                if (confirm('¿Estás seguro de que quieres borrar todos los datos? Esta acción no se puede deshacer.')) {
+                  setEstado([]);
+                  setCardio([]);
+                  setDieta([]);
+                  setAdherenciaDiaria({});
+                  showToast('🗑️ Datos borrados');
+                }
+              }}
+              className="w-full bg-red-600 text-white py-3 px-4 rounded-lg hover:bg-red-700 transition-colors"
+            >
+              🗑️ Borrar Todos los Datos
+            </button>
+          </div>
+        </div>
+
+        <div className="mobile-card">
+          <h3 className="font-semibold mb-4">Información</h3>
+          <div className="text-sm text-gray-600 space-y-2">
+            <p>📊 <strong>Total de registros:</strong> {estado.length + cardio.length + dieta.length}</p>
+            <p>📅 <strong>Días activos:</strong> {Object.keys(adherenciaDiaria).length}</p>
+            <p>🎯 <strong>Objetivo:</strong> 80 kg</p>
+            <p>📱 <strong>Versión:</strong> 1.0.0</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100">
       <ToastContainer />
       
       {/* Mobile Dashboard */}
       <div className="mobile-only">
-        <div className="min-h-screen pb-20">
-          {/* Header */}
-          <div className="bg-white shadow-sm p-6">
-            <h1 className="text-2xl font-bold text-center">Mi Entrenamiento</h1>
-            <p className="text-center text-gray-600 mt-2">
-              Hoy es {new Date().toLocaleDateString('es-ES', { 
-                weekday: 'long', 
-                year: 'numeric', 
-                month: 'long', 
-                day: 'numeric' 
-              })}
-            </p>
-          </div>
-          
-          {/* Progress Overview */}
-          <div className="p-6">
-            <div className="mobile-card text-center">
-              <div className="flex justify-center mb-4">
-                <ProgressCircle progress={progress} />
-              </div>
-              <p className="text-sm text-gray-600">Progreso del día</p>
-            </div>
-          </div>
-          
-          {/* Today's Tasks */}
-          <div className="px-6">
-            <h2 className="text-xl font-semibold mb-4">Hoy toca:</h2>
-            
-            {/* Weight Entry */}
-            <div className="mobile-card" onClick={() => openModal('weight')}>
-              <div className="flex items-center justify-between">
-                <div className="flex items-center">
-                  <div className="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center mr-4">
-                    <span className="text-2xl">⚖️</span>
-                  </div>
-                  <div>
-                    <h3 className="font-semibold">Pesaje Diario</h3>
-                    <p className="text-sm text-gray-600">Registra tu peso de hoy</p>
-                  </div>
-                </div>
-                <div className="text-right">
-                  <div className={getStatusClass('weight')}>{getStatus('weight')}</div>
-                  <div className="text-xs text-gray-500">Toca para registrar</div>
-                </div>
-              </div>
-            </div>
-            
-            {/* Workout Entry */}
-            <div className="mobile-card" onClick={() => openModal('workout')}>
-              <div className="flex items-center justify-between">
-                <div className="flex items-center">
-                  <div className="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center mr-4">
-                    <span className="text-2xl">🏋️</span>
-                  </div>
-                  <div>
-                    <h3 className="font-semibold">Entrenamiento</h3>
-                    <p className="text-sm text-gray-600">Pull - Espalda y Bíceps</p>
-                  </div>
-                </div>
-                <div className="text-right">
-                  <div className={getStatusClass('workout')}>{getStatus('workout')}</div>
-                  <div className="text-xs text-gray-500">Toca para registrar</div>
-                </div>
-              </div>
-            </div>
-            
-            {/* Cardio Entry */}
-            <div className="mobile-card" onClick={() => openModal('cardio')}>
-              <div className="flex items-center justify-between">
-                <div className="flex items-center">
-                  <div className="w-12 h-12 bg-red-100 rounded-full flex items-center justify-center mr-4">
-                    <span className="text-2xl">🏃</span>
-                  </div>
-                  <div>
-                    <h3 className="font-semibold">Cardio</h3>
-                    <p className="text-sm text-gray-600">25 min - 3.5 km</p>
-                  </div>
-                </div>
-                <div className="text-right">
-                  <div className={getStatusClass('cardio')}>{getStatus('cardio')}</div>
-                  <div className="text-xs text-gray-500">Toca para registrar</div>
-                </div>
-              </div>
-            </div>
-            
-            {/* Diet Entry */}
-            <div className="mobile-card" onClick={() => openModal('diet')}>
-              <div className="flex items-center justify-between">
-                <div className="flex items-center">
-                  <div className="w-12 h-12 bg-yellow-100 rounded-full flex items-center justify-center mr-4">
-                    <span className="text-2xl">🥗</span>
-                  </div>
-                  <div>
-                    <h3 className="font-semibold">Dieta</h3>
-                    <p className="text-sm text-gray-600">1800 kcal - 150g proteínas</p>
-                  </div>
-                </div>
-                <div className="text-right">
-                  <div className={getStatusClass('diet')}>{getStatus('diet')}</div>
-                  <div className="text-xs text-gray-500">Toca para registrar</div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
+        {activeSection === 'today' && renderTodaySection()}
+        {activeSection === 'progress' && renderProgressSection()}
+        {activeSection === 'history' && renderHistorySection()}
+        {activeSection === 'settings' && renderSettingsSection()}
         
         {/* Mobile Navigation */}
         <div className="mobile-nav">
           <div className="grid grid-cols-4 gap-2 px-4">
-            <div className="mobile-nav-item active">
+            <div 
+              className={`mobile-nav-item cursor-pointer ${activeSection === 'today' ? 'active' : ''}`}
+              onClick={() => setActiveSection('today')}
+            >
               <span className="text-2xl">📊</span>
               <span className="text-xs mt-1">Hoy</span>
             </div>
-            <div className="mobile-nav-item">
+            <div 
+              className={`mobile-nav-item cursor-pointer ${activeSection === 'progress' ? 'active' : ''}`}
+              onClick={() => setActiveSection('progress')}
+            >
               <span className="text-2xl">📈</span>
               <span className="text-xs mt-1">Progreso</span>
             </div>
-            <div className="mobile-nav-item">
+            <div 
+              className={`mobile-nav-item cursor-pointer ${activeSection === 'history' ? 'active' : ''}`}
+              onClick={() => setActiveSection('history')}
+            >
               <span className="text-2xl">📋</span>
               <span className="text-xs mt-1">Historial</span>
             </div>
-            <div className="mobile-nav-item">
+            <div 
+              className={`mobile-nav-item cursor-pointer ${activeSection === 'settings' ? 'active' : ''}`}
+              onClick={() => setActiveSection('settings')}
+            >
               <span className="text-2xl">⚙️</span>
               <span className="text-xs mt-1">Ajustes</span>
             </div>
@@ -505,7 +689,7 @@ export default function Dashboard() {
             <h3 className="text-xl font-bold mb-6 text-center">Entrenamiento</h3>
             <div className="space-y-4">
               <div>
-                <label className="block text-sm font-medium mb-2">Tipo</label>
+                <label className="block text-sm font-medium mb-2">Tipo de Entrenamiento</label>
                 <select 
                   value={workoutType}
                   onChange={(e) => setWorkoutType(e.target.value)}
@@ -518,16 +702,33 @@ export default function Dashboard() {
                 </select>
               </div>
               <div>
-                <label className="block text-sm font-medium mb-2">¿Completado?</label>
+                <label className="block text-sm font-medium mb-2">¿Completaste el entrenamiento?</label>
                 <div className="flex gap-3">
-                  <button onClick={() => saveWorkout(true)} className="flex-1 py-3 px-4 bg-green-600 text-white rounded-lg">
-                    ✅ Sí
+                  <button 
+                    onClick={() => saveWorkout(true)} 
+                    className="flex-1 py-3 px-4 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors"
+                  >
+                    ✅ Sí, completado
                   </button>
-                  <button onClick={() => saveWorkout(false)} className="flex-1 py-3 px-4 bg-gray-200 rounded-lg">
-                    ❌ No
+                  <button 
+                    onClick={() => saveWorkout(false)} 
+                    className="flex-1 py-3 px-4 bg-gray-200 rounded-lg hover:bg-gray-300 transition-colors"
+                  >
+                    ❌ No, cancelado
                   </button>
                 </div>
               </div>
+              {workoutType !== 'Descanso' && (
+                <div className="bg-blue-50 p-4 rounded-lg">
+                  <h4 className="font-semibold text-blue-800 mb-2">💡 Tips para {workoutType}:</h4>
+                  <ul className="text-sm text-blue-700 space-y-1">
+                    <li>• Calienta bien antes de empezar</li>
+                    <li>• Mantén buena forma en todos los ejercicios</li>
+                    <li>• Respeta los tiempos de descanso</li>
+                    <li>• Hidrátate durante el entrenamiento</li>
+                  </ul>
+                </div>
+              )}
             </div>
           </div>
         </div>
