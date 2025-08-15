@@ -24,7 +24,6 @@ export default function Dashboard() {
 
   // Form states
   const [weightInput, setWeightInput] = useState('');
-  const [workoutType, setWorkoutType] = useState('Pull');
   const [cardioKm, setCardioKm] = useState('');
   const [cardioTime, setCardioTime] = useState('');
   const [dietCalories, setDietCalories] = useState('');
