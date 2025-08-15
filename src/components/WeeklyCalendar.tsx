@@ -8,7 +8,6 @@ interface WeeklyCalendarProps {
 }
 
 const getWeeklyPlan = (): WeeklyPlan => {
-  
   const plan: WeeklyPlan = {
     'Lunes': {
       entrenamiento: 'Push',
@@ -84,12 +83,22 @@ const getWorkoutIcon = (type: string): string => {
   }
 };
 
-const getCardioIcon = (intensidad: string): string => {
+const getWorkoutColor = (type: string): string => {
+  switch (type) {
+    case 'Push': return 'from-blue-400 to-blue-600';
+    case 'Pull': return 'from-green-400 to-green-600';
+    case 'Piernas': return 'from-purple-400 to-purple-600';
+    case 'Descanso': return 'from-gray-300 to-gray-400';
+    default: return 'from-blue-400 to-blue-600';
+  }
+};
+
+const getCardioColor = (intensidad: string): string => {
   switch (intensidad) {
-    case 'Baja': return '🚶';
-    case 'Media': return '🏃';
-    case 'Alta': return '🏃‍♂️';
-    default: return '🏃';
+    case 'Baja': return 'from-yellow-300 to-yellow-500';
+    case 'Media': return 'from-orange-400 to-orange-600';
+    case 'Alta': return 'from-red-400 to-red-600';
+    default: return 'from-yellow-300 to-yellow-500';
   }
 };
 
@@ -101,93 +110,79 @@ export function WeeklyCalendar({ isOpen, onClose }: WeeklyCalendarProps) {
 
   return (
     <div className="modal active" onClick={onClose}>
-      <div className="modal-content" onClick={(e) => e.stopPropagation()}>
+      <div className="modal-content max-w-2xl" onClick={(e) => e.stopPropagation()}>
         <div className="modal-header">
           <button className="modal-close" onClick={onClose}>×</button>
           <h3>📅 Plan Semanal</h3>
         </div>
         
         <div className="modal-body">
-          <div className="space-y-4">
+          <div className="grid grid-cols-1 gap-4">
             {Object.entries(weeklyPlan).map(([day, plan]) => (
               <div 
                 key={day} 
-                className={`bg-gray-50 rounded-2xl p-6 border-2 transition-all ${
+                className={`relative p-6 rounded-3xl border-2 transition-all ${
                   day === today 
-                    ? 'border-blue-500 bg-blue-50' 
-                    : 'border-gray-200'
+                    ? 'border-blue-500 bg-gradient-to-r from-blue-50 to-indigo-50 shadow-lg' 
+                    : 'border-gray-200 bg-white hover:shadow-md'
                 }`}
               >
+                {/* Day Header */}
                 <div className="flex items-center justify-between mb-4">
-                  <h4 className={`text-lg font-semibold ${
+                  <h4 className={`text-lg font-bold ${
                     day === today ? 'text-blue-700' : 'text-gray-800'
                   }`}>
                     {day}
-                    {day === today && <span className="ml-2 text-sm bg-blue-500 text-white px-2 py-1 rounded-full">Hoy</span>}
+                    {day === today && (
+                      <span className="ml-3 text-sm bg-blue-500 text-white px-3 py-1 rounded-full">
+                        Hoy
+                      </span>
+                    )}
                   </h4>
-                  <div className="text-2xl">
-                    {getWorkoutIcon(plan.entrenamiento)}
-                  </div>
                 </div>
                 
-                {plan.descanso ? (
-                  <div className="text-center py-4">
-                    <div className="text-4xl mb-2">😴</div>
-                    <p className="text-gray-600 font-medium">Día de Descanso</p>
-                    <p className="text-sm text-gray-500 mt-1">Recuperación activa recomendada</p>
+                {/* Activity Blocks */}
+                <div className="space-y-3">
+                  {/* Workout Block */}
+                  <div className={`flex items-center p-4 rounded-2xl bg-gradient-to-r ${getWorkoutColor(plan.entrenamiento)} text-white shadow-md`}>
+                    <span className="text-2xl mr-4">{getWorkoutIcon(plan.entrenamiento)}</span>
+                    <div className="flex-1">
+                      <div className="font-bold text-lg">{plan.entrenamiento}</div>
+                      {!plan.descanso && (
+                        <div className="text-sm opacity-90">
+                          {plan.ejercicios.slice(0, 2).join(', ')}
+                          {plan.ejercicios.length > 2 && '...'}
+                        </div>
+                      )}
+                    </div>
                   </div>
-                ) : (
-                  <div className="space-y-4">
-                    <div className="bg-white rounded-xl p-4">
-                      <h5 className="font-semibold text-gray-800 mb-2">
-                        {plan.entrenamiento}
-                      </h5>
-                      <div className="space-y-2">
-                        {plan.ejercicios.map((ejercicio, index) => (
-                          <div key={index} className="flex items-center text-sm text-gray-600">
-                            <span className="w-2 h-2 bg-blue-500 rounded-full mr-3"></span>
-                            {ejercicio}
-                          </div>
-                        ))}
+                  
+                  {/* Cardio Block */}
+                  {plan.cardio && (
+                    <div className={`flex items-center p-4 rounded-2xl bg-gradient-to-r ${getCardioColor(plan.cardio.intensidad)} text-white shadow-md`}>
+                      <span className="text-xl mr-4">🏃</span>
+                      <div className="flex-1">
+                        <div className="font-bold">{plan.cardio.tipo}</div>
+                        <div className="text-sm opacity-90">
+                          {plan.cardio.duracion} min • {plan.cardio.intensidad}
+                        </div>
                       </div>
                     </div>
-                    
-                    {plan.cardio && (
-                      <div className="bg-white rounded-xl p-4">
-                        <div className="flex items-center justify-between mb-2">
-                          <h5 className="font-semibold text-gray-800">Cardio</h5>
-                          <span className="text-xl">{getCardioIcon(plan.cardio.intensidad)}</span>
-                        </div>
-                        <div className="grid grid-cols-3 gap-4 text-sm">
-                          <div className="text-center">
-                            <div className="font-semibold text-gray-800">{plan.cardio.tipo}</div>
-                            <div className="text-gray-500">Tipo</div>
-                          </div>
-                          <div className="text-center">
-                            <div className="font-semibold text-gray-800">{plan.cardio.duracion} min</div>
-                            <div className="text-gray-500">Duración</div>
-                          </div>
-                          <div className="text-center">
-                            <div className="font-semibold text-gray-800">{plan.cardio.intensidad}</div>
-                            <div className="text-gray-500">Intensidad</div>
-                          </div>
-                        </div>
+                  )}
+                  
+                  {/* Rest Day */}
+                  {plan.descanso && (
+                    <div className="flex items-center p-4 rounded-2xl bg-gradient-to-r from-gray-300 to-gray-400 text-white shadow-md">
+                      <span className="text-2xl mr-4">😴</span>
+                      <div className="flex-1">
+                        <div className="font-bold text-lg">Descanso</div>
+                        <div className="text-sm opacity-90">Recuperación activa</div>
                       </div>
-                    )}
-                  </div>
-                )}
+                    </div>
+                  )}
+                </div>
               </div>
             ))}
-            
-            <div className="bg-gradient-to-r from-blue-50 to-purple-50 rounded-2xl p-6 border border-blue-200">
-              <h4 className="font-semibold text-blue-800 mb-3">💡 Tips de la Semana</h4>
-              <ul className="space-y-2 text-sm text-blue-700">
-                <li>• Mantén la consistencia en tus entrenamientos</li>
-                <li>• Respeta los días de descanso para la recuperación</li>
-                <li>• Hidrátate bien antes, durante y después del ejercicio</li>
-                <li>• Escucha a tu cuerpo y ajusta la intensidad según sea necesario</li>
-              </ul>
-            </div>
           </div>
         </div>
       </div>
