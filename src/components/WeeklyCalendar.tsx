@@ -8,67 +8,114 @@ interface WeeklyCalendarProps {
 }
 
 const getWeeklyPlan = (): WeeklyPlan => {
-  const plan: WeeklyPlan = {
-    'Lunes': {
-      entrenamiento: 'Push',
-      ejercicios: ['Press de Banca', 'Press Militar', 'Fondos', 'Extensiones Tríceps'],
-      cardio: {
-        tipo: 'Ligero',
-        duracion: 20,
-        intensidad: 'Baja'
+  // Usar los datos del mesociclo actual
+  const mesociclo = {
+    microciclos: [
+      {
+        id: 1,
+        nombre: "Microciclo 1 - Adaptación (Semana 1)",
+        dias: [
+          { 
+            dia: "Día 1", 
+            entrenamiento: "Pull (Espalda, Bíceps, Core)", 
+            ejercicios: [
+              "Bent over rows con mancuernas (1x8-10 + 2x10-12)",
+              "Jalón polea alta pecho apoyado unilateral (3x8-10)",
+              "Remo polea pecho apoyado unilateral (2x8-10)",
+              "Face pull polea alta boca arriba (2x12-15)",
+              "Low cable rear delt row (2x12-15)",
+              "Curl alterno con mancuernas (1x6-8 + 2x10-12)",
+              "Curl bayesian en polea (2x10-12)",
+              "Crunch abdominal en polea alta (2x12-15)"
+            ],
+            cardio: { tipo: "Trote continuo", duracion: 25, intensidad: "6:30-7:00 min/km + intervalos suaves" }
+          },
+          { 
+            dia: "Día 2", 
+            entrenamiento: "Push (Pecho, Hombros, Tríceps, Core)", 
+            ejercicios: [
+              "Press inclinado multipower 45º (1x5-7 + 2x8-10)",
+              "Contractora pectoral máquina inclinada (2x10-12)",
+              "Press en máquina (2x8-10)",
+              "Elevaciones laterales polea con muñequera (2x12-15)",
+              "Elevaciones laterales mancuernas (2x>15)",
+              "Press francés mancuernas (1x8-10 + 2x10-12)",
+              "Extensión tríceps katana polea baja (2x8-10)",
+              "Crunch abdominal en polea alta (2x12-15)"
+            ],
+            cardio: { tipo: "Trote continuo", duracion: 25, intensidad: "6:30-7:00 min/km + intervalos suaves" }
+          },
+          { 
+            dia: "Día 3", 
+            entrenamiento: "Piernas (Frecuencia 1)", 
+            ejercicios: [
+              "Aducción de cadera en máquina (2x12-15)",
+              "Prensa 45º (1x6-8 + 2x8-10)",
+              "Sentadilla búlgara énfasis glúteo (1x6-8 + 2x8-10)",
+              "Curl femoral en máquina (2x12-15)",
+              "Extensión de rodilla en máquina (2x12-15)",
+              "Elevaciones de talones en máquina (2x12-15)"
+            ],
+            cardio: { tipo: "Trote continuo", duracion: 25, intensidad: "6:30-7:00 min/km + intervalos suaves" }
+          },
+          { 
+            dia: "Día 4", 
+            entrenamiento: "Pull (Espalda, Bíceps, Core)", 
+            ejercicios: [
+              "Bent over rows con mancuernas (1x6-8 + 2x8-10)",
+              "Jalón polea alta pecho apoyado unilateral (1x8-10 + 1x8-10)",
+              "Máquina remo espalda alta (2x8-10)",
+              "Pullover polea alta rodillas banco 60º (2x8-12)",
+              "Face pull polea alta boca arriba (2x12-15)",
+              "Low cable rear delt row (2x12-15)",
+              "Curl barra Z (1x6-8 + 1x10-12)",
+              "Curl bayesian en polea (2x10-12)",
+              "Ab wheel (2x12-15)"
+            ],
+            cardio: { tipo: "Trote continuo", duracion: 25, intensidad: "6:30-7:00 min/km + intervalos suaves" }
+          },
+          { 
+            dia: "Día 5", 
+            entrenamiento: "Push (Pecho, Hombros, Tríceps, Core)", 
+            ejercicios: [
+              "Press inclinado multipower 30º (1x6-8 + 2x8-10)",
+              "Contractora pectoral en máquina (2x10-12)",
+              "Press militar mancuernas banco inclinado (1x7-9 + 1x9-11)",
+              "Elevaciones laterales polea con muñequera (3x12-15)",
+              "Elevaciones laterales mancuernas (2x>15)",
+              "Press francés barra Z 30º (1x8-10 + 1x10-12)",
+              "Extensión tríceps katana polea baja (3x8-10)",
+              "Crunch abdominal en polea alta (2x12-15)"
+            ],
+            cardio: { tipo: "Trote continuo", duracion: 25, intensidad: "6:30-7:00 min/km + intervalos suaves" }
+          },
+          { 
+            dia: "Descanso", 
+            entrenamiento: "Descanso activo", 
+            ejercicios: ["Estiramientos", "Movilidad", "Recuperación"],
+            cardio: { tipo: "Caminata ligera", duracion: 20, intensidad: "Recuperación" }
+          }
+        ]
       }
-    },
-    'Martes': {
-      entrenamiento: 'Pull',
-      ejercicios: ['Dominadas', 'Remo con Barra', 'Curl Bíceps', 'Face Pulls'],
-      cardio: {
-        tipo: 'Moderado',
-        duracion: 25,
-        intensidad: 'Media'
-      }
-    },
-    'Miércoles': {
-      entrenamiento: 'Piernas',
-      ejercicios: ['Sentadillas', 'Peso Muerto', 'Extensiones Cuádriceps', 'Curl Femoral'],
-      cardio: {
-        tipo: 'Intenso',
-        duracion: 30,
-        intensidad: 'Alta'
-      }
-    },
-    'Jueves': {
-      entrenamiento: 'Push',
-      ejercicios: ['Press de Banca', 'Press Militar', 'Fondos', 'Extensiones Tríceps'],
-      cardio: {
-        tipo: 'Ligero',
-        duracion: 20,
-        intensidad: 'Baja'
-      }
-    },
-    'Viernes': {
-      entrenamiento: 'Pull',
-      ejercicios: ['Dominadas', 'Remo con Barra', 'Curl Bíceps', 'Face Pulls'],
-      cardio: {
-        tipo: 'Moderado',
-        duracion: 25,
-        intensidad: 'Media'
-      }
-    },
-    'Sábado': {
-      entrenamiento: 'Piernas',
-      ejercicios: ['Sentadillas', 'Peso Muerto', 'Extensiones Cuádriceps', 'Curl Femoral'],
-      cardio: {
-        tipo: 'Intenso',
-        duracion: 30,
-        intensidad: 'Alta'
-      }
-    },
-    'Domingo': {
-      entrenamiento: 'Descanso',
-      ejercicios: [],
-      descanso: true
-    }
+    ]
   };
+
+  // Convertir los días del mesociclo a formato de plan semanal
+  const currentMicrociclo = mesociclo.microciclos[0];
+  const plan: WeeklyPlan = {};
+  
+  const diasSemana = ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado', 'Domingo'];
+  
+  currentMicrociclo.dias.forEach((dia, index) => {
+    if (index < 7) {
+      plan[diasSemana[index]] = {
+        entrenamiento: dia.entrenamiento,
+        ejercicios: dia.ejercicios,
+        cardio: dia.cardio,
+        descanso: dia.entrenamiento === 'Descanso activo'
+      };
+    }
+  });
 
   return plan;
 };

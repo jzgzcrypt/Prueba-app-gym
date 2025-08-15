@@ -51,6 +51,128 @@ export default function Dashboard() {
 
   const todayISO = () => new Date().toISOString().split('T')[0];
 
+  // Función para obtener el día actual del mesociclo
+  const getCurrentMesocicloDay = () => {
+    const mesociclo = {
+      nombre: "Mesociclo 1 Definitivo - Definición",
+      duracion: "6 semanas (Agosto - Mediados Septiembre)",
+      objetivo: "Definición muscular con enfoque estético",
+      estructura: "5 días entrenamiento en ciclo de 9 días (4 días push/pull, 1 día piernas, 4 descansos flexibles)",
+      volumen: {
+        espalda: "14-16 series",
+        biceps: "10-12 series", 
+        pecho: "9 series",
+        hombros: "10-12 series",
+        triceps: "9 series",
+        piernas: "8 series"
+      },
+      intensidad: "RIR 3 (microciclos 1-2), RIR 2 (microciclo 3), RIR 1-2 (microciclo 4), RIR 1-0 (microciclo 5)",
+      cardio: "3-4 sesiones/semana (25-30 min, trote continuo + intervalos intensos)",
+      dieta: "~1800 kcal/día, ayuno intermitente 16/8 opcional desde semana 3",
+      microciclos: [
+        {
+          id: 1,
+          nombre: "Microciclo 1 - Adaptación (Semana 1)",
+          objetivo: "Técnica, reacondicionamiento",
+          intensidad: "RIR 3, sin técnicas intensivas",
+          cardio: "3 sesiones, trote continuo + intervalos suaves",
+          dias: [
+            { 
+              dia: "Día 1", 
+              entrenamiento: "Pull (Espalda, Bíceps, Core)", 
+              ejercicios: [
+                "Bent over rows con mancuernas (1x8-10 + 2x10-12)",
+                "Jalón polea alta pecho apoyado unilateral (3x8-10)",
+                "Remo polea pecho apoyado unilateral (2x8-10)",
+                "Face pull polea alta boca arriba (2x12-15)",
+                "Low cable rear delt row (2x12-15)",
+                "Curl alterno con mancuernas (1x6-8 + 2x10-12)",
+                "Curl bayesian en polea (2x10-12)",
+                "Crunch abdominal en polea alta (2x12-15)"
+              ],
+              cardio: { tipo: "Trote continuo", duracion: 25, intensidad: "6:30-7:00 min/km + intervalos suaves" }
+            },
+            { 
+              dia: "Día 2", 
+              entrenamiento: "Push (Pecho, Hombros, Tríceps, Core)", 
+              ejercicios: [
+                "Press inclinado multipower 45º (1x5-7 + 2x8-10)",
+                "Contractora pectoral máquina inclinada (2x10-12)",
+                "Press en máquina (2x8-10)",
+                "Elevaciones laterales polea con muñequera (2x12-15)",
+                "Elevaciones laterales mancuernas (2x>15)",
+                "Press francés mancuernas (1x8-10 + 2x10-12)",
+                "Extensión tríceps katana polea baja (2x8-10)",
+                "Crunch abdominal en polea alta (2x12-15)"
+              ],
+              cardio: { tipo: "Trote continuo", duracion: 25, intensidad: "6:30-7:00 min/km + intervalos suaves" }
+            },
+            { 
+              dia: "Día 3", 
+              entrenamiento: "Piernas (Frecuencia 1)", 
+              ejercicios: [
+                "Aducción de cadera en máquina (2x12-15)",
+                "Prensa 45º (1x6-8 + 2x8-10)",
+                "Sentadilla búlgara énfasis glúteo (1x6-8 + 2x8-10)",
+                "Curl femoral en máquina (2x12-15)",
+                "Extensión de rodilla en máquina (2x12-15)",
+                "Elevaciones de talones en máquina (2x12-15)"
+              ],
+              cardio: { tipo: "Trote continuo", duracion: 25, intensidad: "6:30-7:00 min/km + intervalos suaves" }
+            },
+            { 
+              dia: "Día 4", 
+              entrenamiento: "Pull (Espalda, Bíceps, Core)", 
+              ejercicios: [
+                "Bent over rows con mancuernas (1x6-8 + 2x8-10)",
+                "Jalón polea alta pecho apoyado unilateral (1x8-10 + 1x8-10)",
+                "Máquina remo espalda alta (2x8-10)",
+                "Pullover polea alta rodillas banco 60º (2x8-12)",
+                "Face pull polea alta boca arriba (2x12-15)",
+                "Low cable rear delt row (2x12-15)",
+                "Curl barra Z (1x6-8 + 1x10-12)",
+                "Curl bayesian en polea (2x10-12)",
+                "Ab wheel (2x12-15)"
+              ],
+              cardio: { tipo: "Trote continuo", duracion: 25, intensidad: "6:30-7:00 min/km + intervalos suaves" }
+            },
+            { 
+              dia: "Día 5", 
+              entrenamiento: "Push (Pecho, Hombros, Tríceps, Core)", 
+              ejercicios: [
+                "Press inclinado multipower 30º (1x6-8 + 2x8-10)",
+                "Contractora pectoral en máquina (2x10-12)",
+                "Press militar mancuernas banco inclinado (1x7-9 + 1x9-11)",
+                "Elevaciones laterales polea con muñequera (3x12-15)",
+                "Elevaciones laterales mancuernas (2x>15)",
+                "Press francés barra Z 30º (1x8-10 + 1x10-12)",
+                "Extensión tríceps katana polea baja (3x8-10)",
+                "Crunch abdominal en polea alta (2x12-15)"
+              ],
+              cardio: { tipo: "Trote continuo", duracion: 25, intensidad: "6:30-7:00 min/km + intervalos suaves" }
+            },
+            { 
+              dia: "Descanso", 
+              entrenamiento: "Descanso activo", 
+              ejercicios: ["Estiramientos", "Movilidad", "Recuperación"],
+              cardio: { tipo: "Caminata ligera", duracion: 20, intensidad: "Recuperación" }
+            }
+          ]
+        }
+      ]
+    };
+
+    // Simular que estamos en el microciclo 1, día 1 (esto se puede hacer más dinámico)
+    const currentMicrociclo = mesociclo.microciclos[0];
+    const currentDay = currentMicrociclo.dias[0]; // Por ahora día 1, se puede hacer dinámico
+    
+    return {
+      microciclo: currentMicrociclo,
+      dia: currentDay,
+      mesociclo: mesociclo
+    };
+  };
+
   const calculateProgress = () => {
     const today = todayISO();
     const todayAdherence = adherenciaDiaria[today] || {};
@@ -319,6 +441,53 @@ export default function Dashboard() {
       <div className="px-6">
         <h2 className="text-xl font-semibold mb-4">Hoy toca:</h2>
         
+        {/* Current Day Info */}
+        {(() => {
+          const currentData = getCurrentMesocicloDay();
+          return (
+            <div className="clean-card mb-4">
+              <div className="flex items-center gap-3 mb-3">
+                <div className="w-10 h-10 bg-primary rounded-full flex items-center justify-center text-white font-bold">
+                  {currentData.dia.dia.split(' ')[1]}
+                </div>
+                <div>
+                  <h3 className="font-semibold text-lg">{currentData.dia.entrenamiento}</h3>
+                  <p className="text-sm text-gray-600">{currentData.microciclo.nombre}</p>
+                </div>
+              </div>
+              {currentData.dia.cardio && (
+                <div className="flex items-center gap-2 mb-3">
+                  <span className="text-xs bg-blue-100 text-blue-700 px-2 py-1 rounded-full">
+                    🏃 {currentData.dia.cardio.tipo}
+                  </span>
+                  <span className="text-xs text-gray-500">
+                    {currentData.dia.cardio.duracion}min • {currentData.dia.cardio.intensidad}
+                  </span>
+                </div>
+              )}
+              <div className="flex items-center justify-between">
+                <span className="text-sm text-gray-600">
+                  {currentData.dia.ejercicios.length > 0 ? `${currentData.dia.ejercicios.length} ejercicios` : 'Descanso activo'}
+                </span>
+                <button 
+                  onClick={() => {
+                    setSelectedWorkout({
+                      dia: currentData.dia.dia,
+                      entrenamiento: currentData.dia.entrenamiento,
+                      ejercicios: currentData.dia.ejercicios,
+                      cardio: currentData.dia.cardio
+                    });
+                    openModal('workout-details');
+                  }}
+                  className="text-xs bg-primary text-white px-3 py-1 rounded-full hover:bg-primary-dark transition-colors"
+                >
+                  Ver detalles
+                </button>
+              </div>
+            </div>
+          );
+        })()}
+        
         {/* Weight Entry */}
         <div className="clean-card cursor-pointer hover:scale-[1.02] transition-transform" onClick={() => openModal('weight')}>
           <div className="flex items-center justify-between">
@@ -347,7 +516,7 @@ export default function Dashboard() {
               </div>
               <div>
                 <h3 className="font-semibold">Entrenamiento</h3>
-                <p className="text-sm text-gray-600">{workoutType} - {getWorkoutDescription(workoutType)}</p>
+                <p className="text-sm text-gray-600">Completa tu rutina de hoy</p>
               </div>
             </div>
             <div className="text-right">
@@ -366,7 +535,7 @@ export default function Dashboard() {
               </div>
               <div>
                 <h3 className="font-semibold">Cardio</h3>
-                <p className="text-sm text-gray-600">25 min - 3.5 km</p>
+                <p className="text-sm text-gray-600">Registra tu actividad cardiovascular</p>
               </div>
             </div>
             <div className="text-right">

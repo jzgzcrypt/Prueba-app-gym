@@ -97,100 +97,96 @@ const calcularProgresion = (ejercicio: string, series: Set[], pesoActual: number
 const getWorkoutExercises = (type: string): Exercise[] => {
   const mesociclo = getCurrentMesociclo();
   
-  const exercises = {
-    'Push': [
-      { 
-        nombre: 'Press de Banca', 
-        series: Array(4).fill(null).map(() => ({ peso: mesociclo.pesos['Press de Banca'] || 0, repeticiones: 0, completado: false })), 
-        completado: false,
-        pesoSugerido: mesociclo.pesos['Press de Banca'],
-        repeticionesObjetivo: mesociclo.repeticionesObjetivo['Press de Banca']
-      },
-      { 
-        nombre: 'Press Militar', 
-        series: Array(3).fill(null).map(() => ({ peso: mesociclo.pesos['Press Militar'] || 0, repeticiones: 0, completado: false })), 
-        completado: false,
-        pesoSugerido: mesociclo.pesos['Press Militar'],
-        repeticionesObjetivo: mesociclo.repeticionesObjetivo['Press Militar']
-      },
-      { 
-        nombre: 'Fondos', 
-        series: Array(3).fill(null).map(() => ({ peso: 0, repeticiones: 0, completado: false })), 
-        completado: false,
-        pesoSugerido: 0,
-        repeticionesObjetivo: mesociclo.repeticionesObjetivo['Fondos']
-      },
-      { 
-        nombre: 'Extensiones Tríceps', 
-        series: Array(3).fill(null).map(() => ({ peso: mesociclo.pesos['Extensiones Tríceps'] || 0, repeticiones: 0, completado: false })), 
-        completado: false,
-        pesoSugerido: mesociclo.pesos['Extensiones Tríceps'],
-        repeticionesObjetivo: mesociclo.repeticionesObjetivo['Extensiones Tríceps']
-      }
-    ],
-    'Pull': [
-      { 
-        nombre: 'Dominadas', 
-        series: Array(4).fill(null).map(() => ({ peso: 0, repeticiones: 0, completado: false })), 
-        completado: false,
-        pesoSugerido: 0,
-        repeticionesObjetivo: mesociclo.repeticionesObjetivo['Dominadas']
-      },
-      { 
-        nombre: 'Remo con Barra', 
-        series: Array(4).fill(null).map(() => ({ peso: mesociclo.pesos['Remo con Barra'] || 0, repeticiones: 0, completado: false })), 
-        completado: false,
-        pesoSugerido: mesociclo.pesos['Remo con Barra'],
-        repeticionesObjetivo: mesociclo.repeticionesObjetivo['Remo con Barra']
-      },
-      { 
-        nombre: 'Curl Bíceps', 
-        series: Array(3).fill(null).map(() => ({ peso: mesociclo.pesos['Curl Bíceps'] || 0, repeticiones: 0, completado: false })), 
-        completado: false,
-        pesoSugerido: mesociclo.pesos['Curl Bíceps'],
-        repeticionesObjetivo: mesociclo.repeticionesObjetivo['Curl Bíceps']
-      },
-      { 
-        nombre: 'Face Pulls', 
-        series: Array(3).fill(null).map(() => ({ peso: mesociclo.pesos['Face Pulls'] || 0, repeticiones: 0, completado: false })), 
-        completado: false,
-        pesoSugerido: mesociclo.pesos['Face Pulls'],
-        repeticionesObjetivo: mesociclo.repeticionesObjetivo['Face Pulls']
-      }
-    ],
-    'Piernas': [
-      { 
-        nombre: 'Sentadillas', 
-        series: Array(4).fill(null).map(() => ({ peso: mesociclo.pesos['Sentadillas'] || 0, repeticiones: 0, completado: false })), 
-        completado: false,
-        pesoSugerido: mesociclo.pesos['Sentadillas'],
-        repeticionesObjetivo: mesociclo.repeticionesObjetivo['Sentadillas']
-      },
-      { 
-        nombre: 'Peso Muerto', 
-        series: Array(3).fill(null).map(() => ({ peso: mesociclo.pesos['Peso Muerto'] || 0, repeticiones: 0, completado: false })), 
-        completado: false,
-        pesoSugerido: mesociclo.pesos['Peso Muerto'],
-        repeticionesObjetivo: mesociclo.repeticionesObjetivo['Peso Muerto']
-      },
-      { 
-        nombre: 'Extensiones Cuádriceps', 
-        series: Array(3).fill(null).map(() => ({ peso: mesociclo.pesos['Extensiones Cuádriceps'] || 0, repeticiones: 0, completado: false })), 
-        completado: false,
-        pesoSugerido: mesociclo.pesos['Extensiones Cuádriceps'],
-        repeticionesObjetivo: mesociclo.repeticionesObjetivo['Extensiones Cuádriceps']
-      },
-      { 
-        nombre: 'Curl Femoral', 
-        series: Array(3).fill(null).map(() => ({ peso: mesociclo.pesos['Curl Femoral'] || 0, repeticiones: 0, completado: false })), 
-        completado: false,
-        pesoSugerido: mesociclo.pesos['Curl Femoral'],
-        repeticionesObjetivo: mesociclo.repeticionesObjetivo['Curl Femoral']
-      }
-    ]
+  // Obtener ejercicios del día actual del mesociclo
+  const getCurrentDayExercises = (): string[] => {
+    const currentData = {
+      microciclos: [
+        {
+          id: 1,
+          dias: [
+            { 
+              dia: "Día 1", 
+              entrenamiento: "Pull (Espalda, Bíceps, Core)", 
+              ejercicios: [
+                "Bent over rows con mancuernas (1x8-10 + 2x10-12)",
+                "Jalón polea alta pecho apoyado unilateral (3x8-10)",
+                "Remo polea pecho apoyado unilateral (2x8-10)",
+                "Face pull polea alta boca arriba (2x12-15)",
+                "Low cable rear delt row (2x12-15)",
+                "Curl alterno con mancuernas (1x6-8 + 2x10-12)",
+                "Curl bayesian en polea (2x10-12)",
+                "Crunch abdominal en polea alta (2x12-15)"
+              ]
+            },
+            { 
+              dia: "Día 2", 
+              entrenamiento: "Push (Pecho, Hombros, Tríceps, Core)", 
+              ejercicios: [
+                "Press inclinado multipower 45º (1x5-7 + 2x8-10)",
+                "Contractora pectoral máquina inclinada (2x10-12)",
+                "Press en máquina (2x8-10)",
+                "Elevaciones laterales polea con muñequera (2x12-15)",
+                "Elevaciones laterales mancuernas (2x>15)",
+                "Press francés mancuernas (1x8-10 + 2x10-12)",
+                "Extensión tríceps katana polea baja (2x8-10)",
+                "Crunch abdominal en polea alta (2x12-15)"
+              ]
+            },
+            { 
+              dia: "Día 3", 
+              entrenamiento: "Piernas (Frecuencia 1)", 
+              ejercicios: [
+                "Aducción de cadera en máquina (2x12-15)",
+                "Prensa 45º (1x6-8 + 2x8-10)",
+                "Sentadilla búlgara énfasis glúteo (1x6-8 + 2x8-10)",
+                "Curl femoral en máquina (2x12-15)",
+                "Extensión de rodilla en máquina (2x12-15)",
+                "Elevaciones de talones en máquina (2x12-15)"
+              ]
+            }
+          ]
+        }
+      ]
+    };
+    
+    // Por ahora usar el día 1, se puede hacer dinámico
+    return currentData.microciclos[0].dias[0].ejercicios;
   };
   
-  return exercises[type as keyof typeof exercises] || exercises['Push'];
+  // Convertir ejercicios del mesociclo al formato requerido
+  const ejerciciosMesociclo = getCurrentDayExercises();
+  
+  const exercises = ejerciciosMesociclo.map(ejercicio => {
+    // Extraer nombre del ejercicio (antes del paréntesis)
+    const nombre = ejercicio.split('(')[0].trim();
+    // Extraer series y repeticiones del paréntesis
+    const seriesMatch = ejercicio.match(/\(([^)]+)\)/);
+    const seriesInfo = seriesMatch ? seriesMatch[1] : '3x10';
+    
+    // Determinar número de series basado en la información
+    let numSeries = 3;
+    if (seriesInfo.includes('1x') && seriesInfo.includes('2x')) {
+      numSeries = 3; // Top set + 2 rest sets
+    } else if (seriesInfo.includes('3x')) {
+      numSeries = 3;
+    } else if (seriesInfo.includes('2x')) {
+      numSeries = 2;
+    }
+    
+    return {
+      nombre,
+      series: Array(numSeries).fill(null).map(() => ({ 
+        peso: mesociclo.pesos[nombre] || 0, 
+        repeticiones: 0, 
+        completado: false 
+      })),
+      completado: false,
+      pesoSugerido: mesociclo.pesos[nombre] || 0,
+      repeticionesObjetivo: mesociclo.repeticionesObjetivo[nombre] || 10
+    };
+  });
+  
+  return exercises;
 };
 
 export function WorkoutModal({ isOpen, onClose, onComplete, workoutType }: WorkoutModalProps) {
