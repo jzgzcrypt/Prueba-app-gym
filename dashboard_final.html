@@ -1,0 +1,999 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Mi Entrenamiento — Zero Friction</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
+<style>
+  body{ -webkit-font-smoothing:antialiased; -moz-osx-font-smoothing:grayscale; }
+  
+  /* Mobile Detection */
+  .mobile-only { display: none; }
+  .desktop-only { display: block; }
+  @media (max-width: 768px) {
+    .mobile-only { display: block; }
+    .desktop-only { display: none; }
+  }
+  
+  /* Smooth Animations */
+  .fade-in { animation: fadeIn 0.3s ease; }
+  .slide-up { animation: slideUp 0.4s ease; }
+  .bounce-in { animation: bounceIn 0.6s ease; }
+  
+  @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+  @keyframes slideUp { from { transform: translateY(20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+  @keyframes bounceIn { 
+    0% { transform: scale(0.3); opacity: 0; }
+    50% { transform: scale(1.05); }
+    70% { transform: scale(0.9); }
+    100% { transform: scale(1); opacity: 1; }
+  }
+  
+  /* Toast Notifications */
+  .toast {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    background: #10b981;
+    color: white;
+    padding: 16px 24px;
+    border-radius: 12px;
+    z-index: 1000;
+    animation: slideIn 0.3s ease;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.12);
+    font-weight: 500;
+  }
+  .toast.error { background: #ef4444; }
+  .toast.warning { background: #f59e0b; }
+  @keyframes slideIn {
+    from { transform: translateX(100%); opacity: 0; }
+    to { transform: translateX(0); opacity: 1; }
+  }
+  
+  /* Mobile Optimized Cards */
+  .mobile-card {
+    background: white;
+    border-radius: 20px;
+    padding: 24px;
+    margin: 16px 0;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+    transition: all 0.3s ease;
+  }
+  .mobile-card:active {
+    transform: scale(0.98);
+    box-shadow: 0 2px 10px rgba(0,0,0,0.12);
+  }
+  
+  /* Progress Circle */
+  .progress-circle {
+    width: 120px;
+    height: 120px;
+    position: relative;
+  }
+  .progress-circle svg {
+    transform: rotate(-90deg);
+  }
+  .progress-circle circle {
+    transition: stroke-dasharray 0.8s ease;
+  }
+  
+  /* Quick Entry Styles */
+  .quick-entry {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    border-radius: 24px;
+    padding: 32px 24px;
+    color: white;
+    margin: 20px 0;
+  }
+  .quick-entry input, .quick-entry select {
+    background: rgba(255,255,255,0.95);
+    border: none;
+    border-radius: 12px;
+    padding: 16px;
+    color: #1f2937;
+    font-size: 16px;
+    width: 100%;
+  }
+  .quick-entry input:focus, .quick-entry select:focus {
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(255,255,255,0.3);
+  }
+  
+  /* Success States */
+  .success { background: #10b981 !important; color: white !important; }
+  .pending { background: #f3f4f6 !important; color: #6b7280 !important; }
+  
+  /* Loading States */
+  .loading {
+    opacity: 0.7;
+    pointer-events: none;
+  }
+  .loading::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 24px;
+    height: 24px;
+    margin: -12px 0 0 -12px;
+    border: 3px solid #3b82f6;
+    border-top: 3px solid transparent;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+  }
+  @keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+  }
+  
+  /* Mobile Navigation */
+  .mobile-nav {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: white;
+    border-top: 1px solid #e5e7eb;
+    padding: 12px 0;
+    z-index: 50;
+  }
+  .mobile-nav-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 8px;
+    border-radius: 12px;
+    transition: all 0.2s ease;
+  }
+  .mobile-nav-item.active {
+    background: #eff6ff;
+    color: #3b82f6;
+  }
+  
+  /* Data Entry Modal */
+  .modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0,0,0,0.5);
+    z-index: 100;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+  }
+  .modal.active {
+    display: flex;
+  }
+  .modal-content {
+    background: white;
+    border-radius: 24px;
+    padding: 32px 24px;
+    width: 100%;
+    max-width: 400px;
+    animation: slideUp 0.3s ease;
+  }
+</style>
+</head>
+<body class="bg-gradient-to-br from-gray-50 to-gray-100 font-sans text-gray-800">
+  <!-- Mobile Dashboard -->
+  <div class="mobile-only">
+    <div class="min-h-screen pb-20">
+      <!-- Header -->
+      <div class="bg-white shadow-sm p-6">
+        <h1 class="text-2xl font-bold text-center">Mi Entrenamiento</h1>
+        <p class="text-center text-gray-600 mt-2">Hoy es <span id="mobile-date"></span></p>
+      </div>
+      
+      <!-- Progress Overview -->
+      <div class="p-6">
+        <div class="mobile-card text-center">
+          <div class="flex justify-center mb-4">
+            <div class="progress-circle">
+              <svg viewBox="0 0 100 100">
+                <circle cx="50" cy="50" r="45" stroke="#e5e7eb" stroke-width="8" fill="none"></circle>
+                <circle id="mobile-progress-circle" cx="50" cy="50" r="45" stroke="#3b82f6" stroke-width="8" fill="none" stroke-linecap="round" stroke-dasharray="0 283"></circle>
+              </svg>
+              <div class="absolute inset-0 flex items-center justify-center">
+                <span id="mobile-progress-percentage" class="text-2xl font-bold text-blue-600">0%</span>
+              </div>
+            </div>
+          </div>
+          <p class="text-sm text-gray-600">Progreso del día</p>
+        </div>
+      </div>
+      
+      <!-- Today's Tasks -->
+      <div class="px-6">
+        <h2 class="text-xl font-semibold mb-4">Hoy toca:</h2>
+        
+        <!-- Weight Entry -->
+        <div class="mobile-card" onclick="openModal('weight')">
+          <div class="flex items-center justify-between">
+            <div class="flex items-center">
+              <div class="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center mr-4">
+                <span class="text-2xl">⚖️</span>
+              </div>
+              <div>
+                <h3 class="font-semibold">Pesaje Diario</h3>
+                <p class="text-sm text-gray-600">Registra tu peso de hoy</p>
+              </div>
+            </div>
+            <div class="text-right">
+              <div id="weight-status" class="text-sm pending">Pendiente</div>
+              <div class="text-xs text-gray-500">Toca para registrar</div>
+            </div>
+          </div>
+        </div>
+        
+        <!-- Workout Entry -->
+        <div class="mobile-card" onclick="openModal('workout')">
+          <div class="flex items-center justify-between">
+            <div class="flex items-center">
+              <div class="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center mr-4">
+                <span class="text-2xl">🏋️</span>
+              </div>
+              <div>
+                <h3 class="font-semibold">Entrenamiento</h3>
+                <p class="text-sm text-gray-600" id="workout-type">Pull - Espalda y Bíceps</p>
+              </div>
+            </div>
+            <div class="text-right">
+              <div id="workout-status" class="text-sm pending">Pendiente</div>
+              <div class="text-xs text-gray-500">Toca para registrar</div>
+            </div>
+          </div>
+        </div>
+        
+        <!-- Cardio Entry -->
+        <div class="mobile-card" onclick="openModal('cardio')">
+          <div class="flex items-center justify-between">
+            <div class="flex items-center">
+              <div class="w-12 h-12 bg-red-100 rounded-full flex items-center justify-center mr-4">
+                <span class="text-2xl">🏃</span>
+              </div>
+              <div>
+                <h3 class="font-semibold">Cardio</h3>
+                <p class="text-sm text-gray-600">25 min - 3.5 km</p>
+              </div>
+            </div>
+            <div class="text-right">
+              <div id="cardio-status" class="text-sm pending">Pendiente</div>
+              <div class="text-xs text-gray-500">Toca para registrar</div>
+            </div>
+          </div>
+        </div>
+        
+        <!-- Diet Entry -->
+        <div class="mobile-card" onclick="openModal('diet')">
+          <div class="flex items-center justify-between">
+            <div class="flex items-center">
+              <div class="w-12 h-12 bg-yellow-100 rounded-full flex items-center justify-center mr-4">
+                <span class="text-2xl">🥗</span>
+              </div>
+              <div>
+                <h3 class="font-semibold">Dieta</h3>
+                <p class="text-sm text-gray-600">1800 kcal - 150g proteínas</p>
+              </div>
+            </div>
+            <div class="text-right">
+              <div id="diet-status" class="text-sm pending">Pendiente</div>
+              <div class="text-xs text-gray-500">Toca para registrar</div>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Quick Stats -->
+      <div class="px-6 mt-6">
+        <div class="mobile-card">
+          <h3 class="font-semibold mb-3">Resumen de la semana</h3>
+          <div class="grid grid-cols-2 gap-4">
+            <div class="text-center">
+              <div class="text-2xl font-bold text-blue-600" id="week-workouts">0</div>
+              <div class="text-sm text-gray-600">Entrenamientos</div>
+            </div>
+            <div class="text-center">
+              <div class="text-2xl font-bold text-green-600" id="week-cardio">0</div>
+              <div class="text-sm text-gray-600">Sesiones cardio</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    <!-- Mobile Navigation -->
+    <div class="mobile-nav">
+      <div class="grid grid-cols-4 gap-2 px-4">
+        <div class="mobile-nav-item active">
+          <span class="text-2xl">📊</span>
+          <span class="text-xs mt-1">Hoy</span>
+        </div>
+        <div class="mobile-nav-item">
+          <span class="text-2xl">📈</span>
+          <span class="text-xs mt-1">Progreso</span>
+        </div>
+        <div class="mobile-nav-item">
+          <span class="text-2xl">📋</span>
+          <span class="text-xs mt-1">Historial</span>
+        </div>
+        <div class="mobile-nav-item">
+          <span class="text-2xl">⚙️</span>
+          <span class="text-xs mt-1">Ajustes</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Desktop Dashboard (Simplified) -->
+  <div class="desktop-only">
+    <div class="min-h-screen p-6">
+      <div class="max-w-4xl mx-auto">
+        <h1 class="text-3xl font-bold text-center mb-8">Mi Entrenamiento</h1>
+        
+        <!-- Quick Entry Form -->
+        <div class="quick-entry">
+          <h2 class="text-xl font-bold mb-6 text-center">Entrada Rápida de Hoy</h2>
+          <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+            <div>
+              <label class="block text-sm font-medium mb-2">Peso (kg)</label>
+              <input type="number" id="desktop-weight" step="0.1" placeholder="85.0" class="w-full">
+            </div>
+            <div>
+              <label class="block text-sm font-medium mb-2">Entrenamiento</label>
+              <select id="desktop-workout" class="w-full">
+                <option value="">Seleccionar...</option>
+                <option value="Pull">🏋️ Pull</option>
+                <option value="Push">💪 Push</option>
+                <option value="Piernas">🦵 Piernas</option>
+                <option value="Cardio">🏃 Cardio</option>
+                <option value="Descanso">😴 Descanso</option>
+              </select>
+            </div>
+            <div>
+              <label class="block text-sm font-medium mb-2">Cardio (km)</label>
+              <input type="number" id="desktop-cardio" step="0.1" placeholder="3.5" class="w-full">
+            </div>
+            <div class="flex items-end">
+              <button id="desktop-save" class="w-full bg-white text-purple-600 py-4 px-6 rounded-lg font-semibold hover:bg-gray-100 transition-colors">
+                💾 Guardar Todo
+              </button>
+            </div>
+          </div>
+        </div>
+        
+        <!-- Progress Cards -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+          <div class="bg-white p-6 rounded-xl shadow">
+            <h3 class="font-semibold mb-4">Progreso General</h3>
+            <div class="flex justify-center">
+              <div class="progress-circle">
+                <svg viewBox="0 0 100 100">
+                  <circle cx="50" cy="50" r="45" stroke="#e5e7eb" stroke-width="8" fill="none"></circle>
+                  <circle id="desktop-progress-circle" cx="50" cy="50" r="45" stroke="#3b82f6" stroke-width="8" fill="none" stroke-linecap="round" stroke-dasharray="0 283"></circle>
+                </svg>
+                <div class="absolute inset-0 flex items-center justify-center">
+                  <span id="desktop-progress-percentage" class="text-xl font-bold text-blue-600">0%</span>
+                </div>
+              </div>
+            </div>
+          </div>
+          
+          <div class="bg-white p-6 rounded-xl shadow">
+            <h3 class="font-semibold mb-4">Estado Actual</h3>
+            <div class="space-y-3">
+              <div class="flex justify-between">
+                <span class="text-sm text-gray-600">Peso</span>
+                <span id="desktop-current-weight" class="font-bold">85.0 kg</span>
+              </div>
+              <div class="w-full bg-gray-200 rounded-full h-2">
+                <div id="desktop-weight-bar" class="bg-gradient-to-r from-blue-500 to-blue-600 h-2 rounded-full transition-all duration-500" style="width:0%"></div>
+              </div>
+            </div>
+          </div>
+          
+          <div class="bg-white p-6 rounded-xl shadow">
+            <h3 class="font-semibold mb-4">Completado Hoy</h3>
+            <div id="desktop-todo-list" class="space-y-3"></div>
+          </div>
+        </div>
+        
+        <!-- Charts -->
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <div class="bg-white p-6 rounded-xl shadow">
+            <h3 class="font-semibold mb-4">Evolución del Peso</h3>
+            <canvas id="desktop-weight-chart" height="200"></canvas>
+          </div>
+          <div class="bg-white p-6 rounded-xl shadow">
+            <h3 class="font-semibold mb-4">Adherencia Semanal</h3>
+            <canvas id="desktop-adherence-chart" height="200"></canvas>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Data Entry Modals -->
+  <div id="weight-modal" class="modal">
+    <div class="modal-content">
+      <h3 class="text-xl font-bold mb-6 text-center">Pesaje Diario</h3>
+      <div class="space-y-4">
+        <div>
+          <label class="block text-sm font-medium mb-2">Peso (kg)</label>
+          <input type="number" id="modal-weight" step="0.1" placeholder="85.0" class="w-full p-4 border rounded-lg text-lg">
+        </div>
+        <div class="flex gap-3">
+          <button onclick="closeModal()" class="flex-1 py-3 px-4 bg-gray-200 rounded-lg">Cancelar</button>
+          <button onclick="saveWeight()" class="flex-1 py-3 px-4 bg-blue-600 text-white rounded-lg">Guardar</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div id="workout-modal" class="modal">
+    <div class="modal-content">
+      <h3 class="text-xl font-bold mb-6 text-center">Entrenamiento</h3>
+      <div class="space-y-4">
+        <div>
+          <label class="block text-sm font-medium mb-2">Tipo</label>
+          <select id="modal-workout-type" class="w-full p-4 border rounded-lg text-lg">
+            <option value="Pull">🏋️ Pull - Espalda y Bíceps</option>
+            <option value="Push">💪 Push - Pecho y Tríceps</option>
+            <option value="Piernas">🦵 Piernas</option>
+            <option value="Descanso">😴 Descanso</option>
+          </select>
+        </div>
+        <div>
+          <label class="block text-sm font-medium mb-2">¿Completado?</label>
+          <div class="flex gap-3">
+            <button onclick="saveWorkout(true)" class="flex-1 py-3 px-4 bg-green-600 text-white rounded-lg">✅ Sí</button>
+            <button onclick="saveWorkout(false)" class="flex-1 py-3 px-4 bg-gray-200 rounded-lg">❌ No</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div id="cardio-modal" class="modal">
+    <div class="modal-content">
+      <h3 class="text-xl font-bold mb-6 text-center">Cardio</h3>
+      <div class="space-y-4">
+        <div>
+          <label class="block text-sm font-medium mb-2">Distancia (km)</label>
+          <input type="number" id="modal-cardio-km" step="0.1" placeholder="3.5" class="w-full p-4 border rounded-lg text-lg">
+        </div>
+        <div>
+          <label class="block text-sm font-medium mb-2">Tiempo (min)</label>
+          <input type="number" id="modal-cardio-time" placeholder="25" class="w-full p-4 border rounded-lg text-lg">
+        </div>
+        <div class="flex gap-3">
+          <button onclick="closeModal()" class="flex-1 py-3 px-4 bg-gray-200 rounded-lg">Cancelar</button>
+          <button onclick="saveCardio()" class="flex-1 py-3 px-4 bg-blue-600 text-white rounded-lg">Guardar</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div id="diet-modal" class="modal">
+    <div class="modal-content">
+      <h3 class="text-xl font-bold mb-6 text-center">Dieta</h3>
+      <div class="space-y-4">
+        <div>
+          <label class="block text-sm font-medium mb-2">Calorías</label>
+          <input type="number" id="modal-diet-calories" placeholder="1800" class="w-full p-4 border rounded-lg text-lg">
+        </div>
+        <div>
+          <label class="block text-sm font-medium mb-2">Proteínas (g)</label>
+          <input type="number" id="modal-diet-protein" placeholder="150" class="w-full p-4 border rounded-lg text-lg">
+        </div>
+        <div class="flex gap-3">
+          <button onclick="closeModal()" class="flex-1 py-3 px-4 bg-gray-200 rounded-lg">Cancelar</button>
+          <button onclick="saveDiet()" class="flex-1 py-3 px-4 bg-blue-600 text-white rounded-lg">Guardar</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast Container -->
+  <div id="toast-container"></div>
+
+<script>
+// Data structure
+let estado = JSON.parse(localStorage.getItem('estado')) || [];
+let pesos = JSON.parse(localStorage.getItem('pesos')) || [];
+let cardio = JSON.parse(localStorage.getItem('cardio')) || [];
+let dieta = JSON.parse(localStorage.getItem('dieta')) || [];
+let adherenciaDiaria = JSON.parse(localStorage.getItem('adherenciaDiaria')) || {};
+
+// Helper functions
+const q = (s, d = document) => d.querySelector(s);
+const qa = (s, d = document) => Array.from(d.querySelectorAll(s));
+const todayISO = () => new Date().toISOString().split('T')[0];
+const daysName = ['Domingo', 'Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado'];
+const getTodayName = () => daysName[new Date().getDay()];
+const saveAll = () => {
+  localStorage.setItem('estado', JSON.stringify(estado));
+  localStorage.setItem('pesos', JSON.stringify(pesos));
+  localStorage.setItem('cardio', JSON.stringify(cardio));
+  localStorage.setItem('dieta', JSON.stringify(dieta));
+  localStorage.setItem('adherenciaDiaria', JSON.stringify(adherenciaDiaria));
+};
+
+// Toast notifications
+function showToast(message, type = 'success') {
+  const toast = document.createElement('div');
+  toast.className = `toast ${type}`;
+  toast.textContent = message;
+  
+  const container = q('#toast-container');
+  container.appendChild(toast);
+  
+  setTimeout(() => {
+    toast.style.animation = 'slideOut 0.3s ease forwards';
+    setTimeout(() => container.removeChild(toast), 300);
+  }, 3000);
+}
+
+// Mobile detection and initialization
+function isMobile() {
+  return window.innerWidth <= 768;
+}
+
+function initializeMobile() {
+  if (isMobile()) {
+    q('#mobile-date').textContent = new Date().toLocaleDateString('es-ES', { 
+      weekday: 'long', 
+      year: 'numeric', 
+      month: 'long', 
+      day: 'numeric' 
+    });
+    updateMobileProgress();
+    updateMobileStatuses();
+    updateMobileStats();
+  }
+}
+
+// Progress calculation
+function calculateProgress() {
+  const today = todayISO();
+  const todayAdherence = adherenciaDiaria[today] || {};
+  const tasks = ['pesos', 'cardio', 'dieta'];
+  const completed = tasks.filter(task => todayAdherence[task]).length;
+  return Math.round((completed / tasks.length) * 100);
+}
+
+function updateMobileProgress() {
+  const progress = calculateProgress();
+  const circle = q('#mobile-progress-circle');
+  const percentage = q('#mobile-progress-percentage');
+  
+  const circumference = 2 * Math.PI * 45;
+  const dasharray = `${(progress / 100) * circumference} ${circumference}`;
+  
+  circle.style.strokeDasharray = dasharray;
+  percentage.textContent = `${progress}%`;
+}
+
+function updateDesktopProgress() {
+  const progress = calculateProgress();
+  const circle = q('#desktop-progress-circle');
+  const percentage = q('#desktop-progress-percentage');
+  
+  const circumference = 2 * Math.PI * 45;
+  const dasharray = `${(progress / 100) * circumference} ${circumference}`;
+  
+  circle.style.strokeDasharray = dasharray;
+  percentage.textContent = `${progress}%`;
+}
+
+// Status updates
+function updateMobileStatuses() {
+  const today = todayISO();
+  const todayAdherence = adherenciaDiaria[today] || {};
+  
+  // Weight status
+  const weightStatus = q('#weight-status');
+  const hasWeight = estado.find(e => e.fecha === today);
+  weightStatus.textContent = hasWeight ? 'Completado' : 'Pendiente';
+  weightStatus.className = `text-sm ${hasWeight ? 'success' : 'pending'}`;
+  
+  // Workout status
+  const workoutStatus = q('#workout-status');
+  workoutStatus.textContent = todayAdherence.pesos ? 'Completado' : 'Pendiente';
+  workoutStatus.className = `text-sm ${todayAdherence.pesos ? 'success' : 'pending'}`;
+  
+  // Cardio status
+  const cardioStatus = q('#cardio-status');
+  cardioStatus.textContent = todayAdherence.cardio ? 'Completado' : 'Pendiente';
+  cardioStatus.className = `text-sm ${todayAdherence.cardio ? 'success' : 'pending'}`;
+  
+  // Diet status
+  const dietStatus = q('#diet-status');
+  dietStatus.textContent = todayAdherence.dieta ? 'Completado' : 'Pendiente';
+  dietStatus.className = `text-sm ${todayAdherence.dieta ? 'success' : 'pending'}`;
+}
+
+function updateMobileStats() {
+  // Count workouts this week
+  const weekStart = new Date();
+  weekStart.setDate(weekStart.getDate() - weekStart.getDay());
+  const weekEnd = new Date(weekStart);
+  weekEnd.setDate(weekEnd.getDate() + 6);
+  
+  let workoutCount = 0;
+  let cardioCount = 0;
+  
+  for (let d = new Date(weekStart); d <= weekEnd; d.setDate(d.getDate() + 1)) {
+    const date = d.toISOString().split('T')[0];
+    const adherence = adherenciaDiaria[date] || {};
+    if (adherence.pesos) workoutCount++;
+    if (adherence.cardio) cardioCount++;
+  }
+  
+  q('#week-workouts').textContent = workoutCount;
+  q('#week-cardio').textContent = cardioCount;
+}
+
+// Modal functions
+function openModal(type) {
+  q(`#${type}-modal`).classList.add('active');
+}
+
+function closeModal() {
+  qa('.modal').forEach(modal => modal.classList.remove('active'));
+}
+
+// Save functions
+function saveWeight() {
+  const weight = parseFloat(q('#modal-weight').value);
+  if (!weight || weight <= 0) {
+    showToast('⚠️ Ingresa un peso válido', 'error');
+    return;
+  }
+  
+  const fecha = todayISO();
+  estado = estado.filter(e => e.fecha !== fecha);
+  estado.push({ fecha, peso: weight, cintura: null });
+  estado.sort((a, b) => new Date(a.fecha) - new Date(b.fecha));
+  
+  saveAll();
+  showToast(`✅ Peso guardado: ${weight} kg`);
+  closeModal();
+  updateMobileProgress();
+  updateMobileStatuses();
+  updateDesktopProgress();
+}
+
+function saveWorkout(completed) {
+  const fecha = todayISO();
+  if (!adherenciaDiaria[fecha]) adherenciaDiaria[fecha] = {};
+  adherenciaDiaria[fecha].pesos = completed;
+  
+  saveAll();
+  showToast(completed ? '✅ Entrenamiento completado' : '❌ Entrenamiento cancelado');
+  closeModal();
+  updateMobileProgress();
+  updateMobileStatuses();
+  updateDesktopProgress();
+}
+
+function saveCardio() {
+  const km = parseFloat(q('#modal-cardio-km').value);
+  const time = parseInt(q('#modal-cardio-time').value);
+  
+  if (!km || !time || km <= 0 || time <= 0) {
+    showToast('⚠️ Ingresa valores válidos', 'error');
+    return;
+  }
+  
+  const fecha = todayISO();
+  cardio = cardio.filter(c => c.fecha !== fecha);
+  cardio.push({
+    fecha,
+    microciclo: 1,
+    sesionId: 1,
+    km,
+    tiempo: time,
+    ritmo: time / km,
+    calorias: Math.round(time * 10)
+  });
+  
+  if (!adherenciaDiaria[fecha]) adherenciaDiaria[fecha] = {};
+  adherenciaDiaria[fecha].cardio = true;
+  
+  saveAll();
+  showToast(`✅ Cardio guardado: ${km}km en ${time}min`);
+  closeModal();
+  updateMobileProgress();
+  updateMobileStatuses();
+  updateDesktopProgress();
+}
+
+function saveDiet() {
+  const calories = parseInt(q('#modal-diet-calories').value);
+  const protein = parseInt(q('#modal-diet-protein').value);
+  
+  if (!calories || !protein || calories <= 0 || protein <= 0) {
+    showToast('⚠️ Ingresa valores válidos', 'error');
+    return;
+  }
+  
+  const fecha = todayISO();
+  dieta = dieta.filter(d => d.fecha !== fecha);
+  dieta.push({
+    fecha,
+    calorias: calories,
+    proteinas: protein,
+    carbos: Math.round((calories - protein * 4) * 0.4 / 4),
+    grasas: Math.round((calories - protein * 4) * 0.2 / 9),
+    ayuno: false
+  });
+  
+  if (!adherenciaDiaria[fecha]) adherenciaDiaria[fecha] = {};
+  adherenciaDiaria[fecha].dieta = calories >= 1700 && calories <= 1900 && protein >= 150;
+  
+  saveAll();
+  showToast('✅ Dieta guardada');
+  closeModal();
+  updateMobileProgress();
+  updateMobileStatuses();
+  updateDesktopProgress();
+}
+
+// Desktop functions
+function handleDesktopSave() {
+  const weight = parseFloat(q('#desktop-weight').value);
+  const workout = q('#desktop-workout').value;
+  const cardioKm = parseFloat(q('#desktop-cardio').value);
+  
+  let savedItems = [];
+  
+  if (weight && weight > 0) {
+    const fecha = todayISO();
+    estado = estado.filter(e => e.fecha !== fecha);
+    estado.push({ fecha, peso: weight, cintura: null });
+    savedItems.push('Peso');
+  }
+  
+  if (workout && workout !== 'Descanso') {
+    const fecha = todayISO();
+    if (!adherenciaDiaria[fecha]) adherenciaDiaria[fecha] = {};
+    adherenciaDiaria[fecha].pesos = true;
+    savedItems.push('Entrenamiento');
+  }
+  
+  if (cardioKm && cardioKm > 0) {
+    const fecha = todayISO();
+    cardio = cardio.filter(c => c.fecha !== fecha);
+    cardio.push({
+      fecha,
+      microciclo: 1,
+      sesionId: 1,
+      km: cardioKm,
+      tiempo: Math.round(cardioKm * 7),
+      ritmo: Math.round(cardioKm * 7) / cardioKm,
+      calorias: Math.round(cardioKm * 7 * 10)
+    });
+    if (!adherenciaDiaria[fecha]) adherenciaDiaria[fecha] = {};
+    adherenciaDiaria[fecha].cardio = true;
+    savedItems.push('Cardio');
+  }
+  
+  if (savedItems.length > 0) {
+    saveAll();
+    showToast(`✅ Guardado: ${savedItems.join(', ')}`);
+    
+    // Clear form
+    q('#desktop-weight').value = '';
+    q('#desktop-workout').value = '';
+    q('#desktop-cardio').value = '';
+    
+    updateDesktopProgress();
+    updateDesktopTodoList();
+  } else {
+    showToast('⚠️ Introduce al menos un dato', 'warning');
+  }
+}
+
+function updateDesktopTodoList() {
+  const today = todayISO();
+  const todayAdherence = adherenciaDiaria[today] || {};
+  const container = q('#desktop-todo-list');
+  
+  const tasks = [
+    { id: 'pesos', label: 'Entrenamiento', icon: '🏋️' },
+    { id: 'cardio', label: 'Cardio', icon: '🏃' },
+    { id: 'dieta', label: 'Dieta', icon: '🥗' }
+  ];
+  
+  container.innerHTML = '';
+  tasks.forEach(task => {
+    const completed = todayAdherence[task.id];
+    const div = document.createElement('div');
+    div.className = 'flex items-center justify-between';
+    div.innerHTML = `
+      <span class="flex items-center">
+        <span class="mr-2">${task.icon}</span>
+        <span class="text-sm">${task.label}</span>
+      </span>
+      <span class="text-sm ${completed ? 'text-green-600' : 'text-gray-500'}">
+        ${completed ? '✅' : '⏳'}
+      </span>
+    `;
+    container.appendChild(div);
+  });
+}
+
+// Charts
+let weightChart = null, adherenceChart = null;
+
+function createWeightChart() {
+  if (weightChart) {
+    try { weightChart.destroy(); } catch(e) {}
+    weightChart = null;
+  }
+  
+  const ctx = q('#desktop-weight-chart').getContext('2d');
+  weightChart = new Chart(ctx, {
+    type: 'line',
+    data: {
+      labels: [],
+      datasets: [{
+        label: 'Peso',
+        data: [],
+        borderColor: '#3b82f6',
+        backgroundColor: 'rgba(59,130,246,0.1)',
+        tension: 0.3,
+        fill: true
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: { display: false }
+      },
+      scales: {
+        y: { beginAtZero: false }
+      }
+    }
+  });
+  updateWeightChart();
+}
+
+function updateWeightChart() {
+  if (!weightChart) return createWeightChart();
+  
+  const labels = estado.slice(-7).map(e => new Date(e.fecha).toLocaleDateString());
+  const data = estado.slice(-7).map(e => e.peso);
+  
+  weightChart.data.labels = labels.length ? labels : ['Inicio'];
+  weightChart.data.datasets[0].data = data.length ? data : [85];
+  weightChart.update();
+}
+
+function createAdherenceChart() {
+  if (adherenceChart) {
+    try { adherenceChart.destroy(); } catch(e) {}
+    adherenceChart = null;
+  }
+  
+  const ctx = q('#desktop-adherence-chart').getContext('2d');
+  adherenceChart = new Chart(ctx, {
+    type: 'bar',
+    data: {
+      labels: [],
+      datasets: [{
+        label: 'Adherencia (%)',
+        data: [],
+        borderRadius: 4,
+        backgroundColor: []
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: { display: false }
+      },
+      scales: {
+        y: { beginAtZero: true, max: 100 }
+      }
+    }
+  });
+  updateAdherenceChart();
+}
+
+function updateAdherenceChart() {
+  if (!adherenceChart) return createAdherenceChart();
+  
+  const labels = [];
+  const data = [];
+  
+  for (let i = 6; i >= 0; i--) {
+    const d = new Date();
+    d.setDate(d.getDate() - i);
+    const iso = d.toISOString().split('T')[0];
+    labels.push(daysName[d.getDay()].slice(0, 3));
+    
+    const adherence = adherenciaDiaria[iso] || {};
+    const completed = (adherence.pesos ? 1 : 0) + (adherence.cardio ? 1 : 0) + (adherence.dieta ? 1 : 0);
+    data.push(Math.round((completed / 3) * 100));
+  }
+  
+  adherenceChart.data.labels = labels;
+  adherenceChart.data.datasets[0].data = data;
+  adherenceChart.data.datasets[0].backgroundColor = data.map(d => 
+    d >= 75 ? '#10b981' : d >= 50 ? '#f59e0b' : '#ef4444'
+  );
+  adherenceChart.update();
+}
+
+// Initialize
+document.addEventListener('DOMContentLoaded', () => {
+  // Mobile initialization
+  initializeMobile();
+  
+  // Desktop initialization
+  if (!isMobile()) {
+    createWeightChart();
+    createAdherenceChart();
+    updateDesktopProgress();
+    updateDesktopTodoList();
+    
+    // Desktop event listeners
+    q('#desktop-save').addEventListener('click', handleDesktopSave);
+  }
+  
+  // Global event listeners
+  qa('.mobile-nav-item').forEach((item, index) => {
+    item.addEventListener('click', () => {
+      qa('.mobile-nav-item').forEach(i => i.classList.remove('active'));
+      item.classList.add('active');
+      showToast('🚧 Funcionalidad en desarrollo');
+    });
+  });
+  
+  // Close modals on background click
+  qa('.modal').forEach(modal => {
+    modal.addEventListener('click', (e) => {
+      if (e.target === modal) closeModal();
+    });
+  });
+  
+  // Welcome message
+  setTimeout(() => {
+    showToast('🎉 ¡Bienvenido a tu entrenamiento optimizado!');
+  }, 1000);
+});
+
+// Update current weight display
+function updateCurrentWeight() {
+  const lastWeight = estado.length > 0 ? estado[estado.length - 1].peso : 85;
+  q('#desktop-current-weight').textContent = `${lastWeight.toFixed(1)} kg`;
+  
+  // Update weight progress bar
+  const initialWeight = 85;
+  const targetWeight = 80;
+  const progress = Math.max(0, Math.min(100, ((initialWeight - lastWeight) / (initialWeight - targetWeight)) * 100));
+  q('#desktop-weight-bar').style.width = `${progress}%`;
+}
+
+// Periodic updates
+setInterval(() => {
+  if (isMobile()) {
+    updateMobileProgress();
+    updateMobileStatuses();
+  } else {
+    updateDesktopProgress();
+    updateDesktopTodoList();
+    updateCurrentWeight();
+  }
+}, 30000);
+</script>
+</body>
+</html>
