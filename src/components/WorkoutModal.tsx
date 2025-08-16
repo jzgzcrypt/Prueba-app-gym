@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { Exercise, Set, Mesociclo, Progresion } from '@/types';
-import { getCurrentMesocicloDay, calcularProgresionDinamica } from '@/utils/mesocicloUtils';
+import { getCurrentMesocicloDay, calcularProgresionDinamica, parseEjercicioMesociclo } from '@/utils/mesocicloUtils';
 
 interface WorkoutModalProps {
   isOpen: boolean;
@@ -63,32 +63,23 @@ const getWorkoutExercises = (): Exercise[] => {
   const ejerciciosMesociclo = currentData.dia.ejercicios;
   
   const exercises = ejerciciosMesociclo.map(ejercicio => {
-    // Extraer nombre del ejercicio (antes del paréntesis)
-    const nombre = ejercicio.split('(')[0].trim();
-    // Extraer series y repeticiones del paréntesis
-    const seriesMatch = ejercicio.match(/\(([^)]+)\)/);
-    const seriesInfo = seriesMatch ? seriesMatch[1] : '3x10';
-    
-    // Determinar número de series basado en la información
-    let numSeries = 3;
-    if (seriesInfo.includes('1x') && seriesInfo.includes('2x')) {
-      numSeries = 3; // Top set + 2 rest sets
-    } else if (seriesInfo.includes('3x')) {
-      numSeries = 3;
-    } else if (seriesInfo.includes('2x')) {
-      numSeries = 2;
-    }
+    // Usar el parser para extraer información detallada
+    const ejercicioPlan = parseEjercicioMesociclo(ejercicio);
     
     return {
-      nombre,
-      series: Array(numSeries).fill(null).map(() => ({ 
-        peso: mesociclo.pesos[nombre] || 0, 
+      nombre: ejercicioPlan.nombre,
+      series: ejercicioPlan.series.map(seriePlan => ({ 
+        peso: mesociclo.pesos[ejercicioPlan.nombre] || 0, 
         repeticiones: 0, 
-        completado: false 
+        completado: false,
+        repeticionesObjetivo: seriePlan.repeticionesObjetivo,
+        rpeObjetivo: seriePlan.rpeObjetivo,
+        tipo: seriePlan.tipo
       })),
       completado: false,
-      pesoSugerido: mesociclo.pesos[nombre] || 0,
-      repeticionesObjetivo: mesociclo.repeticionesObjetivo[nombre] || 10
+      pesoSugerido: mesociclo.pesos[ejercicioPlan.nombre] || 0,
+      repeticionesObjetivo: mesociclo.repeticionesObjetivo[ejercicioPlan.nombre] || 10,
+      descripcion: ejercicioPlan.descripcion
     };
   });
   
@@ -158,8 +149,8 @@ export function WorkoutModal({ isOpen, onClose, onComplete, workoutType }: Worko
                 <div className="flex items-center justify-between mb-4">
                   <div>
                     <h4 className="font-semibold text-lg">{exercise.nombre}</h4>
-                    <p className="text-sm text-gray-600">
-                      Objetivo: {exercise.repeticionesObjetivo} repeticiones
+                    <p className="text-sm text-gray-600 mb-2">
+                      {exercise.descripcion}
                     </p>
                     {exercise.progresion && (
                       <div className="space-y-1">
@@ -202,16 +193,24 @@ export function WorkoutModal({ isOpen, onClose, onComplete, workoutType }: Worko
                     <thead>
                       <tr>
                         <th>Serie</th>
+                        <th>Tipo</th>
                         <th>Peso (kg)</th>
                         <th>Reps</th>
+                        <th>Objetivo</th>
                         <th>RPE</th>
+                        <th>Objetivo</th>
                         <th>Estado</th>
                       </tr>
                     </thead>
                     <tbody>
                       {exercise.series.map((set, setIndex) => (
-                        <tr key={setIndex}>
+                        <tr key={setIndex} className={set.tipo === 'top' ? 'bg-yellow-50' : ''}>
                           <td className="font-medium">{setIndex + 1}</td>
+                          <td>
+                            {set.tipo === 'top' && <span className="text-xs bg-yellow-200 text-yellow-800 px-2 py-1 rounded">TOP</span>}
+                            {set.tipo === 'rest' && <span className="text-xs bg-blue-200 text-blue-800 px-2 py-1 rounded">REST</span>}
+                            {set.tipo === 'normal' && <span className="text-xs bg-gray-200 text-gray-800 px-2 py-1 rounded">NORM</span>}
+                          </td>
                           <td>
                             <input
                               type="number"
@@ -227,10 +226,13 @@ export function WorkoutModal({ isOpen, onClose, onComplete, workoutType }: Worko
                               type="number"
                               value={set.repeticiones || ''}
                               onChange={(e) => updateSet(exerciseIndex, setIndex, 'repeticiones', Number(e.target.value))}
-                              placeholder={exercise.repeticionesObjetivo?.toString() || "0"}
+                              placeholder="0"
                               className="input-compact w-20"
                               disabled={set.completado}
                             />
+                          </td>
+                          <td className="text-xs text-gray-600 font-medium">
+                            {set.repeticionesObjetivo}
                           </td>
                           <td>
                             <input
@@ -243,6 +245,9 @@ export function WorkoutModal({ isOpen, onClose, onComplete, workoutType }: Worko
                               className="input-compact w-16"
                               disabled={set.completado}
                             />
+                          </td>
+                          <td className="text-xs text-gray-600 font-medium">
+                            {set.rpeObjetivo}
                           </td>
                           <td>
                             <button

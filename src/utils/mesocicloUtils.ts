@@ -662,3 +662,95 @@ export const calcularProgresionDinamica = (
     ajusteRepeticiones
   };
 };
+
+// Interfaces para el parsing de ejercicios
+export interface SeriePlan {
+  numero: number;
+  repeticionesObjetivo: string; // "5-7", "8-10", "12-15", etc.
+  tipo: 'top' | 'rest' | 'normal';
+  rpeObjetivo?: number;
+}
+
+export interface EjercicioPlan {
+  nombre: string;
+  series: SeriePlan[];
+  descripcion: string;
+}
+
+// Parser para convertir el formato del mesociclo a un plan registrable
+export const parseEjercicioMesociclo = (ejercicioString: string): EjercicioPlan => {
+  // Extraer nombre del ejercicio (antes del paréntesis)
+  const nombre = ejercicioString.split('(')[0].trim();
+  
+  // Extraer información de series del paréntesis
+  const seriesMatch = ejercicioString.match(/\(([^)]+)\)/);
+  const seriesInfo = seriesMatch ? seriesMatch[1] : '3x10';
+  
+  const series: SeriePlan[] = [];
+  let serieNumero = 1;
+  
+  // Parsear diferentes formatos de series
+  if (seriesInfo.includes('+')) {
+    // Formato: "1x5-7 + 2x8-10" o "1x8-10 + 1x10-12"
+    const partes = seriesInfo.split('+').map(p => p.trim());
+    
+    partes.forEach(parte => {
+      const match = parte.match(/(\d+)x([^x]+)/);
+      if (match) {
+        const numSeries = parseInt(match[1]);
+        const reps = match[2].trim();
+        
+        for (let i = 0; i < numSeries; i++) {
+          series.push({
+            numero: serieNumero++,
+            repeticionesObjetivo: reps,
+            tipo: serieNumero === 2 ? 'top' : 'rest', // Primera serie es top set
+            rpeObjetivo: determinarRpeObjetivo(reps)
+          });
+        }
+      }
+    });
+  } else {
+    // Formato simple: "2x10-12", "3x8-10", etc.
+    const match = seriesInfo.match(/(\d+)x([^x]+)/);
+    if (match) {
+      const numSeries = parseInt(match[1]);
+      const reps = match[2].trim();
+      
+      for (let i = 0; i < numSeries; i++) {
+        series.push({
+          numero: serieNumero++,
+          repeticionesObjetivo: reps,
+          tipo: 'normal',
+          rpeObjetivo: determinarRpeObjetivo(reps)
+        });
+      }
+    }
+  }
+  
+  return {
+    nombre,
+    series,
+    descripcion: ejercicioString
+  };
+};
+
+// Función para determinar RPE objetivo basado en el rango de repeticiones
+const determinarRpeObjetivo = (reps: string): number => {
+  if (reps.includes('>')) return 8; // ">15" = RPE alto
+  if (reps.includes('-')) {
+    const [min, max] = reps.split('-').map(r => parseInt(r));
+    const promedio = (min + max) / 2;
+    
+    if (promedio <= 6) return 9; // RPE muy alto para pocas reps
+    if (promedio <= 8) return 8; // RPE alto para reps medias
+    if (promedio <= 12) return 7; // RPE medio para reps altas
+    return 6; // RPE bajo para muchas reps
+  }
+  
+  const num = parseInt(reps);
+  if (num <= 6) return 9;
+  if (num <= 8) return 8;
+  if (num <= 12) return 7;
+  return 6;
+};

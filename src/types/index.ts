@@ -20,6 +20,7 @@ export interface Exercise {
   pesoSugerido?: number; // Peso sugerido del mesociclo
   repeticionesObjetivo?: number; // Repeticiones objetivo (ej: 10-12)
   progresion?: Progresion; // Historial de progresión
+  descripcion?: string; // Descripción original del ejercicio del mesociclo
 }
 
 export interface Set {
@@ -27,6 +28,9 @@ export interface Set {
   repeticiones: number;
   completado: boolean;
   rpe?: number; // Rate of Perceived Exertion (1-10)
+  repeticionesObjetivo?: string; // "5-7", "8-10", etc.
+  rpeObjetivo?: number; // RPE objetivo para esta serie
+  tipo?: 'top' | 'rest' | 'normal'; // Tipo de serie
 }
 
 export interface Progresion {
