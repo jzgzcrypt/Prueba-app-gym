@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { Exercise, Set, Mesociclo, Progresion } from '@/types';
+import { getCurrentMesocicloDay } from '@/utils/mesocicloUtils';
 
 interface WorkoutModalProps {
   isOpen: boolean;
@@ -94,67 +95,12 @@ const calcularProgresion = (ejercicio: string, series: Set[], pesoActual: number
   };
 };
 
-const getWorkoutExercises = (type: string): Exercise[] => {
+const getWorkoutExercises = (): Exercise[] => {
   const mesociclo = getCurrentMesociclo();
   
-  // Obtener ejercicios del día actual del mesociclo
-  const getCurrentDayExercises = (): string[] => {
-    const currentData = {
-      microciclos: [
-        {
-          id: 1,
-          dias: [
-            { 
-              dia: "Día 1", 
-              entrenamiento: "Pull (Espalda, Bíceps, Core)", 
-              ejercicios: [
-                "Bent over rows con mancuernas (1x8-10 + 2x10-12)",
-                "Jalón polea alta pecho apoyado unilateral (3x8-10)",
-                "Remo polea pecho apoyado unilateral (2x8-10)",
-                "Face pull polea alta boca arriba (2x12-15)",
-                "Low cable rear delt row (2x12-15)",
-                "Curl alterno con mancuernas (1x6-8 + 2x10-12)",
-                "Curl bayesian en polea (2x10-12)",
-                "Crunch abdominal en polea alta (2x12-15)"
-              ]
-            },
-            { 
-              dia: "Día 2", 
-              entrenamiento: "Push (Pecho, Hombros, Tríceps, Core)", 
-              ejercicios: [
-                "Press inclinado multipower 45º (1x5-7 + 2x8-10)",
-                "Contractora pectoral máquina inclinada (2x10-12)",
-                "Press en máquina (2x8-10)",
-                "Elevaciones laterales polea con muñequera (2x12-15)",
-                "Elevaciones laterales mancuernas (2x>15)",
-                "Press francés mancuernas (1x8-10 + 2x10-12)",
-                "Extensión tríceps katana polea baja (2x8-10)",
-                "Crunch abdominal en polea alta (2x12-15)"
-              ]
-            },
-            { 
-              dia: "Día 3", 
-              entrenamiento: "Piernas (Frecuencia 1)", 
-              ejercicios: [
-                "Aducción de cadera en máquina (2x12-15)",
-                "Prensa 45º (1x6-8 + 2x8-10)",
-                "Sentadilla búlgara énfasis glúteo (1x6-8 + 2x8-10)",
-                "Curl femoral en máquina (2x12-15)",
-                "Extensión de rodilla en máquina (2x12-15)",
-                "Elevaciones de talones en máquina (2x12-15)"
-              ]
-            }
-          ]
-        }
-      ]
-    };
-    
-    // Por ahora usar el día 1, se puede hacer dinámico
-    return currentData.microciclos[0].dias[0].ejercicios;
-  };
-  
-  // Convertir ejercicios del mesociclo al formato requerido
-  const ejerciciosMesociclo = getCurrentDayExercises();
+  // Obtener ejercicios del día actual del mesociclo dinámicamente
+  const currentData = getCurrentMesocicloDay();
+  const ejerciciosMesociclo = currentData.dia.ejercicios;
   
   const exercises = ejerciciosMesociclo.map(ejercicio => {
     // Extraer nombre del ejercicio (antes del paréntesis)
@@ -190,7 +136,7 @@ const getWorkoutExercises = (type: string): Exercise[] => {
 };
 
 export function WorkoutModal({ isOpen, onClose, onComplete, workoutType }: WorkoutModalProps) {
-  const [exercises, setExercises] = useState<Exercise[]>(getWorkoutExercises(workoutType));
+  const [exercises, setExercises] = useState<Exercise[]>(getWorkoutExercises());
 
   const updateSet = (exerciseIndex: number, setIndex: number, field: keyof Set, value: number) => {
     const newExercises = [...exercises];
