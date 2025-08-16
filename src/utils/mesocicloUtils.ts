@@ -361,10 +361,15 @@ export const getCurrentMesocicloDay = () => {
   
   // Obtener fecha de inicio desde localStorage o usar fecha por defecto
   let startDate: Date;
-  if (typeof window !== 'undefined') {
-    const storedStartDate = localStorage.getItem('mesociclo_start_date');
-    startDate = storedStartDate ? new Date(storedStartDate) : new Date('2024-08-01');
-  } else {
+  try {
+    if (typeof window !== 'undefined') {
+      const storedStartDate = localStorage.getItem('mesociclo_start_date');
+      startDate = storedStartDate ? new Date(storedStartDate) : new Date('2024-08-01');
+    } else {
+      startDate = new Date('2024-08-01');
+    }
+  } catch {
+    // Fallback en caso de error
     startDate = new Date('2024-08-01');
   }
   
@@ -533,8 +538,12 @@ export const getWeeklyPlan = () => {
  * @param startDate - Fecha de inicio del mesociclo
  */
 export const setMesocicloStartDate = (startDate: Date) => {
-  if (typeof window !== 'undefined') {
-    localStorage.setItem('mesociclo_start_date', startDate.toISOString());
+  try {
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('mesociclo_start_date', startDate.toISOString());
+    }
+  } catch {
+    console.error('Error al guardar fecha de inicio');
   }
 };
 
@@ -544,9 +553,13 @@ export const setMesocicloStartDate = (startDate: Date) => {
  * @returns Fecha de inicio o null si no está configurada
  */
 export const getMesocicloStartDate = (): Date | null => {
-  if (typeof window !== 'undefined') {
-    const storedDate = localStorage.getItem('mesociclo_start_date');
-    return storedDate ? new Date(storedDate) : null;
+  try {
+    if (typeof window !== 'undefined') {
+      const storedDate = localStorage.getItem('mesociclo_start_date');
+      return storedDate ? new Date(storedDate) : null;
+    }
+  } catch {
+    console.error('Error al obtener fecha de inicio');
   }
   return null;
 };

@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useLocalStorage } from '@/hooks/useLocalStorage';
 import { useToast } from '@/hooks/useToast';
 import { ToastContainer } from '@/components/ToastContainer';
@@ -71,7 +71,39 @@ export default function Dashboard() {
   const todayISO = () => new Date().toISOString().split('T')[0];
 
   // Obtener datos del día actual del mesociclo (memoizado para evitar recálculos)
-  const currentData = getCurrentMesocicloDay();
+  const [currentData, setCurrentData] = useState(() => {
+    try {
+      return getCurrentMesocicloDay();
+    } catch {
+      // Fallback en caso de error durante SSR
+      return {
+        microciclo: { nombre: 'Cargando...', dias: [] },
+        dia: { 
+          dia: 'Cargando...', 
+          entrenamiento: 'Cargando...', 
+          ejercicios: [],
+          cardio: undefined
+        },
+        mesociclo: { nombre: 'Cargando...', microciclos: [] },
+        semanaActual: 1,
+        diaSemana: 0,
+        diaMesociclo: 1,
+        diasTranscurridos: 0,
+        diasEnMicrociclo: 0,
+        microcicloCompletado: false
+      };
+    }
+  });
+
+  // Actualizar datos del mesociclo cuando el componente se monta en el cliente
+  useEffect(() => {
+    try {
+      const updatedData = getCurrentMesocicloDay();
+      setCurrentData(updatedData);
+    } catch {
+      console.error('Error al actualizar datos del mesociclo');
+    }
+  }, []);
 
   const calculateProgress = () => {
     const today = todayISO();
@@ -379,6 +411,15 @@ export default function Dashboard() {
     }
     
     setMesocicloStartDate(startDate);
+    
+    // Actualizar datos del mesociclo con la nueva fecha
+    try {
+      const updatedData = getCurrentMesocicloDay();
+      setCurrentData(updatedData);
+    } catch {
+      console.error('Error al actualizar datos del mesociclo');
+    }
+    
     showToast(`✅ Fecha de inicio configurada: ${startDate.toLocaleDateString()}`);
     setShowStartDateConfig(false);
     setStartDateInput('');
