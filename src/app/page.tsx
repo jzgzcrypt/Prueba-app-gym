@@ -11,6 +11,7 @@ import { WeightEntry, CardioEntry, DietEntry, DailyAdherence, WorkoutEntry, Exer
 import { AnalyticsSection } from '@/components/analytics/AnalyticsSection';
 import { NotificationSystem } from '@/components/analytics/NotificationSystem';
 import { LoadingFallback } from '@/components/LoadingFallback';
+import { ClientOnly } from '@/components/ClientOnly';
 import { getCurrentMesocicloDay, setMesocicloStartDate, getMesocicloStartDate, testMesocicloTracking, calcularCaloriasEntrenoNoProgramado } from '@/utils/mesocicloUtils';
 
 export default function Dashboard() {
@@ -890,14 +891,44 @@ export default function Dashboard() {
         <h2 className="text-xl font-semibold mb-4">🎯 Hoy toca (Actualizado):</h2>
         
         {/* Current Day Info */}
-        {(() => {
+        <ClientOnly fallback={
+          <div className="clean-card mb-4">
+            <div className="flex items-center gap-3 mb-3">
+              <div className="w-10 h-10 bg-primary rounded-full flex items-center justify-center text-white font-bold">
+                ...
+              </div>
+              <div>
+                <h3 className="font-semibold text-lg">Cargando...</h3>
+                <p className="text-sm text-gray-600">Cargando mesociclo</p>
+              </div>
+            </div>
+          </div>
+        }>
+          {(() => {
           let currentData;
           let startDate;
           
-          try {
-            currentData = getCurrentMesocicloDay();
-            startDate = getMesocicloStartDate();
-          } catch {
+          // Solo ejecutar en el cliente
+          if (typeof window !== 'undefined') {
+            try {
+              currentData = getCurrentMesocicloDay();
+              startDate = getMesocicloStartDate();
+            } catch {
+              // Fallback en caso de error
+              currentData = {
+                microciclo: { nombre: 'Cargando...', dias: [] },
+                dia: { dia: 'Día 1', entrenamiento: 'Cargando...', ejercicios: [], cardio: undefined },
+                mesociclo: { nombre: 'Cargando...', microciclos: [] },
+                semanaActual: 1,
+                diaSemana: 0,
+                diaMesociclo: 1,
+                diasTranscurridos: 0,
+                diasEnMicrociclo: 0,
+                microcicloCompletado: false
+              };
+              startDate = null;
+            }
+          } else {
             // Fallback para SSR
             currentData = {
               microciclo: { nombre: 'Cargando...', dias: [] },
@@ -1148,7 +1179,15 @@ export default function Dashboard() {
   );
 
   const renderMesocicloSection = () => {
-    const startDate = getMesocicloStartDate();
+    let startDate = null;
+    if (typeof window !== 'undefined') {
+      try {
+        startDate = getMesocicloStartDate();
+      } catch {
+        startDate = null;
+      }
+    }
+    
     const mesociclo = {
       nombre: "Mesociclo 1 Definitivo - Definición",
       duracion: "6 semanas (Agosto - Mediados Septiembre)",
