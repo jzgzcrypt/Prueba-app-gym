@@ -50,6 +50,30 @@ export interface CardioEntry {
   tiempo: number;
   ritmo: number;
   calorias: number;
+  tipo: 'cinta' | 'pasos' | 'mesociclo';
+  intensidad?: string; // Para pasos: 'ritmo rápido', 'andar normal', etc.
+  inclinacion?: number; // Para cinta
+  pasos?: number; // Para registro de pasos
+}
+
+export interface NeatEntry {
+  fecha: string;
+  tipo: 'pasos' | 'cinta';
+  pasos?: number;
+  ritmo?: string; // 'ritmo rápido', 'andar normal', 'caminar rápido', 'paseo'
+  km?: number;
+  ritmoKmH?: number;
+  inclinacion?: number;
+  calorias: number;
+  duracion: number; // en minutos
+}
+
+export interface SeguimientoEntry {
+  fecha: string;
+  peso: number;
+  cintura: number;
+  porcentajeGraso?: number;
+  notas?: string;
 }
 
 export interface DietEntry {
@@ -67,6 +91,8 @@ export interface DailyAdherence {
     cardio?: boolean;
     dieta?: boolean;
     workout?: boolean;
+    neat?: boolean;
+    seguimiento?: boolean;
   };
 }
 

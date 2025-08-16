@@ -7,7 +7,7 @@ import { ToastContainer } from '@/components/ToastContainer';
 import { ProgressCircle } from '@/components/ProgressCircle';
 import { WorkoutModal } from '@/components/WorkoutModal';
 import { WeeklyCalendar } from '@/components/WeeklyCalendar';
-import { WeightEntry, CardioEntry, DietEntry, DailyAdherence, WorkoutEntry, Exercise } from '@/types';
+import { WeightEntry, CardioEntry, DietEntry, DailyAdherence, WorkoutEntry, Exercise, NeatEntry, SeguimientoEntry } from '@/types';
 
 export default function Dashboard() {
   const { showToast } = useToast();
@@ -35,6 +35,8 @@ export default function Dashboard() {
   const [cardio, setCardio] = useLocalStorage<CardioEntry[]>('cardio', []);
   const [dieta, setDieta] = useLocalStorage<DietEntry[]>('dieta', []);
   const [workouts, setWorkouts] = useLocalStorage<WorkoutEntry[]>('workouts', []);
+  const [neat, setNeat] = useLocalStorage<NeatEntry[]>('neat', []);
+  const [seguimiento, setSeguimiento] = useLocalStorage<SeguimientoEntry[]>('seguimiento', []);
   const [adherenciaDiaria, setAdherenciaDiaria] = useLocalStorage<DailyAdherence>('adherenciaDiaria', {});
 
   // Form states
@@ -43,6 +45,20 @@ export default function Dashboard() {
   const [cardioTime, setCardioTime] = useState('');
   const [dietCalories, setDietCalories] = useState('');
   const [dietProtein, setDietProtein] = useState('');
+  
+  // NEAT form states
+  const [neatTipo, setNeatTipo] = useState<'pasos' | 'cinta'>('pasos');
+  const [neatPasos, setNeatPasos] = useState('');
+  const [neatRitmo, setNeatRitmo] = useState('');
+  const [neatKm, setNeatKm] = useState('');
+  const [neatRitmoKmH, setNeatRitmoKmH] = useState('');
+  const [neatInclinacion, setNeatInclinacion] = useState('');
+  const [neatDuracion, setNeatDuracion] = useState('');
+  
+  // Seguimiento form states
+  const [seguimientoPeso, setSeguimientoPeso] = useState('');
+  const [seguimientoCintura, setSeguimientoCintura] = useState('');
+  const [seguimientoNotas, setSeguimientoNotas] = useState('');
 
   // Desktop form states
   const [desktopWeight, setDesktopWeight] = useState('');
@@ -176,7 +192,7 @@ export default function Dashboard() {
   const calculateProgress = () => {
     const today = todayISO();
     const todayAdherence = adherenciaDiaria[today] || {};
-    const tasks = ['pesos', 'cardio', 'dieta'] as const;
+    const tasks = ['workout', 'cardio', 'dieta', 'neat'] as const;
     const completed = tasks.filter(task => todayAdherence[task]).length;
     return Math.round((completed / tasks.length) * 100);
   };
@@ -210,6 +226,20 @@ export default function Dashboard() {
     setCardioTime('');
     setDietCalories('');
     setDietProtein('');
+    
+    // Reset NEAT form states
+    setNeatTipo('pasos');
+    setNeatPasos('');
+    setNeatRitmo('');
+    setNeatKm('');
+    setNeatRitmoKmH('');
+    setNeatInclinacion('');
+    setNeatDuracion('');
+    
+    // Reset seguimiento form states
+    setSeguimientoPeso('');
+    setSeguimientoCintura('');
+    setSeguimientoNotas('');
   };
 
   const handleWorkoutComplete = (exercises: Exercise[]) => {
@@ -263,6 +293,10 @@ export default function Dashboard() {
       return;
     }
 
+    // Obtener cardio del mesociclo para hoy
+    const currentData = getCurrentMesocicloDay();
+    const cardioMesociclo = currentData.dia.cardio;
+
     const fecha = todayISO();
     const newCardio = cardio.filter(c => c.fecha !== fecha);
     newCardio.push({
@@ -272,7 +306,9 @@ export default function Dashboard() {
       km,
       tiempo: time,
       ritmo: time / km,
-      calorias: Math.round(time * 10)
+      calorias: Math.round(time * 10),
+      tipo: 'mesociclo',
+      intensidad: cardioMesociclo?.intensidad || 'Moderado'
     });
 
     const newAdherencia = { ...adherenciaDiaria };
@@ -281,7 +317,7 @@ export default function Dashboard() {
 
     setCardio(newCardio);
     setAdherenciaDiaria(newAdherencia);
-    showToast(`✅ Cardio guardado: ${km}km en ${time}min`);
+    showToast(`✅ Cardio guardado: ${km}km en ${time}min (${cardioMesociclo?.tipo || 'Cardio'})`);
     closeModal();
   };
 
@@ -315,6 +351,134 @@ export default function Dashboard() {
     closeModal();
   };
 
+  const saveNeat = () => {
+    const fecha = todayISO();
+    
+    if (neatTipo === 'pasos') {
+      const pasos = parseInt(neatPasos);
+      const ritmo = neatRitmo;
+      
+      if (!pasos || !ritmo || pasos <= 0) {
+        showToast('⚠️ Ingresa valores válidos', 'error');
+        return;
+      }
+
+      // Calcular calorías basado en pasos y ritmo
+      let caloriasPorPaso = 0.04; // Base
+      let duracion = 60; // Base 1 hora
+      
+      switch (ritmo) {
+        case 'ritmo rápido':
+          caloriasPorPaso = 0.06;
+          duracion = 45;
+          break;
+        case 'andar normal':
+          caloriasPorPaso = 0.04;
+          duracion = 60;
+          break;
+        case 'caminar rápido':
+          caloriasPorPaso = 0.05;
+          duracion = 50;
+          break;
+        case 'paseo':
+          caloriasPorPaso = 0.03;
+          duracion = 75;
+          break;
+      }
+
+      const calorias = Math.round(pasos * caloriasPorPaso);
+
+      const newNeat = neat.filter(n => n.fecha !== fecha);
+      newNeat.push({
+        fecha,
+        tipo: 'pasos',
+        pasos,
+        ritmo,
+        calorias,
+        duracion
+      });
+
+      const newAdherencia = { ...adherenciaDiaria };
+      if (!newAdherencia[fecha]) newAdherencia[fecha] = {};
+      newAdherencia[fecha].neat = true;
+
+      setNeat(newNeat);
+      setAdherenciaDiaria(newAdherencia);
+      showToast(`✅ NEAT guardado: ${pasos} pasos (${ritmo}) - ${calorias} kcal`);
+    } else {
+      const km = parseFloat(neatKm);
+      const ritmoKmH = parseFloat(neatRitmoKmH);
+      const inclinacion = parseFloat(neatInclinacion);
+      const duracion = parseInt(neatDuracion);
+      
+      if (!km || !ritmoKmH || !duracion || km <= 0 || ritmoKmH <= 0 || duracion <= 0) {
+        showToast('⚠️ Ingresa valores válidos', 'error');
+        return;
+      }
+
+      // Calcular calorías basado en MET (Metabolic Equivalent of Task)
+      let met = 3.5; // Base caminar
+      if (ritmoKmH > 6) met = 8; // Correr
+      else if (ritmoKmH > 4) met = 5; // Caminar rápido
+      
+      // Ajustar por inclinación
+      if (inclinacion > 0) met += inclinacion * 0.5;
+      
+      // Calcular calorías: MET * peso * tiempo / 60
+      const pesoActual = estado.length > 0 ? estado[estado.length - 1].peso : 75;
+      const calorias = Math.round(met * pesoActual * duracion / 60);
+
+      const newNeat = neat.filter(n => n.fecha !== fecha);
+      newNeat.push({
+        fecha,
+        tipo: 'cinta',
+        km,
+        ritmoKmH,
+        inclinacion,
+        calorias,
+        duracion
+      });
+
+      const newAdherencia = { ...adherenciaDiaria };
+      if (!newAdherencia[fecha]) newAdherencia[fecha] = {};
+      newAdherencia[fecha].neat = true;
+
+      setNeat(newNeat);
+      setAdherenciaDiaria(newAdherencia);
+      showToast(`✅ NEAT guardado: ${km}km a ${ritmoKmH}km/h - ${calorias} kcal`);
+    }
+    
+    closeModal();
+  };
+
+  const saveSeguimiento = () => {
+    const peso = parseFloat(seguimientoPeso);
+    const cintura = parseFloat(seguimientoCintura);
+    
+    if (!peso || !cintura || peso <= 0 || cintura <= 0) {
+      showToast('⚠️ Ingresa valores válidos', 'error');
+      return;
+    }
+
+    const fecha = todayISO();
+    const newSeguimiento = seguimiento.filter(s => s.fecha !== fecha);
+    newSeguimiento.push({
+      fecha,
+      peso,
+      cintura,
+      notas: seguimientoNotas || undefined
+    });
+
+    const newAdherencia = { ...adherenciaDiaria };
+    if (!newAdherencia[fecha]) newAdherencia[fecha] = {};
+    newAdherencia[fecha].seguimiento = true;
+
+    setSeguimiento(newSeguimiento);
+    setAdherenciaDiaria(newAdherencia);
+    showToast(`✅ Seguimiento guardado: ${peso}kg, cintura ${cintura}cm`);
+    closeModal();
+  };
+
   const handleDesktopSave = () => {
     const savedItems = [];
 
@@ -345,7 +509,9 @@ export default function Dashboard() {
         km: parseFloat(desktopCardio),
         tiempo: Math.round(parseFloat(desktopCardio) * 7),
         ritmo: Math.round(parseFloat(desktopCardio) * 7) / parseFloat(desktopCardio),
-        calorias: Math.round(parseFloat(desktopCardio) * 7 * 10)
+        calorias: Math.round(parseFloat(desktopCardio) * 7 * 10),
+        tipo: 'mesociclo',
+        intensidad: 'Moderado'
       });
       const newAdherencia = { ...adherenciaDiaria };
       if (!newAdherencia[fecha]) newAdherencia[fecha] = {};
@@ -365,7 +531,7 @@ export default function Dashboard() {
     }
   };
 
-  const getStatus = (type: 'weight' | 'workout' | 'cardio' | 'diet') => {
+  const getStatus = (type: 'weight' | 'workout' | 'cardio' | 'diet' | 'neat' | 'seguimiento') => {
     const today = todayISO();
     const todayAdherence = adherenciaDiaria[today] || {};
     
@@ -373,22 +539,52 @@ export default function Dashboard() {
       case 'weight':
         return estado.find(e => e.fecha === today) ? 'Completado' : 'Pendiente';
       case 'workout':
-        return todayAdherence.pesos ? 'Completado' : 'Pendiente';
+        return todayAdherence.workout ? 'Completado' : 'Pendiente';
       case 'cardio':
         return todayAdherence.cardio ? 'Completado' : 'Pendiente';
       case 'diet':
         return todayAdherence.dieta ? 'Completado' : 'Pendiente';
+      case 'neat':
+        return todayAdherence.neat ? 'Completado' : 'Pendiente';
+      case 'seguimiento':
+        return todayAdherence.seguimiento ? 'Completado' : 'Pendiente';
       default:
         return 'Pendiente';
     }
   };
 
-  const getStatusClass = (type: 'weight' | 'workout' | 'cardio' | 'diet') => {
+  const getStatusClass = (type: 'weight' | 'workout' | 'cardio' | 'diet' | 'neat' | 'seguimiento') => {
     const status = getStatus(type);
     return `text-sm ${status === 'Completado' ? 'success' : 'pending'}`;
   };
 
   const progress = calculateProgress();
+
+  // Función para calcular calorías totales del día
+  const getCaloriasDelDia = () => {
+    const today = todayISO();
+    let totalCalorias = 0;
+    
+    // Calorías del cardio
+    const cardioHoy = cardio.find(c => c.fecha === today);
+    if (cardioHoy) {
+      totalCalorias += cardioHoy.calorias;
+    }
+    
+    // Calorías del NEAT
+    const neatHoy = neat.find(n => n.fecha === today);
+    if (neatHoy) {
+      totalCalorias += neatHoy.calorias;
+    }
+    
+    // Calorías del entrenamiento (estimación)
+    const workoutHoy = workouts.find(w => w.fecha === today);
+    if (workoutHoy) {
+      totalCalorias += 300; // Estimación base para entrenamiento de fuerza
+    }
+    
+    return totalCalorias;
+  };
 
   const getWorkoutDescription = (type: string): string => {
     switch (type) {
@@ -488,6 +684,30 @@ export default function Dashboard() {
           );
         })()}
         
+        {/* Calorías del Día */}
+        {(() => {
+          const caloriasHoy = getCaloriasDelDia();
+          return (
+            <div className="clean-card mb-4 bg-gradient-to-r from-orange-50 to-red-50 border-orange-200">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center">
+                  <div className="w-10 h-10 bg-gradient-to-r from-orange-400 to-red-500 rounded-full flex items-center justify-center mr-3">
+                    <span className="text-white text-lg">🔥</span>
+                  </div>
+                  <div>
+                    <h3 className="font-semibold text-lg">Calorías Quemadas</h3>
+                    <p className="text-sm text-gray-600">Total del día</p>
+                  </div>
+                </div>
+                <div className="text-right">
+                  <div className="text-2xl font-bold text-orange-600">{caloriasHoy}</div>
+                  <div className="text-xs text-gray-500">kcal</div>
+                </div>
+              </div>
+            </div>
+          );
+        })()}
+        
         {/* Weight Entry */}
         <div className="clean-card cursor-pointer hover:scale-[1.02] transition-transform" onClick={() => openModal('weight')}>
           <div className="flex items-center justify-between">
@@ -563,6 +783,46 @@ export default function Dashboard() {
             </div>
           </div>
         </div>
+        
+        {/* NEAT Entry */}
+        <div className="clean-card cursor-pointer hover:scale-[1.02] transition-transform" onClick={() => openModal('neat')}>
+          <div className="flex items-center justify-between">
+            <div className="flex items-center">
+              <div className="w-12 h-12 bg-gradient-to-r from-purple-400 to-purple-500 rounded-full flex items-center justify-center mr-4 shadow-lg">
+                <span className="text-2xl">🚶</span>
+              </div>
+              <div>
+                <h3 className="font-semibold">NEAT</h3>
+                <p className="text-sm text-gray-600">Actividad física no estructurada</p>
+              </div>
+            </div>
+            <div className="text-right">
+              <div className={getStatusClass('neat')}>{getStatus('neat')}</div>
+              <div className="text-xs text-gray-500">Toca para registrar</div>
+            </div>
+          </div>
+        </div>
+        
+        {/* Seguimiento Entry - Solo domingos */}
+        {new Date().getDay() === 0 && (
+          <div className="clean-card cursor-pointer hover:scale-[1.02] transition-transform" onClick={() => openModal('seguimiento')}>
+            <div className="flex items-center justify-between">
+              <div className="flex items-center">
+                <div className="w-12 h-12 bg-gradient-to-r from-indigo-400 to-indigo-500 rounded-full flex items-center justify-center mr-4 shadow-lg">
+                  <span className="text-2xl">📊</span>
+                </div>
+                <div>
+                  <h3 className="font-semibold">Seguimiento Semanal</h3>
+                  <p className="text-sm text-gray-600">Peso, cintura y medidas</p>
+                </div>
+              </div>
+              <div className="text-right">
+                <div className={getStatusClass('seguimiento')}>{getStatus('seguimiento')}</div>
+                <div className="text-xs text-gray-500">Toca para registrar</div>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );
@@ -1725,6 +1985,171 @@ export default function Dashboard() {
                     Cancelar
                   </button>
                   <button onClick={saveDiet} className="btn-elegant btn-primary flex-1">
+                    💾 Guardar
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {activeModal === 'neat' && (
+        <div className="modal-overlay" onClick={closeModal}>
+          <div className="modal-content" onClick={(e) => e.stopPropagation()}>
+            <div className="modal-header">
+              <button className="modal-close" onClick={closeModal}>×</button>
+              <h3>🚶 NEAT</h3>
+            </div>
+            <div className="modal-body">
+              <div className="space-y-4">
+                <div>
+                  <label className="block text-sm font-medium mb-2 text-gray-700">Tipo de registro</label>
+                  <select 
+                    value={neatTipo}
+                    onChange={(e) => setNeatTipo(e.target.value as 'pasos' | 'cinta')}
+                    className="input-compact"
+                  >
+                    <option value="pasos">Pasos y ritmo</option>
+                    <option value="cinta">Cinta (km, ritmo, inclinación)</option>
+                  </select>
+                </div>
+
+                {neatTipo === 'pasos' ? (
+                  <>
+                    <div>
+                      <label className="block text-sm font-medium mb-2 text-gray-700">Pasos</label>
+                      <input 
+                        type="number" 
+                        value={neatPasos}
+                        onChange={(e) => setNeatPasos(e.target.value)}
+                        placeholder="8000" 
+                        className="input-compact"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium mb-2 text-gray-700">Ritmo</label>
+                      <select 
+                        value={neatRitmo}
+                        onChange={(e) => setNeatRitmo(e.target.value)}
+                        className="input-compact"
+                      >
+                        <option value="">Seleccionar ritmo...</option>
+                        <option value="ritmo rápido">Ritmo rápido</option>
+                        <option value="andar normal">Andar normal</option>
+                        <option value="caminar rápido">Caminar rápido</option>
+                        <option value="paseo">Paseo</option>
+                      </select>
+                    </div>
+                  </>
+                ) : (
+                  <>
+                    <div>
+                      <label className="block text-sm font-medium mb-2 text-gray-700">Kilómetros</label>
+                      <input 
+                        type="number" 
+                        value={neatKm}
+                        onChange={(e) => setNeatKm(e.target.value)}
+                        placeholder="3.5" 
+                        step="0.1"
+                        className="input-compact"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium mb-2 text-gray-700">Ritmo (km/h)</label>
+                      <input 
+                        type="number" 
+                        value={neatRitmoKmH}
+                        onChange={(e) => setNeatRitmoKmH(e.target.value)}
+                        placeholder="6.0" 
+                        step="0.1"
+                        className="input-compact"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium mb-2 text-gray-700">Inclinación (%)</label>
+                      <input 
+                        type="number" 
+                        value={neatInclinacion}
+                        onChange={(e) => setNeatInclinacion(e.target.value)}
+                        placeholder="0" 
+                        step="0.5"
+                        className="input-compact"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium mb-2 text-gray-700">Duración (minutos)</label>
+                      <input 
+                        type="number" 
+                        value={neatDuracion}
+                        onChange={(e) => setNeatDuracion(e.target.value)}
+                        placeholder="30" 
+                        className="input-compact"
+                      />
+                    </div>
+                  </>
+                )}
+
+                <div className="flex gap-3">
+                  <button onClick={closeModal} className="btn-elegant btn-secondary flex-1">
+                    Cancelar
+                  </button>
+                  <button onClick={saveNeat} className="btn-elegant btn-primary flex-1">
+                    💾 Guardar
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {activeModal === 'seguimiento' && (
+        <div className="modal-overlay" onClick={closeModal}>
+          <div className="modal-content" onClick={(e) => e.stopPropagation()}>
+            <div className="modal-header">
+              <button className="modal-close" onClick={closeModal}>×</button>
+              <h3>📊 Seguimiento Semanal</h3>
+            </div>
+            <div className="modal-body">
+              <div className="space-y-4">
+                <div>
+                  <label className="block text-sm font-medium mb-2 text-gray-700">Peso (kg)</label>
+                  <input 
+                    type="number" 
+                    value={seguimientoPeso}
+                    onChange={(e) => setSeguimientoPeso(e.target.value)}
+                    placeholder="75.5" 
+                    step="0.1"
+                    className="input-compact"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium mb-2 text-gray-700">Cintura (cm)</label>
+                  <input 
+                    type="number" 
+                    value={seguimientoCintura}
+                    onChange={(e) => setSeguimientoCintura(e.target.value)}
+                    placeholder="85" 
+                    step="0.1"
+                    className="input-compact"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium mb-2 text-gray-700">Notas (opcional)</label>
+                  <textarea 
+                    value={seguimientoNotas}
+                    onChange={(e) => setSeguimientoNotas(e.target.value)}
+                    placeholder="Observaciones del día..." 
+                    className="input-compact"
+                    rows={3}
+                  />
+                </div>
+                <div className="flex gap-3">
+                  <button onClick={closeModal} className="btn-elegant btn-secondary flex-1">
+                    Cancelar
+                  </button>
+                  <button onClick={saveSeguimiento} className="btn-elegant btn-primary flex-1">
                     💾 Guardar
                   </button>
                 </div>
