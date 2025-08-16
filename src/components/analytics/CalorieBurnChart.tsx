@@ -14,14 +14,7 @@ import {
 import { Bar } from 'react-chartjs-2';
 import { CardioEntry, NeatEntry, EntrenoNoProgramado } from '@/types';
 
-ChartJS.register(
-  CategoryScale,
-  LinearScale,
-  BarElement,
-  Title,
-  Tooltip,
-  Legend
-);
+
 
 interface CalorieBurnChartProps {
   cardio: CardioEntry[];
@@ -34,6 +27,17 @@ export const CalorieBurnChart: React.FC<CalorieBurnChartProps> = ({
   neat, 
   entrenosNoProgramados 
 }) => {
+  // Registrar Chart.js solo en el cliente
+  if (typeof window !== 'undefined') {
+    ChartJS.register(
+      CategoryScale,
+      LinearScale,
+      BarElement,
+      Title,
+      Tooltip,
+      Legend
+    );
+  }
   // Obtener datos de los últimos 7 días
   const sevenDaysAgo = new Date();
   sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);

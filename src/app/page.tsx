@@ -10,10 +10,12 @@ import { WeeklyCalendar } from '@/components/WeeklyCalendar';
 import { WeightEntry, CardioEntry, DietEntry, DailyAdherence, WorkoutEntry, Exercise, NeatEntry, SeguimientoEntry, EntrenoNoProgramado } from '@/types';
 import { AnalyticsSection } from '@/components/analytics/AnalyticsSection';
 import { NotificationSystem } from '@/components/analytics/NotificationSystem';
+import { LoadingFallback } from '@/components/LoadingFallback';
 import { getCurrentMesocicloDay, setMesocicloStartDate, getMesocicloStartDate, testMesocicloTracking, calcularCaloriasEntrenoNoProgramado } from '@/utils/mesocicloUtils';
 
 export default function Dashboard() {
   const { showToast } = useToast();
+  const [isLoading, setIsLoading] = useState(true);
   const [activeModal, setActiveModal] = useState<string | null>(null);
   const [activeSection, setActiveSection] = useState<'today' | 'mesociclo' | 'analytics' | 'history' | 'settings'>('today');
   const [showStartDateConfig, setShowStartDateConfig] = useState(false);
@@ -44,6 +46,16 @@ export default function Dashboard() {
   const [seguimiento, setSeguimiento] = useLocalStorage<SeguimientoEntry[]>('seguimiento', []);
   const [entrenosNoProgramados, setEntrenosNoProgramados] = useLocalStorage<EntrenoNoProgramado[]>('entrenosNoProgramados', []);
   const [adherenciaDiaria, setAdherenciaDiaria] = useLocalStorage<DailyAdherence>('adherenciaDiaria', {});
+
+  // Effect para manejar la carga inicial
+  useEffect(() => {
+    // Simular tiempo de carga para asegurar que localStorage esté disponible
+    const timer = setTimeout(() => {
+      setIsLoading(false);
+    }, 100);
+    
+    return () => clearTimeout(timer);
+  }, []);
 
   // Form states
   const [weightInput, setWeightInput] = useState('');
@@ -879,8 +891,28 @@ export default function Dashboard() {
         
         {/* Current Day Info */}
         {(() => {
-          const currentData = getCurrentMesocicloDay();
-          const startDate = getMesocicloStartDate();
+          let currentData;
+          let startDate;
+          
+          try {
+            currentData = getCurrentMesocicloDay();
+            startDate = getMesocicloStartDate();
+          } catch {
+            // Fallback para SSR
+            currentData = {
+              microciclo: { nombre: 'Cargando...', dias: [] },
+              dia: { dia: 'Día 1', entrenamiento: 'Cargando...', ejercicios: [], cardio: undefined },
+              mesociclo: { nombre: 'Cargando...', microciclos: [] },
+              semanaActual: 1,
+              diaSemana: 0,
+              diaMesociclo: 1,
+              diasTranscurridos: 0,
+              diasEnMicrociclo: 0,
+              microcicloCompletado: false
+            };
+            startDate = null;
+          }
+          
           return (
             <div className="clean-card mb-4">
               {/* Configuración de fecha de inicio */}
@@ -1998,6 +2030,11 @@ export default function Dashboard() {
       </div>
     </div>
   );
+
+  // Mostrar loading mientras se inicializa
+  if (isLoading) {
+    return <LoadingFallback />;
+  }
 
   return (
     <div className="min-h-screen">
