@@ -564,6 +564,67 @@ export const getMesocicloStartDate = (): Date | null => {
   return null;
 };
 
+/**
+ * Función de prueba para verificar el seguimiento del mesociclo
+ * 
+ * @param testDate - Fecha para probar (opcional, usa hoy por defecto)
+ * @returns Información detallada del seguimiento para debugging
+ */
+export const testMesocicloTracking = (testDate?: Date) => {
+  const date = testDate || new Date();
+  const mesociclo = getMesocicloData();
+  
+  // Obtener fecha de inicio
+  let startDate: Date;
+  try {
+    if (typeof window !== 'undefined') {
+      const storedStartDate = localStorage.getItem('mesociclo_start_date');
+      startDate = storedStartDate ? new Date(storedStartDate) : new Date('2024-08-01');
+    } else {
+      startDate = new Date('2024-08-01');
+    }
+  } catch {
+    startDate = new Date('2024-08-01');
+  }
+  
+  // Calcular días transcurridos
+  const daysDiff = Math.floor((date.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24));
+  
+  // Determinar microciclo actual
+  let microcicloIndex = 0;
+  let daysInPreviousMicrociclos = 0;
+  
+  for (let i = 0; i < mesociclo.microciclos.length; i++) {
+    const microcicloDuration = mesociclo.microciclos[i].dias.length;
+    if (daysDiff < daysInPreviousMicrociclos + microcicloDuration) {
+      microcicloIndex = i;
+      break;
+    }
+    daysInPreviousMicrociclos += microcicloDuration;
+  }
+  
+  if (microcicloIndex >= mesociclo.microciclos.length) {
+    microcicloIndex = mesociclo.microciclos.length - 1;
+  }
+  
+  const currentMicrociclo = mesociclo.microciclos[microcicloIndex];
+  const daysInCurrentMicrociclo = daysDiff - daysInPreviousMicrociclos;
+  const mesocicloDayIndex = Math.min(daysInCurrentMicrociclo, currentMicrociclo.dias.length - 1);
+  
+  return {
+    fecha: date.toISOString().split('T')[0],
+    fechaInicio: startDate.toISOString().split('T')[0],
+    diasTranscurridos: daysDiff,
+    microcicloIndex,
+    microcicloNombre: currentMicrociclo.nombre,
+    diaEnMicrociclo: mesocicloDayIndex + 1,
+    totalDiasMicrociclo: currentMicrociclo.dias.length,
+    diaSemana: date.getDay(),
+    diaActual: currentMicrociclo.dias[mesocicloDayIndex],
+    proximoDia: mesocicloDayIndex < currentMicrociclo.dias.length - 1 ? currentMicrociclo.dias[mesocicloDayIndex + 1] : null
+  };
+};
+
 // Configuración de progresión por microciclo
 export interface ProgresionConfig {
   microciclo: number;

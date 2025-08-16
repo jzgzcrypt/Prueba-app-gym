@@ -8,7 +8,7 @@ import { ProgressCircle } from '@/components/ProgressCircle';
 import { WorkoutModal } from '@/components/WorkoutModal';
 import { WeeklyCalendar } from '@/components/WeeklyCalendar';
 import { WeightEntry, CardioEntry, DietEntry, DailyAdherence, WorkoutEntry, Exercise, NeatEntry, SeguimientoEntry } from '@/types';
-import { getCurrentMesocicloDay, setMesocicloStartDate, getMesocicloStartDate } from '@/utils/mesocicloUtils';
+import { getCurrentMesocicloDay, setMesocicloStartDate, getMesocicloStartDate, testMesocicloTracking } from '@/utils/mesocicloUtils';
 
 export default function Dashboard() {
   const { showToast } = useToast();
@@ -592,7 +592,7 @@ export default function Dashboard() {
                     </div>
                     <button
                       onClick={() => setShowStartDateConfig(true)}
-                      className="text-xs bg-yellow-500 text-white px-3 py-1 rounded-full hover:bg-yellow-600 transition-colors"
+                      className="btn-elegant btn-small bg-yellow-500 hover:bg-yellow-600 text-white"
                     >
                       Configurar
                     </button>
@@ -632,7 +632,7 @@ export default function Dashboard() {
                     });
                     openModal('workout-details');
                   }}
-                  className="text-xs bg-primary text-white px-3 py-1 rounded-full hover:bg-primary-dark transition-colors"
+                  className="btn-elegant btn-small bg-primary hover:bg-primary-dark text-white"
                 >
                   Ver detalles
                 </button>
@@ -646,6 +646,22 @@ export default function Dashboard() {
                     <div>Día: {currentData.diaMesociclo}/{currentData.microciclo.dias.length}</div>
                     <div>Días transcurridos: {currentData.diasTranscurridos}</div>
                     <div>Día semana: {['Dom', 'Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb'][currentData.diaSemana]}</div>
+                  </div>
+                  {/* Información detallada de seguimiento */}
+                  <div className="mt-2 p-2 bg-gray-50 rounded text-xs">
+                    <div className="font-medium mb-1">Seguimiento Detallado:</div>
+                    {(() => {
+                      const testData = testMesocicloTracking();
+                      return (
+                        <div className="space-y-1">
+                          <div>Fecha inicio: {testData.fechaInicio}</div>
+                          <div>Días transcurridos: {testData.diasTranscurridos}</div>
+                          <div>Microciclo: {testData.microcicloIndex + 1} - {testData.microcicloNombre}</div>
+                          <div>Día en microciclo: {testData.diaEnMicrociclo}/{testData.totalDiasMicrociclo}</div>
+                          <div>Entrenamiento: {testData.diaActual.entrenamiento}</div>
+                        </div>
+                      );
+                    })()}
                   </div>
                 </div>
               )}
