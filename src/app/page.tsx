@@ -35,6 +35,9 @@ export default function Dashboard() {
     microciclos: {}
   });
   
+  // Estado para forzar re-render cuando cambia la fecha
+  const [forceUpdate, setForceUpdate] = useState(0);
+  
   // Local storage hooks
   const [estado, setEstado] = useLocalStorage<WeightEntry[]>('estado', []);
   const [cardio, setCardio] = useLocalStorage<CardioEntry[]>('cardio', []);
@@ -49,7 +52,14 @@ export default function Dashboard() {
   useEffect(() => {
     // Asegurar que localStorage esté disponible
     if (typeof window !== 'undefined') {
-      setIsLoading(false);
+      try {
+        // Test localStorage access
+        localStorage.getItem('test');
+        setIsLoading(false);
+      } catch (error) {
+        console.error('localStorage not available:', error);
+        setIsLoading(false);
+      }
     }
   }, []);
 
@@ -711,16 +721,17 @@ export default function Dashboard() {
       return;
     }
     
-    setMesocicloStartDate(startDate);
-    
-    showToast(`✅ Fecha de inicio configurada: ${startDate.toLocaleDateString()}`);
-    setShowStartDateConfig(false);
-    setStartDateInput('');
-    
-    // Forzar actualización del estado para refrescar el plan semanal
-    setTimeout(() => {
-      window.location.reload();
-    }, 1000);
+    try {
+      setMesocicloStartDate(startDate);
+      showToast(`✅ Fecha de inicio configurada: ${startDate.toLocaleDateString()}`);
+      setShowStartDateConfig(false);
+      setStartDateInput('');
+      // Forzar re-render sin recarga
+      setForceUpdate(prev => prev + 1);
+    } catch (error) {
+      console.error('Error al configurar fecha:', error);
+      showToast('⚠️ Error al configurar fecha', 'error');
+    }
   };
 
   const handleDesktopSave = () => {
@@ -1000,6 +1011,7 @@ export default function Dashboard() {
               caloriasHoy = getCaloriasDelDia();
             } catch (error) {
               console.error('Error calculating calories:', error);
+              caloriasHoy = 0;
             }
           }
           return (
@@ -1168,6 +1180,7 @@ export default function Dashboard() {
         startDate = getMesocicloStartDate();
       } catch (error) {
         console.error('Error loading start date:', error);
+        startDate = null;
       }
     }
     
