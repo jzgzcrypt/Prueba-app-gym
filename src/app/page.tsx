@@ -2022,10 +2022,7 @@ export default function Dashboard() {
         {/* Sistema de Notificaciones */}
         <NotificationSystem
           weights={estado}
-          seguimiento={seguimiento}
           cardio={cardio}
-          neat={neat}
-          entrenosNoProgramados={entrenosNoProgramados}
           workouts={workouts}
           adherenciaDiaria={adherenciaDiaria}
           onShowNotification={showToast}

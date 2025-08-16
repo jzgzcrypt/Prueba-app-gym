@@ -1,12 +1,9 @@
 import React, { useEffect, useState, useCallback } from 'react';
-import { WeightEntry, SeguimientoEntry, CardioEntry, NeatEntry, EntrenoNoProgramado, WorkoutEntry, DailyAdherence } from '@/types';
+import { WeightEntry, CardioEntry, WorkoutEntry, DailyAdherence } from '@/types';
 
 interface NotificationSystemProps {
   weights: WeightEntry[];
-  seguimiento: SeguimientoEntry[];
   cardio: CardioEntry[];
-  neat: NeatEntry[];
-  entrenosNoProgramados: EntrenoNoProgramado[];
   workouts: WorkoutEntry[];
   adherenciaDiaria: DailyAdherence;
   onShowNotification: (message: string, type: 'success' | 'warning' | 'error') => void;
@@ -23,10 +20,7 @@ interface Notification {
 
 export const NotificationSystem: React.FC<NotificationSystemProps> = ({
   weights,
-  seguimiento,
   cardio,
-  neat,
-  entrenosNoProgramados,
   workouts,
   adherenciaDiaria,
   onShowNotification
@@ -113,7 +107,7 @@ export const NotificationSystem: React.FC<NotificationSystemProps> = ({
       
       onShowNotification(mostImportant.message, mostImportant.type);
     }
-  }, [weights, workouts, cardio, adherenciaDiaria, onShowNotification]);
+  }, [weights, workouts, adherenciaDiaria, onShowNotification]);
 
   useEffect(() => {
     // Verificar insights cada 24 horas
@@ -130,7 +124,7 @@ export const NotificationSystem: React.FC<NotificationSystemProps> = ({
     return () => clearInterval(checkInterval);
   }, [lastCheck, checkForInsights]);
 
-  const checkWeekCompletion = (): number => {
+  const checkWeekCompletion = useCallback((): number => {
     const sevenDaysAgo = new Date();
     sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
     
@@ -143,9 +137,9 @@ export const NotificationSystem: React.FC<NotificationSystemProps> = ({
     }
     
     return 0;
-  };
+  }, []);
 
-  const checkForNewPRs = (): string[] => {
+  const checkForNewPRs = useCallback((): string[] => {
     const newPRs: string[] = [];
     
     // Analizar cada ejercicio
@@ -176,9 +170,9 @@ export const NotificationSystem: React.FC<NotificationSystemProps> = ({
     });
 
     return newPRs;
-  };
+  }, [workouts]);
 
-  const checkForStagnation = (): string[] => {
+  const checkForStagnation = useCallback((): string[] => {
     const stagnantExercises: string[] = [];
     
     const exerciseData: { [key: string]: number[] } = {};
@@ -211,9 +205,9 @@ export const NotificationSystem: React.FC<NotificationSystemProps> = ({
     });
 
     return stagnantExercises;
-  };
+  }, []);
 
-  const checkAdherenceStatus = () => {
+  const checkAdherenceStatus = useCallback(() => {
     const sevenDaysAgo = new Date();
     sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
     
@@ -238,7 +232,7 @@ export const NotificationSystem: React.FC<NotificationSystemProps> = ({
       low: adherenceRate < 0.6,
       rate: adherenceRate
     };
-  };
+  }, []);
 
   const markAsRead = (notificationId: string) => {
     setNotifications(prev => 
