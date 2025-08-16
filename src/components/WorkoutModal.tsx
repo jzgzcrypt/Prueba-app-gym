@@ -11,8 +11,15 @@ interface WorkoutModalProps {
   workoutType: string;
 }
 
+/**
+ * Obtiene la configuración del mesociclo actual con pesos y repeticiones sugeridas
+ * 
+ * En una aplicación real, estos datos vendrían de una base de datos
+ * y se actualizarían dinámicamente según el progreso del usuario.
+ * 
+ * @returns Configuración del mesociclo con pesos y repeticiones objetivo
+ */
 const getCurrentMesociclo = (): Mesociclo => {
-  // Simular mesociclo actual - en una app real esto vendría de la base de datos
   return {
     semana: 1,
     objetivo: "Hipertrofia",

@@ -68,8 +68,8 @@ export default function Dashboard() {
 
   const todayISO = () => new Date().toISOString().split('T')[0];
 
-  // Usar la función centralizada del mesociclo
-  const getCurrentMesocicloDayLocal = () => getCurrentMesocicloDay();
+  // Obtener datos del día actual del mesociclo (memoizado para evitar recálculos)
+  const currentData = getCurrentMesocicloDay();
 
   const calculateProgress = () => {
     const today = todayISO();
@@ -176,7 +176,6 @@ export default function Dashboard() {
     }
 
     // Obtener cardio del mesociclo para hoy
-    const currentData = getCurrentMesocicloDayLocal();
     const cardioMesociclo = currentData.dia.cardio;
 
     const fecha = todayISO();
@@ -514,7 +513,7 @@ export default function Dashboard() {
         
         {/* Current Day Info */}
         {(() => {
-          const currentData = getCurrentMesocicloDayLocal();
+          const currentData = getCurrentMesocicloDay();
           return (
             <div className="clean-card mb-4">
               <div className="flex items-center gap-3 mb-3">

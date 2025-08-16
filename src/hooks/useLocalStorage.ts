@@ -2,6 +2,16 @@
 
 import { useState } from 'react';
 
+/**
+ * Hook personalizado para manejar localStorage con TypeScript
+ * 
+ * Proporciona una interfaz similar a useState pero con persistencia
+ * automática en localStorage. Maneja errores de forma segura.
+ * 
+ * @param key - Clave para almacenar en localStorage
+ * @param initialValue - Valor inicial si no existe en localStorage
+ * @returns Array con [valor, setter] similar a useState
+ */
 export function useLocalStorage<T>(key: string, initialValue: T) {
   // State to store our value
   // Pass initial state function to useState so logic is only executed once

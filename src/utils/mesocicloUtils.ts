@@ -343,7 +343,16 @@ export const getMesocicloData = (): Mesociclo => ({
       ]
 });
 
-// Función para obtener el día actual del mesociclo con lógica flexible
+/**
+ * Obtiene el día actual del mesociclo con lógica flexible para manejar microciclos variables
+ * 
+ * Esta función calcula dinámicamente:
+ * - El microciclo actual basado en la duración real de cada uno
+ * - El día dentro del microciclo actual
+ * - Ajustes flexibles para retrasos de un día
+ * 
+ * @returns Objeto con información completa del día actual del mesociclo
+ */
 export const getCurrentMesocicloDay = () => {
   const mesociclo = getMesocicloData();
   
@@ -415,7 +424,14 @@ export const getCurrentMesocicloDay = () => {
   };
 };
 
-// Función para obtener el plan semanal dinámico con lógica flexible
+/**
+ * Obtiene el plan semanal dinámico basado en el mesociclo actual
+ * 
+ * Esta función mapea los días de la semana actual a los ejercicios del microciclo,
+ * manejando transiciones entre microciclos y días de descanso.
+ * 
+ * @returns Plan semanal con entrenamientos y cardio para cada día
+ */
 export const getWeeklyPlan = () => {
   const currentData = getCurrentMesocicloDay();
   
@@ -557,7 +573,22 @@ export const getProgresionConfig = (microcicloId: number): ProgresionConfig => {
   return configs[microcicloId] || configs[1]; // Default al microciclo 1
 };
 
-// Algoritmo de progresión dinámico basado en el microciclo
+/**
+ * Algoritmo de progresión dinámico que se adapta a cada fase del microciclo
+ * 
+ * Este algoritmo toma decisiones inteligentes basadas en:
+ * - La fase actual del microciclo (Adaptación, Intensificación, Pico)
+ * - El RPE reportado por el usuario
+ * - Las repeticiones realizadas vs objetivo
+ * - Los parámetros específicos de cada microciclo
+ * 
+ * @param ejercicio - Nombre del ejercicio
+ * @param series - Array de series completadas
+ * @param pesoActual - Peso actual del ejercicio
+ * @param repeticionesObjetivo - Repeticiones objetivo
+ * @param microcicloId - ID del microciclo actual
+ * @returns Objeto de progresión con recomendaciones
+ */
 export const calcularProgresionDinamica = (
   ejercicio: string, 
   series: Set[], 
