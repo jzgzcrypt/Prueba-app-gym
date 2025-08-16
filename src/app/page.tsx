@@ -8,12 +8,14 @@ import { ProgressCircle } from '@/components/ProgressCircle';
 import { WorkoutModal } from '@/components/WorkoutModal';
 import { WeeklyCalendar } from '@/components/WeeklyCalendar';
 import { WeightEntry, CardioEntry, DietEntry, DailyAdherence, WorkoutEntry, Exercise, NeatEntry, SeguimientoEntry } from '@/types';
-import { getCurrentMesocicloDay } from '@/utils/mesocicloUtils';
+import { getCurrentMesocicloDay, setMesocicloStartDate, getMesocicloStartDate } from '@/utils/mesocicloUtils';
 
 export default function Dashboard() {
   const { showToast } = useToast();
   const [activeModal, setActiveModal] = useState<string | null>(null);
   const [activeSection, setActiveSection] = useState<'today' | 'mesociclo' | 'history' | 'settings'>('today');
+  const [showStartDateConfig, setShowStartDateConfig] = useState(false);
+  const [startDateInput, setStartDateInput] = useState('');
   const [workoutType] = useState('Pull');
   const [selectedWorkout, setSelectedWorkout] = useState<{
     dia: string;
@@ -122,6 +124,10 @@ export default function Dashboard() {
     setSeguimientoPeso('');
     setSeguimientoCintura('');
     setSeguimientoNotas('');
+    
+    // Reset start date config
+    setShowStartDateConfig(false);
+    setStartDateInput('');
   };
 
   const handleWorkoutComplete = (exercises: Exercise[]) => {
@@ -360,6 +366,24 @@ export default function Dashboard() {
     closeModal();
   };
 
+  const handleStartDateConfig = () => {
+    if (!startDateInput) {
+      showToast('⚠️ Ingresa una fecha válida', 'error');
+      return;
+    }
+    
+    const startDate = new Date(startDateInput);
+    if (isNaN(startDate.getTime())) {
+      showToast('⚠️ Fecha inválida', 'error');
+      return;
+    }
+    
+    setMesocicloStartDate(startDate);
+    showToast(`✅ Fecha de inicio configurada: ${startDate.toLocaleDateString()}`);
+    setShowStartDateConfig(false);
+    setStartDateInput('');
+  };
+
   const handleDesktopSave = () => {
     const savedItems = [];
 
@@ -514,8 +538,26 @@ export default function Dashboard() {
         {/* Current Day Info */}
         {(() => {
           const currentData = getCurrentMesocicloDay();
+          const startDate = getMesocicloStartDate();
           return (
             <div className="clean-card mb-4">
+              {/* Configuración de fecha de inicio */}
+              {!startDate && (
+                <div className="mb-3 p-3 bg-yellow-50 border border-yellow-200 rounded-lg">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-sm font-medium text-yellow-800">⚠️ Configura tu fecha de inicio</p>
+                      <p className="text-xs text-yellow-600">Para un seguimiento preciso del mesociclo</p>
+                    </div>
+                    <button
+                      onClick={() => setShowStartDateConfig(true)}
+                      className="text-xs bg-yellow-500 text-white px-3 py-1 rounded-full hover:bg-yellow-600 transition-colors"
+                    >
+                      Configurar
+                    </button>
+                  </div>
+                </div>
+              )}
               <div className="flex items-center gap-3 mb-3">
                 <div className="w-10 h-10 bg-primary rounded-full flex items-center justify-center text-white font-bold">
                   {currentData.dia.dia.split(' ')[1]}
@@ -555,15 +597,17 @@ export default function Dashboard() {
                 </button>
               </div>
               
-              {/* Debug Info */}
-              <div className="mt-3 pt-3 border-t border-gray-200">
-                <div className="grid grid-cols-2 gap-2 text-xs text-gray-500">
-                  <div>Microciclo: {currentData.semanaActual}</div>
-                  <div>Día: {currentData.diaMesociclo}/{currentData.microciclo.dias.length}</div>
-                  <div>Días transcurridos: {currentData.diasTranscurridos}</div>
-                  <div>Día semana: {['Dom', 'Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb'][currentData.diaSemana]}</div>
+              {/* Debug Info - Solo visible en desarrollo */}
+              {process.env.NODE_ENV === 'development' && (
+                <div className="mt-3 pt-3 border-t border-gray-200">
+                  <div className="grid grid-cols-2 gap-2 text-xs text-gray-500">
+                    <div>Microciclo: {currentData.semanaActual}</div>
+                    <div>Día: {currentData.diaMesociclo}/{currentData.microciclo.dias.length}</div>
+                    <div>Días transcurridos: {currentData.diasTranscurridos}</div>
+                    <div>Día semana: {['Dom', 'Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb'][currentData.diaSemana]}</div>
+                  </div>
                 </div>
-              </div>
+              )}
             </div>
           );
         })()}
@@ -1983,6 +2027,53 @@ export default function Dashboard() {
                   </button>
                 </div>
               </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Start Date Config Modal */}
+      {showStartDateConfig && (
+        <div className="modal-overlay" onClick={closeModal}>
+          <div className="modal-content" onClick={(e) => e.stopPropagation()}>
+            <div className="modal-header">
+              <button className="modal-close" onClick={closeModal}>×</button>
+              <h3>📅 Configurar Fecha de Inicio</h3>
+            </div>
+            <div className="modal-body">
+              <p className="text-sm text-gray-600 mb-4">
+                Establece la fecha en la que comenzaste tu mesociclo para un seguimiento preciso.
+              </p>
+              <div className="space-y-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Fecha de inicio del mesociclo
+                  </label>
+                  <input
+                    type="date"
+                    value={startDateInput}
+                    onChange={(e) => setStartDateInput(e.target.value)}
+                    className="input-modern w-full"
+                    required
+                  />
+                </div>
+              </div>
+            </div>
+            <div className="flex gap-3 flex-shrink-0 p-4 border-t border-gray-200">
+              <button onClick={closeModal} className="btn-elegant btn-secondary flex-1">
+                Cancelar
+              </button>
+              <button
+                onClick={handleStartDateConfig}
+                disabled={!startDateInput}
+                className={`btn-elegant flex-1 ${
+                  startDateInput 
+                    ? 'btn-primary' 
+                    : 'btn-secondary opacity-50 cursor-not-allowed'
+                }`}
+              >
+                Guardar Fecha
+              </button>
             </div>
           </div>
         </div>

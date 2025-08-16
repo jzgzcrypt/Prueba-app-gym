@@ -358,7 +358,15 @@ export const getCurrentMesocicloDay = () => {
   
   // LÓGICA FLEXIBLE: Calcular microciclo y día actual
   const today = new Date();
-  const startDate = new Date('2024-08-01'); // Fecha de inicio del mesociclo
+  
+  // Obtener fecha de inicio desde localStorage o usar fecha por defecto
+  let startDate: Date;
+  if (typeof window !== 'undefined') {
+    const storedStartDate = localStorage.getItem('mesociclo_start_date');
+    startDate = storedStartDate ? new Date(storedStartDate) : new Date('2024-08-01');
+  } else {
+    startDate = new Date('2024-08-01');
+  }
   
   // Calcular días transcurridos desde el inicio
   const daysDiff = Math.floor((today.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24));
@@ -517,6 +525,30 @@ export const getWeeklyPlan = () => {
   });
   
   return plan;
+};
+
+/**
+ * Configura la fecha de inicio del mesociclo personal
+ * 
+ * @param startDate - Fecha de inicio del mesociclo
+ */
+export const setMesocicloStartDate = (startDate: Date) => {
+  if (typeof window !== 'undefined') {
+    localStorage.setItem('mesociclo_start_date', startDate.toISOString());
+  }
+};
+
+/**
+ * Obtiene la fecha de inicio configurada del mesociclo
+ * 
+ * @returns Fecha de inicio o null si no está configurada
+ */
+export const getMesocicloStartDate = (): Date | null => {
+  if (typeof window !== 'undefined') {
+    const storedDate = localStorage.getItem('mesociclo_start_date');
+    return storedDate ? new Date(storedDate) : null;
+  }
+  return null;
 };
 
 // Configuración de progresión por microciclo
