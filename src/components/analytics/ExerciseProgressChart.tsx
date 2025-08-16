@@ -22,18 +22,20 @@ interface ExerciseProgressChartProps {
 }
 
 export const ExerciseProgressChart: React.FC<ExerciseProgressChartProps> = ({ workouts }) => {
-  // Registrar Chart.js solo en el cliente
-  if (typeof window !== 'undefined') {
-    ChartJS.register(
-      CategoryScale,
-      LinearScale,
-      PointElement,
-      LineElement,
-      Title,
-      Tooltip,
-      Legend
-    );
-  }
+  // Registrar Chart.js solo una vez en el cliente
+  React.useEffect(() => {
+    if (typeof window !== 'undefined') {
+      ChartJS.register(
+        CategoryScale,
+        LinearScale,
+        PointElement,
+        LineElement,
+        Title,
+        Tooltip,
+        Legend
+      );
+    }
+  }, []);
   // Obtener lista única de ejercicios
   const allExercises = useMemo(() => {
     const exercises = new Set<string>();

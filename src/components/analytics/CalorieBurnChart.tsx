@@ -22,22 +22,24 @@ interface CalorieBurnChartProps {
   entrenosNoProgramados: EntrenoNoProgramado[];
 }
 
-export const CalorieBurnChart: React.FC<CalorieBurnChartProps> = ({ 
-  cardio, 
-  neat, 
-  entrenosNoProgramados 
+export const CalorieBurnChart: React.FC<CalorieBurnChartProps> = ({
+  cardio,
+  neat,
+  entrenosNoProgramados
 }) => {
-  // Registrar Chart.js solo en el cliente
-  if (typeof window !== 'undefined') {
-    ChartJS.register(
-      CategoryScale,
-      LinearScale,
-      BarElement,
-      Title,
-      Tooltip,
-      Legend
-    );
-  }
+  // Registrar Chart.js solo una vez en el cliente
+  React.useEffect(() => {
+    if (typeof window !== 'undefined') {
+      ChartJS.register(
+        CategoryScale,
+        LinearScale,
+        BarElement,
+        Title,
+        Tooltip,
+        Legend
+      );
+    }
+  }, []);
   // Obtener datos de los últimos 7 días
   const sevenDaysAgo = new Date();
   sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);

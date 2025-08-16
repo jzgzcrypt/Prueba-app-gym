@@ -364,13 +364,24 @@ export const getCurrentMesocicloDay = () => {
   try {
     if (typeof window !== 'undefined') {
       const storedStartDate = localStorage.getItem('mesociclo_start_date');
-      startDate = storedStartDate ? new Date(storedStartDate) : new Date('2024-08-01');
+      if (storedStartDate) {
+        startDate = new Date(storedStartDate);
+      } else {
+        // Si no hay fecha configurada, usar el lunes de esta semana
+        const today = new Date();
+        const dayOfWeek = today.getDay();
+        const daysToMonday = dayOfWeek === 0 ? 1 : dayOfWeek; // Si es domingo, ir al lunes siguiente
+        const monday = new Date(today);
+        monday.setDate(today.getDate() - daysToMonday);
+        startDate = monday;
+      }
     } else {
-      startDate = new Date('2024-08-01');
+      // Para SSR, usar una fecha reciente
+      startDate = new Date('2025-01-01');
     }
   } catch {
     // Fallback en caso de error
-    startDate = new Date('2024-08-01');
+    startDate = new Date('2025-01-01');
   }
   
   // Calcular días transcurridos desde el inicio
@@ -468,7 +479,28 @@ export const getWeeklyPlan = () => {
   startOfWeek.setDate(today.getDate() - dayOfWeek + (dayOfWeek === 0 ? -6 : 1)); // Lunes como inicio de semana
   
   // Calcular días transcurridos hasta el inicio de la semana
-  const startDate = new Date('2024-08-01');
+  let startDate: Date;
+  try {
+    if (typeof window !== 'undefined') {
+      const storedStartDate = localStorage.getItem('mesociclo_start_date');
+      if (storedStartDate) {
+        startDate = new Date(storedStartDate);
+      } else {
+        // Si no hay fecha configurada, usar el lunes de esta semana
+        const today = new Date();
+        const dayOfWeek = today.getDay();
+        const daysToMonday = dayOfWeek === 0 ? 1 : dayOfWeek;
+        const monday = new Date(today);
+        monday.setDate(today.getDate() - daysToMonday);
+        startDate = monday;
+      }
+    } else {
+      startDate = new Date('2025-01-01');
+    }
+  } catch {
+    startDate = new Date('2025-01-01');
+  }
+  
   const daysToStartOfWeek = Math.floor((startOfWeek.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24));
   
   // Determinar microciclo de la semana actual
@@ -722,12 +754,22 @@ export const testMesocicloTracking = (testDate?: Date) => {
   try {
     if (typeof window !== 'undefined') {
       const storedStartDate = localStorage.getItem('mesociclo_start_date');
-      startDate = storedStartDate ? new Date(storedStartDate) : new Date('2024-08-01');
+      if (storedStartDate) {
+        startDate = new Date(storedStartDate);
+      } else {
+        // Si no hay fecha configurada, usar el lunes de esta semana
+        const today = new Date();
+        const dayOfWeek = today.getDay();
+        const daysToMonday = dayOfWeek === 0 ? 1 : dayOfWeek;
+        const monday = new Date(today);
+        monday.setDate(today.getDate() - daysToMonday);
+        startDate = monday;
+      }
     } else {
-      startDate = new Date('2024-08-01');
+      startDate = new Date('2025-01-01');
     }
   } catch {
-    startDate = new Date('2024-08-01');
+    startDate = new Date('2025-01-01');
   }
   
   // Calcular días transcurridos

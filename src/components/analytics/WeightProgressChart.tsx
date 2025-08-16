@@ -21,18 +21,20 @@ interface WeightProgressChartProps {
 }
 
 export const WeightProgressChart: React.FC<WeightProgressChartProps> = ({ weights, seguimiento }) => {
-  // Registrar Chart.js solo en el cliente
-  if (typeof window !== 'undefined') {
-    ChartJS.register(
-      CategoryScale,
-      LinearScale,
-      PointElement,
-      LineElement,
-      Title,
-      Tooltip,
-      Legend
-    );
-  }
+  // Registrar Chart.js solo una vez en el cliente
+  React.useEffect(() => {
+    if (typeof window !== 'undefined') {
+      ChartJS.register(
+        CategoryScale,
+        LinearScale,
+        PointElement,
+        LineElement,
+        Title,
+        Tooltip,
+        Legend
+      );
+    }
+  }, []);
   // Obtener datos de los últimos 30 días
   const thirtyDaysAgo = new Date();
   thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
