@@ -890,7 +890,7 @@ export default function Dashboard() {
       <div className="px-6">
         <h2 className="text-xl font-semibold mb-4">🎯 Hoy toca (Actualizado):</h2>
         
-        {/* Current Day Info */}
+                {/* Current Day Info */}
         <ClientOnly fallback={
           <div className="clean-card mb-4">
             <div className="flex items-center gap-3 mb-3">
@@ -904,33 +904,8 @@ export default function Dashboard() {
             </div>
           </div>
         }>
-          {(() => {
-          let currentData;
-          let startDate;
-          
-          // Solo ejecutar en el cliente
-          if (typeof window !== 'undefined') {
-            try {
-              currentData = getCurrentMesocicloDay();
-              startDate = getMesocicloStartDate();
-            } catch {
-              // Fallback en caso de error
-              currentData = {
-                microciclo: { nombre: 'Cargando...', dias: [] },
-                dia: { dia: 'Día 1', entrenamiento: 'Cargando...', ejercicios: [], cardio: undefined },
-                mesociclo: { nombre: 'Cargando...', microciclos: [] },
-                semanaActual: 1,
-                diaSemana: 0,
-                diaMesociclo: 1,
-                diasTranscurridos: 0,
-                diasEnMicrociclo: 0,
-                microcicloCompletado: false
-              };
-              startDate = null;
-            }
-          } else {
-            // Fallback para SSR
-            currentData = {
+          {() => {
+            const [currentData, setCurrentData] = useState(() => ({
               microciclo: { nombre: 'Cargando...', dias: [] },
               dia: { dia: 'Día 1', entrenamiento: 'Cargando...', ejercicios: [], cardio: undefined },
               mesociclo: { nombre: 'Cargando...', microciclos: [] },
@@ -940,9 +915,20 @@ export default function Dashboard() {
               diasTranscurridos: 0,
               diasEnMicrociclo: 0,
               microcicloCompletado: false
-            };
-            startDate = null;
-          }
+            }));
+            
+            const [startDate, setStartDate] = useState<string | null>(null);
+            
+            useEffect(() => {
+              try {
+                const data = getCurrentMesocicloDay();
+                const date = getMesocicloStartDate();
+                setCurrentData(data);
+                setStartDate(date);
+              } catch (error) {
+                console.error('Error loading mesociclo data:', error);
+              }
+            }, []);
           
           return (
             <div className="clean-card mb-4">
