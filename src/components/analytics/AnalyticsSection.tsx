@@ -1,3 +1,5 @@
+'use client';
+
 import React, { useState } from 'react';
 import { TabNavigation, AnalyticsTab } from './TabNavigation';
 import { WeightProgressChart } from './WeightProgressChart';

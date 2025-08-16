@@ -1,3 +1,5 @@
+'use client';
+
 import React, { useMemo } from 'react';
 import { WeightEntry, SeguimientoEntry, CardioEntry, NeatEntry, EntrenoNoProgramado, WorkoutEntry, DailyAdherence } from '@/types';
 

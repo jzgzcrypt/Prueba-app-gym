@@ -1,3 +1,5 @@
+'use client';
+
 import React, { useEffect, useState, useCallback } from 'react';
 import { WeightEntry, CardioEntry, WorkoutEntry, DailyAdherence } from '@/types';
 
