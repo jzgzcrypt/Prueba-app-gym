@@ -7,8 +7,8 @@ import { ToastContainer } from '@/components/ToastContainer';
 import { ProgressCircle } from '@/components/ProgressCircle';
 import { WorkoutModal } from '@/components/WorkoutModal';
 import { WeeklyCalendar } from '@/components/WeeklyCalendar';
-import { WeightEntry, CardioEntry, DietEntry, DailyAdherence, WorkoutEntry, Exercise, NeatEntry, SeguimientoEntry } from '@/types';
-import { getCurrentMesocicloDay, setMesocicloStartDate, getMesocicloStartDate, testMesocicloTracking } from '@/utils/mesocicloUtils';
+import { WeightEntry, CardioEntry, DietEntry, DailyAdherence, WorkoutEntry, Exercise, NeatEntry, SeguimientoEntry, EntrenoNoProgramado } from '@/types';
+import { getCurrentMesocicloDay, setMesocicloStartDate, getMesocicloStartDate, testMesocicloTracking, calcularCaloriasEntrenoNoProgramado } from '@/utils/mesocicloUtils';
 
 export default function Dashboard() {
   const { showToast } = useToast();
@@ -40,6 +40,7 @@ export default function Dashboard() {
   const [workouts, setWorkouts] = useLocalStorage<WorkoutEntry[]>('workouts', []);
   const [neat, setNeat] = useLocalStorage<NeatEntry[]>('neat', []);
   const [seguimiento, setSeguimiento] = useLocalStorage<SeguimientoEntry[]>('seguimiento', []);
+  const [entrenosNoProgramados, setEntrenosNoProgramados] = useLocalStorage<EntrenoNoProgramado[]>('entrenosNoProgramados', []);
   const [adherenciaDiaria, setAdherenciaDiaria] = useLocalStorage<DailyAdherence>('adherenciaDiaria', {});
 
   // Form states
@@ -62,6 +63,61 @@ export default function Dashboard() {
   const [seguimientoPeso, setSeguimientoPeso] = useState('');
   const [seguimientoCintura, setSeguimientoCintura] = useState('');
   const [seguimientoNotas, setSeguimientoNotas] = useState('');
+  
+  // Entreno no programado form states
+  const [entrenoTipo, setEntrenoTipo] = useState<'tenis' | 'natacion' | 'alpinismo' | 'ciclismo' | 'running' | 'futbol' | 'baloncesto' | 'escalada' | 'yoga' | 'pilates' | 'crossfit' | 'otro'>('tenis');
+  const [entrenoDuracion, setEntrenoDuracion] = useState('');
+  const [entrenoIntensidad, setEntrenoIntensidad] = useState<'baja' | 'moderada' | 'alta' | 'muy alta'>('moderada');
+  const [entrenoEsfuerzo, setEntrenoEsfuerzo] = useState('');
+  const [entrenoNotas, setEntrenoNotas] = useState('');
+  
+  // Campos específicos por actividad
+  const [entrenoTenisSets, setEntrenoTenisSets] = useState('');
+  const [entrenoTenisDuracionSet, setEntrenoTenisDuracionSet] = useState('');
+  const [entrenoTenisNivel, setEntrenoTenisNivel] = useState<'principiante' | 'intermedio' | 'avanzado'>('intermedio');
+  
+  const [entrenoNatacionMetros, setEntrenoNatacionMetros] = useState('');
+  const [entrenoNatacionEstilo, setEntrenoNatacionEstilo] = useState<'libre' | 'espalda' | 'braza' | 'mariposa' | 'combinado'>('libre');
+  const [entrenoNatacionRitmo, setEntrenoNatacionRitmo] = useState<'lento' | 'moderado' | 'rápido' | 'competitivo'>('moderado');
+  
+  const [entrenoAlpinismoRuta, setEntrenoAlpinismoRuta] = useState('');
+  const [entrenoAlpinismoDesnivel, setEntrenoAlpinismoDesnivel] = useState('');
+  const [entrenoAlpinismoDificultad, setEntrenoAlpinismoDificultad] = useState<'facil' | 'moderada' | 'dificil' | 'muy dificil'>('moderada');
+  const [entrenoAlpinismoCondiciones, setEntrenoAlpinismoCondiciones] = useState<'buenas' | 'regulares' | 'malas'>('buenas');
+  
+  const [entrenoCiclismoKm, setEntrenoCiclismoKm] = useState('');
+  const [entrenoCiclismoRitmo, setEntrenoCiclismoRitmo] = useState('');
+  const [entrenoCiclismoDesnivel, setEntrenoCiclismoDesnivel] = useState('');
+  const [entrenoCiclismoTipo, setEntrenoCiclismoTipo] = useState<'carretera' | 'mtb' | 'urbano'>('carretera');
+  
+  const [entrenoRunningKm, setEntrenoRunningKm] = useState('');
+  const [entrenoRunningRitmo, setEntrenoRunningRitmo] = useState('');
+  const [entrenoRunningTipo, setEntrenoRunningTipo] = useState<'carrera' | 'trail' | 'intervalos'>('carrera');
+  
+  const [entrenoFutbolDuracion, setEntrenoFutbolDuracion] = useState('');
+  const [entrenoFutbolPosicion, setEntrenoFutbolPosicion] = useState<'portero' | 'defensa' | 'centrocampista' | 'delantero'>('centrocampista');
+  const [entrenoFutbolIntensidad, setEntrenoFutbolIntensidad] = useState<'amistoso' | 'competitivo'>('amistoso');
+  
+  const [entrenoBaloncestoDuracion, setEntrenoBaloncestoDuracion] = useState('');
+  const [entrenoBaloncestoPosicion, setEntrenoBaloncestoPosicion] = useState<'base' | 'escolta' | 'ala' | 'ala-pivot' | 'pivot'>('ala');
+  const [entrenoBaloncestoIntensidad, setEntrenoBaloncestoIntensidad] = useState<'amistoso' | 'competitivo'>('amistoso');
+  
+  const [entrenoEscaladaRutas, setEntrenoEscaladaRutas] = useState('');
+  const [entrenoEscaladaGrado, setEntrenoEscaladaGrado] = useState('');
+  const [entrenoEscaladaTipo, setEntrenoEscaladaTipo] = useState<'boulder' | 'deportiva' | 'tradicional'>('deportiva');
+  
+  const [entrenoYogaTipo, setEntrenoYogaTipo] = useState<'hatha' | 'vinyasa' | 'ashtanga' | 'yin' | 'restaurativo'>('hatha');
+  const [entrenoYogaNivel, setEntrenoYogaNivel] = useState<'principiante' | 'intermedio' | 'avanzado'>('intermedio');
+  
+  const [entrenoPilatesTipo, setEntrenoPilatesTipo] = useState<'mat' | 'reformer' | 'cadillac'>('mat');
+  const [entrenoPilatesNivel, setEntrenoPilatesNivel] = useState<'principiante' | 'intermedio' | 'avanzado'>('intermedio');
+  
+  const [entrenoCrossfitWod, setEntrenoCrossfitWod] = useState('');
+  const [entrenoCrossfitTiempo, setEntrenoCrossfitTiempo] = useState('');
+  const [entrenoCrossfitRx, setEntrenoCrossfitRx] = useState(false);
+  
+  const [entrenoOtroActividad, setEntrenoOtroActividad] = useState('');
+  const [entrenoOtroDetalles, setEntrenoOtroDetalles] = useState('');
 
   // Desktop form states
   const [desktopWeight, setDesktopWeight] = useState('');
@@ -156,6 +212,29 @@ export default function Dashboard() {
     setSeguimientoPeso('');
     setSeguimientoCintura('');
     setSeguimientoNotas('');
+    
+    // Reset entreno no programado form states
+    setEntrenoDuracion('');
+    setEntrenoEsfuerzo('');
+    setEntrenoNotas('');
+    setEntrenoTenisSets('');
+    setEntrenoTenisDuracionSet('');
+    setEntrenoNatacionMetros('');
+    setEntrenoAlpinismoRuta('');
+    setEntrenoAlpinismoDesnivel('');
+    setEntrenoCiclismoKm('');
+    setEntrenoCiclismoRitmo('');
+    setEntrenoCiclismoDesnivel('');
+    setEntrenoRunningKm('');
+    setEntrenoRunningRitmo('');
+    setEntrenoFutbolDuracion('');
+    setEntrenoBaloncestoDuracion('');
+    setEntrenoEscaladaRutas('');
+    setEntrenoEscaladaGrado('');
+    setEntrenoCrossfitWod('');
+    setEntrenoCrossfitTiempo('');
+    setEntrenoOtroActividad('');
+    setEntrenoOtroDetalles('');
     
     // Reset start date config
     setShowStartDateConfig(false);
@@ -398,6 +477,218 @@ export default function Dashboard() {
     closeModal();
   };
 
+  const saveEntrenoNoProgramado = () => {
+    if (!entrenoDuracion || !entrenoEsfuerzo) {
+      showToast('Por favor completa todos los campos obligatorios', 'error');
+      return;
+    }
+
+    const duracion = parseInt(entrenoDuracion);
+    const esfuerzo = parseInt(entrenoEsfuerzo);
+    
+    if (duracion <= 0 || esfuerzo < 1 || esfuerzo > 10) {
+      showToast('Duración y esfuerzo deben ser válidos', 'error');
+      return;
+    }
+
+    // Obtener datos específicos según el tipo de actividad
+    let datosEspecificos: Record<string, unknown> = {};
+    
+    switch (entrenoTipo) {
+      case 'tenis':
+        if (!entrenoTenisSets || !entrenoTenisDuracionSet) {
+          showToast('Completa los datos específicos de tenis', 'error');
+          return;
+        }
+        datosEspecificos = {
+          sets: parseInt(entrenoTenisSets),
+          duracionSet: parseInt(entrenoTenisDuracionSet),
+          nivel: entrenoTenisNivel
+        };
+        break;
+        
+      case 'natacion':
+        if (!entrenoNatacionMetros) {
+          showToast('Completa los metros nadados', 'error');
+          return;
+        }
+        datosEspecificos = {
+          metros: parseInt(entrenoNatacionMetros),
+          estilo: entrenoNatacionEstilo,
+          ritmo: entrenoNatacionRitmo
+        };
+        break;
+        
+      case 'alpinismo':
+        if (!entrenoAlpinismoRuta || !entrenoAlpinismoDesnivel) {
+          showToast('Completa los datos de la ruta', 'error');
+          return;
+        }
+        datosEspecificos = {
+          ruta: entrenoAlpinismoRuta,
+          desnivel: parseInt(entrenoAlpinismoDesnivel),
+          dificultad: entrenoAlpinismoDificultad,
+          condiciones: entrenoAlpinismoCondiciones
+        };
+        break;
+        
+      case 'ciclismo':
+        if (!entrenoCiclismoKm || !entrenoCiclismoRitmo) {
+          showToast('Completa los datos de ciclismo', 'error');
+          return;
+        }
+        datosEspecificos = {
+          km: parseFloat(entrenoCiclismoKm),
+          ritmoKmH: parseFloat(entrenoCiclismoRitmo),
+          desnivel: entrenoCiclismoDesnivel ? parseInt(entrenoCiclismoDesnivel) : 0,
+          tipo: entrenoCiclismoTipo
+        };
+        break;
+        
+      case 'running':
+        if (!entrenoRunningKm || !entrenoRunningRitmo) {
+          showToast('Completa los datos de running', 'error');
+          return;
+        }
+        datosEspecificos = {
+          km: parseFloat(entrenoRunningKm),
+          ritmoMinKm: parseFloat(entrenoRunningRitmo),
+          tipo: entrenoRunningTipo
+        };
+        break;
+        
+      case 'futbol':
+        if (!entrenoFutbolDuracion) {
+          showToast('Completa la duración del partido', 'error');
+          return;
+        }
+        datosEspecificos = {
+          duracionPartido: parseInt(entrenoFutbolDuracion),
+          posicion: entrenoFutbolPosicion,
+          intensidad: entrenoFutbolIntensidad
+        };
+        break;
+        
+      case 'baloncesto':
+        if (!entrenoBaloncestoDuracion) {
+          showToast('Completa la duración del partido', 'error');
+          return;
+        }
+        datosEspecificos = {
+          duracionPartido: parseInt(entrenoBaloncestoDuracion),
+          posicion: entrenoBaloncestoPosicion,
+          intensidad: entrenoBaloncestoIntensidad
+        };
+        break;
+        
+      case 'escalada':
+        if (!entrenoEscaladaRutas || !entrenoEscaladaGrado) {
+          showToast('Completa los datos de escalada', 'error');
+          return;
+        }
+        datosEspecificos = {
+          rutas: parseInt(entrenoEscaladaRutas),
+          grado: entrenoEscaladaGrado,
+          tipo: entrenoEscaladaTipo
+        };
+        break;
+        
+      case 'yoga':
+        datosEspecificos = {
+          tipo: entrenoYogaTipo,
+          nivel: entrenoYogaNivel
+        };
+        break;
+        
+      case 'pilates':
+        datosEspecificos = {
+          tipo: entrenoPilatesTipo,
+          nivel: entrenoPilatesNivel
+        };
+        break;
+        
+      case 'crossfit':
+        if (!entrenoCrossfitWod || !entrenoCrossfitTiempo) {
+          showToast('Completa los datos del WOD', 'error');
+          return;
+        }
+        datosEspecificos = {
+          wod: entrenoCrossfitWod,
+          tiempo: parseInt(entrenoCrossfitTiempo),
+          rx: entrenoCrossfitRx
+        };
+        break;
+        
+      case 'otro':
+        if (!entrenoOtroActividad) {
+          showToast('Especifica la actividad', 'error');
+          return;
+        }
+        datosEspecificos = {
+          actividad: entrenoOtroActividad,
+          detalles: entrenoOtroDetalles
+        };
+        break;
+    }
+
+    // Calcular calorías
+    const peso = estado.length > 0 ? estado[estado.length - 1].peso : 75;
+    const calorias = calcularCaloriasEntrenoNoProgramado(
+      entrenoTipo,
+      duracion,
+      entrenoIntensidad,
+      peso,
+      datosEspecificos
+    );
+
+    const fecha = todayISO();
+    const newEntreno: EntrenoNoProgramado = {
+      fecha,
+      tipo: entrenoTipo,
+      duracion,
+      intensidad: entrenoIntensidad,
+      calorias,
+      esfuerzo,
+      notas: entrenoNotas || undefined,
+      ...datosEspecificos
+    };
+
+    const newEntrenos = entrenosNoProgramados.filter(e => e.fecha !== fecha);
+    newEntrenos.push(newEntreno);
+    setEntrenosNoProgramados(newEntrenos);
+    
+    const newAdherencia = { ...adherenciaDiaria };
+    if (!newAdherencia[fecha]) newAdherencia[fecha] = {};
+    newAdherencia[fecha].entrenoNoProgramado = true;
+    setAdherenciaDiaria(newAdherencia);
+
+    // Limpiar formulario
+    setEntrenoDuracion('');
+    setEntrenoEsfuerzo('');
+    setEntrenoNotas('');
+    setEntrenoTenisSets('');
+    setEntrenoTenisDuracionSet('');
+    setEntrenoNatacionMetros('');
+    setEntrenoAlpinismoRuta('');
+    setEntrenoAlpinismoDesnivel('');
+    setEntrenoCiclismoKm('');
+    setEntrenoCiclismoRitmo('');
+    setEntrenoCiclismoDesnivel('');
+    setEntrenoRunningKm('');
+    setEntrenoRunningRitmo('');
+    setEntrenoFutbolDuracion('');
+    setEntrenoBaloncestoDuracion('');
+    setEntrenoEscaladaRutas('');
+    setEntrenoEscaladaGrado('');
+    setEntrenoCrossfitWod('');
+    setEntrenoCrossfitTiempo('');
+    setEntrenoOtroActividad('');
+    setEntrenoOtroDetalles('');
+
+    closeModal();
+    showToast(`✅ Entreno de ${entrenoTipo} guardado: ${calorias} calorías`, 'success');
+  };
+
   const handleStartDateConfig = () => {
     if (!startDateInput) {
       showToast('⚠️ Ingresa una fecha válida', 'error');
@@ -477,7 +768,7 @@ export default function Dashboard() {
     }
   };
 
-  const getStatus = (type: 'weight' | 'workout' | 'cardio' | 'diet' | 'neat' | 'seguimiento') => {
+  const getStatus = (type: 'weight' | 'workout' | 'cardio' | 'diet' | 'neat' | 'seguimiento' | 'entrenoNoProgramado') => {
     const today = todayISO();
     const todayAdherence = adherenciaDiaria[today] || {};
     
@@ -494,12 +785,14 @@ export default function Dashboard() {
         return todayAdherence.neat ? 'Completado' : 'Pendiente';
       case 'seguimiento':
         return todayAdherence.seguimiento ? 'Completado' : 'Pendiente';
+      case 'entrenoNoProgramado':
+        return todayAdherence.entrenoNoProgramado ? 'Completado' : 'Pendiente';
       default:
         return 'Pendiente';
     }
   };
 
-  const getStatusClass = (type: 'weight' | 'workout' | 'cardio' | 'diet' | 'neat' | 'seguimiento') => {
+  const getStatusClass = (type: 'weight' | 'workout' | 'cardio' | 'diet' | 'neat' | 'seguimiento' | 'entrenoNoProgramado') => {
     const status = getStatus(type);
     return `text-sm ${status === 'Completado' ? 'success' : 'pending'}`;
   };
@@ -528,6 +821,12 @@ export default function Dashboard() {
     if (workoutHoy) {
       totalCalorias += 300; // Estimación base para entrenamiento de fuerza
     }
+    
+    // Calorías de entrenos no programados
+    const entrenosHoy = entrenosNoProgramados.filter(e => e.fecha === today);
+    entrenosHoy.forEach(entreno => {
+      totalCalorias += entreno.calorias;
+    });
     
     return totalCalorias;
   };
@@ -783,6 +1082,25 @@ export default function Dashboard() {
             </div>
             <div className="text-right">
               <div className={getStatusClass('neat')}>{getStatus('neat')}</div>
+              <div className="text-xs text-gray-500">Toca para registrar</div>
+            </div>
+          </div>
+        </div>
+        
+        {/* Entreno No Programado Entry */}
+        <div className="clean-card cursor-pointer hover:scale-[1.02] transition-transform" onClick={() => openModal('entreno-no-programado')}>
+          <div className="flex items-center justify-between">
+            <div className="flex items-center">
+              <div className="w-12 h-12 bg-gradient-to-r from-teal-400 to-teal-500 rounded-full flex items-center justify-center mr-4 shadow-lg">
+                <span className="text-2xl">🎯</span>
+              </div>
+              <div>
+                <h3 className="font-semibold">Entreno Extra</h3>
+                <p className="text-sm text-gray-600">Tenis, natación, alpinismo, etc.</p>
+              </div>
+            </div>
+            <div className="text-right">
+              <div className={getStatusClass('entrenoNoProgramado')}>{getStatus('entrenoNoProgramado')}</div>
               <div className="text-xs text-gray-500">Toca para registrar</div>
             </div>
           </div>
@@ -2136,6 +2454,595 @@ export default function Dashboard() {
         </div>
       )}
 
+      {activeModal === 'entreno-no-programado' && (
+        <div className="modal-overlay" onClick={closeModal}>
+          <div className="modal-content max-h-[90vh] flex flex-col" onClick={(e) => e.stopPropagation()}>
+            <div className="modal-header flex-shrink-0">
+              <button className="modal-close" onClick={closeModal}>×</button>
+              <h3>🎯 Entreno No Programado</h3>
+            </div>
+            
+            <div className="modal-body flex-1 overflow-y-auto">
+              <div className="space-y-4">
+                {/* Tipo de actividad */}
+                <div>
+                  <label className="block text-sm font-medium mb-2 text-gray-700">Tipo de Actividad</label>
+                  <select 
+                    value={entrenoTipo}
+                    onChange={(e) => setEntrenoTipo(e.target.value as 'tenis' | 'natacion' | 'alpinismo' | 'ciclismo' | 'running' | 'futbol' | 'baloncesto' | 'escalada' | 'yoga' | 'pilates' | 'crossfit' | 'otro')}
+                    className="input-compact"
+                  >
+                    <option value="tenis">🎾 Tenis</option>
+                    <option value="natacion">🏊 Natación</option>
+                    <option value="alpinismo">⛰️ Alpinismo</option>
+                    <option value="ciclismo">🚴 Ciclismo</option>
+                    <option value="running">🏃 Running</option>
+                    <option value="futbol">⚽ Fútbol</option>
+                    <option value="baloncesto">🏀 Baloncesto</option>
+                    <option value="escalada">🧗 Escalada</option>
+                    <option value="yoga">🧘 Yoga</option>
+                    <option value="pilates">🤸 Pilates</option>
+                    <option value="crossfit">💪 CrossFit</option>
+                    <option value="otro">🎯 Otro</option>
+                  </select>
+                </div>
+
+                {/* Duración y esfuerzo */}
+                <div className="grid grid-cols-2 gap-3">
+                  <div>
+                    <label className="block text-sm font-medium mb-2 text-gray-700">Duración (min)</label>
+                    <input 
+                      type="number" 
+                      value={entrenoDuracion}
+                      onChange={(e) => setEntrenoDuracion(e.target.value)}
+                      placeholder="60" 
+                      className="input-compact"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium mb-2 text-gray-700">Esfuerzo (RPE 1-10)</label>
+                    <input 
+                      type="number" 
+                      value={entrenoEsfuerzo}
+                      onChange={(e) => setEntrenoEsfuerzo(e.target.value)}
+                      placeholder="7" 
+                      min="1"
+                      max="10"
+                      className="input-compact"
+                    />
+                  </div>
+                </div>
+
+                {/* Intensidad */}
+                <div>
+                  <label className="block text-sm font-medium mb-2 text-gray-700">Intensidad</label>
+                  <select 
+                    value={entrenoIntensidad}
+                    onChange={(e) => setEntrenoIntensidad(e.target.value as 'baja' | 'moderada' | 'alta' | 'muy alta')}
+                    className="input-compact"
+                  >
+                    <option value="baja">Baja</option>
+                    <option value="moderada">Moderada</option>
+                    <option value="alta">Alta</option>
+                    <option value="muy alta">Muy Alta</option>
+                  </select>
+                </div>
+
+                {/* Campos específicos por actividad */}
+                {entrenoTipo === 'tenis' && (
+                  <div className="space-y-3 p-3 bg-blue-50 rounded-lg">
+                    <h4 className="font-medium text-sm text-blue-800">🎾 Datos de Tenis</h4>
+                    <div className="grid grid-cols-2 gap-3">
+                      <div>
+                        <label className="block text-xs font-medium mb-1 text-gray-700">Sets</label>
+                        <input 
+                          type="number" 
+                          value={entrenoTenisSets}
+                          onChange={(e) => setEntrenoTenisSets(e.target.value)}
+                          placeholder="3" 
+                          className="input-compact"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-xs font-medium mb-1 text-gray-700">Duración por set (min)</label>
+                        <input 
+                          type="number" 
+                          value={entrenoTenisDuracionSet}
+                          onChange={(e) => setEntrenoTenisDuracionSet(e.target.value)}
+                          placeholder="20" 
+                          className="input-compact"
+                        />
+                      </div>
+                    </div>
+                    <div>
+                      <label className="block text-xs font-medium mb-1 text-gray-700">Nivel</label>
+                      <select 
+                        value={entrenoTenisNivel}
+                        onChange={(e) => setEntrenoTenisNivel(e.target.value as 'principiante' | 'intermedio' | 'avanzado')}
+                        className="input-compact"
+                      >
+                        <option value="principiante">Principiante</option>
+                        <option value="intermedio">Intermedio</option>
+                        <option value="avanzado">Avanzado</option>
+                      </select>
+                    </div>
+                  </div>
+                )}
+
+                {entrenoTipo === 'natacion' && (
+                  <div className="space-y-3 p-3 bg-blue-50 rounded-lg">
+                    <h4 className="font-medium text-sm text-blue-800">🏊 Datos de Natación</h4>
+                    <div>
+                      <label className="block text-xs font-medium mb-1 text-gray-700">Metros</label>
+                      <input 
+                        type="number" 
+                        value={entrenoNatacionMetros}
+                        onChange={(e) => setEntrenoNatacionMetros(e.target.value)}
+                        placeholder="1000" 
+                        className="input-compact"
+                      />
+                    </div>
+                    <div className="grid grid-cols-2 gap-3">
+                      <div>
+                        <label className="block text-xs font-medium mb-1 text-gray-700">Estilo</label>
+                        <select 
+                          value={entrenoNatacionEstilo}
+                          onChange={(e) => setEntrenoNatacionEstilo(e.target.value as 'libre' | 'espalda' | 'braza' | 'mariposa' | 'combinado')}
+                          className="input-compact"
+                        >
+                          <option value="libre">Libre</option>
+                          <option value="espalda">Espalda</option>
+                          <option value="braza">Braza</option>
+                          <option value="mariposa">Mariposa</option>
+                          <option value="combinado">Combinado</option>
+                        </select>
+                      </div>
+                      <div>
+                        <label className="block text-xs font-medium mb-1 text-gray-700">Ritmo</label>
+                        <select 
+                          value={entrenoNatacionRitmo}
+                          onChange={(e) => setEntrenoNatacionRitmo(e.target.value as 'lento' | 'moderado' | 'rápido' | 'competitivo')}
+                          className="input-compact"
+                        >
+                          <option value="lento">Lento</option>
+                          <option value="moderado">Moderado</option>
+                          <option value="rápido">Rápido</option>
+                          <option value="competitivo">Competitivo</option>
+                        </select>
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {entrenoTipo === 'alpinismo' && (
+                  <div className="space-y-3 p-3 bg-blue-50 rounded-lg">
+                    <h4 className="font-medium text-sm text-blue-800">⛰️ Datos de Alpinismo</h4>
+                    <div>
+                      <label className="block text-xs font-medium mb-1 text-gray-700">Ruta</label>
+                      <input 
+                        type="text" 
+                        value={entrenoAlpinismoRuta}
+                        onChange={(e) => setEntrenoAlpinismoRuta(e.target.value)}
+                        placeholder="Nombre de la ruta" 
+                        className="input-compact"
+                      />
+                    </div>
+                    <div className="grid grid-cols-2 gap-3">
+                      <div>
+                        <label className="block text-xs font-medium mb-1 text-gray-700">Desnivel (m)</label>
+                        <input 
+                          type="number" 
+                          value={entrenoAlpinismoDesnivel}
+                          onChange={(e) => setEntrenoAlpinismoDesnivel(e.target.value)}
+                          placeholder="500" 
+                          className="input-compact"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-xs font-medium mb-1 text-gray-700">Dificultad</label>
+                        <select 
+                          value={entrenoAlpinismoDificultad}
+                          onChange={(e) => setEntrenoAlpinismoDificultad(e.target.value as 'facil' | 'moderada' | 'dificil' | 'muy dificil')}
+                          className="input-compact"
+                        >
+                          <option value="facil">Fácil</option>
+                          <option value="moderada">Moderada</option>
+                          <option value="dificil">Difícil</option>
+                          <option value="muy dificil">Muy Difícil</option>
+                        </select>
+                      </div>
+                    </div>
+                    <div>
+                      <label className="block text-xs font-medium mb-1 text-gray-700">Condiciones</label>
+                      <select 
+                        value={entrenoAlpinismoCondiciones}
+                        onChange={(e) => setEntrenoAlpinismoCondiciones(e.target.value as 'buenas' | 'regulares' | 'malas')}
+                        className="input-compact"
+                      >
+                        <option value="buenas">Buenas</option>
+                        <option value="regulares">Regulares</option>
+                        <option value="malas">Malas</option>
+                      </select>
+                    </div>
+                  </div>
+                )}
+
+                {entrenoTipo === 'ciclismo' && (
+                  <div className="space-y-3 p-3 bg-blue-50 rounded-lg">
+                    <h4 className="font-medium text-sm text-blue-800">🚴 Datos de Ciclismo</h4>
+                    <div className="grid grid-cols-2 gap-3">
+                      <div>
+                        <label className="block text-xs font-medium mb-1 text-gray-700">Kilómetros</label>
+                        <input 
+                          type="number" 
+                          value={entrenoCiclismoKm}
+                          onChange={(e) => setEntrenoCiclismoKm(e.target.value)}
+                          placeholder="30" 
+                          step="0.1"
+                          className="input-compact"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-xs font-medium mb-1 text-gray-700">Ritmo (km/h)</label>
+                        <input 
+                          type="number" 
+                          value={entrenoCiclismoRitmo}
+                          onChange={(e) => setEntrenoCiclismoRitmo(e.target.value)}
+                          placeholder="25" 
+                          step="0.1"
+                          className="input-compact"
+                        />
+                      </div>
+                    </div>
+                    <div className="grid grid-cols-2 gap-3">
+                      <div>
+                        <label className="block text-xs font-medium mb-1 text-gray-700">Desnivel (m)</label>
+                        <input 
+                          type="number" 
+                          value={entrenoCiclismoDesnivel}
+                          onChange={(e) => setEntrenoCiclismoDesnivel(e.target.value)}
+                          placeholder="200" 
+                          className="input-compact"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-xs font-medium mb-1 text-gray-700">Tipo</label>
+                        <select 
+                          value={entrenoCiclismoTipo}
+                          onChange={(e) => setEntrenoCiclismoTipo(e.target.value as 'carretera' | 'mtb' | 'urbano')}
+                          className="input-compact"
+                        >
+                          <option value="carretera">Carretera</option>
+                          <option value="mtb">MTB</option>
+                          <option value="urbano">Urbano</option>
+                        </select>
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {entrenoTipo === 'running' && (
+                  <div className="space-y-3 p-3 bg-blue-50 rounded-lg">
+                    <h4 className="font-medium text-sm text-blue-800">🏃 Datos de Running</h4>
+                    <div className="grid grid-cols-2 gap-3">
+                      <div>
+                        <label className="block text-xs font-medium mb-1 text-gray-700">Kilómetros</label>
+                        <input 
+                          type="number" 
+                          value={entrenoRunningKm}
+                          onChange={(e) => setEntrenoRunningKm(e.target.value)}
+                          placeholder="5" 
+                          step="0.1"
+                          className="input-compact"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-xs font-medium mb-1 text-gray-700">Ritmo (min/km)</label>
+                        <input 
+                          type="number" 
+                          value={entrenoRunningRitmo}
+                          onChange={(e) => setEntrenoRunningRitmo(e.target.value)}
+                          placeholder="5.30" 
+                          step="0.1"
+                          className="input-compact"
+                        />
+                      </div>
+                    </div>
+                    <div>
+                      <label className="block text-xs font-medium mb-1 text-gray-700">Tipo</label>
+                      <select 
+                        value={entrenoRunningTipo}
+                        onChange={(e) => setEntrenoRunningTipo(e.target.value as 'carrera' | 'trail' | 'intervalos')}
+                        className="input-compact"
+                      >
+                        <option value="carrera">Carrera</option>
+                        <option value="trail">Trail</option>
+                        <option value="intervalos">Intervalos</option>
+                      </select>
+                    </div>
+                  </div>
+                )}
+
+                {entrenoTipo === 'futbol' && (
+                  <div className="space-y-3 p-3 bg-blue-50 rounded-lg">
+                    <h4 className="font-medium text-sm text-blue-800">⚽ Datos de Fútbol</h4>
+                    <div className="grid grid-cols-2 gap-3">
+                      <div>
+                        <label className="block text-xs font-medium mb-1 text-gray-700">Duración partido (min)</label>
+                        <input 
+                          type="number" 
+                          value={entrenoFutbolDuracion}
+                          onChange={(e) => setEntrenoFutbolDuracion(e.target.value)}
+                          placeholder="90" 
+                          className="input-compact"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-xs font-medium mb-1 text-gray-700">Posición</label>
+                        <select 
+                          value={entrenoFutbolPosicion}
+                          onChange={(e) => setEntrenoFutbolPosicion(e.target.value as 'portero' | 'defensa' | 'centrocampista' | 'delantero')}
+                          className="input-compact"
+                        >
+                          <option value="portero">Portero</option>
+                          <option value="defensa">Defensa</option>
+                          <option value="centrocampista">Centrocampista</option>
+                          <option value="delantero">Delantero</option>
+                        </select>
+                      </div>
+                    </div>
+                    <div>
+                      <label className="block text-xs font-medium mb-1 text-gray-700">Intensidad</label>
+                      <select 
+                        value={entrenoFutbolIntensidad}
+                        onChange={(e) => setEntrenoFutbolIntensidad(e.target.value as 'amistoso' | 'competitivo')}
+                        className="input-compact"
+                      >
+                        <option value="amistoso">Amistoso</option>
+                        <option value="competitivo">Competitivo</option>
+                      </select>
+                    </div>
+                  </div>
+                )}
+
+                {entrenoTipo === 'baloncesto' && (
+                  <div className="space-y-3 p-3 bg-blue-50 rounded-lg">
+                    <h4 className="font-medium text-sm text-blue-800">🏀 Datos de Baloncesto</h4>
+                    <div className="grid grid-cols-2 gap-3">
+                      <div>
+                        <label className="block text-xs font-medium mb-1 text-gray-700">Duración partido (min)</label>
+                        <input 
+                          type="number" 
+                          value={entrenoBaloncestoDuracion}
+                          onChange={(e) => setEntrenoBaloncestoDuracion(e.target.value)}
+                          placeholder="40" 
+                          className="input-compact"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-xs font-medium mb-1 text-gray-700">Posición</label>
+                        <select 
+                          value={entrenoBaloncestoPosicion}
+                          onChange={(e) => setEntrenoBaloncestoPosicion(e.target.value as 'base' | 'escolta' | 'ala' | 'ala-pivot' | 'pivot')}
+                          className="input-compact"
+                        >
+                          <option value="base">Base</option>
+                          <option value="escolta">Escolta</option>
+                          <option value="ala">Ala</option>
+                          <option value="ala-pivot">Ala-Pívot</option>
+                          <option value="pivot">Pívot</option>
+                        </select>
+                      </div>
+                    </div>
+                    <div>
+                      <label className="block text-xs font-medium mb-1 text-gray-700">Intensidad</label>
+                      <select 
+                        value={entrenoBaloncestoIntensidad}
+                        onChange={(e) => setEntrenoBaloncestoIntensidad(e.target.value as 'amistoso' | 'competitivo')}
+                        className="input-compact"
+                      >
+                        <option value="amistoso">Amistoso</option>
+                        <option value="competitivo">Competitivo</option>
+                      </select>
+                    </div>
+                  </div>
+                )}
+
+                {entrenoTipo === 'escalada' && (
+                  <div className="space-y-3 p-3 bg-blue-50 rounded-lg">
+                    <h4 className="font-medium text-sm text-blue-800">🧗 Datos de Escalada</h4>
+                    <div className="grid grid-cols-2 gap-3">
+                      <div>
+                        <label className="block text-xs font-medium mb-1 text-gray-700">Número de rutas</label>
+                        <input 
+                          type="number" 
+                          value={entrenoEscaladaRutas}
+                          onChange={(e) => setEntrenoEscaladaRutas(e.target.value)}
+                          placeholder="5" 
+                          className="input-compact"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-xs font-medium mb-1 text-gray-700">Grado</label>
+                        <input 
+                          type="text" 
+                          value={entrenoEscaladaGrado}
+                          onChange={(e) => setEntrenoEscaladaGrado(e.target.value)}
+                          placeholder="6a" 
+                          className="input-compact"
+                        />
+                      </div>
+                    </div>
+                    <div>
+                      <label className="block text-xs font-medium mb-1 text-gray-700">Tipo</label>
+                      <select 
+                        value={entrenoEscaladaTipo}
+                        onChange={(e) => setEntrenoEscaladaTipo(e.target.value as 'boulder' | 'deportiva' | 'tradicional')}
+                        className="input-compact"
+                      >
+                        <option value="boulder">Boulder</option>
+                        <option value="deportiva">Deportiva</option>
+                        <option value="tradicional">Tradicional</option>
+                      </select>
+                    </div>
+                  </div>
+                )}
+
+                {entrenoTipo === 'yoga' && (
+                  <div className="space-y-3 p-3 bg-blue-50 rounded-lg">
+                    <h4 className="font-medium text-sm text-blue-800">🧘 Datos de Yoga</h4>
+                    <div className="grid grid-cols-2 gap-3">
+                      <div>
+                        <label className="block text-xs font-medium mb-1 text-gray-700">Tipo</label>
+                        <select 
+                          value={entrenoYogaTipo}
+                          onChange={(e) => setEntrenoYogaTipo(e.target.value as 'hatha' | 'vinyasa' | 'ashtanga' | 'yin' | 'restaurativo')}
+                          className="input-compact"
+                        >
+                          <option value="hatha">Hatha</option>
+                          <option value="vinyasa">Vinyasa</option>
+                          <option value="ashtanga">Ashtanga</option>
+                          <option value="yin">Yin</option>
+                          <option value="restaurativo">Restaurativo</option>
+                        </select>
+                      </div>
+                      <div>
+                        <label className="block text-xs font-medium mb-1 text-gray-700">Nivel</label>
+                        <select 
+                          value={entrenoYogaNivel}
+                          onChange={(e) => setEntrenoYogaNivel(e.target.value as 'principiante' | 'intermedio' | 'avanzado')}
+                          className="input-compact"
+                        >
+                          <option value="principiante">Principiante</option>
+                          <option value="intermedio">Intermedio</option>
+                          <option value="avanzado">Avanzado</option>
+                        </select>
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {entrenoTipo === 'pilates' && (
+                  <div className="space-y-3 p-3 bg-blue-50 rounded-lg">
+                    <h4 className="font-medium text-sm text-blue-800">🤸 Datos de Pilates</h4>
+                    <div className="grid grid-cols-2 gap-3">
+                      <div>
+                        <label className="block text-xs font-medium mb-1 text-gray-700">Tipo</label>
+                        <select 
+                          value={entrenoPilatesTipo}
+                          onChange={(e) => setEntrenoPilatesTipo(e.target.value as 'mat' | 'reformer' | 'cadillac')}
+                          className="input-compact"
+                        >
+                          <option value="mat">Mat</option>
+                          <option value="reformer">Reformer</option>
+                          <option value="cadillac">Cadillac</option>
+                        </select>
+                      </div>
+                      <div>
+                        <label className="block text-xs font-medium mb-1 text-gray-700">Nivel</label>
+                        <select 
+                          value={entrenoPilatesNivel}
+                          onChange={(e) => setEntrenoPilatesNivel(e.target.value as 'principiante' | 'intermedio' | 'avanzado')}
+                          className="input-compact"
+                        >
+                          <option value="principiante">Principiante</option>
+                          <option value="intermedio">Intermedio</option>
+                          <option value="avanzado">Avanzado</option>
+                        </select>
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {entrenoTipo === 'crossfit' && (
+                  <div className="space-y-3 p-3 bg-blue-50 rounded-lg">
+                    <h4 className="font-medium text-sm text-blue-800">💪 Datos de CrossFit</h4>
+                    <div>
+                      <label className="block text-xs font-medium mb-1 text-gray-700">WOD</label>
+                      <input 
+                        type="text" 
+                        value={entrenoCrossfitWod}
+                        onChange={(e) => setEntrenoCrossfitWod(e.target.value)}
+                        placeholder="Descripción del WOD" 
+                        className="input-compact"
+                      />
+                    </div>
+                    <div className="grid grid-cols-2 gap-3">
+                      <div>
+                        <label className="block text-xs font-medium mb-1 text-gray-700">Tiempo (min)</label>
+                        <input 
+                          type="number" 
+                          value={entrenoCrossfitTiempo}
+                          onChange={(e) => setEntrenoCrossfitTiempo(e.target.value)}
+                          placeholder="15" 
+                          className="input-compact"
+                        />
+                      </div>
+                      <div className="flex items-center">
+                        <input 
+                          type="checkbox" 
+                          checked={entrenoCrossfitRx}
+                          onChange={(e) => setEntrenoCrossfitRx(e.target.checked)}
+                          className="mr-2"
+                        />
+                        <label className="text-xs font-medium text-gray-700">RX (como está programado)</label>
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {entrenoTipo === 'otro' && (
+                  <div className="space-y-3 p-3 bg-blue-50 rounded-lg">
+                    <h4 className="font-medium text-sm text-blue-800">🎯 Datos de Otra Actividad</h4>
+                    <div>
+                      <label className="block text-xs font-medium mb-1 text-gray-700">Actividad</label>
+                      <input 
+                        type="text" 
+                        value={entrenoOtroActividad}
+                        onChange={(e) => setEntrenoOtroActividad(e.target.value)}
+                        placeholder="Nombre de la actividad" 
+                        className="input-compact"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-xs font-medium mb-1 text-gray-700">Detalles</label>
+                      <textarea 
+                        value={entrenoOtroDetalles}
+                        onChange={(e) => setEntrenoOtroDetalles(e.target.value)}
+                        placeholder="Descripción de la actividad..." 
+                        className="input-compact"
+                        rows={3}
+                      />
+                    </div>
+                  </div>
+                )}
+
+                {/* Notas */}
+                <div>
+                  <label className="block text-sm font-medium mb-2 text-gray-700">Notas (opcional)</label>
+                  <textarea 
+                    value={entrenoNotas}
+                    onChange={(e) => setEntrenoNotas(e.target.value)}
+                    placeholder="Observaciones del entrenamiento..." 
+                    className="input-compact"
+                    rows={3}
+                  />
+                </div>
+              </div>
+            </div>
+            
+            <div className="flex gap-3 flex-shrink-0 p-4 border-t border-gray-200">
+              <button onClick={closeModal} className="btn-elegant btn-secondary flex-1">
+                Cancelar
+              </button>
+              <button onClick={saveEntrenoNoProgramado} className="btn-elegant btn-primary flex-1">
+                💾 Guardar Entreno
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       {activeModal === 'seguimiento' && (
         <div className="modal-overlay" onClick={closeModal}>
           <div className="modal-content" onClick={(e) => e.stopPropagation()}>
@@ -2157,7 +3064,7 @@ export default function Dashboard() {
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium mb-2 text-gray-700">Cintura (cm)</label>
+                  <label className="block text-sm font-medium mb-1 text-gray-700">Cintura (cm)</label>
                   <input 
                     type="number" 
                     value={seguimientoCintura}

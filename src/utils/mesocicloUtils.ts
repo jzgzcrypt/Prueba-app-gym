@@ -565,6 +565,149 @@ export const getMesocicloStartDate = (): Date | null => {
 };
 
 /**
+ * Calcula calorías quemadas para diferentes tipos de entrenos no programados
+ * 
+ * @param tipo - Tipo de actividad
+ * @param duracion - Duración en minutos
+ * @param intensidad - Nivel de intensidad
+ * @param peso - Peso corporal en kg
+ * @param datosEspecificos - Datos específicos de la actividad
+ * @returns Calorías estimadas
+ */
+export const calcularCaloriasEntrenoNoProgramado = (
+  tipo: string,
+  duracion: number,
+  intensidad: 'baja' | 'moderada' | 'alta' | 'muy alta',
+  peso: number = 75,
+  datosEspecificos?: Record<string, unknown>
+): number => {
+  // MET (Metabolic Equivalent of Task) por actividad e intensidad
+  const metValues: { [key: string]: { [key: string]: number } } = {
+    tenis: {
+      baja: 4.5,      // Tenis recreativo
+      moderada: 6.0,  // Tenis moderado
+      alta: 8.0,      // Tenis competitivo
+      'muy alta': 10.0 // Tenis profesional
+    },
+    natacion: {
+      baja: 4.0,      // Natación lenta
+      moderada: 6.0,  // Natación moderada
+      alta: 8.0,      // Natación rápida
+      'muy alta': 10.0 // Natación competitiva
+    },
+    alpinismo: {
+      baja: 6.0,      // Senderismo fácil
+      moderada: 8.0,  // Alpinismo moderado
+      alta: 10.0,     // Alpinismo difícil
+      'muy alta': 12.0 // Alpinismo extremo
+    },
+    ciclismo: {
+      baja: 4.0,      // Ciclismo lento
+      moderada: 6.0,  // Ciclismo moderado
+      alta: 8.0,      // Ciclismo rápido
+      'muy alta': 12.0 // Ciclismo competitivo
+    },
+    running: {
+      baja: 6.0,      // Trote lento
+      moderada: 8.0,  // Running moderado
+      alta: 10.0,     // Running rápido
+      'muy alta': 12.0 // Running competitivo
+    },
+    futbol: {
+      baja: 6.0,      // Futbol recreativo
+      moderada: 8.0,  // Futbol moderado
+      alta: 10.0,     // Futbol competitivo
+      'muy alta': 12.0 // Futbol profesional
+    },
+    baloncesto: {
+      baja: 6.0,      // Baloncesto recreativo
+      moderada: 8.0,  // Baloncesto moderado
+      alta: 10.0,     // Baloncesto competitivo
+      'muy alta': 12.0 // Baloncesto profesional
+    },
+    escalada: {
+      baja: 5.0,      // Escalada fácil
+      moderada: 7.0,  // Escalada moderada
+      alta: 9.0,      // Escalada difícil
+      'muy alta': 11.0 // Escalada extrema
+    },
+    yoga: {
+      baja: 2.5,      // Yoga suave
+      moderada: 3.5,  // Yoga moderado
+      alta: 4.5,      // Yoga intenso
+      'muy alta': 6.0  // Power yoga
+    },
+    pilates: {
+      baja: 3.0,      // Pilates básico
+      moderada: 4.0,  // Pilates moderado
+      alta: 5.0,      // Pilates avanzado
+      'muy alta': 6.0  // Pilates intenso
+    },
+    crossfit: {
+      baja: 8.0,      // Crossfit moderado
+      moderada: 10.0, // Crossfit estándar
+      alta: 12.0,     // Crossfit intenso
+      'muy alta': 15.0 // Crossfit extremo
+    },
+    otro: {
+      baja: 3.0,      // Actividad general baja
+      moderada: 5.0,  // Actividad general moderada
+      alta: 7.0,      // Actividad general alta
+      'muy alta': 9.0  // Actividad general muy alta
+    }
+  };
+
+  // Obtener MET base para la actividad
+  const metBase = metValues[tipo]?.[intensidad] || metValues.otro[intensidad];
+  
+  // Ajustes específicos por actividad
+  let metAjustado = metBase;
+  
+  if (tipo === 'natacion' && datosEspecificos?.estilo) {
+    const ajustesEstilo: Record<string, number> = {
+      libre: 1.0,
+      espalda: 0.9,
+      braza: 1.1,
+      mariposa: 1.3,
+      combinado: 1.2
+    };
+    const estilo = datosEspecificos.estilo as string;
+    metAjustado *= ajustesEstilo[estilo] || 1.0;
+  }
+  
+  if (tipo === 'alpinismo' && datosEspecificos?.desnivel) {
+    // Ajustar por desnivel (más desnivel = más intensidad)
+    const desnivel = datosEspecificos.desnivel as number;
+    const desnivelPorHora = (desnivel / duracion) * 60;
+    if (desnivelPorHora > 500) metAjustado *= 1.3;
+    else if (desnivelPorHora > 300) metAjustado *= 1.2;
+    else if (desnivelPorHora > 100) metAjustado *= 1.1;
+  }
+  
+  if (tipo === 'ciclismo' && datosEspecificos?.desnivel) {
+    // Ajustar por desnivel en ciclismo
+    const desnivel = datosEspecificos.desnivel as number;
+    const desnivelPorHora = (desnivel / duracion) * 60;
+    if (desnivelPorHora > 300) metAjustado *= 1.4;
+    else if (desnivelPorHora > 200) metAjustado *= 1.3;
+    else if (desnivelPorHora > 100) metAjustado *= 1.2;
+  }
+  
+  if (tipo === 'running' && datosEspecificos?.ritmoMinKm) {
+    // Ajustar por ritmo (más rápido = más intensidad)
+    const ritmoMinKm = datosEspecificos.ritmoMinKm as number;
+    if (ritmoMinKm < 4) metAjustado *= 1.4;
+    else if (ritmoMinKm < 5) metAjustado *= 1.3;
+    else if (ritmoMinKm < 6) metAjustado *= 1.2;
+  }
+  
+  // Calcular calorías: MET * peso * tiempo / 60
+  const calorias = Math.round(metAjustado * peso * duracion / 60);
+  
+  return calorias;
+};
+
+/**
  * Función de prueba para verificar el seguimiento del mesociclo
  * 
  * @param testDate - Fecha para probar (opcional, usa hoy por defecto)

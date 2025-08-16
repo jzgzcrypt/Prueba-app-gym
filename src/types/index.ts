@@ -77,6 +77,88 @@ export interface NeatEntry {
   duracion: number; // en minutos
 }
 
+export interface EntrenoNoProgramado {
+  fecha: string;
+  tipo: 'tenis' | 'natacion' | 'alpinismo' | 'ciclismo' | 'running' | 'futbol' | 'baloncesto' | 'escalada' | 'yoga' | 'pilates' | 'crossfit' | 'otro';
+  duracion: number; // en minutos
+  intensidad: 'baja' | 'moderada' | 'alta' | 'muy alta';
+  calorias: number;
+  esfuerzo: number; // RPE 1-10
+  notas?: string;
+  
+  // Campos específicos por actividad
+  tenis?: {
+    sets: number;
+    duracionSet: number;
+    nivel: 'principiante' | 'intermedio' | 'avanzado';
+  };
+  
+  natacion?: {
+    metros: number;
+    estilo: 'libre' | 'espalda' | 'braza' | 'mariposa' | 'combinado';
+    ritmo: 'lento' | 'moderado' | 'rápido' | 'competitivo';
+  };
+  
+  alpinismo?: {
+    ruta: string;
+    desnivel: number; // metros
+    dificultad: 'facil' | 'moderada' | 'dificil' | 'muy dificil';
+    condiciones: 'buenas' | 'regulares' | 'malas';
+  };
+  
+  ciclismo?: {
+    km: number;
+    ritmoKmH: number;
+    desnivel: number;
+    tipo: 'carretera' | 'mtb' | 'urbano';
+  };
+  
+  running?: {
+    km: number;
+    ritmoMinKm: number;
+    tipo: 'carrera' | 'trail' | 'intervalos';
+  };
+  
+  futbol?: {
+    duracionPartido: number;
+    posicion: 'portero' | 'defensa' | 'centrocampista' | 'delantero';
+    intensidad: 'amistoso' | 'competitivo';
+  };
+  
+  baloncesto?: {
+    duracionPartido: number;
+    posicion: 'base' | 'escolta' | 'ala' | 'ala-pivot' | 'pivot';
+    intensidad: 'amistoso' | 'competitivo';
+  };
+  
+  escalada?: {
+    rutas: number;
+    grado: string; // 5a, 6b, etc.
+    tipo: 'boulder' | 'deportiva' | 'tradicional';
+  };
+  
+  yoga?: {
+    tipo: 'hatha' | 'vinyasa' | 'ashtanga' | 'yin' | 'restaurativo';
+    nivel: 'principiante' | 'intermedio' | 'avanzado';
+  };
+  
+  pilates?: {
+    tipo: 'mat' | 'reformer' | 'cadillac';
+    nivel: 'principiante' | 'intermedio' | 'avanzado';
+  };
+  
+  crossfit?: {
+    wod: string;
+    tiempo: number;
+    rx: boolean; // si se hizo como está programado
+  };
+  
+  otro?: {
+    actividad: string;
+    detalles: string;
+  };
+}
+
 export interface SeguimientoEntry {
   fecha: string;
   peso: number;
@@ -102,6 +184,7 @@ export interface DailyAdherence {
     workout?: boolean;
     neat?: boolean;
     seguimiento?: boolean;
+    entrenoNoProgramado?: boolean;
   };
 }
 
