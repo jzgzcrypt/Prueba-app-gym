@@ -8,17 +8,14 @@ import { ProgressCircle } from '@/components/ProgressCircle';
 import { WorkoutModal } from '@/components/WorkoutModal';
 import { WeeklyCalendar } from '@/components/WeeklyCalendar';
 import { WeightEntry, CardioEntry, DietEntry, DailyAdherence, WorkoutEntry, Exercise, NeatEntry, SeguimientoEntry, EntrenoNoProgramado } from '@/types';
-import { AnalyticsSection } from '@/components/analytics/AnalyticsSection';
-import { NotificationSystem } from '@/components/analytics/NotificationSystem';
 import { LoadingFallback } from '@/components/LoadingFallback';
-import { ClientOnly } from '@/components/ClientOnly';
 import { getCurrentMesocicloDay, setMesocicloStartDate, getMesocicloStartDate, testMesocicloTracking, calcularCaloriasEntrenoNoProgramado } from '@/utils/mesocicloUtils';
 
 export default function Dashboard() {
   const { showToast } = useToast();
   const [isLoading, setIsLoading] = useState(true);
   const [activeModal, setActiveModal] = useState<string | null>(null);
-  const [activeSection, setActiveSection] = useState<'today' | 'mesociclo' | 'analytics' | 'history' | 'settings'>('today');
+  const [activeSection, setActiveSection] = useState<'today' | 'mesociclo' | 'history' | 'settings'>('today');
   const [showStartDateConfig, setShowStartDateConfig] = useState(false);
   const [startDateInput, setStartDateInput] = useState('');
   const [workoutType] = useState('Pull');
@@ -893,18 +890,19 @@ export default function Dashboard() {
                 {/* Current Day Info */}
         {(() => {
           let currentData;
-          let startDate;
+          let startDate = null;
           
-          // Solo ejecutar en el cliente
-          if (typeof window !== 'undefined') {
+          // Solo ejecutar en el cliente después de la hidratación
+          if (typeof window !== 'undefined' && !isLoading) {
             try {
               currentData = getCurrentMesocicloDay();
               startDate = getMesocicloStartDate();
-            } catch {
+            } catch (error) {
+              console.error('Error loading mesociclo:', error);
               currentData = {
-                microciclo: { nombre: 'Cargando...', dias: [] },
-                dia: { dia: 'Día 1', entrenamiento: 'Cargando...', ejercicios: [], cardio: undefined },
-                mesociclo: { nombre: 'Cargando...', microciclos: [] },
+                microciclo: { nombre: 'Error', dias: [] },
+                dia: { dia: 'Error', entrenamiento: 'Error', ejercicios: [], cardio: undefined },
+                mesociclo: { nombre: 'Error', microciclos: [] },
                 semanaActual: 1,
                 diaSemana: 0,
                 diaMesociclo: 1,
@@ -912,12 +910,11 @@ export default function Dashboard() {
                 diasEnMicrociclo: 0,
                 microcicloCompletado: false
               };
-              startDate = null;
             }
           } else {
             currentData = {
               microciclo: { nombre: 'Cargando...', dias: [] },
-              dia: { dia: 'Día 1', entrenamiento: 'Cargando...', ejercicios: [], cardio: undefined },
+              dia: { dia: 'Cargando...', entrenamiento: 'Cargando...', ejercicios: [], cardio: undefined },
               mesociclo: { nombre: 'Cargando...', microciclos: [] },
               semanaActual: 1,
               diaSemana: 0,
@@ -926,7 +923,6 @@ export default function Dashboard() {
               diasEnMicrociclo: 0,
               microcicloCompletado: false
             };
-            startDate = null;
           }
           
           return (
@@ -1004,11 +1000,11 @@ export default function Dashboard() {
         {/* Calorías del Día */}
         {(() => {
           let caloriasHoy = 0;
-          if (typeof window !== 'undefined') {
+          if (typeof window !== 'undefined' && !isLoading) {
             try {
               caloriasHoy = getCaloriasDelDia();
-            } catch {
-              caloriasHoy = 0;
+            } catch (error) {
+              console.error('Error calculating calories:', error);
             }
           }
           return (
@@ -1172,12 +1168,12 @@ export default function Dashboard() {
 
   const renderMesocicloSection = () => {
     let startDate = null;
-    try {
-      if (typeof window !== 'undefined') {
+    if (typeof window !== 'undefined' && !isLoading) {
+      try {
         startDate = getMesocicloStartDate();
+      } catch (error) {
+        console.error('Error loading start date:', error);
       }
-    } catch {
-      startDate = null;
     }
     
     const mesociclo = {
@@ -2095,32 +2091,12 @@ export default function Dashboard() {
       <div className="block md:hidden">
         {activeSection === 'today' && renderTodaySection()}
         {activeSection === 'mesociclo' && renderMesocicloSection()}
-        {activeSection === 'analytics' && (
-          <AnalyticsSection
-            weights={estado}
-            seguimiento={seguimiento}
-            cardio={cardio}
-            neat={neat}
-            entrenosNoProgramados={entrenosNoProgramados}
-            workouts={workouts}
-            adherenciaDiaria={adherenciaDiaria}
-          />
-        )}
-
-        {/* Sistema de Notificaciones */}
-        <NotificationSystem
-          weights={estado}
-          cardio={cardio}
-          workouts={workouts}
-          adherenciaDiaria={adherenciaDiaria}
-          onShowNotification={showToast}
-        />
         {activeSection === 'history' && renderHistorySection()}
         {activeSection === 'settings' && renderSettingsSection()}
         
         {/* Mobile Navigation */}
         <div className="bottom-nav">
-          <div className="grid grid-cols-5 gap-1 px-2">
+          <div className="grid grid-cols-4 gap-1 px-2">
             <div 
               className={`bottom-nav-item cursor-pointer ${activeSection === 'today' ? 'active' : ''}`}
               onClick={() => setActiveSection('today')}
@@ -2134,13 +2110,6 @@ export default function Dashboard() {
             >
               <span className="text-xl">📋</span>
               <span className="text-xs mt-1">Mesociclo</span>
-            </div>
-            <div 
-              className={`bottom-nav-item cursor-pointer ${activeSection === 'analytics' ? 'active' : ''}`}
-              onClick={() => setActiveSection('analytics')}
-            >
-              <span className="text-xl">📊</span>
-              <span className="text-xs mt-1">Análisis</span>
             </div>
             <div 
               className={`bottom-nav-item cursor-pointer ${activeSection === 'history' ? 'active' : ''}`}

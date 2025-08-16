@@ -355,11 +355,9 @@ export const getMesocicloData = (): Mesociclo => ({
  */
 export const getCurrentMesocicloDay = () => {
   const mesociclo = getMesocicloData();
-  
-  // LÓGICA FLEXIBLE: Calcular microciclo y día actual
   const today = new Date();
   
-  // Obtener fecha de inicio desde localStorage o usar fecha por defecto
+  // Obtener fecha de inicio desde localStorage
   let startDate: Date;
   try {
     if (typeof window !== 'undefined') {
@@ -368,19 +366,16 @@ export const getCurrentMesocicloDay = () => {
         startDate = new Date(storedStartDate);
       } else {
         // Si no hay fecha configurada, usar el lunes de esta semana
-        const today = new Date();
         const dayOfWeek = today.getDay();
-        const daysToMonday = dayOfWeek === 0 ? 1 : dayOfWeek; // Si es domingo, ir al lunes siguiente
+        const daysToMonday = dayOfWeek === 0 ? 1 : dayOfWeek;
         const monday = new Date(today);
         monday.setDate(today.getDate() - daysToMonday);
         startDate = monday;
       }
     } else {
-      // Para SSR, usar una fecha reciente
       startDate = new Date('2025-01-01');
     }
   } catch {
-    // Fallback en caso de error
     startDate = new Date('2025-01-01');
   }
   
