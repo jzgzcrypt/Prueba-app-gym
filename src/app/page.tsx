@@ -47,12 +47,10 @@ export default function Dashboard() {
 
   // Effect para manejar la carga inicial
   useEffect(() => {
-    // Simular tiempo de carga para asegurar que localStorage esté disponible
-    const timer = setTimeout(() => {
+    // Asegurar que localStorage esté disponible
+    if (typeof window !== 'undefined') {
       setIsLoading(false);
-    }, 100);
-    
-    return () => clearTimeout(timer);
+    }
   }, []);
 
   // Form states
@@ -715,17 +713,14 @@ export default function Dashboard() {
     
     setMesocicloStartDate(startDate);
     
-    // Actualizar datos del mesociclo con la nueva fecha
-    try {
-      const updatedData = getCurrentMesocicloDay();
-      setCurrentData(updatedData);
-    } catch {
-      console.error('Error al actualizar datos del mesociclo');
-    }
-    
     showToast(`✅ Fecha de inicio configurada: ${startDate.toLocaleDateString()}`);
     setShowStartDateConfig(false);
     setStartDateInput('');
+    
+    // Forzar actualización del estado para refrescar el plan semanal
+    setTimeout(() => {
+      window.location.reload();
+    }, 1000);
   };
 
   const handleDesktopSave = () => {
@@ -1839,29 +1834,29 @@ export default function Dashboard() {
             {expandedSections.volumen && (
               <div className="px-3 md:px-4 pb-3 md:pb-4 animate-fadeIn">
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 md:gap-4">
-                  <div className="flex justify-between items-center p-3 bg-gray-50 rounded-lg">
-                    <span className="text-sm md:text-base font-medium">Espalda</span>
-                    <span className="text-sm md:text-base text-primary font-semibold">{mesociclo.volumen.espalda}</span>
+                  <div className="flex justify-between items-center p-3 bg-gradient-to-r from-blue-50 to-blue-100 rounded-xl border border-blue-200 shadow-sm">
+                    <span className="text-sm md:text-base font-medium text-blue-800">💪 Espalda</span>
+                    <span className="text-sm md:text-base text-blue-700 font-bold">{mesociclo.volumen.espalda}</span>
                   </div>
-                  <div className="flex justify-between items-center p-3 bg-gray-50 rounded-lg">
-                    <span className="text-sm md:text-base font-medium">Bíceps</span>
-                    <span className="text-sm md:text-base text-primary font-semibold">{mesociclo.volumen.biceps}</span>
+                  <div className="flex justify-between items-center p-3 bg-gradient-to-r from-green-50 to-green-100 rounded-xl border border-green-200 shadow-sm">
+                    <span className="text-sm md:text-base font-medium text-green-800">💪 Bíceps</span>
+                    <span className="text-sm md:text-base text-green-700 font-bold">{mesociclo.volumen.biceps}</span>
                   </div>
-                  <div className="flex justify-between items-center p-3 bg-gray-50 rounded-lg">
-                    <span className="text-sm md:text-base font-medium">Pecho</span>
-                    <span className="text-sm md:text-base text-primary font-semibold">{mesociclo.volumen.pecho}</span>
+                  <div className="flex justify-between items-center p-3 bg-gradient-to-r from-red-50 to-red-100 rounded-xl border border-red-200 shadow-sm">
+                    <span className="text-sm md:text-base font-medium text-red-800">💪 Pecho</span>
+                    <span className="text-sm md:text-base text-red-700 font-bold">{mesociclo.volumen.pecho}</span>
                   </div>
-                  <div className="flex justify-between items-center p-3 bg-gray-50 rounded-lg">
-                    <span className="text-sm md:text-base font-medium">Hombros</span>
-                    <span className="text-sm md:text-base text-primary font-semibold">{mesociclo.volumen.hombros}</span>
+                  <div className="flex justify-between items-center p-3 bg-gradient-to-r from-orange-50 to-orange-100 rounded-xl border border-orange-200 shadow-sm">
+                    <span className="text-sm md:text-base font-medium text-orange-800">💪 Hombros</span>
+                    <span className="text-sm md:text-base text-orange-700 font-bold">{mesociclo.volumen.hombros}</span>
                   </div>
-                  <div className="flex justify-between items-center p-3 bg-gray-50 rounded-lg">
-                    <span className="text-sm md:text-base font-medium">Tríceps</span>
-                    <span className="text-sm md:text-base text-primary font-semibold">{mesociclo.volumen.triceps}</span>
+                  <div className="flex justify-between items-center p-3 bg-gradient-to-r from-purple-50 to-purple-100 rounded-xl border border-purple-200 shadow-sm">
+                    <span className="text-sm md:text-base font-medium text-purple-800">💪 Tríceps</span>
+                    <span className="text-sm md:text-base text-purple-700 font-bold">{mesociclo.volumen.triceps}</span>
                   </div>
-                  <div className="flex justify-between items-center p-3 bg-gray-50 rounded-lg">
-                    <span className="text-sm md:text-base font-medium">Piernas</span>
-                    <span className="text-sm md:text-base text-primary font-semibold">{mesociclo.volumen.piernas}</span>
+                  <div className="flex justify-between items-center p-3 bg-gradient-to-r from-indigo-50 to-indigo-100 rounded-xl border border-indigo-200 shadow-sm">
+                    <span className="text-sm md:text-base font-medium text-indigo-800">💪 Piernas</span>
+                    <span className="text-sm md:text-base text-indigo-700 font-bold">{mesociclo.volumen.piernas}</span>
                   </div>
                 </div>
               </div>
@@ -1870,14 +1865,14 @@ export default function Dashboard() {
 
                       <div className="space-y-3 md:space-y-4">
               {mesociclo.microciclos.map((microciclo) => (
-                <div key={microciclo.id} className="clean-card">
+                <div key={microciclo.id} className="clean-card border border-purple-200 shadow-sm hover:shadow-md transition-all duration-200">
                   <button 
                     onClick={() => toggleMicrociclo(microciclo.id)}
-                    className="w-full flex items-center justify-between p-3 md:p-4 hover:bg-gray-50 rounded-lg transition-colors"
+                    className="w-full flex items-center justify-between p-3 md:p-4 hover:bg-gradient-to-r hover:from-purple-50 hover:to-purple-100 rounded-lg transition-all duration-200"
                   >
                     <div className="flex items-center gap-3">
-                      <div className="w-8 h-8 bg-purple-100 rounded-full flex items-center justify-center">
-                        <span className="text-purple-600 text-sm font-bold">{microciclo.id}</span>
+                      <div className="w-10 h-10 bg-gradient-to-br from-purple-400 to-purple-600 rounded-xl flex items-center justify-center shadow-md">
+                        <span className="text-white text-sm font-bold">{microciclo.id}</span>
                       </div>
                       <div className="text-left">
                         <h3 className="text-base md:text-lg font-semibold">{microciclo.nombre}</h3>
