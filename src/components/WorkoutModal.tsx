@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { Exercise, Set, Mesociclo, Progresion } from '@/types';
-import { getCurrentMesocicloDay } from '@/utils/mesocicloUtils';
+import { getCurrentMesocicloDay, calcularProgresionDinamica } from '@/utils/mesocicloUtils';
 
 interface WorkoutModalProps {
   isOpen: boolean;
@@ -49,50 +49,10 @@ const getCurrentMesociclo = (): Mesociclo => {
   };
 };
 
-// Algoritmo de progresión automática
+// Usar el algoritmo de progresión dinámico
 const calcularProgresion = (ejercicio: string, series: Set[], pesoActual: number, repeticionesObjetivo: number): Progresion => {
-  const repeticionesPromedio = series.reduce((sum, set) => sum + set.repeticiones, 0) / series.length;
-  const pesoPromedio = series.reduce((sum, set) => sum + set.peso, 0) / series.length;
-  
-  let proximoAjuste: 'peso' | 'repeticiones' | 'mantener' = 'mantener';
-  let nuevoPeso = pesoActual;
-  let nuevasRepeticiones = repeticionesObjetivo;
-
-  // Si todas las series están completadas
-  if (series.every(set => set.completado)) {
-    // Si hice más repeticiones de las objetivo en todas las series
-    if (repeticionesPromedio > repeticionesObjetivo + 2) {
-      proximoAjuste = 'peso';
-      nuevoPeso = pesoActual + 2.5; // Subir 2.5kg
-    }
-    // Si hice las repeticiones objetivo pero con RPE bajo
-    else if (repeticionesPromedio >= repeticionesObjetivo && series.every(set => (set.rpe || 0) < 8)) {
-      proximoAjuste = 'peso';
-      nuevoPeso = pesoActual + 2.5;
-    }
-    // Si hice menos repeticiones de las objetivo
-    else if (repeticionesPromedio < repeticionesObjetivo - 2) {
-      proximoAjuste = 'repeticiones';
-      nuevasRepeticiones = Math.max(repeticionesObjetivo - 2, 6);
-    }
-    // Si hice las repeticiones objetivo con RPE alto
-    else if (repeticionesPromedio >= repeticionesObjetivo && series.every(set => (set.rpe || 0) >= 8)) {
-      proximoAjuste = 'mantener';
-    }
-  }
-
-  return {
-    ejercicio,
-    historial: [{
-      fecha: new Date().toISOString().split('T')[0],
-      peso: pesoPromedio,
-      repeticiones: repeticionesPromedio,
-      rpe: series.reduce((sum, set) => sum + (set.rpe || 0), 0) / series.length
-    }],
-    pesoActual: nuevoPeso,
-    repeticionesObjetivo: nuevasRepeticiones,
-    proximoAjuste
-  };
+  const currentData = getCurrentMesocicloDay();
+  return calcularProgresionDinamica(ejercicio, series, pesoActual, repeticionesObjetivo, currentData.semanaActual);
 };
 
 const getWorkoutExercises = (): Exercise[] => {
@@ -202,11 +162,26 @@ export function WorkoutModal({ isOpen, onClose, onComplete, workoutType }: Worko
                       Objetivo: {exercise.repeticionesObjetivo} repeticiones
                     </p>
                     {exercise.progresion && (
-                      <p className="text-xs text-blue-600">
-                        Próximo: {exercise.progresion.proximoAjuste === 'peso' ? `Subir a ${exercise.progresion.pesoActual}kg` : 
-                                  exercise.progresion.proximoAjuste === 'repeticiones' ? `Bajar a ${exercise.progresion.repeticionesObjetivo} reps` : 
-                                  'Mantener'}
-                      </p>
+                      <div className="space-y-1">
+                        <p className="text-xs text-blue-600">
+                          Próximo: {exercise.progresion.proximoAjuste === 'peso' ? `Subir a ${exercise.progresion.pesoActual}kg` : 
+                                    exercise.progresion.proximoAjuste === 'repeticiones' ? `Bajar a ${exercise.progresion.repeticionesObjetivo} reps` : 
+                                    'Mantener'}
+                        </p>
+                        <div className="flex gap-2 text-xs">
+                          <span className="bg-blue-100 text-blue-700 px-2 py-1 rounded-full">
+                            {exercise.progresion.fase}
+                          </span>
+                          <span className="bg-green-100 text-green-700 px-2 py-1 rounded-full">
+                            {exercise.progresion.intensidad}
+                          </span>
+                          {exercise.progresion.incrementoPeso && exercise.progresion.incrementoPeso > 0 && (
+                            <span className="bg-orange-100 text-orange-700 px-2 py-1 rounded-full">
+                              +{exercise.progresion.incrementoPeso}kg
+                            </span>
+                          )}
+                        </div>
+                      </div>
                     )}
                   </div>
                   <button

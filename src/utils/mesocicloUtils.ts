@@ -1,3 +1,5 @@
+import { Set, Progresion } from '@/types';
+
 export interface MesocicloDay {
   dia: string;
   entrenamiento: string;
@@ -499,4 +501,164 @@ export const getWeeklyPlan = () => {
   });
   
   return plan;
+};
+
+// Configuración de progresión por microciclo
+export interface ProgresionConfig {
+  microciclo: number;
+  fase: string;
+  intensidad: string;
+  incrementoPeso: number;
+  ajusteRepeticiones: number;
+  rpeMinimo: number;
+  rpeMaximo: number;
+  toleranciaRepeticiones: number;
+  tecnicasIntensivas: boolean;
+}
+
+// Configuraciones de progresión para cada microciclo
+export const getProgresionConfig = (microcicloId: number): ProgresionConfig => {
+  const configs: { [key: number]: ProgresionConfig } = {
+    1: {
+      microciclo: 1,
+      fase: "Adaptación",
+      intensidad: "RIR 3",
+      incrementoPeso: 2.5, // Incremento conservador
+      ajusteRepeticiones: 2, // Ajuste de repeticiones
+      rpeMinimo: 6, // RPE mínimo para progresar
+      rpeMaximo: 8, // RPE máximo antes de bajar peso
+      toleranciaRepeticiones: 3, // Tolerancia en repeticiones
+      tecnicasIntensivas: false // Sin técnicas intensivas
+    },
+    2: {
+      microciclo: 2,
+      fase: "Intensificación",
+      intensidad: "RIR 2",
+      incrementoPeso: 5, // Incremento moderado
+      ajusteRepeticiones: 1, // Ajuste más fino
+      rpeMinimo: 7, // RPE más alto para progresar
+      rpeMaximo: 9, // RPE máximo más alto
+      toleranciaRepeticiones: 2, // Tolerancia menor
+      tecnicasIntensivas: true // Técnicas opcionales
+    },
+    3: {
+      microciclo: 3,
+      fase: "Pico",
+      intensidad: "RIR 1-0",
+      incrementoPeso: 2.5, // Incremento conservador en pico
+      ajusteRepeticiones: 1, // Ajuste muy fino
+      rpeMinimo: 8, // RPE muy alto para progresar
+      rpeMaximo: 10, // RPE máximo
+      toleranciaRepeticiones: 1, // Tolerancia mínima
+      tecnicasIntensivas: true // Técnicas obligatorias
+    }
+  };
+
+  return configs[microcicloId] || configs[1]; // Default al microciclo 1
+};
+
+// Algoritmo de progresión dinámico basado en el microciclo
+export const calcularProgresionDinamica = (
+  ejercicio: string, 
+  series: Set[], 
+  pesoActual: number, 
+  repeticionesObjetivo: number,
+  microcicloId: number
+): Progresion => {
+  const config = getProgresionConfig(microcicloId);
+  const repeticionesPromedio = series.reduce((sum, set) => sum + set.repeticiones, 0) / series.length;
+  const pesoPromedio = series.reduce((sum, set) => sum + set.peso, 0) / series.length;
+  const rpePromedio = series.reduce((sum, set) => sum + (set.rpe || 0), 0) / series.length;
+  
+  let proximoAjuste: 'peso' | 'repeticiones' | 'mantener' = 'mantener';
+  let nuevoPeso = pesoActual;
+  let nuevasRepeticiones = repeticionesObjetivo;
+  let incrementoPeso = 0;
+  let ajusteRepeticiones = 0;
+
+  // Si todas las series están completadas
+  if (series.every(set => set.completado)) {
+    
+    // LÓGICA DE PROGRESIÓN POR MICROCICLO
+    
+    // MICROCICLO 1 - ADAPTACIÓN (RIR 3)
+    if (microcicloId === 1) {
+      // Progresión más permisiva, enfocada en técnica
+      if (repeticionesPromedio > repeticionesObjetivo + config.toleranciaRepeticiones && rpePromedio <= config.rpeMaximo) {
+        proximoAjuste = 'peso';
+        incrementoPeso = config.incrementoPeso;
+        nuevoPeso = pesoActual + incrementoPeso;
+      }
+      // Si RPE es muy bajo, subir peso
+      else if (rpePromedio < config.rpeMinimo && repeticionesPromedio >= repeticionesObjetivo) {
+        proximoAjuste = 'peso';
+        incrementoPeso = config.incrementoPeso;
+        nuevoPeso = pesoActual + incrementoPeso;
+      }
+      // Si no se alcanzan las repeticiones, bajar objetivo
+      else if (repeticionesPromedio < repeticionesObjetivo - config.toleranciaRepeticiones) {
+        proximoAjuste = 'repeticiones';
+        ajusteRepeticiones = -config.ajusteRepeticiones;
+        nuevasRepeticiones = Math.max(repeticionesObjetivo + ajusteRepeticiones, 6);
+      }
+    }
+    
+    // MICROCICLO 2 - INTENSIFICACIÓN (RIR 2)
+    else if (microcicloId === 2) {
+      // Progresión moderada, introduciendo intensidad
+      if (repeticionesPromedio > repeticionesObjetivo + config.toleranciaRepeticiones && rpePromedio >= config.rpeMinimo && rpePromedio <= config.rpeMaximo) {
+        proximoAjuste = 'peso';
+        incrementoPeso = config.incrementoPeso;
+        nuevoPeso = pesoActual + incrementoPeso;
+      }
+      // Si RPE es muy alto, mantener peso
+      else if (rpePromedio > config.rpeMaximo) {
+        proximoAjuste = 'mantener';
+      }
+      // Si no se alcanzan las repeticiones, ajustar objetivo
+      else if (repeticionesPromedio < repeticionesObjetivo - config.toleranciaRepeticiones) {
+        proximoAjuste = 'repeticiones';
+        ajusteRepeticiones = -config.ajusteRepeticiones;
+        nuevasRepeticiones = Math.max(repeticionesObjetivo + ajusteRepeticiones, 6);
+      }
+    }
+    
+    // MICROCICLO 3 - PICO (RIR 1-0)
+    else if (microcicloId === 3) {
+      // Progresión conservadora, máxima intensidad
+      if (repeticionesPromedio > repeticionesObjetivo + config.toleranciaRepeticiones && rpePromedio >= config.rpeMinimo && rpePromedio < config.rpeMaximo) {
+        proximoAjuste = 'peso';
+        incrementoPeso = config.incrementoPeso;
+        nuevoPeso = pesoActual + incrementoPeso;
+      }
+      // Si RPE es máximo, mantener peso
+      else if (rpePromedio >= config.rpeMaximo) {
+        proximoAjuste = 'mantener';
+      }
+      // Si no se alcanzan las repeticiones, ajustar objetivo
+      else if (repeticionesPromedio < repeticionesObjetivo - config.toleranciaRepeticiones) {
+        proximoAjuste = 'repeticiones';
+        ajusteRepeticiones = -config.ajusteRepeticiones;
+        nuevasRepeticiones = Math.max(repeticionesObjetivo + ajusteRepeticiones, 6);
+      }
+    }
+  }
+
+  return {
+    ejercicio,
+    historial: [{
+      fecha: new Date().toISOString().split('T')[0],
+      peso: pesoPromedio,
+      repeticiones: repeticionesPromedio,
+      rpe: rpePromedio
+    }],
+    pesoActual: nuevoPeso,
+    repeticionesObjetivo: nuevasRepeticiones,
+    proximoAjuste,
+    microciclo: microcicloId,
+    fase: config.fase,
+    intensidad: config.intensidad,
+    incrementoPeso,
+    ajusteRepeticiones
+  };
 };

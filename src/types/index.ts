@@ -40,6 +40,11 @@ export interface Progresion {
   pesoActual: number;
   repeticionesObjetivo: number;
   proximoAjuste?: 'peso' | 'repeticiones' | 'mantener';
+  microciclo: number;
+  fase: string;
+  intensidad: string;
+  incrementoPeso?: number;
+  ajusteRepeticiones?: number;
 }
 
 export interface CardioEntry {
