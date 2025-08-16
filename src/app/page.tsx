@@ -9,6 +9,7 @@ import { WorkoutModal } from '@/components/WorkoutModal';
 import { WeeklyCalendar } from '@/components/WeeklyCalendar';
 import { WeightEntry, CardioEntry, DietEntry, DailyAdherence, WorkoutEntry, Exercise, NeatEntry, SeguimientoEntry, EntrenoNoProgramado } from '@/types';
 import { AnalyticsSection } from '@/components/analytics/AnalyticsSection';
+import { NotificationSystem } from '@/components/analytics/NotificationSystem';
 import { getCurrentMesocicloDay, setMesocicloStartDate, getMesocicloStartDate, testMesocicloTracking, calcularCaloriasEntrenoNoProgramado } from '@/utils/mesocicloUtils';
 
 export default function Dashboard() {
@@ -2017,6 +2018,18 @@ export default function Dashboard() {
             adherenciaDiaria={adherenciaDiaria}
           />
         )}
+
+        {/* Sistema de Notificaciones */}
+        <NotificationSystem
+          weights={estado}
+          seguimiento={seguimiento}
+          cardio={cardio}
+          neat={neat}
+          entrenosNoProgramados={entrenosNoProgramados}
+          workouts={workouts}
+          adherenciaDiaria={adherenciaDiaria}
+          onShowNotification={showToast}
+        />
         {activeSection === 'history' && renderHistorySection()}
         {activeSection === 'settings' && renderSettingsSection()}
         

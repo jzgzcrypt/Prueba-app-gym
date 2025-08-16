@@ -4,6 +4,8 @@ import { WeightProgressChart } from './WeightProgressChart';
 import { CalorieBurnChart } from './CalorieBurnChart';
 import { ExerciseProgressChart } from './ExerciseProgressChart';
 import { AdherenceHeatmap } from './AdherenceHeatmap';
+import { InsightsEngine } from './InsightsEngine';
+import { SmartAlerts } from './SmartAlerts';
 import { WeightEntry, SeguimientoEntry, CardioEntry, NeatEntry, EntrenoNoProgramado, WorkoutEntry, DailyAdherence } from '@/types';
 
 interface AnalyticsSectionProps {
@@ -83,6 +85,28 @@ export const AnalyticsSection: React.FC<AnalyticsSectionProps> = ({
 
       {/* Contenido */}
       <div className="px-6">
+        {/* Insights Automáticos - Siempre visible */}
+        <InsightsEngine
+          weights={weights}
+          seguimiento={seguimiento}
+          cardio={cardio}
+          neat={neat}
+          entrenosNoProgramados={entrenosNoProgramados}
+          workouts={workouts}
+          adherenciaDiaria={adherenciaDiaria}
+        />
+
+        {/* Alertas Inteligentes */}
+        <SmartAlerts
+          weights={weights}
+          seguimiento={seguimiento}
+          cardio={cardio}
+          neat={neat}
+          entrenosNoProgramados={entrenosNoProgramados}
+          workouts={workouts}
+          adherenciaDiaria={adherenciaDiaria}
+        />
+
         {/* Navegación por tabs */}
         <TabNavigation 
           activeTab={activeTab} 
