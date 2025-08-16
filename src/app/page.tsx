@@ -8,12 +8,13 @@ import { ProgressCircle } from '@/components/ProgressCircle';
 import { WorkoutModal } from '@/components/WorkoutModal';
 import { WeeklyCalendar } from '@/components/WeeklyCalendar';
 import { WeightEntry, CardioEntry, DietEntry, DailyAdherence, WorkoutEntry, Exercise, NeatEntry, SeguimientoEntry, EntrenoNoProgramado } from '@/types';
+import { AnalyticsSection } from '@/components/analytics/AnalyticsSection';
 import { getCurrentMesocicloDay, setMesocicloStartDate, getMesocicloStartDate, testMesocicloTracking, calcularCaloriasEntrenoNoProgramado } from '@/utils/mesocicloUtils';
 
 export default function Dashboard() {
   const { showToast } = useToast();
   const [activeModal, setActiveModal] = useState<string | null>(null);
-  const [activeSection, setActiveSection] = useState<'today' | 'mesociclo' | 'history' | 'settings'>('today');
+  const [activeSection, setActiveSection] = useState<'today' | 'mesociclo' | 'analytics' | 'history' | 'settings'>('today');
   const [showStartDateConfig, setShowStartDateConfig] = useState(false);
   const [startDateInput, setStartDateInput] = useState('');
   const [workoutType] = useState('Pull');
@@ -2005,38 +2006,56 @@ export default function Dashboard() {
       <div className="block md:hidden">
         {activeSection === 'today' && renderTodaySection()}
         {activeSection === 'mesociclo' && renderMesocicloSection()}
+        {activeSection === 'analytics' && (
+          <AnalyticsSection
+            weights={estado}
+            seguimiento={seguimiento}
+            cardio={cardio}
+            neat={neat}
+            entrenosNoProgramados={entrenosNoProgramados}
+            workouts={workouts}
+            adherenciaDiaria={adherenciaDiaria}
+          />
+        )}
         {activeSection === 'history' && renderHistorySection()}
         {activeSection === 'settings' && renderSettingsSection()}
         
         {/* Mobile Navigation */}
         <div className="bottom-nav">
-          <div className="grid grid-cols-4 gap-2 px-4">
+          <div className="grid grid-cols-5 gap-1 px-2">
             <div 
               className={`bottom-nav-item cursor-pointer ${activeSection === 'today' ? 'active' : ''}`}
               onClick={() => setActiveSection('today')}
             >
-              <span className="text-2xl">📊</span>
+              <span className="text-xl">🏠</span>
               <span className="text-xs mt-1">Hoy</span>
             </div>
             <div 
               className={`bottom-nav-item cursor-pointer ${activeSection === 'mesociclo' ? 'active' : ''}`}
               onClick={() => setActiveSection('mesociclo')}
             >
-              <span className="text-2xl">📋</span>
+              <span className="text-xl">📋</span>
               <span className="text-xs mt-1">Mesociclo</span>
+            </div>
+            <div 
+              className={`bottom-nav-item cursor-pointer ${activeSection === 'analytics' ? 'active' : ''}`}
+              onClick={() => setActiveSection('analytics')}
+            >
+              <span className="text-xl">📊</span>
+              <span className="text-xs mt-1">Análisis</span>
             </div>
             <div 
               className={`bottom-nav-item cursor-pointer ${activeSection === 'history' ? 'active' : ''}`}
               onClick={() => setActiveSection('history')}
             >
-              <span className="text-2xl">📋</span>
+              <span className="text-xl">📋</span>
               <span className="text-xs mt-1">Historial</span>
             </div>
             <div 
               className={`bottom-nav-item cursor-pointer ${activeSection === 'settings' ? 'active' : ''}`}
               onClick={() => setActiveSection('settings')}
             >
-              <span className="text-2xl">⚙️</span>
+              <span className="text-xl">⚙️</span>
               <span className="text-xs mt-1">Ajustes</span>
             </div>
           </div>
