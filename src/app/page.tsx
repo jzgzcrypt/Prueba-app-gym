@@ -555,6 +555,16 @@ export default function Dashboard() {
                   Ver detalles
                 </button>
               </div>
+              
+              {/* Debug Info */}
+              <div className="mt-3 pt-3 border-t border-gray-200">
+                <div className="grid grid-cols-2 gap-2 text-xs text-gray-500">
+                  <div>Microciclo: {currentData.semanaActual}</div>
+                  <div>Día: {currentData.diaMesociclo}/{currentData.microciclo.dias.length}</div>
+                  <div>Días transcurridos: {currentData.diasTranscurridos}</div>
+                  <div>Día semana: {['Dom', 'Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb'][currentData.diaSemana]}</div>
+                </div>
+              </div>
             </div>
           );
         })()}
