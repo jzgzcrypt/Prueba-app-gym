@@ -439,7 +439,7 @@ export default function Dashboard() {
       
       {/* Today's Tasks */}
       <div className="px-6">
-        <h2 className="text-xl font-semibold mb-4">🎯 Hoy toca:</h2>
+        <h2 className="text-xl font-semibold mb-4">🎯 Hoy toca (Actualizado):</h2>
         
         {/* Current Day Info */}
         {(() => {
