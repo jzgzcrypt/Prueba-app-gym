@@ -915,23 +915,6 @@ export default function Dashboard() {
           
           return (
             <div className="clean-card mb-4">
-              {/* Configuración de fecha de inicio */}
-              {!startDate && (
-                <div className="mb-3 p-3 bg-yellow-50 border border-yellow-200 rounded-lg">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="text-sm font-medium text-yellow-800">⚠️ Configura tu fecha de inicio</p>
-                      <p className="text-xs text-yellow-600">Para un seguimiento preciso del mesociclo</p>
-                    </div>
-                    <button
-                      onClick={() => setShowStartDateConfig(true)}
-                      className="btn-elegant btn-small bg-yellow-500 hover:bg-yellow-600 text-white"
-                    >
-                      Configurar
-                    </button>
-                  </div>
-                </div>
-              )}
               <div className="flex items-center gap-3 mb-3">
                 <div className="w-10 h-10 bg-primary rounded-full flex items-center justify-center text-white font-bold">
                   {currentData.dia.dia.split(' ')[1]}
@@ -1165,6 +1148,7 @@ export default function Dashboard() {
   );
 
   const renderMesocicloSection = () => {
+    const startDate = getMesocicloStartDate();
     const mesociclo = {
       nombre: "Mesociclo 1 Definitivo - Definición",
       duracion: "6 semanas (Agosto - Mediados Septiembre)",
@@ -1727,6 +1711,42 @@ export default function Dashboard() {
         </div>
         
         <div className="p-4 md:p-6">
+          {/* Configuración de Fecha de Inicio */}
+          <div className="clean-card mb-4 md:mb-6">
+            <div className="flex items-center justify-between p-3 md:p-4">
+              <div className="flex items-center gap-3">
+                <div className="w-8 h-8 bg-yellow-100 rounded-full flex items-center justify-center">
+                  <span className="text-yellow-600 text-sm">📅</span>
+                </div>
+                <div>
+                  <h2 className="text-lg md:text-xl font-semibold text-left">Configuración de Fecha de Inicio</h2>
+                  <p className="text-sm text-gray-600">Establece cuándo comenzaste tu mesociclo</p>
+                </div>
+              </div>
+              <button
+                onClick={() => setShowStartDateConfig(true)}
+                className="btn-elegant btn-small bg-yellow-500 hover:bg-yellow-600 text-white"
+              >
+                {startDate ? 'Cambiar' : 'Configurar'}
+              </button>
+            </div>
+            {startDate && (
+              <div className="px-3 md:px-4 pb-3 md:pb-4">
+                <div className="p-3 bg-green-50 rounded-lg">
+                  <p className="text-xs text-green-600 font-medium">Fecha configurada</p>
+                  <p className="text-sm md:text-base font-semibold">
+                    {new Date(startDate).toLocaleDateString('es-ES', { 
+                      weekday: 'long', 
+                      year: 'numeric', 
+                      month: 'long', 
+                      day: 'numeric' 
+                    })}
+                  </p>
+                </div>
+              </div>
+            )}
+          </div>
+
           {/* Información General */}
           <div className="clean-card mb-4 md:mb-6">
             <button 
