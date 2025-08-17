@@ -12,7 +12,7 @@ export default function TestSimplePage() {
       const response = await fetch('/api/test-db');
       const data = await response.json();
       setMessage(data.message);
-    } catch (error) {
+    } catch {
       setMessage('Error al conectar con la base de datos');
     } finally {
       setIsLoading(false);

@@ -11,22 +11,20 @@ import {
   addWeightAction, 
   addCardioAction, 
   addNeatAction,
-  addSeguimientoAction,
-  addEntrenoNoProgramadoAction,
   addWorkoutAction,
   updateAdherenciaAction
 } from '@/app/actions';
 
 interface DashboardClientProps {
   initialData?: {
-    weights?: any[];
-    cardio?: any[];
-    neat?: any[];
-    workouts?: any[];
-    seguimiento?: any[];
-    entrenosNoProgramados?: any[];
-    adherencia?: any[];
-    mesocicloConfig?: any;
+    weights?: Array<Record<string, unknown>>;
+    cardio?: Array<Record<string, unknown>>;
+    neat?: Array<Record<string, unknown>>;
+    workouts?: Array<Record<string, unknown>>;
+    seguimiento?: Array<Record<string, unknown>>;
+    entrenosNoProgramados?: Array<Record<string, unknown>>;
+    adherencia?: Array<Record<string, unknown>>;
+    mesocicloConfig?: Record<string, unknown> | null;
   };
 }
 
@@ -75,12 +73,16 @@ export default function DashboardClient({ initialData = {} }: DashboardClientPro
   const calculateProgress = () => {
     // Calcular progreso basado en los datos del servidor
     const today = todayISO();
-    const todayAdherence = initialData.adherencia?.find(a => a.fecha === today);
+    const todayAdherence = initialData.adherencia?.find(a => 
+      (a as { fecha?: string }).fecha === today
+    );
     
     if (!todayAdherence) return 0;
     
     const tasks = ['workout', 'cardio', 'neat'] as const;
-    const completed = tasks.filter(task => todayAdherence[task]).length;
+    const completed = tasks.filter(task => 
+      (todayAdherence as Record<string, unknown>)[task]
+    ).length;
     return Math.round((completed / tasks.length) * 100);
   };
 
@@ -154,7 +156,7 @@ export default function DashboardClient({ initialData = {} }: DashboardClientPro
     }
   };
 
-  const handleCompleteWorkout = async (exercises: any[]) => {
+  const handleCompleteWorkout = async (exercises: Array<Record<string, unknown>>) => {
     setIsLoading(true);
     try {
       const formData = new FormData();

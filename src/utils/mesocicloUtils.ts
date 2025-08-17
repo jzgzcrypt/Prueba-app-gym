@@ -394,11 +394,11 @@ export const getCurrentMesocicloDay = () => {
   const mesocicloDayIndex = Math.min(daysInCurrentMicrociclo, currentMicrociclo.dias.length - 1);
   
   // LÓGICA DE FLEXIBILIDAD: Permitir retrasos de un día
-  const dayOfWeek = today.getDay();
+  const currentDayOfWeek = today.getDay();
   let adjustedDayIndex = mesocicloDayIndex;
   
   // Si es domingo (0) y el día anterior era un día de entrenamiento, permitir continuar
-  if (dayOfWeek === 0 && mesocicloDayIndex > 0) {
+  if (currentDayOfWeek === 0 && mesocicloDayIndex > 0) {
     // Verificar si el día anterior era un día de entrenamiento
     const previousDay = currentMicrociclo.dias[mesocicloDayIndex - 1];
     if (previousDay.entrenamiento !== 'Descanso activo') {
@@ -407,7 +407,7 @@ export const getCurrentMesocicloDay = () => {
   }
   
   // Si es lunes (1) y el día anterior era domingo, verificar si podemos avanzar
-  if (dayOfWeek === 1 && mesocicloDayIndex < currentMicrociclo.dias.length - 1) {
+  if (currentDayOfWeek === 1 && mesocicloDayIndex < currentMicrociclo.dias.length - 1) {
     const currentDay = currentMicrociclo.dias[mesocicloDayIndex];
     if (currentDay.entrenamiento === 'Descanso activo') {
       adjustedDayIndex = mesocicloDayIndex + 1; // Avanzar al siguiente día
