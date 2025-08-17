@@ -1,4 +1,5 @@
 import { Set, Progresion } from '@/types';
+import { getLocalStorageItem, setLocalStorageItem } from './clientStorage';
 
 export interface MesocicloDay {
   dia: string;
@@ -357,26 +358,19 @@ export const getCurrentMesocicloDay = () => {
   const mesociclo = getMesocicloData();
   const today = new Date();
   
-  // Obtener fecha de inicio desde localStorage
+  // Obtener fecha de inicio desde localStorage de forma segura
   let startDate: Date;
-  try {
-    if (typeof window !== 'undefined') {
-      const storedStartDate = localStorage.getItem('mesociclo_start_date');
-      if (storedStartDate) {
-        startDate = new Date(storedStartDate);
-      } else {
-        // Si no hay fecha configurada, usar el lunes de esta semana
-        const dayOfWeek = today.getDay();
-        const daysToMonday = dayOfWeek === 0 ? 1 : dayOfWeek;
-        const monday = new Date(today);
-        monday.setDate(today.getDate() - daysToMonday);
-        startDate = monday;
-      }
-    } else {
-      startDate = new Date('2025-01-01');
-    }
-  } catch {
-    startDate = new Date('2025-01-01');
+  const storedStartDate = getLocalStorageItem<string | null>('mesociclo_start_date', null);
+  
+  if (storedStartDate) {
+    startDate = new Date(storedStartDate);
+  } else {
+    // Si no hay fecha configurada, usar el lunes de esta semana
+    const dayOfWeek = today.getDay();
+    const daysToMonday = dayOfWeek === 0 ? 1 : dayOfWeek;
+    const monday = new Date(today);
+    monday.setDate(today.getDate() - daysToMonday);
+    startDate = monday;
   }
   
   // Calcular días transcurridos desde el inicio
