@@ -232,3 +232,94 @@ export async function markInsightAsReadAction(insightId: number) {
     return { success: false, message: 'Error al marcar insight como leído' };
   }
 }
+
+// Server Actions para obtener datos
+export async function getWeightsAction() {
+  try {
+    const weights = await db.getWeights(1);
+    return { success: true, data: weights };
+  } catch (error) {
+    console.error('Error al obtener pesos:', error);
+    return { success: false, data: [], message: 'Error al obtener pesos' };
+  }
+}
+
+export async function getWorkoutsAction() {
+  try {
+    const workouts = await db.getWorkouts(1);
+    return { success: true, data: workouts };
+  } catch (error) {
+    console.error('Error al obtener entrenamientos:', error);
+    return { success: false, data: [], message: 'Error al obtener entrenamientos' };
+  }
+}
+
+export async function getCardioAction() {
+  try {
+    const cardio = await db.getCardio(1);
+    return { success: true, data: cardio };
+  } catch (error) {
+    console.error('Error al obtener cardio:', error);
+    return { success: false, data: [], message: 'Error al obtener cardio' };
+  }
+}
+
+export async function getNeatAction() {
+  try {
+    const neat = await db.getNeat(1);
+    return { success: true, data: neat };
+  } catch (error) {
+    console.error('Error al obtener NEAT:', error);
+    return { success: false, data: [], message: 'Error al obtener NEAT' };
+  }
+}
+
+export async function getSeguimientoAction() {
+  try {
+    const seguimiento = await db.getSeguimiento(1);
+    return { success: true, data: seguimiento };
+  } catch (error) {
+    console.error('Error al obtener seguimiento:', error);
+    return { success: false, data: [], message: 'Error al obtener seguimiento' };
+  }
+}
+
+export async function getEntrenosNoProgramadosAction() {
+  try {
+    const entrenos = await db.getEntrenosNoProgramados(1);
+    return { success: true, data: entrenos };
+  } catch (error) {
+    console.error('Error al obtener entrenos no programados:', error);
+    return { success: false, data: [], message: 'Error al obtener entrenos no programados' };
+  }
+}
+
+export async function getAdherenciaDiariaAction() {
+  try {
+    const adherencia = await db.getAdherenciaDiaria(1);
+    return { success: true, data: adherencia };
+  } catch (error) {
+    console.error('Error al obtener adherencia diaria:', error);
+    return { success: false, data: [], message: 'Error al obtener adherencia diaria' };
+  }
+}
+
+export async function getMesocicloConfigAction() {
+  try {
+    const config = await db.getMesocicloConfig(1);
+    return { success: true, data: config };
+  } catch (error) {
+    console.error('Error al obtener configuración del mesociclo:', error);
+    return { success: false, data: null, message: 'Error al obtener configuración del mesociclo' };
+  }
+}
+
+export async function getInsightsAction(limit: number = 50) {
+  try {
+    const insights = await db.getInsights(1, limit);
+    return { success: true, data: insights };
+  } catch (error) {
+    console.error('Error al obtener insights:', error);
+    return { success: false, data: [], message: 'Error al obtener insights' };
+  }
+}

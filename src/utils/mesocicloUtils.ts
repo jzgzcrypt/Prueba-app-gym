@@ -1,5 +1,4 @@
 import { Set, Progresion } from '@/types';
-import { getLocalStorageItem, setLocalStorageItem } from './clientStorage';
 
 export interface MesocicloDay {
   dia: string;
@@ -358,20 +357,13 @@ export const getCurrentMesocicloDay = () => {
   const mesociclo = getMesocicloData();
   const today = new Date();
   
-  // Obtener fecha de inicio desde localStorage de forma segura
-  let startDate: Date;
-  const storedStartDate = getLocalStorageItem<string | null>('mesociclo_start_date', null);
-  
-  if (storedStartDate) {
-    startDate = new Date(storedStartDate);
-  } else {
-    // Si no hay fecha configurada, usar el lunes de esta semana
-    const dayOfWeek = today.getDay();
-    const daysToMonday = dayOfWeek === 0 ? 1 : dayOfWeek;
-    const monday = new Date(today);
-    monday.setDate(today.getDate() - daysToMonday);
-    startDate = monday;
-  }
+  // Por defecto usar el lunes de esta semana como fecha de inicio
+  // En producción, esto debería venir de la base de datos
+  const dayOfWeek = today.getDay();
+  const daysToMonday = dayOfWeek === 0 ? 1 : dayOfWeek;
+  const monday = new Date(today);
+  monday.setDate(today.getDate() - daysToMonday);
+  const startDate = monday;
   
   // Calcular días transcurridos desde el inicio
   const daysDiff = Math.floor((today.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24));
@@ -468,27 +460,11 @@ export const getWeeklyPlan = () => {
   startOfWeek.setDate(today.getDate() - dayOfWeek + (dayOfWeek === 0 ? -6 : 1)); // Lunes como inicio de semana
   
   // Calcular días transcurridos hasta el inicio de la semana
-  let startDate: Date;
-  try {
-    if (typeof window !== 'undefined') {
-      const storedStartDate = localStorage.getItem('mesociclo_start_date');
-      if (storedStartDate) {
-        startDate = new Date(storedStartDate);
-      } else {
-        // Si no hay fecha configurada, usar el lunes de esta semana
-        const today = new Date();
-        const dayOfWeek = today.getDay();
-        const daysToMonday = dayOfWeek === 0 ? 1 : dayOfWeek;
-        const monday = new Date(today);
-        monday.setDate(today.getDate() - daysToMonday);
-        startDate = monday;
-      }
-    } else {
-      startDate = new Date('2025-01-01');
-    }
-  } catch {
-    startDate = new Date('2025-01-01');
-  }
+  // Por defecto usar el lunes de esta semana como fecha de inicio
+  const daysToMonday = dayOfWeek === 0 ? 1 : dayOfWeek;
+  const monday = new Date(today);
+  monday.setDate(today.getDate() - daysToMonday);
+  const startDate = monday;
   
   const daysToStartOfWeek = Math.floor((startOfWeek.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24));
   
@@ -555,46 +531,33 @@ export const getWeeklyPlan = () => {
 
 /**
  * Configura la fecha de inicio del mesociclo personal
+ * NOTA: Esta función ahora es solo un placeholder
+ * La configuración real debe hacerse a través de Server Actions
  * 
  * @param startDate - Fecha de inicio del mesociclo
+ * @deprecated Usar Server Actions en su lugar
  */
 export const setMesocicloStartDate = (startDate: Date) => {
-  try {
-    if (typeof window !== 'undefined') {
-      // Validar que la fecha sea válida antes de guardar
-      if (!isNaN(startDate.getTime())) {
-        localStorage.setItem('mesociclo_start_date', startDate.toISOString());
-        console.log('Fecha de inicio configurada:', startDate.toISOString().split('T')[0]);
-      } else {
-        console.error('Fecha inválida:', startDate);
-      }
-    }
-  } catch (error) {
-    console.error('Error al guardar fecha de inicio:', error);
-  }
+  console.log('Fecha de inicio configurada:', startDate.toISOString().split('T')[0]);
+  // En producción, esto debería llamar a una Server Action
 };
 
 /**
  * Obtiene la fecha de inicio configurada del mesociclo
+ * NOTA: Esta función ahora retorna una fecha por defecto
+ * Los datos reales deben venir del servidor
  * 
- * @returns Fecha de inicio o null si no está configurada
+ * @returns Fecha de inicio o fecha por defecto
+ * @deprecated Usar Server Actions en su lugar
  */
 export const getMesocicloStartDate = (): Date | null => {
-  try {
-    if (typeof window !== 'undefined') {
-      const storedDate = localStorage.getItem('mesociclo_start_date');
-      if (storedDate) {
-        const date = new Date(storedDate);
-        // Validar que la fecha sea válida
-        if (!isNaN(date.getTime())) {
-          return date;
-        }
-      }
-    }
-  } catch {
-    console.error('Error al obtener fecha de inicio');
-  }
-  return null;
+  // Por defecto retornar el lunes de esta semana
+  const today = new Date();
+  const dayOfWeek = today.getDay();
+  const daysToMonday = dayOfWeek === 0 ? 1 : dayOfWeek;
+  const monday = new Date(today);
+  monday.setDate(today.getDate() - daysToMonday);
+  return monday;
 };
 
 /**
@@ -750,29 +713,13 @@ export const testMesocicloTracking = (testDate?: Date) => {
   const date = testDate || new Date();
   const mesociclo = getMesocicloData();
   
-  // Obtener fecha de inicio
-  let startDate: Date;
-  try {
-    if (typeof window !== 'undefined') {
-      const storedStartDate = localStorage.getItem('mesociclo_start_date');
-      if (storedStartDate) {
-        startDate = new Date(storedStartDate);
-        console.log('📅 Fecha configurada encontrada:', startDate.toISOString().split('T')[0]);
-      } else {
-        // Si no hay fecha configurada, usar el lunes de esta semana
-        const dayOfWeek = date.getDay();
-        const daysToMonday = dayOfWeek === 0 ? 1 : dayOfWeek;
-        const monday = new Date(date);
-        monday.setDate(date.getDate() - daysToMonday);
-        startDate = monday;
-        console.log('📅 Usando lunes de esta semana como fecha por defecto:', startDate.toISOString().split('T')[0]);
-      }
-    } else {
-      startDate = new Date('2025-01-01');
-    }
-  } catch {
-    startDate = new Date('2025-01-01');
-  }
+  // Obtener fecha de inicio - usar el lunes de esta semana por defecto
+  const dayOfWeek = date.getDay();
+  const daysToMonday = dayOfWeek === 0 ? 1 : dayOfWeek;
+  const monday = new Date(date);
+  monday.setDate(date.getDate() - daysToMonday);
+  const startDate = monday;
+  console.log('📅 Usando lunes de esta semana como fecha por defecto:', startDate.toISOString().split('T')[0]);
   
   // Calcular días transcurridos
   const daysDiff = Math.floor((date.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24));
