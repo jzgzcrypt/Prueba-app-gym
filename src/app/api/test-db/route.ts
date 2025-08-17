@@ -5,9 +5,6 @@ export async function GET() {
   try {
     console.log('🔍 Probando conexión con la base de datos...');
     
-    // Probar conexión simple
-    const result = await db.getWeights(1);
-    
     // Obtener estadísticas
     const tables = await db.getWeights(1);
     const cardioCount = await db.getCardio(1);
