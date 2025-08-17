@@ -6,25 +6,33 @@ import { ToastContainer } from '@/components/ToastContainer';
 import { ProgressCircle } from '@/components/ProgressCircle';
 import { WorkoutModal } from '@/components/WorkoutModal';
 import { WeeklyCalendar } from '@/components/WeeklyCalendar';
+import { TodayWorkout } from '@/components/TodayWorkout';
 import { getCurrentMesocicloDay } from '@/utils/mesocicloUtils';
 import { 
   addWeightAction, 
-  addCardioAction, 
-  addNeatAction,
   addWorkoutAction,
   updateAdherenciaAction
 } from '@/app/actions';
+import type {
+  DatabaseWeight,
+  DatabaseWorkout,
+  DatabaseCardio,
+  DatabaseNeat,
+  DatabaseSeguimiento,
+  DatabaseEntrenoNoProgramado,
+  DatabaseAdherenciaDiaria
+} from '@/lib/database';
 
 interface DashboardClientProps {
   initialData?: {
-    weights?: Array<Record<string, unknown>>;
-    cardio?: Array<Record<string, unknown>>;
-    neat?: Array<Record<string, unknown>>;
-    workouts?: Array<Record<string, unknown>>;
-    seguimiento?: Array<Record<string, unknown>>;
-    entrenosNoProgramados?: Array<Record<string, unknown>>;
-    adherencia?: Array<Record<string, unknown>>;
-    mesocicloConfig?: Record<string, unknown> | null;
+    weights?: DatabaseWeight[];
+    cardio?: DatabaseCardio[];
+    neat?: DatabaseNeat[];
+    workouts?: DatabaseWorkout[];
+    seguimiento?: DatabaseSeguimiento[];
+    entrenosNoProgramados?: DatabaseEntrenoNoProgramado[];
+    adherencia?: DatabaseAdherenciaDiaria[];
+    mesocicloConfig?: { fecha_inicio: string } | null;
   };
 }
 
@@ -73,16 +81,12 @@ export default function DashboardClient({ initialData = {} }: DashboardClientPro
   const calculateProgress = () => {
     // Calcular progreso basado en los datos del servidor
     const today = todayISO();
-    const todayAdherence = initialData.adherencia?.find(a => 
-      (a as { fecha?: string }).fecha === today
-    );
+    const todayAdherence = initialData.adherencia?.find(a => a.fecha === today);
     
     if (!todayAdherence) return 0;
     
     const tasks = ['workout', 'cardio', 'neat'] as const;
-    const completed = tasks.filter(task => 
-      (todayAdherence as Record<string, unknown>)[task]
-    ).length;
+    const completed = tasks.filter(task => todayAdherence[task]).length;
     return Math.round((completed / tasks.length) * 100);
   };
 
@@ -105,58 +109,17 @@ export default function DashboardClient({ initialData = {} }: DashboardClientPro
       } else {
         showToast(result.message, 'error');
       }
-    } catch (error) {
+    } catch {
       showToast('Error al guardar peso', 'error');
     } finally {
       setIsLoading(false);
     }
   };
 
-  const handleAddCardio = async (formData: FormData) => {
-    setIsLoading(true);
-    try {
-      const result = await addCardioAction(formData);
-      if (result.success) {
-        showToast(result.message, 'success');
-        closeModal();
-        // Actualizar adherencia
-        const adherenciaForm = new FormData();
-        adherenciaForm.append('fecha', todayISO());
-        adherenciaForm.append('cardio', 'true');
-        await updateAdherenciaAction(adherenciaForm);
-      } else {
-        showToast(result.message, 'error');
-      }
-    } catch (error) {
-      showToast('Error al guardar cardio', 'error');
-    } finally {
-      setIsLoading(false);
-    }
-  };
 
-  const handleAddNeat = async (formData: FormData) => {
-    setIsLoading(true);
-    try {
-      const result = await addNeatAction(formData);
-      if (result.success) {
-        showToast(result.message, 'success');
-        closeModal();
-        // Actualizar adherencia
-        const adherenciaForm = new FormData();
-        adherenciaForm.append('fecha', todayISO());
-        adherenciaForm.append('neat', 'true');
-        await updateAdherenciaAction(adherenciaForm);
-      } else {
-        showToast(result.message, 'error');
-      }
-    } catch (error) {
-      showToast('Error al guardar NEAT', 'error');
-    } finally {
-      setIsLoading(false);
-    }
-  };
 
-  const handleCompleteWorkout = async (exercises: Array<Record<string, unknown>>) => {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const handleCompleteWorkout = async (exercises: any) => {
     setIsLoading(true);
     try {
       const formData = new FormData();
@@ -176,7 +139,7 @@ export default function DashboardClient({ initialData = {} }: DashboardClientPro
       } else {
         showToast(result.message, 'error');
       }
-    } catch (error) {
+    } catch {
       showToast('Error al guardar entrenamiento', 'error');
     } finally {
       setIsLoading(false);
@@ -243,30 +206,11 @@ export default function DashboardClient({ initialData = {} }: DashboardClientPro
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {activeSection === 'today' && (
           <div className="space-y-6">
-            {/* Today's Workout Card */}
-            <div className="bg-white rounded-lg shadow p-6">
-              <h2 className="text-lg font-semibold mb-4">
-                Entrenamiento de Hoy
-              </h2>
-              <div className="space-y-4">
-                <div>
-                  <p className="text-sm text-gray-600">
-                    {currentData.dia.dia}
-                  </p>
-                  <p className="text-xl font-bold">
-                    {currentData.dia.entrenamiento}
-                  </p>
-                </div>
-                {currentData.dia.entrenamiento !== 'Descanso activo' && (
-                  <button
-                    onClick={() => openModal('workout')}
-                    className="w-full bg-blue-600 text-white py-3 px-4 rounded-lg hover:bg-blue-700 transition"
-                  >
-                    Iniciar Entrenamiento
-                  </button>
-                )}
-              </div>
-            </div>
+            {/* Today's Workout Component */}
+            <TodayWorkout 
+              onStartWorkout={() => openModal('workout')}
+              mesocicloConfig={initialData.mesocicloConfig}
+            />
 
             {/* Quick Actions */}
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4">

@@ -9,11 +9,7 @@ const nextConfig: NextConfig = {
     domains: [],
   },
   
-  // Configuración experimental para mejor rendimiento
-  experimental: {
-    // Optimizar el tamaño del bundle
-    optimizeCss: true,
-  },
+
   
   // Headers de seguridad
   async headers() {
