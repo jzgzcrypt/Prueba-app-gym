@@ -1,16 +1,28 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { pool } from '@/lib/db';
 
+interface SyncRequest {
+  action: 'save' | 'load' | 'sync';
+  data?: Record<string, unknown> | Record<string, unknown>[];
+  table: string;
+}
+
 export async function POST(request: NextRequest) {
   try {
-    const { action, data, table } = await request.json();
+    const { action, data, table }: SyncRequest = await request.json();
     
     switch (action) {
       case 'save':
+        if (!data || Array.isArray(data)) {
+          return NextResponse.json({ error: 'Datos requeridos para guardar' }, { status: 400 });
+        }
         return await saveData(table, data);
       case 'load':
         return await loadData(table);
       case 'sync':
+        if (!data || !Array.isArray(data)) {
+          return NextResponse.json({ error: 'Datos requeridos para sincronizar' }, { status: 400 });
+        }
         return await syncData(table, data);
       default:
         return NextResponse.json({ error: 'Acción no válida' }, { status: 400 });
@@ -21,7 +33,7 @@ export async function POST(request: NextRequest) {
   }
 }
 
-async function saveData(table: string, data: any) {
+async function saveData(table: string, data: Record<string, unknown>) {
   const client = await pool.connect();
   
   try {
@@ -119,7 +131,7 @@ async function loadData(table: string) {
   }
 }
 
-async function syncData(table: string, localData: any[]) {
+async function syncData(table: string, localData: Record<string, unknown>[]) {
   const client = await pool.connect();
   
   try {
@@ -145,21 +157,24 @@ async function syncData(table: string, localData: any[]) {
   }
 }
 
-function mergeData(localData: any[], dbData: any[]) {
+function mergeData(localData: Record<string, unknown>[], dbData: Record<string, unknown>[]) {
   const merged = new Map();
-  
+
   // Agregar datos locales
   localData.forEach(item => {
     merged.set(item.fecha, item);
   });
-  
+
   // Agregar datos de la base de datos (sobrescribir si son más recientes)
   dbData.forEach(item => {
     const existing = merged.get(item.fecha);
-    if (!existing || new Date(item.updated_at) > new Date(existing.updated_at || 0)) {
+    const itemUpdatedAt = typeof item.updated_at === 'string' ? item.updated_at : '0';
+    const existingUpdatedAt = existing && typeof existing.updated_at === 'string' ? existing.updated_at : '0';
+    
+    if (!existing || new Date(itemUpdatedAt) > new Date(existingUpdatedAt)) {
       merged.set(item.fecha, item);
     }
   });
-  
+
   return Array.from(merged.values());
 }

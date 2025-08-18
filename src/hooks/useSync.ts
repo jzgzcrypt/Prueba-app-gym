@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useToast } from './useToast';
+import { WeightEntry, CardioEntry, DietEntry, NeatEntry, EntrenoNoProgramado } from '@/types';
 
 interface SyncStatus {
   isOnline: boolean;
@@ -39,7 +40,7 @@ export function useSync() {
   }, [showToast]);
 
   // Función para sincronizar datos
-  const syncData = async (table: string, localData: any[]) => {
+  const syncData = async (table: string, localData: Record<string, unknown>[] | WeightEntry[] | CardioEntry[] | DietEntry[] | NeatEntry[] | EntrenoNoProgramado[]) => {
     if (!syncStatus.isOnline) {
       showToast('📡 Sin conexión - Los datos se guardarán localmente', 'warning');
       return false;
@@ -91,7 +92,7 @@ export function useSync() {
   };
 
   // Función para guardar datos
-  const saveData = async (table: string, data: any) => {
+  const saveData = async (table: string, data: Record<string, unknown> | CardioEntry | WeightEntry | DietEntry | NeatEntry | EntrenoNoProgramado) => {
     if (!syncStatus.isOnline) {
       showToast('📡 Sin conexión - Los datos se guardarán localmente', 'warning');
       return false;
@@ -168,7 +169,7 @@ export function useSync() {
   };
 
   // Función para sincronización automática
-  const autoSync = async (table: string, localData: any[]) => {
+  const autoSync = async (table: string, localData: Record<string, unknown>[]) => {
     if (syncStatus.isOnline && !syncStatus.isSyncing) {
       await syncData(table, localData);
     }

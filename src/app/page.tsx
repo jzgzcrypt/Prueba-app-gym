@@ -15,7 +15,7 @@ import { getCurrentMesocicloDay, setMesocicloStartDate, testMesocicloTracking, c
 
 export default function Dashboard() {
   const { showToast } = useToast();
-  const { syncStatus, syncData, saveData, loadData, autoSync } = useSync();
+  const { syncStatus, syncData, saveData } = useSync();
   const [isLoading, setIsLoading] = useState(true);
   const [activeModal, setActiveModal] = useState<string | null>(null);
   const [activeSection, setActiveSection] = useState<'today' | 'mesociclo' | 'history' | 'settings' | 'stats'>('today');
@@ -53,10 +53,8 @@ export default function Dashboard() {
   } | null>(null);
   
   // Estados para versión PC
-  const [isDesktop, setIsDesktop] = useState(false);
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [activeForm, setActiveForm] = useState<'weight' | 'cardio' | 'diet' | 'neat' | 'entreno' | null>(null);
-  const [calendarView, setCalendarView] = useState<'month' | 'week' | 'agenda'>('week');
   const [darkMode, setDarkMode] = useState(false);
   const [showAdvancedSettings, setShowAdvancedSettings] = useState(false);
   
@@ -82,13 +80,7 @@ export default function Dashboard() {
         localStorage.getItem('test');
         setIsLoading(false);
         
-        // Detectar si es desktop
-        const checkDesktop = () => {
-          setIsDesktop(window.innerWidth >= 768);
-        };
-        
-        checkDesktop();
-        window.addEventListener('resize', checkDesktop);
+
         
         // Inicializar base de datos
         const initDB = async () => {
@@ -102,7 +94,7 @@ export default function Dashboard() {
         
         initDB();
         
-        return () => window.removeEventListener('resize', checkDesktop);
+                  return () => {};
       } catch (error) {
         console.error('localStorage not available:', error);
         setIsLoading(false);
@@ -186,10 +178,7 @@ export default function Dashboard() {
   const [entrenoOtroActividad, setEntrenoOtroActividad] = useState('');
   const [entrenoOtroDetalles, setEntrenoOtroDetalles] = useState('');
 
-  // Desktop form states
-  const [desktopWeight, setDesktopWeight] = useState('');
-  const [desktopWorkout, setDesktopWorkout] = useState('');
-  const [desktopCardio, setDesktopCardio] = useState('');
+
 
   const todayISO = () => new Date().toISOString().split('T')[0];
 
@@ -843,7 +832,7 @@ export default function Dashboard() {
         <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Actividad</label>
         <select
           value={entrenoTipo}
-          onChange={(e) => setEntrenoTipo(e.target.value as any)}
+          onChange={(e) => setEntrenoTipo(e.target.value as 'tenis' | 'natacion' | 'alpinismo' | 'ciclismo' | 'running' | 'futbol' | 'baloncesto' | 'escalada' | 'yoga' | 'pilates' | 'crossfit' | 'otro')}
           className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-700 dark:text-white"
         >
           <option value="tenis">🎾 Tenis</option>
@@ -876,7 +865,7 @@ export default function Dashboard() {
         <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Intensidad</label>
         <select
           value={entrenoIntensidad}
-          onChange={(e) => setEntrenoIntensidad(e.target.value as any)}
+          onChange={(e) => setEntrenoIntensidad(e.target.value as 'baja' | 'moderada' | 'alta' | 'muy alta')}
           className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-700 dark:text-white"
         >
           <option value="baja">Baja</option>
@@ -933,7 +922,7 @@ export default function Dashboard() {
 
     const fecha = todayISO();
     const newCardio = cardio.filter(c => c.fecha !== fecha);
-    const newCardioEntry = {
+    const newCardioEntry: CardioEntry = {
       fecha,
       microciclo: 1,
       sesionId: 1,
@@ -1033,7 +1022,7 @@ export default function Dashboard() {
       const calorias = Math.round(pasos * caloriasPorPaso);
 
       const newNeat = neat.filter(n => n.fecha !== fecha);
-      const newNeatEntry = {
+      const newNeatEntry: NeatEntry = {
         fecha,
         tipo: 'pasos',
         pasos,
@@ -1078,7 +1067,7 @@ export default function Dashboard() {
       const calorias = Math.round(met * pesoActual * duracion / 60);
 
       const newNeat = neat.filter(n => n.fecha !== fecha);
-      const newNeatEntry = {
+      const newNeatEntry: NeatEntry = {
         fecha,
         tipo: 'cinta',
         km,
@@ -1372,57 +1361,7 @@ export default function Dashboard() {
     }
   };
 
-  const handleDesktopSave = () => {
-    const savedItems = [];
 
-    if (desktopWeight && parseFloat(desktopWeight) > 0) {
-      const fecha = todayISO();
-      const newEstado = estado.filter(e => e.fecha !== fecha);
-      newEstado.push({ fecha, peso: parseFloat(desktopWeight), cintura: null });
-      setEstado(newEstado);
-      savedItems.push('Peso');
-    }
-
-    if (desktopWorkout && desktopWorkout !== 'Descanso') {
-      const fecha = todayISO();
-      const newAdherencia = { ...adherenciaDiaria };
-      if (!newAdherencia[fecha]) newAdherencia[fecha] = {};
-      newAdherencia[fecha].pesos = true;
-      setAdherenciaDiaria(newAdherencia);
-      savedItems.push('Entrenamiento');
-    }
-
-    if (desktopCardio && parseFloat(desktopCardio) > 0) {
-      const fecha = todayISO();
-      const newCardio = cardio.filter(c => c.fecha !== fecha);
-      newCardio.push({
-        fecha,
-        microciclo: 1,
-        sesionId: 1,
-        km: parseFloat(desktopCardio),
-        tiempo: Math.round(parseFloat(desktopCardio) * 7),
-        ritmo: Math.round(parseFloat(desktopCardio) * 7) / parseFloat(desktopCardio),
-        calorias: Math.round(parseFloat(desktopCardio) * 7 * 10),
-        tipo: 'mesociclo',
-        intensidad: 'Moderado'
-      });
-      const newAdherencia = { ...adherenciaDiaria };
-      if (!newAdherencia[fecha]) newAdherencia[fecha] = {};
-      newAdherencia[fecha].cardio = true;
-      setCardio(newCardio);
-      setAdherenciaDiaria(newAdherencia);
-      savedItems.push('Cardio');
-    }
-
-    if (savedItems.length > 0) {
-      showToast(`✅ Guardado: ${savedItems.join(', ')}`);
-      setDesktopWeight('');
-      setDesktopWorkout('');
-      setDesktopCardio('');
-    } else {
-      showToast('⚠️ Introduce al menos un dato', 'warning');
-    }
-  };
 
   const getStatus = (type: 'weight' | 'workout' | 'cardio' | 'diet' | 'neat' | 'seguimiento' | 'entrenoNoProgramado') => {
     const today = todayISO();
@@ -3397,80 +3336,6 @@ export default function Dashboard() {
       {/* Desktop Dashboard */}
       <div className="hidden md:block">
         {renderDesktopLayout()}
-      </div>
-                    onChange={(e) => setDesktopCardio(e.target.value)}
-                    step="0.1" 
-                    placeholder="3.5" 
-                    className="w-full"
-                  />
-                </div>
-                <div className="flex items-end">
-                  <button 
-                    onClick={handleDesktopSave}
-                    className="w-full bg-white text-purple-600 py-4 px-6 rounded-lg font-semibold hover:bg-gray-100 transition-colors"
-                  >
-                    💾 Guardar Todo
-                  </button>
-                </div>
-              </div>
-            </div>
-            
-            {/* Progress Cards */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-              <div className="bg-white p-6 rounded-xl shadow">
-                <h3 className="font-semibold mb-4">Progreso General</h3>
-                <div className="flex justify-center">
-                  <ProgressCircle progress={progress} size={90} />
-                </div>
-              </div>
-              
-              <div className="bg-white p-6 rounded-xl shadow">
-                <h3 className="font-semibold mb-4">Estado Actual</h3>
-                <div className="space-y-3">
-                  <div className="flex justify-between">
-                    <span className="text-sm text-gray-600">Peso</span>
-                    <span className="font-bold">
-                      {estado.length > 0 ? `${estado[estado.length - 1].peso.toFixed(1)} kg` : '85.0 kg'}
-                    </span>
-                  </div>
-                  <div className="w-full bg-gray-200 rounded-full h-2">
-                    <div 
-                      className="bg-gradient-to-r from-blue-500 to-blue-600 h-2 rounded-full transition-all duration-500" 
-                      style={{ width: `${Math.max(0, Math.min(100, ((85 - (estado.length > 0 ? estado[estado.length - 1].peso : 85)) / 5) * 100))}%` }}
-                    ></div>
-                  </div>
-                </div>
-              </div>
-              
-              <div className="bg-white p-6 rounded-xl shadow">
-                <h3 className="font-semibold mb-4">Completado Hoy</h3>
-                <div className="space-y-3">
-                  {[
-                    { id: 'pesos', label: 'Entrenamiento', icon: '🏋️' },
-                    { id: 'cardio', label: 'Cardio', icon: '🏃' },
-                    { id: 'dieta', label: 'Dieta', icon: '🥗' }
-                  ].map(task => {
-                    const today = todayISO();
-                    const todayAdherence = adherenciaDiaria[today] || {};
-                    const completed = todayAdherence[task.id as keyof typeof todayAdherence];
-                    
-                    return (
-                      <div key={task.id} className="flex items-center justify-between">
-                        <span className="flex items-center">
-                          <span className="mr-2">{task.icon}</span>
-                          <span className="text-sm">{task.label}</span>
-                        </span>
-                        <span className={`text-sm ${completed ? 'text-green-600' : 'text-gray-500'}`}>
-                          {completed ? '✅' : '⏳'}
-                        </span>
-                      </div>
-                    );
-                  })}
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
       </div>
 
       {/* Modals */}

@@ -9,7 +9,7 @@ interface DesktopChartsProps {
   neat: NeatEntry[];
 }
 
-const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#8884D8'];
+
 
 export const DesktopCharts: React.FC<DesktopChartsProps> = ({ estado, cardio, dieta, neat }) => {
   // Preparar datos para gráfico de peso
@@ -54,8 +54,8 @@ export const DesktopCharts: React.FC<DesktopChartsProps> = ({ estado, cardio, di
         <div className="bg-white dark:bg-gray-800 p-4 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700">
           <div className="text-sm text-gray-600 dark:text-gray-400">Peso Actual</div>
           <div className="text-2xl font-bold text-gray-900 dark:text-white">{stats.pesoActual} kg</div>
-          <div className={`text-xs ${parseFloat(stats.cambioPeso) >= 0 ? 'text-green-600' : 'text-red-600'}`}>
-            {parseFloat(stats.cambioPeso) >= 0 ? '+' : ''}{stats.cambioPeso} kg
+          <div className={`text-xs ${parseFloat(String(stats.cambioPeso)) >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+            {parseFloat(String(stats.cambioPeso)) >= 0 ? '+' : ''}{stats.cambioPeso} kg
           </div>
         </div>
         
@@ -162,7 +162,7 @@ export const DesktopCharts: React.FC<DesktopChartsProps> = ({ estado, cardio, di
                 cx="50%"
                 cy="50%"
                 labelLine={false}
-                label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}
+                label={({ name, percent }) => `${name} ${((percent || 0) * 100).toFixed(0)}%`}
                 outerRadius={80}
                 fill="#8884d8"
                 dataKey="value"
