@@ -473,72 +473,35 @@ export default function Dashboard() {
     openModal('history-details');
   };
 
-  // Desktop Layout Functions - ELEGANT & PROFESSIONAL DESIGN
+  // Desktop Layout Functions - ELEGANT CARDS & SIDEBAR DESIGN
   const renderDesktopLayout = () => (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50/30 to-indigo-100/50 dark:from-slate-900 dark:via-slate-800 dark:to-slate-900">
-      {/* Modern Header */}
-      <header className="bg-white/80 dark:bg-slate-800/80 backdrop-blur-xl border-b border-slate-200/50 dark:border-slate-700/50 sticky top-0 z-50">
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-blue-100/50">
+      {/* Header */}
+      <header className="bg-white/90 backdrop-blur-sm border-b border-blue-200/50 sticky top-0 z-50 shadow-sm">
         <div className="max-w-7xl mx-auto px-6">
-          <div className="flex justify-between items-center h-20">
+          <div className="flex justify-between items-center h-16">
             {/* Logo & Brand */}
-            <div className="flex items-center space-x-12">
-              <div className="flex items-center space-x-4">
-                <div className="relative">
-                  <div className="w-12 h-12 bg-gradient-to-br from-indigo-500 via-purple-500 to-pink-500 rounded-2xl flex items-center justify-center shadow-xl shadow-indigo-500/25">
-                    <span className="text-white text-xl font-bold">🏋️</span>
-                  </div>
-                  <div className="absolute -top-1 -right-1 w-4 h-4 bg-green-400 rounded-full border-2 border-white"></div>
+            <div className="flex items-center space-x-8">
+              <div className="flex items-center space-x-3">
+                <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl flex items-center justify-center shadow-lg">
+                  <span className="text-white text-lg font-bold">🏋️</span>
                 </div>
                 <div>
-                  <h1 className="text-2xl font-bold bg-gradient-to-r from-slate-900 via-indigo-800 to-purple-800 dark:from-white dark:via-indigo-200 dark:to-purple-200 bg-clip-text text-transparent">
-                    GymTracker Pro
-                  </h1>
-                  <p className="text-xs text-slate-500 dark:text-slate-400">Fitness Analytics Platform</p>
+                  <h1 className="text-xl font-bold text-blue-900">GymTracker</h1>
+                  <p className="text-xs text-blue-600">Fitness Platform</p>
                 </div>
               </div>
               
-              {/* Navigation */}
-              <nav className="hidden lg:flex space-x-2">
-                {[
-                  { id: 'today', label: 'Dashboard', icon: '🏠', color: 'indigo' },
-                  { id: 'mesociclo', label: 'Mesociclo', icon: '📋', color: 'purple' },
-                  { id: 'history', label: 'Historial', icon: '📊', color: 'emerald' },
-                  { id: 'stats', label: 'Analytics', icon: '📈', color: 'rose' },
-                  { id: 'settings', label: 'Config', icon: '⚙️', color: 'slate' }
-                ].map((item) => (
-                  <button
-                    key={item.id}
-                    onClick={() => setActiveSection(item.id as 'today' | 'mesociclo' | 'history' | 'stats' | 'settings')}
-                    className={`group relative px-6 py-3 rounded-xl text-sm font-semibold transition-all duration-300 ${
-                      activeSection === item.id
-                        ? `bg-gradient-to-r from-${item.color}-500 to-${item.color}-600 text-white shadow-lg shadow-${item.color}-500/25`
-                        : 'text-slate-600 hover:text-slate-900 dark:text-slate-300 dark:hover:text-white hover:bg-white/60 dark:hover:bg-slate-700/60'
-                    }`}
-                  >
-                    <span className="flex items-center space-x-2">
-                      <span className="text-lg">{item.icon}</span>
-                      <span>{item.label}</span>
-                    </span>
-                    {activeSection === item.id && (
-                      <div className="absolute -bottom-px left-1/2 transform -translate-x-1/2 w-8 h-1 bg-white rounded-full shadow-lg"></div>
-                    )}
-                  </button>
-                ))}
-              </nav>
-            </div>
-            
-            {/* Right Side Actions */}
-            <div className="flex items-center space-x-6">
               {/* Sync Status */}
-              <div className="flex items-center space-x-3 px-4 py-2 bg-white/60 dark:bg-slate-700/60 rounded-xl backdrop-blur-sm border border-slate-200/50 dark:border-slate-600/50">
-                <div className={`w-3 h-3 rounded-full ${
+              <div className="flex items-center space-x-2 px-3 py-1 bg-blue-50 rounded-lg border border-blue-200">
+                <div className={`w-2 h-2 rounded-full ${
                   syncStatus.isOnline 
                     ? syncStatus.isSyncing 
-                      ? 'bg-amber-500 animate-pulse shadow-lg shadow-amber-500/50' 
-                      : 'bg-emerald-500 shadow-lg shadow-emerald-500/50' 
-                    : 'bg-red-500 shadow-lg shadow-red-500/50'
+                      ? 'bg-yellow-500 animate-pulse' 
+                      : 'bg-green-500' 
+                    : 'bg-red-500'
                 }`} />
-                <span className="text-sm font-medium text-slate-700 dark:text-slate-300">
+                <span className="text-xs font-medium text-blue-700">
                   {syncStatus.isOnline 
                     ? syncStatus.isSyncing 
                       ? 'Sincronizando...' 
@@ -547,314 +510,304 @@ export default function Dashboard() {
                   }
                 </span>
               </div>
-              
-              {/* Action Buttons */}
-              <div className="flex items-center space-x-3">
-                <button
-                  onClick={() => setDarkMode(!darkMode)}
-                  className="p-3 text-slate-600 hover:text-slate-900 dark:text-slate-300 dark:hover:text-white hover:bg-white/60 dark:hover:bg-slate-700/60 rounded-xl transition-all duration-300 backdrop-blur-sm border border-slate-200/50 dark:border-slate-600/50"
-                  title={darkMode ? 'Modo claro' : 'Modo oscuro'}
-                >
-                  <span className="text-lg">{darkMode ? '☀️' : '🌙'}</span>
-                </button>
-                <button
-                  onClick={() => openModal('weekly-calendar')}
-                  className="p-3 text-slate-600 hover:text-slate-900 dark:text-slate-300 dark:hover:text-white hover:bg-white/60 dark:hover:bg-slate-700/60 rounded-xl transition-all duration-300 backdrop-blur-sm border border-slate-200/50 dark:border-slate-600/50"
-                  title="Ver plan semanal"
-                >
-                  <span className="text-lg">📅</span>
-                </button>
-              </div>
+            </div>
+            
+            {/* Right Side Actions */}
+            <div className="flex items-center space-x-3">
+              <button
+                onClick={() => setDarkMode(!darkMode)}
+                className="p-2 text-blue-600 hover:text-blue-800 hover:bg-blue-50 rounded-lg transition-colors"
+                title={darkMode ? 'Modo claro' : 'Modo oscuro'}
+              >
+                <span className="text-lg">{darkMode ? '☀️' : '🌙'}</span>
+              </button>
+              <button
+                onClick={() => openModal('weekly-calendar')}
+                className="p-2 text-blue-600 hover:text-blue-800 hover:bg-blue-50 rounded-lg transition-colors"
+                title="Ver plan semanal"
+              >
+                <span className="text-lg">📅</span>
+              </button>
             </div>
           </div>
         </div>
       </header>
 
       {/* Main Content Area */}
-      <div className="max-w-7xl mx-auto px-6 py-8">
-        <div className="grid grid-cols-12 gap-8">
-          {/* Left Sidebar - Quick Actions */}
-          <div className="col-span-3">
-            <div className="sticky top-32 space-y-6">
-              {renderDesktopQuickActions()}
-            </div>
-          </div>
+      <div className="flex">
+        {/* Sidebar */}
+        <div className={`w-64 bg-white/90 backdrop-blur-sm border-r border-blue-200/50 transition-all duration-300 ${
+          sidebarOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'
+        }`}>
+          {renderDesktopSidebar()}
+        </div>
 
-          {/* Main Content */}
-          <div className="col-span-6">
-            <div className="space-y-8">
-              {activeSection === 'today' && renderDesktopDashboard()}
-              {activeSection === 'mesociclo' && renderDesktopMesociclo()}
-              {activeSection === 'history' && renderDesktopHistory()}
-              {activeSection === 'stats' && renderDesktopAnalytics()}
-              {activeSection === 'settings' && renderDesktopSettings()}
-            </div>
-          </div>
-
-          {/* Right Sidebar - Stats & Insights */}
-          <div className="col-span-3">
-            <div className="sticky top-32 space-y-6">
-              {renderDesktopInsights()}
-            </div>
+        {/* Main Content */}
+        <div className="flex-1">
+          <div className="p-6">
+            {renderDesktopMainContent()}
           </div>
         </div>
       </div>
+
+      {/* Mobile Sidebar Toggle */}
+      <button
+        onClick={() => setSidebarOpen(!sidebarOpen)}
+        className="lg:hidden fixed top-20 left-4 z-50 p-2 bg-blue-600 text-white rounded-lg shadow-lg"
+      >
+        {sidebarOpen ? '✕' : '☰'}
+      </button>
     </div>
   );
 
   // ===== NEW DESKTOP COMPONENTS =====
   
-  const renderDesktopQuickActions = () => (
-    <div className="space-y-6">
-      {/* Quick Stats Card */}
-      <div className="bg-white/80 dark:bg-slate-800/80 backdrop-blur-xl rounded-2xl p-6 shadow-xl border border-slate-200/50 dark:border-slate-700/50">
-        <div className="flex items-center space-x-3 mb-4">
-          <div className="w-10 h-10 bg-gradient-to-br from-indigo-500 to-purple-500 rounded-xl flex items-center justify-center shadow-lg">
-            <span className="text-white text-lg">📊</span>
-          </div>
-          <h3 className="text-lg font-bold text-slate-900 dark:text-white">Resumen Rápido</h3>
-        </div>
-        <div className="space-y-4">
-          <div className="flex items-center justify-between p-3 bg-gradient-to-r from-indigo-50 to-purple-50 dark:from-indigo-900/20 dark:to-purple-900/20 rounded-xl">
-            <span className="text-sm font-medium text-slate-600 dark:text-slate-400">Peso Actual</span>
-            <span className="font-bold text-lg text-slate-900 dark:text-white">
+  const renderDesktopSidebar = () => (
+    <div className="h-full flex flex-col">
+      {/* Sidebar Header */}
+      <div className="p-4 border-b border-blue-200">
+        <h2 className="text-lg font-semibold text-blue-900">Menú Principal</h2>
+        <p className="text-xs text-blue-600 mt-1">Navegación rápida</p>
+      </div>
+
+      {/* Navigation Menu */}
+      <div className="flex-1 p-4 space-y-2">
+        {[
+          { 
+            id: 'today', 
+            label: 'Dashboard', 
+            icon: '🏠', 
+            description: 'Vista general del día',
+            color: 'blue'
+          },
+          { 
+            id: 'mesociclo', 
+            label: 'Mesociclo', 
+            icon: '📋', 
+            description: 'Plan de entrenamiento',
+            color: 'blue'
+          },
+          { 
+            id: 'history', 
+            label: 'Historial', 
+            icon: '📊', 
+            description: 'Registros anteriores',
+            color: 'blue'
+          },
+          { 
+            id: 'stats', 
+            label: 'Estadísticas', 
+            icon: '📈', 
+            description: 'Análisis y gráficos',
+            color: 'blue'
+          },
+          { 
+            id: 'settings', 
+            label: 'Configuración', 
+            icon: '⚙️', 
+            description: 'Ajustes del sistema',
+            color: 'blue'
+          }
+        ].map((item) => (
+          <button
+            key={item.id}
+            onClick={() => setActiveSection(item.id as 'today' | 'mesociclo' | 'history' | 'stats' | 'settings')}
+            className={`w-full text-left p-3 rounded-lg transition-all duration-200 ${
+              activeSection === item.id
+                ? 'bg-blue-100 text-blue-900 border border-blue-300 shadow-sm'
+                : 'text-blue-700 hover:bg-blue-50 hover:text-blue-900'
+            }`}
+          >
+            <div className="flex items-center space-x-3">
+              <div className={`w-8 h-8 rounded-lg flex items-center justify-center ${
+                activeSection === item.id
+                  ? 'bg-blue-600 text-white'
+                  : 'bg-blue-100 text-blue-600'
+              }`}>
+                <span className="text-sm">{item.icon}</span>
+              </div>
+              <div>
+                <div className="font-medium text-sm">{item.label}</div>
+                <div className="text-xs text-blue-600">{item.description}</div>
+              </div>
+            </div>
+          </button>
+        ))}
+      </div>
+
+      {/* Quick Stats */}
+      <div className="p-4 border-t border-blue-200 bg-blue-50/50">
+        <h3 className="text-sm font-semibold text-blue-900 mb-3">📊 Resumen Rápido</h3>
+        <div className="space-y-2 text-sm">
+          <div className="flex justify-between items-center p-2 bg-white rounded-lg border border-blue-200">
+            <span className="text-blue-700">Peso:</span>
+            <span className="font-semibold text-blue-900">
               {estado.length > 0 ? `${estado[estado.length - 1].peso} kg` : '--'}
             </span>
           </div>
-          <div className="flex items-center justify-between p-3 bg-gradient-to-r from-orange-50 to-red-50 dark:from-orange-900/20 dark:to-red-900/20 rounded-xl">
-            <span className="text-sm font-medium text-slate-600 dark:text-slate-400">Calorías Hoy</span>
-            <span className="font-bold text-lg text-orange-600">
-              {getCaloriasDelDia()} kcal
-            </span>
+          <div className="flex justify-between items-center p-2 bg-white rounded-lg border border-blue-200">
+            <span className="text-blue-700">Calorías:</span>
+            <span className="font-semibold text-blue-900">{getCaloriasDelDia()} kcal</span>
           </div>
-          <div className="flex items-center justify-between p-3 bg-gradient-to-r from-emerald-50 to-green-50 dark:from-emerald-900/20 dark:to-green-900/20 rounded-xl">
-            <span className="text-sm font-medium text-slate-600 dark:text-slate-400">Progreso</span>
-            <span className="font-bold text-lg text-emerald-600">
-              {Math.round(progress)}%
-            </span>
+          <div className="flex justify-between items-center p-2 bg-white rounded-lg border border-blue-200">
+            <span className="text-blue-700">Progreso:</span>
+            <span className="font-semibold text-blue-900">{Math.round(progress)}%</span>
           </div>
-        </div>
-      </div>
-
-      {/* Quick Actions */}
-      <div className="bg-white/80 dark:bg-slate-800/80 backdrop-blur-xl rounded-2xl p-6 shadow-xl border border-slate-200/50 dark:border-slate-700/50">
-        <div className="flex items-center space-x-3 mb-4">
-          <div className="w-10 h-10 bg-gradient-to-br from-rose-500 to-pink-500 rounded-xl flex items-center justify-center shadow-lg">
-            <span className="text-white text-lg">⚡</span>
-          </div>
-          <h3 className="text-lg font-bold text-slate-900 dark:text-white">Acciones Rápidas</h3>
-        </div>
-        <div className="space-y-3">
-          {[
-            { icon: '⚖️', label: 'Registrar Peso', action: () => openModal('weight'), color: 'indigo' },
-            { icon: '🏃', label: 'Añadir Cardio', action: () => openModal('cardio'), color: 'emerald' },
-            { icon: '🥗', label: 'Registrar Dieta', action: () => openModal('diet'), color: 'orange' },
-            { icon: '🚶', label: 'Añadir NEAT', action: () => openModal('neat'), color: 'purple' },
-            { icon: '🎯', label: 'Entreno Extra', action: () => openModal('entreno-no-programado'), color: 'rose' }
-          ].map((item, index) => (
-            <button
-              key={index}
-              onClick={item.action}
-              className={`w-full flex items-center space-x-3 p-4 rounded-xl bg-gradient-to-r from-${item.color}-50 to-${item.color}-100 dark:from-${item.color}-900/20 dark:to-${item.color}-800/20 hover:from-${item.color}-100 hover:to-${item.color}-200 dark:hover:from-${item.color}-800/30 dark:hover:to-${item.color}-700/30 transition-all duration-300 border border-${item.color}-200/50 dark:border-${item.color}-700/50 shadow-sm hover:shadow-lg`}
-            >
-              <div className={`w-8 h-8 bg-gradient-to-br from-${item.color}-500 to-${item.color}-600 rounded-lg flex items-center justify-center shadow-sm`}>
-                <span className="text-white text-sm">{item.icon}</span>
-              </div>
-              <span className="font-semibold text-slate-700 dark:text-slate-300">{item.label}</span>
-            </button>
-          ))}
         </div>
       </div>
     </div>
   );
 
-  const renderDesktopDashboard = () => (
-    <div className="space-y-8">
-      {/* Welcome Section */}
-      <div className="bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600 rounded-3xl p-8 text-white shadow-2xl relative overflow-hidden">
-        <div className="absolute inset-0 bg-black/10"></div>
-        <div className="relative z-10">
-          <div className="flex items-center justify-between">
-            <div>
-              <h1 className="text-4xl font-bold mb-2">¡Bienvenido de vuelta! 👋</h1>
-              <p className="text-indigo-100 text-lg">
-                Hoy es {new Date().toLocaleDateString('es-ES', { 
-                  weekday: 'long', 
-                  year: 'numeric', 
-                  month: 'long', 
-                  day: 'numeric' 
-                })}
-              </p>
-            </div>
-            <div className="text-right">
-              <div className="text-5xl font-bold mb-1">{Math.round(progress)}%</div>
-              <div className="text-indigo-100 text-lg">Progreso del día</div>
-            </div>
-          </div>
+  const renderDesktopMainContent = () => (
+    <div className="space-y-6">
+      {/* Section Header */}
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-3xl font-bold text-blue-900">
+            {activeSection === 'today' && '🏠 Dashboard'}
+            {activeSection === 'mesociclo' && '📋 Mesociclo'}
+            {activeSection === 'history' && '📊 Historial'}
+            {activeSection === 'stats' && '📈 Estadísticas'}
+            {activeSection === 'settings' && '⚙️ Configuración'}
+          </h1>
+          <p className="text-blue-600 mt-1">
+            {activeSection === 'today' && 'Vista general del día'}
+            {activeSection === 'mesociclo' && 'Plan de entrenamiento'}
+            {activeSection === 'history' && 'Registros anteriores'}
+            {activeSection === 'stats' && 'Análisis y gráficos'}
+            {activeSection === 'settings' && 'Ajustes del sistema'}
+          </p>
         </div>
-        <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full -translate-y-16 translate-x-16"></div>
-        <div className="absolute bottom-0 left-0 w-24 h-24 bg-white/10 rounded-full translate-y-12 -translate-x-12"></div>
+        <div className="text-sm text-blue-600">
+          {new Date().toLocaleDateString('es-ES', { 
+            weekday: 'long', 
+            year: 'numeric', 
+            month: 'long', 
+            day: 'numeric' 
+          })}
+        </div>
       </div>
 
-      {/* Stats Grid */}
-      <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
+      {/* Function Cards Grid */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {[
           { 
-            icon: '📊', 
-            label: 'Progreso del Día', 
-            value: `${Math.round(calculateProgress() * 100)}%`,
-            subtitle: `${Object.keys(adherenciaDiaria[todayISO()] || {}).length} de 5 actividades`,
-            color: 'indigo',
-            gradient: 'from-indigo-500 to-blue-500'
-          },
-          { 
             icon: '⚖️', 
-            label: 'Peso Actual', 
-            value: estado.length > 0 ? `${estado[estado.length - 1].peso} kg` : '--',
-            subtitle: 'Último registro',
-            color: 'emerald',
-            gradient: 'from-emerald-500 to-green-500'
+            title: 'Registrar Peso', 
+            description: 'Añadir peso y medidas',
+            color: 'blue',
+            action: () => setActiveForm('weight')
           },
           { 
-            icon: '🔥', 
-            label: 'Calorías Hoy', 
-            value: `${getCaloriasDelDia()}`,
-            subtitle: 'kcal consumidas',
-            color: 'orange',
-            gradient: 'from-orange-500 to-red-500'
+            icon: '🏃', 
+            title: 'Añadir Cardio', 
+            description: 'Registrar actividad cardiovascular',
+            color: 'blue',
+            action: () => setActiveForm('cardio')
           },
           { 
-            icon: '💪', 
-            label: 'Entrenamiento', 
-            value: (() => {
-              const currentData = getCurrentMesocicloDay();
-              return currentData ? currentData.dia.entrenamiento : 'Descanso';
-            })(),
-            subtitle: (() => {
-              const currentData = getCurrentMesocicloDay();
-              return currentData ? currentData.dia.dia : 'Hoy';
-            })(),
-            color: 'purple',
-            gradient: 'from-purple-500 to-pink-500'
+            icon: '🥗', 
+            title: 'Registrar Dieta', 
+            description: 'Añadir calorías y macronutrientes',
+            color: 'blue',
+            action: () => setActiveForm('diet')
+          },
+          { 
+            icon: '🚶', 
+            title: 'Añadir NEAT', 
+            description: 'Actividad física no estructurada',
+            color: 'blue',
+            action: () => setActiveForm('neat')
+          },
+          { 
+            icon: '🎯', 
+            title: 'Entreno Extra', 
+            description: 'Entrenamiento no programado',
+            color: 'blue',
+            action: () => setActiveForm('entreno')
+          },
+          { 
+            icon: '📊', 
+            title: 'Ver Estadísticas', 
+            description: 'Análisis y progreso',
+            color: 'blue',
+            action: () => setActiveSection('stats')
           }
-        ].map((stat, index) => (
-          <div key={index} className="bg-white/80 dark:bg-slate-800/80 backdrop-blur-xl rounded-2xl p-6 shadow-xl border border-slate-200/50 dark:border-slate-700/50 hover:shadow-2xl transition-all duration-300">
-            <div className="flex items-center justify-between mb-4">
-              <div className={`w-12 h-12 bg-gradient-to-br ${stat.gradient} rounded-xl flex items-center justify-center shadow-lg`}>
-                <span className="text-white text-xl">{stat.icon}</span>
+        ].map((card, index) => (
+          <div 
+            key={index}
+            onClick={card.action}
+            className="bg-white rounded-xl p-6 shadow-lg border border-blue-200 hover:shadow-xl transition-all duration-300 cursor-pointer group"
+          >
+            <div className="flex items-center space-x-4 mb-4">
+              <div className="w-12 h-12 bg-blue-100 rounded-xl flex items-center justify-center group-hover:bg-blue-200 transition-colors">
+                <span className="text-2xl">{card.icon}</span>
               </div>
-              <div className="text-right">
-                <h3 className="text-lg font-semibold text-slate-900 dark:text-white">{stat.label}</h3>
+              <div>
+                <h3 className="text-lg font-semibold text-blue-900">{card.title}</h3>
+                <p className="text-sm text-blue-600">{card.description}</p>
               </div>
             </div>
-            <div className="text-center">
-              <div className={`text-3xl font-bold text-${stat.color}-600 dark:text-${stat.color}-400 mb-2`}>
-                {stat.value}
-              </div>
-              <div className="text-sm text-slate-600 dark:text-slate-400">
-                {stat.subtitle}
+            <div className="flex items-center justify-between">
+              <span className="text-xs text-blue-500 font-medium">Hacer clic para abrir</span>
+              <div className="w-6 h-6 bg-blue-100 rounded-full flex items-center justify-center group-hover:bg-blue-200 transition-colors">
+                <span className="text-blue-600 text-xs">→</span>
               </div>
             </div>
           </div>
         ))}
       </div>
 
-      {/* Activity Overview */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-        <div className="bg-white/80 dark:bg-slate-800/80 backdrop-blur-xl rounded-2xl p-6 shadow-xl border border-slate-200/50 dark:border-slate-700/50">
-          <div className="flex items-center space-x-3 mb-6">
-            <div className="w-10 h-10 bg-gradient-to-br from-emerald-500 to-green-500 rounded-xl flex items-center justify-center shadow-lg">
-              <span className="text-white text-lg">✅</span>
+      {/* Horizontal Tabs */}
+      {activeForm && (
+        <div className="mt-8">
+          <div className="bg-white rounded-xl shadow-lg border border-blue-200">
+            {/* Tab Headers */}
+            <div className="flex border-b border-blue-200">
+              {[
+                { id: 'weight', label: '⚖️ Peso', icon: '⚖️' },
+                { id: 'cardio', label: '🏃 Cardio', icon: '🏃' },
+                { id: 'diet', label: '🥗 Dieta', icon: '🥗' },
+                { id: 'neat', label: '🚶 NEAT', icon: '🚶' },
+                { id: 'entreno', label: '🎯 Entreno', icon: '🎯' }
+              ].map((tab) => (
+                <button
+                  key={tab.id}
+                  onClick={() => setActiveForm(tab.id as 'weight' | 'cardio' | 'diet' | 'neat' | 'entreno')}
+                  className={`flex items-center space-x-2 px-6 py-4 text-sm font-medium transition-colors ${
+                    activeForm === tab.id
+                      ? 'text-blue-900 border-b-2 border-blue-600 bg-blue-50'
+                      : 'text-blue-600 hover:text-blue-900 hover:bg-blue-50'
+                  }`}
+                >
+                  <span className="text-lg">{tab.icon}</span>
+                  <span>{tab.label}</span>
+                </button>
+              ))}
             </div>
-            <h3 className="text-xl font-bold text-slate-900 dark:text-white">Actividades Completadas</h3>
-          </div>
-          <div className="space-y-3">
-            {adherenciaDiaria[todayISO()]?.pesos && (
-              <div className="flex items-center space-x-3 p-4 bg-gradient-to-r from-emerald-50 to-green-50 dark:from-emerald-900/20 dark:to-green-900/20 rounded-xl border border-emerald-200/50 dark:border-emerald-700/50">
-                <div className="w-8 h-8 bg-emerald-500 rounded-lg flex items-center justify-center">
-                  <span className="text-white text-sm">⚖️</span>
-                </div>
-                <span className="font-semibold text-slate-900 dark:text-white">Peso registrado</span>
-              </div>
-            )}
-            {adherenciaDiaria[todayISO()]?.cardio && (
-              <div className="flex items-center space-x-3 p-4 bg-gradient-to-r from-emerald-50 to-green-50 dark:from-emerald-900/20 dark:to-green-900/20 rounded-xl border border-emerald-200/50 dark:border-emerald-700/50">
-                <div className="w-8 h-8 bg-emerald-500 rounded-lg flex items-center justify-center">
-                  <span className="text-white text-sm">🏃</span>
-                </div>
-                <span className="font-semibold text-slate-900 dark:text-white">Cardio completado</span>
-              </div>
-            )}
-            {adherenciaDiaria[todayISO()]?.dieta && (
-              <div className="flex items-center space-x-3 p-4 bg-gradient-to-r from-emerald-50 to-green-50 dark:from-emerald-900/20 dark:to-green-900/20 rounded-xl border border-emerald-200/50 dark:border-emerald-700/50">
-                <div className="w-8 h-8 bg-emerald-500 rounded-lg flex items-center justify-center">
-                  <span className="text-white text-sm">🥗</span>
-                </div>
-                <span className="font-semibold text-slate-900 dark:text-white">Dieta registrada</span>
-              </div>
-            )}
-            {adherenciaDiaria[todayISO()]?.neat && (
-              <div className="flex items-center space-x-3 p-4 bg-gradient-to-r from-emerald-50 to-green-50 dark:from-emerald-900/20 dark:to-green-900/20 rounded-xl border border-emerald-200/50 dark:border-emerald-700/50">
-                <div className="w-8 h-8 bg-emerald-500 rounded-lg flex items-center justify-center">
-                  <span className="text-white text-sm">🚶</span>
-                </div>
-                <span className="font-semibold text-slate-900 dark:text-white">NEAT registrado</span>
-              </div>
-            )}
-            {adherenciaDiaria[todayISO()]?.entrenoNoProgramado && (
-              <div className="flex items-center space-x-3 p-4 bg-gradient-to-r from-emerald-50 to-green-50 dark:from-emerald-900/20 dark:to-green-900/20 rounded-xl border border-emerald-200/50 dark:border-emerald-700/50">
-                <div className="w-8 h-8 bg-emerald-500 rounded-lg flex items-center justify-center">
-                  <span className="text-white text-sm">🎯</span>
-                </div>
-                <span className="font-semibold text-slate-900 dark:text-white">Entreno extra</span>
-              </div>
-            )}
-          </div>
-        </div>
 
-        <div className="bg-white/80 dark:bg-slate-800/80 backdrop-blur-xl rounded-2xl p-6 shadow-xl border border-slate-200/50 dark:border-slate-700/50">
-          <div className="flex items-center space-x-3 mb-6">
-            <div className="w-10 h-10 bg-gradient-to-br from-amber-500 to-orange-500 rounded-xl flex items-center justify-center shadow-lg">
-              <span className="text-white text-lg">⏳</span>
+            {/* Tab Content */}
+            <div className="p-6">
+              {activeForm === 'weight' && renderDesktopWeightForm()}
+              {activeForm === 'cardio' && renderDesktopCardioForm()}
+              {activeForm === 'diet' && renderDesktopDietForm()}
+              {activeForm === 'neat' && renderDesktopNeatForm()}
+              {activeForm === 'entreno' && renderDesktopEntrenoForm()}
             </div>
-            <h3 className="text-xl font-bold text-slate-900 dark:text-white">Próximas Actividades</h3>
-          </div>
-          <div className="space-y-3">
-            {!adherenciaDiaria[todayISO()]?.pesos && (
-              <div className="flex items-center space-x-3 p-4 bg-gradient-to-r from-slate-50 to-gray-50 dark:from-slate-700 dark:to-gray-700 rounded-xl border border-slate-200/50 dark:border-slate-600/50">
-                <div className="w-8 h-8 bg-slate-400 rounded-lg flex items-center justify-center">
-                  <span className="text-white text-sm">⚖️</span>
-                </div>
-                <span className="font-semibold text-slate-700 dark:text-slate-300">Registrar peso</span>
-              </div>
-            )}
-            {!adherenciaDiaria[todayISO()]?.cardio && (
-              <div className="flex items-center space-x-3 p-4 bg-gradient-to-r from-slate-50 to-gray-50 dark:from-slate-700 dark:to-gray-700 rounded-xl border border-slate-200/50 dark:border-slate-600/50">
-                <div className="w-8 h-8 bg-slate-400 rounded-lg flex items-center justify-center">
-                  <span className="text-white text-sm">🏃</span>
-                </div>
-                <span className="font-semibold text-slate-700 dark:text-slate-300">Hacer cardio</span>
-              </div>
-            )}
-            {!adherenciaDiaria[todayISO()]?.dieta && (
-              <div className="flex items-center space-x-3 p-4 bg-gradient-to-r from-slate-50 to-gray-50 dark:from-slate-700 dark:to-gray-700 rounded-xl border border-slate-200/50 dark:border-slate-600/50">
-                <div className="w-8 h-8 bg-slate-400 rounded-lg flex items-center justify-center">
-                  <span className="text-white text-sm">🥗</span>
-                </div>
-                <span className="font-semibold text-slate-700 dark:text-slate-300">Registrar dieta</span>
-              </div>
-            )}
-            {!adherenciaDiaria[todayISO()]?.neat && (
-              <div className="flex items-center space-x-3 p-4 bg-gradient-to-r from-slate-50 to-gray-50 dark:from-slate-700 dark:to-gray-700 rounded-xl border border-slate-200/50 dark:border-slate-600/50">
-                <div className="w-8 h-8 bg-slate-400 rounded-lg flex items-center justify-center">
-                  <span className="text-white text-sm">🚶</span>
-                </div>
-                <span className="font-semibold text-slate-700 dark:text-slate-300">Actividad NEAT</span>
-              </div>
-            )}
           </div>
         </div>
-      </div>
+      )}
+
+      {/* Section Content */}
+      {!activeForm && (
+        <div className="mt-8">
+          {activeSection === 'today' && renderDesktopDashboard()}
+          {activeSection === 'mesociclo' && renderDesktopMesociclo()}
+          {activeSection === 'history' && renderDesktopHistory()}
+          {activeSection === 'stats' && renderDesktopAnalytics()}
+          {activeSection === 'settings' && renderDesktopSettings()}
+        </div>
+      )}
     </div>
   );
 
@@ -973,7 +926,7 @@ export default function Dashboard() {
 
   const renderDesktopSettings = () => (
     <div className="space-y-8">
-      <div className="bg-white/70 dark:bg-gray-800/70 backdrop-blur-lg rounded-2xl p-6 shadow-xl border border-white/20 dark:border-gray-700/20">
+      <div className="bg-white/70 dark:bg-gray-800/70 backdrop-lg rounded-2xl p-6 shadow-xl border border-white/20 dark:border-gray-700/20">
         <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-6">⚙️ Configuración</h2>
         
         <div className="space-y-6">
@@ -3766,6 +3719,187 @@ export default function Dashboard() {
     </div>
   );
 
+  // ===== DESKTOP FUNCTIONS =====
+  
+  const renderDesktopDashboard = () => (
+    <div className="space-y-6">
+      {/* Welcome Card */}
+      <div className="bg-gradient-to-r from-blue-500 to-blue-600 rounded-xl p-6 text-white shadow-lg">
+        <div className="flex items-center justify-between">
+          <div>
+            <h2 className="text-2xl font-bold mb-1">¡Bienvenido de vuelta! 👋</h2>
+            <p className="text-blue-100">
+              Hoy es {new Date().toLocaleDateString('es-ES', { 
+                weekday: 'long', 
+                year: 'numeric', 
+                month: 'long', 
+                day: 'numeric' 
+              })}
+            </p>
+          </div>
+          <div className="text-right">
+            <div className="text-4xl font-bold mb-1">{Math.round(progress)}%</div>
+            <div className="text-blue-100">Progreso del día</div>
+          </div>
+        </div>
+      </div>
+
+      {/* Stats Grid */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+        {[
+          { 
+            icon: '📊', 
+            label: 'Progreso del Día', 
+            value: `${Math.round(calculateProgress() * 100)}%`,
+            subtitle: `${Object.keys(adherenciaDiaria[todayISO()] || {}).length} de 5 actividades`
+          },
+          { 
+            icon: '⚖️', 
+            label: 'Peso Actual', 
+            value: estado.length > 0 ? `${estado[estado.length - 1].peso} kg` : '--',
+            subtitle: 'Último registro'
+          },
+          { 
+            icon: '🔥', 
+            label: 'Calorías Hoy', 
+            value: `${getCaloriasDelDia()}`,
+            subtitle: 'kcal consumidas'
+          },
+          { 
+            icon: '💪', 
+            label: 'Entrenamiento', 
+            value: (() => {
+              const currentData = getCurrentMesocicloDay();
+              return currentData ? currentData.dia.entrenamiento : 'Descanso';
+            })(),
+            subtitle: (() => {
+              const currentData = getCurrentMesocicloDay();
+              return currentData ? currentData.dia.dia : 'Hoy';
+            })()
+          }
+        ].map((stat, index) => (
+          <div key={index} className="bg-white rounded-xl p-4 shadow-lg border border-blue-200">
+            <div className="flex items-center space-x-3 mb-3">
+              <div className="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center">
+                <span className="text-xl">{stat.icon}</span>
+              </div>
+              <div>
+                <h3 className="text-sm font-semibold text-blue-900">{stat.label}</h3>
+              </div>
+            </div>
+            <div className="text-center">
+              <div className="text-2xl font-bold text-blue-900 mb-1">
+                {stat.value}
+              </div>
+              <div className="text-xs text-blue-600">
+                {stat.subtitle}
+              </div>
+            </div>
+          </div>
+        ))}
+      </div>
+
+      {/* Activity Overview */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <div className="bg-white rounded-xl p-6 shadow-lg border border-blue-200">
+          <div className="flex items-center space-x-3 mb-4">
+            <div className="w-8 h-8 bg-green-100 rounded-lg flex items-center justify-center">
+              <span className="text-green-600">✅</span>
+            </div>
+            <h3 className="text-lg font-semibold text-blue-900">Actividades Completadas</h3>
+          </div>
+          <div className="space-y-2">
+            {adherenciaDiaria[todayISO()]?.pesos && (
+              <div className="flex items-center space-x-3 p-3 bg-green-50 rounded-lg border border-green-200">
+                <div className="w-6 h-6 bg-green-500 rounded flex items-center justify-center">
+                  <span className="text-white text-xs">⚖️</span>
+                </div>
+                <span className="font-medium text-blue-900">Peso registrado</span>
+              </div>
+            )}
+            {adherenciaDiaria[todayISO()]?.cardio && (
+              <div className="flex items-center space-x-3 p-3 bg-green-50 rounded-lg border border-green-200">
+                <div className="w-6 h-6 bg-green-500 rounded flex items-center justify-center">
+                  <span className="text-white text-xs">🏃</span>
+                </div>
+                <span className="font-medium text-blue-900">Cardio completado</span>
+              </div>
+            )}
+            {adherenciaDiaria[todayISO()]?.dieta && (
+              <div className="flex items-center space-x-3 p-3 bg-green-50 rounded-lg border border-green-200">
+                <div className="w-6 h-6 bg-green-500 rounded flex items-center justify-center">
+                  <span className="text-white text-xs">🥗</span>
+                </div>
+                <span className="font-medium text-blue-900">Dieta registrada</span>
+              </div>
+            )}
+            {adherenciaDiaria[todayISO()]?.neat && (
+              <div className="flex items-center space-x-3 p-3 bg-green-50 rounded-lg border border-green-200">
+                <div className="w-6 h-6 bg-green-500 rounded flex items-center justify-center">
+                  <span className="text-white text-xs">🚶</span>
+                </div>
+                <span className="font-medium text-blue-900">NEAT registrado</span>
+              </div>
+            )}
+            {adherenciaDiaria[todayISO()]?.entrenoNoProgramado && (
+              <div className="flex items-center space-x-3 p-3 bg-green-50 rounded-lg border border-green-200">
+                <div className="w-6 h-6 bg-green-500 rounded flex items-center justify-center">
+                  <span className="text-white text-xs">🎯</span>
+                </div>
+                <span className="font-medium text-blue-900">Entreno extra</span>
+              </div>
+            )}
+          </div>
+        </div>
+
+        <div className="bg-white rounded-xl p-6 shadow-lg border border-blue-200">
+          <div className="flex items-center space-x-3 mb-4">
+            <div className="w-8 h-8 bg-amber-100 rounded-lg flex items-center justify-center">
+              <span className="text-amber-600">⏳</span>
+            </div>
+            <h3 className="text-lg font-semibold text-blue-900">Próximas Actividades</h3>
+          </div>
+          <div className="space-y-2">
+            {!adherenciaDiaria[todayISO()]?.pesos && (
+              <div className="flex items-center space-x-3 p-3 bg-gray-50 rounded-lg border border-gray-200">
+                <div className="w-6 h-6 bg-gray-400 rounded flex items-center justify-center">
+                  <span className="text-white text-xs">⚖️</span>
+                </div>
+                <span className="font-medium text-blue-700">Registrar peso</span>
+              </div>
+            )}
+            {!adherenciaDiaria[todayISO()]?.cardio && (
+              <div className="flex items-center space-x-3 p-3 bg-gray-50 rounded-lg border border-gray-200">
+                <div className="w-6 h-6 bg-gray-400 rounded flex items-center justify-center">
+                  <span className="text-white text-xs">🏃</span>
+                </div>
+                <span className="font-medium text-blue-700">Hacer cardio</span>
+              </div>
+            )}
+            {!adherenciaDiaria[todayISO()]?.dieta && (
+              <div className="flex items-center space-x-3 p-3 bg-gray-50 rounded-lg border border-gray-200">
+                <div className="w-6 h-6 bg-gray-400 rounded flex items-center justify-center">
+                  <span className="text-white text-xs">🥗</span>
+                </div>
+                <span className="font-medium text-blue-700">Registrar dieta</span>
+              </div>
+            )}
+            {!adherenciaDiaria[todayISO()]?.neat && (
+              <div className="flex items-center space-x-3 p-3 bg-gray-50 rounded-lg border border-gray-200">
+                <div className="w-6 h-6 bg-gray-400 rounded flex items-center justify-center">
+                  <span className="text-white text-xs">🚶</span>
+                </div>
+                <span className="font-medium text-blue-700">Actividad NEAT</span>
+              </div>
+            )}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+
+
+
   // Mostrar loading mientras se inicializa
   if (isLoading) {
     return <LoadingFallback />;
@@ -5033,7 +5167,7 @@ export default function Dashboard() {
               </div>
             </div>
             
-                        <div className="flex gap-2 md:gap-3 flex-shrink-0 p-3 md:p-4 border-t border-gray-200">
+            <div className="flex gap-2 md:gap-3 flex-shrink-0 p-3 md:p-4 border-t border-gray-200">
               <button onClick={closeModal} className="btn-elegant btn-secondary flex-1 text-sm md:text-base">
                 Cerrar
               </button>
