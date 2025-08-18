@@ -468,64 +468,128 @@ export default function Dashboard() {
 
   // Desktop Layout Functions - SIMPLIFIED VERSION
   const renderDesktopLayout = () => (
-    <div className="min-h-screen bg-gray-50">
-      {/* Header */}
-      <header className="bg-white shadow-sm border-b">
+    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-900 dark:to-gray-800">
+      {/* Header mejorado */}
+      <header className="bg-white/95 dark:bg-gray-900/95 backdrop-blur-md shadow-lg border-b border-gray-200 dark:border-gray-700 sticky top-0 z-40">
         <div className="flex items-center justify-between px-6 py-4">
-          {/* Logo */}
-          <div className="flex items-center space-x-3">
-            <div className="w-8 h-8 bg-blue-500 rounded-lg flex items-center justify-center">
-              <span className="text-white font-bold">G</span>
-            </div>
-            <h1 className="text-xl font-bold text-gray-900">GymTracker</h1>
-          </div>
-
-          {/* Controles */}
+          {/* Logo mejorado */}
           <div className="flex items-center space-x-4">
-            {/* Menú hamburguesa para sidebar */}
             <button
               onClick={() => setSidebarOpen(!sidebarOpen)}
-              className="p-2 rounded-lg hover:bg-gray-100 lg:hidden"
+              className="p-2 rounded-xl hover:bg-gray-100 dark:hover:bg-gray-800 transition-all duration-200 lg:hidden"
             >
-              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <svg className="w-6 h-6 text-gray-700 dark:text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
               </svg>
             </button>
+            <div className="flex items-center space-x-3">
+              <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-xl flex items-center justify-center shadow-lg transform hover:scale-105 transition-transform">
+                <span className="text-white font-bold text-lg">G</span>
+              </div>
+              <div>
+                <h1 className="text-xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">GymTracker Pro</h1>
+                <p className="text-xs text-gray-500 dark:text-gray-400">Tu compañero de fitness</p>
+              </div>
+            </div>
+          </div>
 
-            {/* Indicador de sincronización */}
-            <div className="flex items-center space-x-2">
-              <div className={`w-2 h-2 rounded-full ${syncStatus.isOnline ? 'bg-green-500' : 'bg-red-500'}`}></div>
-              <span className="text-sm text-gray-600 hidden sm:block">
-                {syncStatus.isOnline ? 'Conectado' : 'Sin conexión'}
+          {/* Controles mejorados */}
+          <div className="flex items-center space-x-4">
+            {/* Buscador rápido */}
+            <div className="hidden md:flex items-center bg-gray-100 dark:bg-gray-800 rounded-xl px-3 py-2">
+              <svg className="w-4 h-4 text-gray-400 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+              </svg>
+              <input
+                type="text"
+                placeholder="Buscar... (Ctrl+K)"
+                className="bg-transparent text-sm outline-none text-gray-700 dark:text-gray-300 w-48"
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter' && e.currentTarget.value) {
+                    setHistoryFilter('all');
+                    setActiveSection('history');
+                  }
+                }}
+              />
+            </div>
+
+            {/* Notificaciones */}
+            <button className="relative p-2 rounded-xl hover:bg-gray-100 dark:hover:bg-gray-800 transition-all duration-200">
+              <svg className="w-6 h-6 text-gray-700 dark:text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
+              </svg>
+              {workouts.filter(w => !w.completado).length > 0 && (
+                <span className="absolute top-1 right-1 w-2 h-2 bg-red-500 rounded-full animate-pulse"></span>
+              )}
+            </button>
+
+            {/* Indicador de sincronización mejorado */}
+            <div className="flex items-center space-x-2 px-3 py-2 bg-gray-100 dark:bg-gray-800 rounded-xl">
+              <div className={`w-2 h-2 rounded-full animate-pulse ${
+                syncStatus.isOnline ? 'bg-green-500' : 'bg-red-500'
+              }`}></div>
+              <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                {syncStatus.isOnline ? 'En línea' : 'Sin conexión'}
               </span>
             </div>
 
-            {/* Selector de modo */}
-            <select
-              value={viewMode}
-              onChange={(e) => setViewMode(e.target.value as 'mobile' | 'desktop')}
-              className="px-3 py-1.5 border border-gray-300 rounded-lg text-sm bg-white"
-            >
-              <option value="mobile">📱 Móvil</option>
-              <option value="desktop">💻 PC</option>
-            </select>
+            {/* Selector de modo mejorado */}
+            <div className="flex bg-gray-100 dark:bg-gray-800 rounded-xl p-1">
+              <button
+                onClick={() => setViewMode('mobile')}
+                className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-all duration-200 ${
+                  viewMode === 'mobile'
+                    ? 'bg-white dark:bg-gray-700 text-blue-600 dark:text-blue-400 shadow-sm'
+                    : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200'
+                }`}
+              >
+                📱 Móvil
+              </button>
+              <button
+                onClick={() => setViewMode('desktop')}
+                className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-all duration-200 ${
+                  viewMode === 'desktop'
+                    ? 'bg-white dark:bg-gray-700 text-blue-600 dark:text-blue-400 shadow-sm'
+                    : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200'
+                }`}
+              >
+                💻 Escritorio
+              </button>
+            </div>
+
+            {/* Perfil de usuario */}
+            <button className="flex items-center space-x-2 p-2 rounded-xl hover:bg-gray-100 dark:hover:bg-gray-800 transition-all duration-200">
+              <div className="w-8 h-8 bg-gradient-to-br from-purple-500 to-pink-500 rounded-lg flex items-center justify-center">
+                <span className="text-white text-sm font-bold">U</span>
+              </div>
+            </button>
           </div>
         </div>
       </header>
 
-      {/* Layout principal */}
-      <div className="flex">
-        {/* Sidebar */}
-        <div className={`w-64 bg-white border-r border-gray-200 transition-all duration-300 ${
+      {/* Layout principal mejorado */}
+      <div className="flex h-[calc(100vh-73px)]">
+        {/* Sidebar mejorado */}
+        <aside className={`fixed lg:relative w-72 h-full bg-white dark:bg-gray-900 border-r border-gray-200 dark:border-gray-700 transition-all duration-300 transform z-30 ${
           sidebarOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'
-        }`}>
+        } shadow-2xl lg:shadow-none`}>
           {renderDesktopSidebar()}
-        </div>
+        </aside>
 
-        {/* Contenido principal */}
-        <div className="flex-1 p-6">
-          {renderDesktopMainContent()}
-        </div>
+        {/* Overlay para móvil */}
+        {sidebarOpen && (
+          <div
+            className="fixed inset-0 bg-black/50 z-20 lg:hidden"
+            onClick={() => setSidebarOpen(false)}
+          />
+        )}
+
+        {/* Contenido principal mejorado */}
+        <main className="flex-1 overflow-y-auto">
+          <div className="p-6 lg:p-8">
+            {renderDesktopMainContent()}
+          </div>
+        </main>
       </div>
     </div>
   );
@@ -533,51 +597,166 @@ export default function Dashboard() {
   // ===== NEW DESKTOP COMPONENTS =====
   
   const renderDesktopSidebar = () => (
-    <div className="h-full flex flex-col">
-      {/* Sidebar Header */}
-      <div className="p-4 border-b border-gray-200">
-        <h2 className="text-lg font-semibold text-gray-900">Menú</h2>
+    <div className="h-full flex flex-col bg-gradient-to-b from-white to-gray-50 dark:from-gray-900 dark:to-gray-800">
+      {/* Sidebar Header mejorado */}
+      <div className="p-6 border-b border-gray-200 dark:border-gray-700">
+        <div className="flex items-center justify-between mb-4">
+          <h2 className="text-lg font-bold text-gray-900 dark:text-white">Navegación</h2>
+          <button
+            onClick={() => setSidebarOpen(false)}
+            className="lg:hidden p-1 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800"
+          >
+            <svg className="w-5 h-5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+            </svg>
+          </button>
+        </div>
+        
+        {/* Progreso del día */}
+        <div className="bg-gradient-to-r from-blue-500 to-indigo-600 rounded-xl p-4 text-white">
+          <div className="flex items-center justify-between mb-2">
+            <span className="text-sm font-medium opacity-90">Progreso del día</span>
+            <span className="text-lg font-bold">{getCompletionPercentage()}%</span>
+          </div>
+          <div className="w-full bg-white/20 rounded-full h-2">
+            <div 
+              className="bg-white rounded-full h-2 transition-all duration-500"
+              style={{ width: `${getCompletionPercentage()}%` }}
+            />
+          </div>
+        </div>
       </div>
 
-      {/* Navigation Menu */}
-      <div className="flex-1 p-4 space-y-2">
+      {/* Navigation Menu mejorado */}
+      <nav className="flex-1 p-4 space-y-1 overflow-y-auto">
         {[
-          { id: 'today', label: 'Dashboard', icon: '🏠' },
-          { id: 'mesociclo', label: 'Mesociclo', icon: '📋' },
-          { id: 'history', label: 'Historial', icon: '📊' },
-          { id: 'stats', label: 'Estadísticas', icon: '📈' },
-          { id: 'settings', label: 'Configuración', icon: '⚙️' }
+          { id: 'today', label: 'Dashboard', icon: '🏠', badge: null },
+          { id: 'mesociclo', label: 'Plan de Entreno', icon: '📋', badge: getCurrentMesocicloDay() },
+          { id: 'history', label: 'Historial', icon: '📊', badge: null },
+          { id: 'stats', label: 'Estadísticas', icon: '📈', badge: null },
+          { id: 'settings', label: 'Configuración', icon: '⚙️', badge: null }
         ].map((item) => (
           <button
             key={item.id}
-            onClick={() => setActiveSection(item.id as 'today' | 'mesociclo' | 'history' | 'stats' | 'settings')}
-            className={`w-full text-left p-3 rounded-lg transition-colors ${
+            onClick={() => {
+              setActiveSection(item.id as any);
+              setActiveForm(null);
+              if (window.innerWidth < 1024) setSidebarOpen(false);
+            }}
+            className={`w-full group relative flex items-center p-3 rounded-xl transition-all duration-200 ${
               activeSection === item.id
-                ? 'bg-blue-100 text-blue-900'
-                : 'text-gray-700 hover:bg-gray-100'
+                ? 'bg-gradient-to-r from-blue-500 to-indigo-600 text-white shadow-lg transform scale-[1.02]'
+                : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800'
             }`}
           >
-            <div className="flex items-center space-x-3">
-              <span className="text-lg">{item.icon}</span>
-              <span className="font-medium">{item.label}</span>
-            </div>
+            <span className="text-xl mr-3">{item.icon}</span>
+            <span className="font-medium flex-1 text-left">{item.label}</span>
+            {item.badge && (
+              <span className={`px-2 py-1 text-xs rounded-full ${
+                activeSection === item.id
+                  ? 'bg-white/20 text-white'
+                  : 'bg-blue-100 text-blue-600 dark:bg-blue-900 dark:text-blue-300'
+              }`}>
+                Día {item.badge}
+              </span>
+            )}
+            {activeSection === item.id && (
+              <div className="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-8 bg-blue-600 rounded-r-full -ml-4" />
+            )}
           </button>
         ))}
-      </div>
 
-      {/* Quick Stats */}
-      <div className="p-4 border-t border-gray-200">
-        <h3 className="text-sm font-semibold text-gray-900 mb-3">Resumen</h3>
-        <div className="space-y-2 text-sm">
-          <div className="flex justify-between">
-            <span className="text-gray-600">Peso:</span>
-            <span className="font-semibold">
+        {/* Separador */}
+        <div className="my-4 border-t border-gray-200 dark:border-gray-700" />
+
+        {/* Acciones rápidas */}
+        <div className="space-y-1">
+          <p className="px-3 py-2 text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+            Acciones Rápidas
+          </p>
+          {[
+            { icon: '⚖️', label: 'Registrar Peso', action: 'weight' },
+            { icon: '🏃', label: 'Añadir Cardio', action: 'cardio' },
+            { icon: '🥗', label: 'Registrar Dieta', action: 'diet' }
+          ].map((item) => (
+            <button
+              key={item.action}
+              onClick={() => {
+                setActiveForm(item.action as any);
+                if (window.innerWidth < 1024) setSidebarOpen(false);
+              }}
+              className="w-full flex items-center p-2 rounded-lg text-sm text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
+            >
+              <span className="mr-2">{item.icon}</span>
+              <span>{item.label}</span>
+            </button>
+          ))}
+        </div>
+      </nav>
+
+      {/* Quick Stats mejorado */}
+      <div className="p-4 border-t border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/50">
+        <h3 className="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-3">
+          Resumen Rápido
+        </h3>
+        <div className="grid grid-cols-2 gap-3">
+          <div className="bg-white dark:bg-gray-800 rounded-lg p-3 border border-gray-200 dark:border-gray-700">
+            <div className="flex items-center justify-between mb-1">
+              <span className="text-2xl">⚖️</span>
+              <span className="text-xs text-gray-500 dark:text-gray-400">Peso</span>
+            </div>
+            <p className="text-sm font-bold text-gray-900 dark:text-white">
               {estado.length > 0 ? `${estado[estado.length - 1].peso} kg` : '--'}
-            </span>
+            </p>
+            {estado.length > 1 && (
+              <p className={`text-xs mt-1 ${
+                estado[estado.length - 1].peso < estado[estado.length - 2].peso
+                  ? 'text-green-600'
+                  : 'text-red-600'
+              }`}>
+                {estado[estado.length - 1].peso < estado[estado.length - 2].peso ? '↓' : '↑'}
+                {Math.abs(estado[estado.length - 1].peso - estado[estado.length - 2].peso).toFixed(1)} kg
+              </p>
+            )}
           </div>
-          <div className="flex justify-between">
-            <span className="text-gray-600">Calorías:</span>
-            <span className="font-semibold">{getCaloriasDelDia()} kcal</span>
+          
+          <div className="bg-white dark:bg-gray-800 rounded-lg p-3 border border-gray-200 dark:border-gray-700">
+            <div className="flex items-center justify-between mb-1">
+              <span className="text-2xl">🔥</span>
+              <span className="text-xs text-gray-500 dark:text-gray-400">Cal</span>
+            </div>
+            <p className="text-sm font-bold text-gray-900 dark:text-white">
+              {getCaloriasDelDia()}
+            </p>
+            <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">kcal hoy</p>
+          </div>
+        </div>
+        
+        {/* Mini calendario semanal */}
+        <div className="mt-4">
+          <p className="text-xs font-semibold text-gray-500 dark:text-gray-400 mb-2">Esta semana</p>
+          <div className="grid grid-cols-7 gap-1">
+            {[...Array(7)].map((_, i) => {
+              const date = new Date();
+              date.setDate(date.getDate() - date.getDay() + i);
+              const isToday = date.toDateString() === new Date().toDateString();
+              const hasData = estado.some(e => new Date(e.fecha).toDateString() === date.toDateString());
+              
+              return (
+                <div
+                  key={i}
+                  className={`aspect-square rounded-lg flex items-center justify-center text-xs font-medium transition-all ${
+                    isToday
+                      ? 'bg-blue-500 text-white shadow-sm'
+                      : hasData
+                      ? 'bg-green-100 text-green-700 dark:bg-green-900 dark:text-green-300'
+                      : 'bg-gray-100 text-gray-400 dark:bg-gray-800 dark:text-gray-600'
+                  }`}
+                >
+                  {date.getDate()}
+                </div>
+              );
+            })}
           </div>
         </div>
       </div>
@@ -586,71 +765,194 @@ export default function Dashboard() {
 
   const renderDesktopMainContent = () => (
     <div className="space-y-6">
-      {/* Section Header */}
-      <div className="flex items-center justify-between">
+      {/* Section Header mejorado */}
+      <div className="flex items-center justify-between mb-8">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">
-            {activeSection === 'today' && 'Dashboard'}
-            {activeSection === 'mesociclo' && 'Mesociclo'}
-            {activeSection === 'history' && 'Historial'}
-            {activeSection === 'stats' && 'Estadísticas'}
-            {activeSection === 'settings' && 'Configuración'}
+          <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">
+            {activeSection === 'today' && '🏠 Dashboard'}
+            {activeSection === 'mesociclo' && '📋 Plan de Entrenamiento'}
+            {activeSection === 'history' && '📊 Historial de Actividades'}
+            {activeSection === 'stats' && '📈 Estadísticas y Análisis'}
+            {activeSection === 'settings' && '⚙️ Configuración'}
           </h1>
+          <p className="text-gray-600 dark:text-gray-400">
+            {activeSection === 'today' && `Hoy es ${new Date().toLocaleDateString('es-ES', { weekday: 'long', day: 'numeric', month: 'long' })}`}
+            {activeSection === 'mesociclo' && `Mesociclo activo - Día ${getCurrentMesocicloDay()}`}
+            {activeSection === 'history' && 'Revisa tu progreso y actividades pasadas'}
+            {activeSection === 'stats' && 'Analiza tu rendimiento y tendencias'}
+            {activeSection === 'settings' && 'Personaliza tu experiencia'}
+          </p>
+        </div>
+        
+        {/* Acciones contextuales */}
+        <div className="flex items-center space-x-3">
+          {activeSection === 'today' && (
+            <button
+              onClick={() => window.location.reload()}
+              className="px-4 py-2 bg-gray-100 dark:bg-gray-800 rounded-xl hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors flex items-center space-x-2"
+            >
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+              </svg>
+              <span className="text-sm font-medium">Actualizar</span>
+            </button>
+          )}
         </div>
       </div>
 
-      {/* Function Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-        {[
-          { icon: '⚖️', title: 'Registrar Peso', action: () => setActiveForm('weight') },
-          { icon: '🏃', title: 'Añadir Cardio', action: () => setActiveForm('cardio') },
-          { icon: '🥗', title: 'Registrar Dieta', action: () => setActiveForm('diet') },
-          { icon: '🚶', title: 'Añadir NEAT', action: () => setActiveForm('neat') },
-          { icon: '🎯', title: 'Entreno Extra', action: () => setActiveForm('entreno') },
-          { icon: '📊', title: 'Ver Estadísticas', action: () => setActiveSection('stats') }
-        ].map((card, index) => (
-          <div 
-            key={index}
-            onClick={card.action}
-            className="bg-white p-4 rounded-lg shadow border hover:shadow-md transition-shadow cursor-pointer"
-          >
-            <div className="flex items-center space-x-3">
-              <span className="text-2xl">{card.icon}</span>
-              <span className="font-medium">{card.title}</span>
+      {/* Quick Actions Cards mejoradas */}
+      {activeSection === 'today' && !activeForm && (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+          {[
+            { 
+              icon: '⚖️', 
+              title: 'Registrar Peso', 
+              subtitle: 'Control diario',
+              action: () => setActiveForm('weight'),
+              color: 'from-blue-500 to-blue-600',
+              status: getStatus('weight')
+            },
+            { 
+              icon: '🏃', 
+              title: 'Añadir Cardio', 
+              subtitle: 'Ejercicio aeróbico',
+              action: () => setActiveForm('cardio'),
+              color: 'from-green-500 to-green-600',
+              status: getStatus('cardio')
+            },
+            { 
+              icon: '🥗', 
+              title: 'Registrar Dieta', 
+              subtitle: 'Nutrición del día',
+              action: () => setActiveForm('diet'),
+              color: 'from-yellow-500 to-orange-500',
+              status: getStatus('diet')
+            },
+            { 
+              icon: '🚶', 
+              title: 'Añadir NEAT', 
+              subtitle: 'Actividad diaria',
+              action: () => setActiveForm('neat'),
+              color: 'from-purple-500 to-purple-600',
+              status: getStatus('neat')
+            },
+            { 
+              icon: '🎯', 
+              title: 'Entreno Extra', 
+              subtitle: 'Otras actividades',
+              action: () => setActiveForm('entreno'),
+              color: 'from-pink-500 to-pink-600',
+              status: getStatus('entrenoNoProgramado')
+            },
+            { 
+              icon: '📊', 
+              title: 'Ver Estadísticas', 
+              subtitle: 'Análisis completo',
+              action: () => setActiveSection('stats'),
+              color: 'from-indigo-500 to-indigo-600',
+              status: null
+            },
+            { 
+              icon: '🏆', 
+              title: 'Workout del Día', 
+              subtitle: 'Entrenamiento programado',
+              action: () => openModal('workout'),
+              color: 'from-red-500 to-red-600',
+              status: getStatus('workout')
+            },
+            { 
+              icon: '📅', 
+              title: 'Calendario', 
+              subtitle: 'Vista semanal',
+              action: () => setActiveSection('history'),
+              color: 'from-teal-500 to-teal-600',
+              status: null
+            }
+          ].map((card, index) => (
+            <div 
+              key={index}
+              onClick={card.action}
+              className="group relative bg-white dark:bg-gray-800 rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 cursor-pointer overflow-hidden transform hover:scale-[1.02]"
+            >
+              {/* Gradient background */}
+              <div className={`absolute inset-0 bg-gradient-to-br ${card.color} opacity-0 group-hover:opacity-10 transition-opacity duration-300`} />
+              
+              {/* Content */}
+              <div className="relative p-6">
+                <div className="flex items-start justify-between mb-4">
+                  <div className={`w-12 h-12 bg-gradient-to-br ${card.color} rounded-xl flex items-center justify-center shadow-lg`}>
+                    <span className="text-2xl filter drop-shadow-sm">{card.icon}</span>
+                  </div>
+                  {card.status && (
+                    <span className={`px-2 py-1 text-xs rounded-full font-medium ${
+                      card.status === 'Completado' 
+                        ? 'bg-green-100 text-green-700 dark:bg-green-900 dark:text-green-300'
+                        : 'bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-400'
+                    }`}>
+                      {card.status}
+                    </span>
+                  )}
+                </div>
+                <h3 className="font-bold text-gray-900 dark:text-white mb-1">{card.title}</h3>
+                <p className="text-sm text-gray-600 dark:text-gray-400">{card.subtitle}</p>
+              </div>
+              
+              {/* Hover arrow */}
+              <div className="absolute bottom-4 right-4 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                <svg className="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                </svg>
+              </div>
             </div>
-          </div>
-        ))}
-      </div>
+          ))}
+        </div>
+      )}
 
-      {/* Horizontal Tabs */}
+      {/* Formularios con Tabs mejorados */}
       {activeForm && (
         <div className="mt-6">
-          <div className="bg-white rounded-lg shadow border">
-            {/* Tab Headers */}
-            <div className="flex border-b">
+          <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-xl border border-gray-200 dark:border-gray-700 overflow-hidden">
+            {/* Tab Headers mejorados */}
+            <div className="flex bg-gray-50 dark:bg-gray-900 border-b border-gray-200 dark:border-gray-700">
               {[
-                { id: 'weight', label: 'Peso' },
-                { id: 'cardio', label: 'Cardio' },
-                { id: 'diet', label: 'Dieta' },
-                { id: 'neat', label: 'NEAT' },
-                { id: 'entreno', label: 'Entreno' }
+                { id: 'weight', label: 'Peso', icon: '⚖️' },
+                { id: 'cardio', label: 'Cardio', icon: '🏃' },
+                { id: 'diet', label: 'Dieta', icon: '🥗' },
+                { id: 'neat', label: 'NEAT', icon: '🚶' },
+                { id: 'entreno', label: 'Entreno', icon: '🎯' }
               ].map((tab) => (
                 <button
                   key={tab.id}
                   onClick={() => setActiveForm(tab.id as 'weight' | 'cardio' | 'diet' | 'neat' | 'entreno')}
-                  className={`px-6 py-3 text-sm font-medium transition-colors ${
+                  className={`flex-1 px-6 py-4 text-sm font-medium transition-all duration-200 relative ${
                     activeForm === tab.id
-                      ? 'text-blue-600 border-b-2 border-blue-600'
-                      : 'text-gray-600 hover:text-blue-600'
+                      ? 'text-blue-600 dark:text-blue-400 bg-white dark:bg-gray-800'
+                      : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200 hover:bg-white/50 dark:hover:bg-gray-800/50'
                   }`}
                 >
-                  {tab.label}
+                  <div className="flex items-center justify-center space-x-2">
+                    <span>{tab.icon}</span>
+                    <span>{tab.label}</span>
+                  </div>
+                  {activeForm === tab.id && (
+                    <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-gradient-to-r from-blue-500 to-indigo-600" />
+                  )}
                 </button>
               ))}
+              
+              {/* Botón de cerrar */}
+              <button
+                onClick={() => setActiveForm(null)}
+                className="px-4 text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 transition-colors"
+              >
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
             </div>
 
-            {/* Tab Content */}
-            <div className="p-6">
+            {/* Tab Content con animación */}
+            <div className="p-8 animate-fadeIn">
               {activeForm === 'weight' && renderDesktopWeightForm()}
               {activeForm === 'cardio' && renderDesktopCardioForm()}
               {activeForm === 'diet' && renderDesktopDietForm()}
@@ -965,35 +1267,123 @@ export default function Dashboard() {
 
   // Desktop Form Functions
   const renderDesktopWeightForm = () => (
-    <div className="space-y-4">
-      <div>
-        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Peso (kg)</label>
-        <input
-          type="number"
-          value={weightInput}
-          onChange={(e) => setWeightInput(e.target.value)}
-          step="0.1"
-          placeholder="85.0"
-          className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-700 dark:text-white"
-        />
+    <div className="max-w-2xl mx-auto">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        {/* Columna izquierda - Formulario */}
+        <div className="space-y-6">
+          <div>
+            <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
+              ⚖️ Peso corporal
+            </label>
+            <div className="relative">
+              <input
+                type="number"
+                value={weightInput}
+                onChange={(e) => setWeightInput(e.target.value)}
+                step="0.1"
+                placeholder="85.0"
+                className="w-full px-4 py-3 pr-12 border-2 border-gray-300 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white text-lg font-medium transition-all"
+                onKeyPress={(e) => e.key === 'Enter' && saveWeight()}
+              />
+              <span className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 font-medium">kg</span>
+            </div>
+            <p className="mt-2 text-xs text-gray-500 dark:text-gray-400">
+              Último registro: {estado.length > 0 ? `${estado[estado.length - 1].peso} kg` : 'Sin registros'}
+            </p>
+          </div>
+          
+          <div>
+            <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
+              📏 Circunferencia de cintura
+              <span className="ml-2 text-xs font-normal text-gray-500">(Opcional)</span>
+            </label>
+            <div className="relative">
+              <input
+                type="number"
+                value={seguimientoCintura}
+                onChange={(e) => setSeguimientoCintura(e.target.value)}
+                step="0.1"
+                placeholder="80.0"
+                className="w-full px-4 py-3 pr-12 border-2 border-gray-300 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white text-lg font-medium transition-all"
+                onKeyPress={(e) => e.key === 'Enter' && saveWeight()}
+              />
+              <span className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 font-medium">cm</span>
+            </div>
+          </div>
+          
+          <div className="flex space-x-3">
+            <button
+              onClick={saveWeight}
+              className="flex-1 bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white font-semibold py-3 px-6 rounded-xl transition-all duration-200 transform hover:scale-[1.02] shadow-lg flex items-center justify-center space-x-2"
+            >
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+              </svg>
+              <span>Guardar Registro</span>
+            </button>
+            <button
+              onClick={() => setActiveForm(null)}
+              className="px-6 py-3 bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-300 font-medium rounded-xl transition-all duration-200"
+            >
+              Cancelar
+            </button>
+          </div>
+        </div>
+        
+        {/* Columna derecha - Visualización */}
+        <div className="bg-gray-50 dark:bg-gray-900 rounded-xl p-6">
+          <h3 className="font-semibold text-gray-900 dark:text-white mb-4">📈 Tendencia Reciente</h3>
+          {estado.length > 0 ? (
+            <div className="space-y-4">
+              <div className="grid grid-cols-2 gap-4">
+                <div className="bg-white dark:bg-gray-800 rounded-lg p-3">
+                  <p className="text-xs text-gray-500 dark:text-gray-400 mb-1">Promedio 7 días</p>
+                  <p className="text-lg font-bold text-gray-900 dark:text-white">
+                    {estado.slice(-7).reduce((sum, e) => sum + e.peso, 0) / Math.min(estado.length, 7)}.toFixed(1)} kg
+                  </p>
+                </div>
+                <div className="bg-white dark:bg-gray-800 rounded-lg p-3">
+                  <p className="text-xs text-gray-500 dark:text-gray-400 mb-1">Cambio semanal</p>
+                  <p className={`text-lg font-bold ${
+                    estado.length > 7 && estado[estado.length - 1].peso < estado[estado.length - 7].peso
+                      ? 'text-green-600'
+                      : 'text-red-600'
+                  }`}>
+                    {estado.length > 7 
+                      ? `${(estado[estado.length - 1].peso - estado[estado.length - 7].peso).toFixed(1)} kg`
+                      : '--'
+                    }
+                  </p>
+                </div>
+              </div>
+              
+              {/* Mini gráfico de tendencia */}
+              <div className="h-32 flex items-end space-x-1">
+                {estado.slice(-7).map((entry, index) => (
+                  <div key={index} className="flex-1 flex flex-col items-center">
+                    <div 
+                      className="w-full bg-gradient-to-t from-blue-500 to-blue-400 rounded-t"
+                      style={{ 
+                        height: `${((entry.peso - Math.min(...estado.slice(-7).map(e => e.peso))) / 
+                                  (Math.max(...estado.slice(-7).map(e => e.peso)) - Math.min(...estado.slice(-7).map(e => e.peso)))) * 100}%`,
+                        minHeight: '4px'
+                      }}
+                    />
+                    <span className="text-xs text-gray-500 mt-1">
+                      {new Date(entry.fecha).getDate()}
+                    </span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          ) : (
+            <div className="text-center py-8 text-gray-500">
+              <p>Aún no hay registros de peso</p>
+              <p className="text-sm mt-2">Comienza registrando tu peso actual</p>
+            </div>
+          )}
+        </div>
       </div>
-      <div>
-        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Cintura (cm) - Opcional</label>
-        <input
-          type="number"
-          value={seguimientoCintura}
-          onChange={(e) => setSeguimientoCintura(e.target.value)}
-          step="0.1"
-          placeholder="80.0"
-          className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-700 dark:text-white"
-        />
-      </div>
-      <button
-        onClick={saveWeight}
-        className="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded-lg transition-colors"
-      >
-        Guardar Peso
-      </button>
     </div>
   );
 
