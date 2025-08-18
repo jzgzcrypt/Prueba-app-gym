@@ -11,7 +11,7 @@ import { WeeklyCalendar } from '@/components/WeeklyCalendar';
 import { DesktopCharts } from '@/components/DesktopCharts';
 import { WeightEntry, CardioEntry, DietEntry, DailyAdherence, WorkoutEntry, Exercise, NeatEntry, SeguimientoEntry, EntrenoNoProgramado } from '@/types';
 import { LoadingFallback } from '@/components/LoadingFallback';
-import { getCurrentMesocicloDay, setMesocicloStartDate, testMesocicloTracking, calcularCaloriasEntrenoNoProgramado } from '@/utils/mesocicloUtils';
+import { getCurrentMesocicloDay, setMesocicloStartDate, testMesocicloTracking, calcularCaloriasEntrenoNoProgramado, getMesocicloData } from '@/utils/mesocicloUtils';
 
 export default function Dashboard() {
   const { showToast } = useToast();
@@ -755,7 +755,7 @@ export default function Dashboard() {
       <div className="bg-white/70 dark:bg-gray-800/70 backdrop-blur-lg rounded-2xl p-6 shadow-xl border border-white/20 dark:border-gray-700/20">
         <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-6">📋 Plan de Entrenamiento</h2>
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          {mesocicloData.microciclos.map((microciclo, index) => (
+          {getMesocicloData().microciclos.map((microciclo, index) => (
             <div key={index} className="bg-gradient-to-r from-purple-50 to-pink-50 dark:from-purple-900/20 dark:to-pink-900/20 rounded-xl p-6 border border-purple-200/50 dark:border-purple-700/50">
               <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-2">{microciclo.nombre}</h3>
               <p className="text-sm text-gray-600 dark:text-gray-400 mb-4">{microciclo.objetivo}</p>
