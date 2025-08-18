@@ -8,6 +8,7 @@ import { ToastContainer } from '@/components/ToastContainer';
 import { ProgressCircle } from '@/components/ProgressCircle';
 import { WorkoutModal } from '@/components/WorkoutModal';
 import { WeeklyCalendar } from '@/components/WeeklyCalendar';
+import { DesktopCharts } from '@/components/DesktopCharts';
 import { WeightEntry, CardioEntry, DietEntry, DailyAdherence, WorkoutEntry, Exercise, NeatEntry, SeguimientoEntry, EntrenoNoProgramado } from '@/types';
 import { LoadingFallback } from '@/components/LoadingFallback';
 import { getCurrentMesocicloDay, setMesocicloStartDate, testMesocicloTracking, calcularCaloriasEntrenoNoProgramado } from '@/utils/mesocicloUtils';
@@ -17,7 +18,7 @@ export default function Dashboard() {
   const { syncStatus, syncData, saveData, loadData, autoSync } = useSync();
   const [isLoading, setIsLoading] = useState(true);
   const [activeModal, setActiveModal] = useState<string | null>(null);
-  const [activeSection, setActiveSection] = useState<'today' | 'mesociclo' | 'history' | 'settings'>('today');
+  const [activeSection, setActiveSection] = useState<'today' | 'mesociclo' | 'history' | 'settings' | 'stats'>('today');
   const [showStartDateConfig, setShowStartDateConfig] = useState(false);
   const [startDateInput, setStartDateInput] = useState('');
   const [workoutType] = useState('Pull');
@@ -429,6 +430,16 @@ export default function Dashboard() {
                   📊 Historial
                 </button>
                 <button
+                  onClick={() => setActiveSection('stats')}
+                  className={`px-3 py-2 rounded-md text-sm font-medium transition-colors ${
+                    activeSection === 'stats'
+                      ? 'bg-blue-100 text-blue-700 dark:bg-blue-900 dark:text-blue-300'
+                      : 'text-gray-600 hover:text-gray-900 dark:text-gray-300 dark:hover:text-white'
+                  }`}
+                >
+                  📈 Estadísticas
+                </button>
+                <button
                   onClick={() => setActiveSection('settings')}
                   className={`px-3 py-2 rounded-md text-sm font-medium transition-colors ${
                     activeSection === 'settings'
@@ -495,6 +506,7 @@ export default function Dashboard() {
             {activeSection === 'today' && renderDesktopTodaySection()}
             {activeSection === 'mesociclo' && renderDesktopMesocicloSection()}
             {activeSection === 'history' && renderDesktopHistorySection()}
+            {activeSection === 'stats' && renderDesktopStatsSection()}
             {activeSection === 'settings' && renderDesktopSettingsSection()}
           </div>
         </div>
@@ -1689,11 +1701,44 @@ export default function Dashboard() {
               📅 Ver calendario semanal
             </button>
             <button
+              onClick={() => setActiveSection('stats')}
+              className="w-full text-left p-2 hover:bg-gray-100 dark:hover:bg-gray-600 rounded text-sm text-gray-700 dark:text-gray-300 transition-colors"
+            >
+              📈 Ver estadísticas
+            </button>
+            <button
               onClick={() => setShowAdvancedSettings(true)}
               className="w-full text-left p-2 hover:bg-gray-100 dark:hover:bg-gray-600 rounded text-sm text-gray-700 dark:text-gray-300 transition-colors"
             >
               ⚙️ Configuración avanzada
             </button>
+          </div>
+        </div>
+
+        {/* Recent Activity */}
+        <div className="bg-gray-50 dark:bg-gray-700 p-4 rounded-lg">
+          <h3 className="font-semibold text-gray-900 dark:text-white mb-3">🕒 Actividad Reciente</h3>
+          <div className="space-y-2">
+            {estado.length > 0 && (
+              <div className="text-sm text-gray-600 dark:text-gray-400">
+                <span className="font-medium">Último peso:</span> {estado[estado.length - 1].peso} kg
+              </div>
+            )}
+            {cardio.length > 0 && (
+              <div className="text-sm text-gray-600 dark:text-gray-400">
+                <span className="font-medium">Último cardio:</span> {cardio[cardio.length - 1].km} km
+              </div>
+            )}
+            {dieta.length > 0 && (
+              <div className="text-sm text-gray-600 dark:text-gray-400">
+                <span className="font-medium">Última dieta:</span> {dieta[dieta.length - 1].calorias} kcal
+              </div>
+            )}
+            {neat.length > 0 && (
+              <div className="text-sm text-gray-600 dark:text-gray-400">
+                <span className="font-medium">Último NEAT:</span> {neat[neat.length - 1].tipo}
+              </div>
+            )}
           </div>
         </div>
       </div>
@@ -1884,6 +1929,24 @@ export default function Dashboard() {
           </table>
         </div>
       </div>
+    </div>
+  );
+
+  const renderDesktopStatsSection = () => (
+    <div className="space-y-6">
+      <div className="flex justify-between items-center">
+        <h1 className="text-3xl font-bold text-gray-900 dark:text-white">📈 Estadísticas</h1>
+        <div className="text-sm text-gray-600 dark:text-gray-400">
+          Análisis completo de tu progreso
+        </div>
+      </div>
+
+      <DesktopCharts 
+        estado={estado}
+        cardio={cardio}
+        dieta={dieta}
+        neat={neat}
+      />
     </div>
   );
 
