@@ -948,7 +948,7 @@ export default function Dashboard() {
     closeModal();
   };
 
-  const saveDiet = () => {
+  const saveDiet = async () => {
     const calories = parseInt(dietCalories);
     const protein = parseInt(dietProtein);
     
@@ -959,14 +959,15 @@ export default function Dashboard() {
 
     const fecha = todayISO();
     const newDieta = dieta.filter(d => d.fecha !== fecha);
-    newDieta.push({
+    const newDietEntry = {
       fecha,
       calorias: calories,
       proteinas: protein,
       carbos: Math.round((calories - protein * 4) * 0.4 / 4),
       grasas: Math.round((calories - protein * 4) * 0.2 / 9),
       ayuno: false
-    });
+    };
+    newDieta.push(newDietEntry);
 
     const newAdherencia = { ...adherenciaDiaria };
     if (!newAdherencia[fecha]) newAdherencia[fecha] = {};
@@ -974,11 +975,15 @@ export default function Dashboard() {
 
     setDieta(newDieta);
     setAdherenciaDiaria(newAdherencia);
+    
+    // Sincronizar con Neon
+    await saveData('diet', newDietEntry);
+    
     showToast('✅ Dieta guardada');
     closeModal();
   };
 
-  const saveNeat = () => {
+  const saveNeat = async () => {
     const fecha = todayISO();
     
     if (neatTipo === 'pasos') {
@@ -1016,14 +1021,15 @@ export default function Dashboard() {
       const calorias = Math.round(pasos * caloriasPorPaso);
 
       const newNeat = neat.filter(n => n.fecha !== fecha);
-      newNeat.push({
+      const newNeatEntry = {
         fecha,
         tipo: 'pasos',
         pasos,
         ritmo,
         calorias,
         duracion
-      });
+      };
+      newNeat.push(newNeatEntry);
 
       const newAdherencia = { ...adherenciaDiaria };
       if (!newAdherencia[fecha]) newAdherencia[fecha] = {};
@@ -1031,6 +1037,10 @@ export default function Dashboard() {
 
       setNeat(newNeat);
       setAdherenciaDiaria(newAdherencia);
+      
+      // Sincronizar con Neon
+      await saveData('neat', newNeatEntry);
+      
       showToast(`✅ NEAT guardado: ${pasos} pasos (${ritmo}) - ${calorias} kcal`);
     } else {
       const km = parseFloat(neatKm);
@@ -1056,7 +1066,7 @@ export default function Dashboard() {
       const calorias = Math.round(met * pesoActual * duracion / 60);
 
       const newNeat = neat.filter(n => n.fecha !== fecha);
-      newNeat.push({
+      const newNeatEntry = {
         fecha,
         tipo: 'cinta',
         km,
@@ -1064,7 +1074,8 @@ export default function Dashboard() {
         inclinacion,
         calorias,
         duracion
-      });
+      };
+      newNeat.push(newNeatEntry);
 
       const newAdherencia = { ...adherenciaDiaria };
       if (!newAdherencia[fecha]) newAdherencia[fecha] = {};
@@ -1072,6 +1083,9 @@ export default function Dashboard() {
 
       setNeat(newNeat);
       setAdherenciaDiaria(newAdherencia);
+      
+      // Sincronizar con Neon
+      await saveData('neat', newNeatEntry);
       showToast(`✅ NEAT guardado: ${km}km a ${ritmoKmH}km/h - ${calorias} kcal`);
     }
     
@@ -1106,7 +1120,7 @@ export default function Dashboard() {
     closeModal();
   };
 
-  const saveEntrenoNoProgramado = () => {
+  const saveEntrenoNoProgramado = async () => {
     if (!entrenoDuracion || !entrenoEsfuerzo) {
       showToast('Por favor completa todos los campos obligatorios', 'error');
       return;
@@ -1314,6 +1328,9 @@ export default function Dashboard() {
     setEntrenoOtroActividad('');
     setEntrenoOtroDetalles('');
 
+    // Sincronizar con Neon
+    await saveData('entrenos_no_programados', newEntreno);
+    
     closeModal();
     showToast(`✅ Entreno de ${entrenoTipo} guardado: ${calorias} calorías`, 'success');
   };
