@@ -89,6 +89,18 @@ export default function Dashboard() {
         checkDesktop();
         window.addEventListener('resize', checkDesktop);
         
+        // Inicializar base de datos
+        const initDB = async () => {
+          try {
+            await fetch('/api/init-db', { method: 'POST' });
+            console.log('✅ Base de datos inicializada');
+          } catch (error) {
+            console.error('❌ Error inicializando base de datos:', error);
+          }
+        };
+        
+        initDB();
+        
         return () => window.removeEventListener('resize', checkDesktop);
       } catch (error) {
         console.error('localStorage not available:', error);
@@ -430,6 +442,25 @@ export default function Dashboard() {
             </div>
             
             <div className="flex items-center space-x-4">
+              {/* Indicador de sincronización */}
+              <div className="flex items-center space-x-2">
+                <div className={`w-2 h-2 rounded-full ${
+                  syncStatus.isOnline 
+                    ? syncStatus.isSyncing 
+                      ? 'bg-yellow-500 animate-pulse' 
+                      : 'bg-green-500' 
+                    : 'bg-red-500'
+                }`} />
+                <span className="text-xs text-gray-600 dark:text-gray-400">
+                  {syncStatus.isOnline 
+                    ? syncStatus.isSyncing 
+                      ? 'Sincronizando...' 
+                      : 'Conectado' 
+                    : 'Sin conexión'
+                  }
+                </span>
+              </div>
+              
               <button
                 onClick={() => setDarkMode(!darkMode)}
                 className="p-2 text-gray-600 hover:text-gray-900 dark:text-gray-300 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors"
@@ -1870,6 +1901,27 @@ export default function Dashboard() {
                 className="text-blue-600 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300"
               >
                 Configurar
+              </button>
+            </div>
+            
+            <div className="flex items-center justify-between">
+              <span className="text-gray-700 dark:text-gray-300">Sincronización</span>
+              <button
+                onClick={async () => {
+                  await syncData('weights', estado);
+                  await syncData('cardio', cardio);
+                  await syncData('diet', dieta);
+                  await syncData('neat', neat);
+                  await syncData('entrenos_no_programados', entrenosNoProgramados);
+                }}
+                disabled={!syncStatus.isOnline || syncStatus.isSyncing}
+                className={`px-3 py-1 rounded text-sm font-medium transition-colors ${
+                  syncStatus.isOnline && !syncStatus.isSyncing
+                    ? 'bg-blue-600 hover:bg-blue-700 text-white'
+                    : 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                }`}
+              >
+                {syncStatus.isSyncing ? 'Sincronizando...' : 'Sincronizar'}
               </button>
             </div>
           </div>
