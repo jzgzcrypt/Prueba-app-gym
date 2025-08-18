@@ -871,7 +871,7 @@ export default function Dashboard() {
           <div className="flex-1 flex justify-end">
             <button 
               onClick={() => openModal('calendar')}
-              className="w-12 h-12 bg-primary rounded-full flex items-center justify-center hover:scale-110 transition-all text-white shadow-lg hover:shadow-xl"
+              className="w-12 h-12 bg-gray-100 rounded-full flex items-center justify-center hover:scale-110 transition-all text-gray-700 shadow-sm hover:shadow-md"
               title="Ver plan semanal"
             >
               <span className="text-xl">📅</span>
@@ -935,7 +935,7 @@ export default function Dashboard() {
           return (
             <div className="clean-card mb-4">
               <div className="flex items-start gap-3 mb-3">
-                <div className="w-10 h-10 bg-primary rounded-full flex items-center justify-center text-white font-bold text-sm flex-shrink-0">
+                <div className="w-10 h-10 bg-gray-100 rounded-full flex items-center justify-center text-gray-700 font-bold text-sm flex-shrink-0">
                   {currentData.dia.dia.split(' ')[1]}
                 </div>
                 <div className="flex-1 min-w-0">
@@ -945,7 +945,7 @@ export default function Dashboard() {
               </div>
               {currentData.dia.cardio && (
                 <div className="flex items-center gap-2 mb-3 flex-wrap">
-                  <span className="text-xs bg-blue-100 text-blue-700 px-2 py-1 rounded-full font-medium">
+                  <span className="text-xs bg-blue-50 text-blue-600 px-2 py-1 rounded-full font-medium">
                     🏃 {currentData.dia.cardio.tipo}
                   </span>
                   <span className="text-xs text-gray-500 font-medium">
@@ -954,7 +954,7 @@ export default function Dashboard() {
                 </div>
               )}
               <div className="flex items-center justify-between">
-                <span className="text-sm text-gray-600 font-medium bg-gray-100 px-3 py-1 rounded-full">
+                <span className="text-sm text-gray-600 font-medium bg-gray-50 px-3 py-1 rounded-full">
                   {currentData.dia.ejercicios.length > 0 ? `${currentData.dia.ejercicios.length} ejercicios` : 'Descanso activo'}
                 </span>
                 <button 
@@ -967,9 +967,9 @@ export default function Dashboard() {
                     });
                     openModal('workout-details');
                   }}
-                  className="bg-primary hover:bg-primary-dark text-white px-4 py-2 rounded-lg font-medium text-sm transition-all hover:scale-105 shadow-sm"
+                  className="bg-gray-100 hover:bg-gray-200 text-gray-700 px-4 py-2 rounded-lg font-medium text-sm transition-all"
                 >
-                  📋 Ver detalles
+                  Ver detalles
                 </button>
               </div>
               
@@ -1803,25 +1803,25 @@ export default function Dashboard() {
             {expandedSections.info && (
               <div className="px-3 md:px-4 pb-3 md:pb-4 space-y-3 md:space-y-4 animate-fadeIn">
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 md:gap-4">
-                  <div className="p-3 bg-white rounded-lg shadow-sm border border-blue-100">
-                    <p className="text-xs text-blue-600 font-medium mb-1">Objetivo</p>
+                  <div className="p-3 bg-blue-50 rounded-lg">
+                    <p className="text-xs text-blue-600 font-medium mb-2">Objetivo</p>
                     <p className="text-sm md:text-base font-semibold leading-relaxed">{mesociclo.objetivo}</p>
                   </div>
-                  <div className="p-3 bg-white rounded-lg shadow-sm border border-green-100">
-                    <p className="text-xs text-green-600 font-medium mb-1">Estructura</p>
+                  <div className="p-3 bg-green-50 rounded-lg">
+                    <p className="text-xs text-green-600 font-medium mb-2">Estructura</p>
                     <p className="text-sm md:text-base font-semibold leading-relaxed">{mesociclo.estructura}</p>
                   </div>
-                  <div className="p-3 bg-white rounded-lg shadow-sm border border-orange-100">
-                    <p className="text-xs text-orange-600 font-medium mb-1">Intensidad</p>
+                  <div className="p-3 bg-orange-50 rounded-lg">
+                    <p className="text-xs text-orange-600 font-medium mb-2">Intensidad</p>
                     <p className="text-sm md:text-base font-semibold leading-relaxed">{mesociclo.intensidad}</p>
                   </div>
-                  <div className="p-3 bg-white rounded-lg shadow-sm border border-purple-100">
-                    <p className="text-xs text-purple-600 font-medium mb-1">Cardio</p>
+                  <div className="p-3 bg-purple-50 rounded-lg">
+                    <p className="text-xs text-purple-600 font-medium mb-2">Cardio</p>
                     <p className="text-sm md:text-base font-semibold leading-relaxed">{mesociclo.cardio}</p>
                   </div>
                 </div>
-                <div className="p-3 bg-white rounded-lg shadow-sm border border-yellow-100">
-                  <p className="text-xs text-yellow-600 font-medium mb-1">Dieta</p>
+                <div className="p-3 bg-yellow-50 rounded-lg">
+                  <p className="text-xs text-yellow-600 font-medium mb-2">Dieta</p>
                   <p className="text-sm md:text-base font-semibold leading-relaxed">{mesociclo.dieta}</p>
                 </div>
               </div>
@@ -1912,16 +1912,16 @@ export default function Dashboard() {
                     <div className="px-3 md:px-4 pb-3 md:pb-4 animate-fadeIn">
                       {/* Información del microciclo */}
                       <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 md:gap-3 mb-3 md:mb-4">
-                        <div className="p-2 bg-white rounded-lg shadow-sm border border-blue-100">
-                          <p className="text-xs text-blue-600 font-medium mb-1">Objetivo</p>
+                        <div className="p-2 bg-blue-50 rounded-lg">
+                          <p className="text-xs text-blue-600 font-medium mb-2">Objetivo</p>
                           <p className="text-xs md:text-sm leading-relaxed">{microciclo.objetivo}</p>
                         </div>
-                        <div className="p-2 bg-white rounded-lg shadow-sm border border-green-100">
-                          <p className="text-xs text-green-600 font-medium mb-1">Intensidad</p>
+                        <div className="p-2 bg-green-50 rounded-lg">
+                          <p className="text-xs text-green-600 font-medium mb-2">Intensidad</p>
                           <p className="text-xs md:text-sm leading-relaxed">{microciclo.intensidad}</p>
                         </div>
-                        <div className="p-2 bg-white rounded-lg shadow-sm border border-orange-100">
-                          <p className="text-xs text-orange-600 font-medium mb-1">Cardio</p>
+                        <div className="p-2 bg-orange-50 rounded-lg">
+                          <p className="text-xs text-orange-600 font-medium mb-2">Cardio</p>
                           <p className="text-xs md:text-sm leading-relaxed">{microciclo.cardio}</p>
                         </div>
                       </div>
@@ -1931,7 +1931,7 @@ export default function Dashboard() {
                         {microciclo.dias.map((dia, index) => (
                           <div 
                             key={index} 
-                            className="flex items-start justify-between p-3 md:p-4 bg-white rounded-lg cursor-pointer hover:bg-gray-50 transition-colors border border-gray-200 shadow-sm"
+                            className="flex items-start justify-between p-3 md:p-4 bg-gray-50 rounded-lg cursor-pointer hover:bg-gray-100 transition-colors"
                             onClick={() => {
                               setSelectedWorkout({
                                 dia: dia.dia,
@@ -1944,7 +1944,7 @@ export default function Dashboard() {
                           >
                             <div className="flex-1 min-w-0">
                               <div className="flex items-start gap-3">
-                                <div className="w-8 h-8 bg-primary rounded-full flex items-center justify-center text-white font-bold text-sm flex-shrink-0">
+                                <div className="w-8 h-8 bg-gray-100 rounded-full flex items-center justify-center text-gray-700 font-bold text-sm flex-shrink-0">
                                   {index + 1}
                                 </div>
                                 <div className="min-w-0 flex-1">
@@ -1952,7 +1952,7 @@ export default function Dashboard() {
                                   <p className="text-xs text-gray-600 leading-relaxed mb-2">{dia.entrenamiento}</p>
                                   {dia.cardio && (
                                     <div className="flex items-center gap-2 flex-wrap">
-                                      <span className="text-xs bg-blue-100 text-blue-700 px-2 py-1 rounded-full font-medium">
+                                      <span className="text-xs bg-blue-50 text-blue-600 px-2 py-1 rounded-full font-medium">
                                         🏃 {dia.cardio.tipo}
                                       </span>
                                       <span className="text-xs text-gray-500 font-medium">
@@ -1965,10 +1965,10 @@ export default function Dashboard() {
                             </div>
                             <div className="text-right flex-shrink-0 ml-3">
                               <div className="flex flex-col items-end gap-1">
-                                <span className="text-xs font-medium text-gray-700 bg-gray-100 px-2 py-1 rounded-full">
+                                <span className="text-xs font-medium text-gray-700 bg-gray-50 px-2 py-1 rounded-full">
                                   {dia.ejercicios.length > 0 ? `${dia.ejercicios.length} ejercicios` : 'Descanso'}
                                 </span>
-                                <span className="text-primary text-lg font-bold">→</span>
+                                <span className="text-gray-500 text-lg font-bold">→</span>
                               </div>
                             </div>
                           </div>
