@@ -635,6 +635,221 @@ export default function Dashboard() {
     closeModal();
   };
 
+  // Desktop Form Functions
+  const renderDesktopWeightForm = () => (
+    <div className="space-y-4">
+      <div>
+        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Peso (kg)</label>
+        <input
+          type="number"
+          value={weightInput}
+          onChange={(e) => setWeightInput(e.target.value)}
+          step="0.1"
+          placeholder="85.0"
+          className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-700 dark:text-white"
+        />
+      </div>
+      <div>
+        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Cintura (cm) - Opcional</label>
+        <input
+          type="number"
+          value={seguimientoCintura}
+          onChange={(e) => setSeguimientoCintura(e.target.value)}
+          step="0.1"
+          placeholder="80.0"
+          className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-700 dark:text-white"
+        />
+      </div>
+      <button
+        onClick={saveWeight}
+        className="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded-lg transition-colors"
+      >
+        Guardar Peso
+      </button>
+    </div>
+  );
+
+  const renderDesktopCardioForm = () => (
+    <div className="space-y-4">
+      <div>
+        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Distancia (km)</label>
+        <input
+          type="number"
+          value={cardioKm}
+          onChange={(e) => setCardioKm(e.target.value)}
+          step="0.1"
+          placeholder="5.0"
+          className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-700 dark:text-white"
+        />
+      </div>
+      <div>
+        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Tiempo (minutos)</label>
+        <input
+          type="number"
+          value={cardioTime}
+          onChange={(e) => setCardioTime(e.target.value)}
+          placeholder="30"
+          className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-700 dark:text-white"
+        />
+      </div>
+      <button
+        onClick={saveCardio}
+        className="w-full bg-red-600 hover:bg-red-700 text-white font-medium py-2 px-4 rounded-lg transition-colors"
+      >
+        Guardar Cardio
+      </button>
+    </div>
+  );
+
+  const renderDesktopDietForm = () => (
+    <div className="space-y-4">
+      <div>
+        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Calorías</label>
+        <input
+          type="number"
+          value={dietCalories}
+          onChange={(e) => setDietCalories(e.target.value)}
+          placeholder="2000"
+          className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-700 dark:text-white"
+        />
+      </div>
+      <div>
+        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Proteínas (g)</label>
+        <input
+          type="number"
+          value={dietProtein}
+          onChange={(e) => setDietProtein(e.target.value)}
+          placeholder="150"
+          className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-700 dark:text-white"
+        />
+      </div>
+      <button
+        onClick={saveDiet}
+        className="w-full bg-yellow-600 hover:bg-yellow-700 text-white font-medium py-2 px-4 rounded-lg transition-colors"
+      >
+        Guardar Dieta
+      </button>
+    </div>
+  );
+
+  const renderDesktopNeatForm = () => (
+    <div className="space-y-4">
+      <div>
+        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Tipo</label>
+        <select
+          value={neatTipo}
+          onChange={(e) => setNeatTipo(e.target.value as 'pasos' | 'cinta')}
+          className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-700 dark:text-white"
+        >
+          <option value="pasos">Pasos</option>
+          <option value="cinta">Cinta</option>
+        </select>
+      </div>
+      
+      {neatTipo === 'pasos' ? (
+        <div>
+          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Pasos</label>
+          <input
+            type="number"
+            value={neatPasos}
+            onChange={(e) => setNeatPasos(e.target.value)}
+            placeholder="8000"
+            className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-700 dark:text-white"
+          />
+        </div>
+      ) : (
+        <div className="space-y-3">
+          <div>
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Distancia (km)</label>
+            <input
+              type="number"
+              value={neatKm}
+              onChange={(e) => setNeatKm(e.target.value)}
+              step="0.1"
+              placeholder="2.0"
+              className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-700 dark:text-white"
+            />
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Duración (min)</label>
+            <input
+              type="number"
+              value={neatDuracion}
+              onChange={(e) => setNeatDuracion(e.target.value)}
+              placeholder="20"
+              className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-700 dark:text-white"
+            />
+          </div>
+        </div>
+      )}
+      
+      <button
+        onClick={saveNeat}
+        className="w-full bg-purple-600 hover:bg-purple-700 text-white font-medium py-2 px-4 rounded-lg transition-colors"
+      >
+        Guardar NEAT
+      </button>
+    </div>
+  );
+
+  const renderDesktopEntrenoForm = () => (
+    <div className="space-y-4">
+      <div>
+        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Actividad</label>
+        <select
+          value={entrenoTipo}
+          onChange={(e) => setEntrenoTipo(e.target.value as any)}
+          className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-700 dark:text-white"
+        >
+          <option value="tenis">🎾 Tenis</option>
+          <option value="natacion">🏊 Natación</option>
+          <option value="alpinismo">🏔️ Alpinismo</option>
+          <option value="ciclismo">🚴 Ciclismo</option>
+          <option value="running">🏃 Running</option>
+          <option value="futbol">⚽ Fútbol</option>
+          <option value="baloncesto">🏀 Baloncesto</option>
+          <option value="escalada">🧗 Escalada</option>
+          <option value="yoga">🧘 Yoga</option>
+          <option value="pilates">🤸 Pilates</option>
+          <option value="crossfit">💪 CrossFit</option>
+          <option value="otro">🎯 Otro</option>
+        </select>
+      </div>
+      
+      <div>
+        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Duración (minutos)</label>
+        <input
+          type="number"
+          value={entrenoDuracion}
+          onChange={(e) => setEntrenoDuracion(e.target.value)}
+          placeholder="60"
+          className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-700 dark:text-white"
+        />
+      </div>
+      
+      <div>
+        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Intensidad</label>
+        <select
+          value={entrenoIntensidad}
+          onChange={(e) => setEntrenoIntensidad(e.target.value as any)}
+          className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-700 dark:text-white"
+        >
+          <option value="baja">Baja</option>
+          <option value="moderada">Moderada</option>
+          <option value="alta">Alta</option>
+          <option value="muy alta">Muy Alta</option>
+        </select>
+      </div>
+      
+      <button
+        onClick={saveEntrenoNoProgramado}
+        className="w-full bg-teal-600 hover:bg-teal-700 text-white font-medium py-2 px-4 rounded-lg transition-colors"
+      >
+        Guardar Entreno
+      </button>
+    </div>
+  );
+
   const saveWeight = () => {
     const weight = parseFloat(weightInput);
     if (!weight || weight <= 0) {
@@ -1201,6 +1416,156 @@ export default function Dashboard() {
   };
 
 
+
+  // Desktop Section Functions
+  const renderDesktopTodaySection = () => (
+    <div className="space-y-6">
+      {/* Header */}
+      <div className="flex justify-between items-center">
+        <h1 className="text-3xl font-bold text-gray-900 dark:text-white">🏠 Hoy</h1>
+        <div className="text-sm text-gray-600 dark:text-gray-400">
+          {new Date().toLocaleDateString('es-ES', { 
+            weekday: 'long', 
+            day: '2-digit', 
+            month: 'long',
+            year: 'numeric'
+          })}
+        </div>
+      </div>
+
+      {/* Progress Overview */}
+      <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
+        <div className="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700">
+          <div className="flex items-center justify-between mb-4">
+            <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Progreso del Día</h3>
+            <span className="text-2xl">📊</span>
+          </div>
+          <div className="text-center">
+            <div className="text-3xl font-bold text-blue-600 dark:text-blue-400 mb-2">
+              {Math.round(calculateProgress() * 100)}%
+            </div>
+            <div className="text-sm text-gray-600 dark:text-gray-400">
+              {Object.keys(adherenciaDiaria[todayISO()] || {}).length} de 5 actividades
+            </div>
+          </div>
+        </div>
+
+        <div className="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700">
+          <div className="flex items-center justify-between mb-4">
+            <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Peso Actual</h3>
+            <span className="text-2xl">⚖️</span>
+          </div>
+          <div className="text-center">
+            <div className="text-3xl font-bold text-green-600 dark:text-green-400 mb-2">
+              {estado.length > 0 ? `${estado[estado.length - 1].peso} kg` : '--'}
+            </div>
+            <div className="text-sm text-gray-600 dark:text-gray-400">
+              Último registro
+            </div>
+          </div>
+        </div>
+
+        <div className="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700">
+          <div className="flex items-center justify-between mb-4">
+            <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Calorías Hoy</h3>
+            <span className="text-2xl">🔥</span>
+          </div>
+          <div className="text-center">
+            <div className="text-3xl font-bold text-orange-600 dark:text-orange-400 mb-2">
+              {dieta.length > 0 ? `${dieta[dieta.length - 1].calorias}` : '--'}
+            </div>
+            <div className="text-sm text-gray-600 dark:text-gray-400">
+              kcal consumidas
+            </div>
+          </div>
+        </div>
+
+        <div className="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700">
+          <div className="flex items-center justify-between mb-4">
+            <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Entrenamiento</h3>
+            <span className="text-2xl">💪</span>
+          </div>
+          <div className="text-center">
+            <div className="text-3xl font-bold text-purple-600 dark:text-purple-400 mb-2">
+              {currentData.dia.entrenamiento}
+            </div>
+            <div className="text-sm text-gray-600 dark:text-gray-400">
+              {currentData.dia.dia}
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Activity Cards */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <div className="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700">
+          <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-4">Actividades Completadas</h3>
+          <div className="space-y-3">
+            {adherenciaDiaria[todayISO()]?.pesos && (
+              <div className="flex items-center space-x-3 p-3 bg-green-50 dark:bg-green-900/20 rounded-lg">
+                <span className="text-green-600 dark:text-green-400">✅</span>
+                <span className="text-gray-900 dark:text-white">Peso registrado</span>
+              </div>
+            )}
+            {adherenciaDiaria[todayISO()]?.cardio && (
+              <div className="flex items-center space-x-3 p-3 bg-red-50 dark:bg-red-900/20 rounded-lg">
+                <span className="text-red-600 dark:text-red-400">✅</span>
+                <span className="text-gray-900 dark:text-white">Cardio completado</span>
+              </div>
+            )}
+            {adherenciaDiaria[todayISO()]?.dieta && (
+              <div className="flex items-center space-x-3 p-3 bg-yellow-50 dark:bg-yellow-900/20 rounded-lg">
+                <span className="text-yellow-600 dark:text-yellow-400">✅</span>
+                <span className="text-gray-900 dark:text-white">Dieta registrada</span>
+              </div>
+            )}
+            {adherenciaDiaria[todayISO()]?.neat && (
+              <div className="flex items-center space-x-3 p-3 bg-purple-50 dark:bg-purple-900/20 rounded-lg">
+                <span className="text-purple-600 dark:text-purple-400">✅</span>
+                <span className="text-gray-900 dark:text-white">NEAT registrado</span>
+              </div>
+            )}
+            {adherenciaDiaria[todayISO()]?.entrenoNoProgramado && (
+              <div className="flex items-center space-x-3 p-3 bg-teal-50 dark:bg-teal-900/20 rounded-lg">
+                <span className="text-teal-600 dark:text-teal-400">✅</span>
+                <span className="text-gray-900 dark:text-white">Entreno extra</span>
+              </div>
+            )}
+          </div>
+        </div>
+
+        <div className="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700">
+          <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-4">Próximas Actividades</h3>
+          <div className="space-y-3">
+            {!adherenciaDiaria[todayISO()]?.pesos && (
+              <div className="flex items-center space-x-3 p-3 bg-gray-50 dark:bg-gray-700 rounded-lg">
+                <span className="text-gray-400">⏳</span>
+                <span className="text-gray-900 dark:text-white">Registrar peso</span>
+              </div>
+            )}
+            {!adherenciaDiaria[todayISO()]?.cardio && (
+              <div className="flex items-center space-x-3 p-3 bg-gray-50 dark:bg-gray-700 rounded-lg">
+                <span className="text-gray-400">⏳</span>
+                <span className="text-gray-900 dark:text-white">Hacer cardio</span>
+              </div>
+            )}
+            {!adherenciaDiaria[todayISO()]?.dieta && (
+              <div className="flex items-center space-x-3 p-3 bg-gray-50 dark:bg-gray-700 rounded-lg">
+                <span className="text-gray-400">⏳</span>
+                <span className="text-gray-900 dark:text-white">Registrar dieta</span>
+              </div>
+            )}
+            {!adherenciaDiaria[todayISO()]?.neat && (
+              <div className="flex items-center space-x-3 p-3 bg-gray-50 dark:bg-gray-700 rounded-lg">
+                <span className="text-gray-400">⏳</span>
+                <span className="text-gray-900 dark:text-white">Actividad NEAT</span>
+              </div>
+            )}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
 
   const renderTodaySection = () => (
     <div className="min-h-screen pb-20">
