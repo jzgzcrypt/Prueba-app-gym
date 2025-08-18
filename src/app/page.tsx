@@ -49,6 +49,14 @@ export default function Dashboard() {
     data: WeightEntry | CardioEntry | DietEntry | NeatEntry | EntrenoNoProgramado;
   } | null>(null);
   
+  // Estados para versión PC
+  const [isDesktop, setIsDesktop] = useState(false);
+  const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [activeForm, setActiveForm] = useState<'weight' | 'cardio' | 'diet' | 'neat' | 'entreno' | null>(null);
+  const [calendarView, setCalendarView] = useState<'month' | 'week' | 'agenda'>('week');
+  const [darkMode, setDarkMode] = useState(false);
+  const [showAdvancedSettings, setShowAdvancedSettings] = useState(false);
+  
   // Estado para forzar re-render cuando cambia la fecha
   const [, setForceUpdate] = useState(0);
   
@@ -70,6 +78,16 @@ export default function Dashboard() {
         // Test localStorage access
         localStorage.getItem('test');
         setIsLoading(false);
+        
+        // Detectar si es desktop
+        const checkDesktop = () => {
+          setIsDesktop(window.innerWidth >= 768);
+        };
+        
+        checkDesktop();
+        window.addEventListener('resize', checkDesktop);
+        
+        return () => window.removeEventListener('resize', checkDesktop);
       } catch (error) {
         console.error('localStorage not available:', error);
         setIsLoading(false);
@@ -353,6 +371,195 @@ export default function Dashboard() {
     setSelectedHistoryItem(item);
     openModal('history-details');
   };
+
+  // Desktop Layout Functions
+  const renderDesktopLayout = () => (
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
+      {/* Header */}
+      <header className="bg-white dark:bg-gray-800 shadow-sm border-b border-gray-200 dark:border-gray-700">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex justify-between items-center h-16">
+            <div className="flex items-center space-x-8">
+              <h1 className="text-2xl font-bold text-gray-900 dark:text-white">🏋️ GymTracker</h1>
+              
+              {/* Desktop Navigation */}
+              <nav className="hidden lg:flex space-x-8">
+                <button
+                  onClick={() => setActiveSection('today')}
+                  className={`px-3 py-2 rounded-md text-sm font-medium transition-colors ${
+                    activeSection === 'today'
+                      ? 'bg-blue-100 text-blue-700 dark:bg-blue-900 dark:text-blue-300'
+                      : 'text-gray-600 hover:text-gray-900 dark:text-gray-300 dark:hover:text-white'
+                  }`}
+                >
+                  🏠 Hoy
+                </button>
+                <button
+                  onClick={() => setActiveSection('mesociclo')}
+                  className={`px-3 py-2 rounded-md text-sm font-medium transition-colors ${
+                    activeSection === 'mesociclo'
+                      ? 'bg-blue-100 text-blue-700 dark:bg-blue-900 dark:text-blue-300'
+                      : 'text-gray-600 hover:text-gray-900 dark:text-gray-300 dark:hover:text-white'
+                  }`}
+                >
+                  📋 Mesociclo
+                </button>
+                <button
+                  onClick={() => setActiveSection('history')}
+                  className={`px-3 py-2 rounded-md text-sm font-medium transition-colors ${
+                    activeSection === 'history'
+                      ? 'bg-blue-100 text-blue-700 dark:bg-blue-900 dark:text-blue-300'
+                      : 'text-gray-600 hover:text-gray-900 dark:text-gray-300 dark:hover:text-white'
+                  }`}
+                >
+                  📊 Historial
+                </button>
+                <button
+                  onClick={() => setActiveSection('settings')}
+                  className={`px-3 py-2 rounded-md text-sm font-medium transition-colors ${
+                    activeSection === 'settings'
+                      ? 'bg-blue-100 text-blue-700 dark:bg-blue-900 dark:text-blue-300'
+                      : 'text-gray-600 hover:text-gray-900 dark:text-gray-300 dark:hover:text-white'
+                  }`}
+                >
+                  ⚙️ Ajustes
+                </button>
+              </nav>
+            </div>
+            
+            <div className="flex items-center space-x-4">
+              <button
+                onClick={() => setDarkMode(!darkMode)}
+                className="p-2 text-gray-600 hover:text-gray-900 dark:text-gray-300 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors"
+                title={darkMode ? 'Modo claro' : 'Modo oscuro'}
+              >
+                {darkMode ? '☀️' : '🌙'}
+              </button>
+              <button
+                onClick={() => openModal('weekly-calendar')}
+                className="p-2 text-gray-600 hover:text-gray-900 dark:text-gray-300 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors"
+                title="Ver plan semanal"
+              >
+                📅
+              </button>
+            </div>
+          </div>
+        </div>
+      </header>
+
+      {/* Main Content */}
+      <div className="flex">
+        {/* Sidebar */}
+        <div className={`w-80 bg-white dark:bg-gray-800 border-r border-gray-200 dark:border-gray-700 transition-all duration-300 ${
+          sidebarOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'
+        }`}>
+          {renderDesktopSidebar()}
+        </div>
+
+        {/* Main Content Area */}
+        <div className="flex-1">
+          <div className="p-6">
+            {activeSection === 'today' && renderDesktopTodaySection()}
+            {activeSection === 'mesociclo' && renderDesktopMesocicloSection()}
+            {activeSection === 'history' && renderDesktopHistorySection()}
+            {activeSection === 'settings' && renderDesktopSettingsSection()}
+          </div>
+        </div>
+
+        {/* Right Sidebar */}
+        <div className="w-80 bg-white dark:bg-gray-800 border-l border-gray-200 dark:border-gray-700 hidden xl:block">
+          {renderDesktopRightSidebar()}
+        </div>
+      </div>
+
+      {/* Mobile Sidebar Toggle */}
+      <button
+        onClick={() => setSidebarOpen(!sidebarOpen)}
+        className="lg:hidden fixed top-20 left-4 z-50 p-2 bg-blue-600 text-white rounded-lg shadow-lg"
+      >
+        {sidebarOpen ? '✕' : '☰'}
+      </button>
+    </div>
+  );
+
+  const renderDesktopSidebar = () => (
+    <div className="h-full flex flex-col">
+      {/* Sidebar Header */}
+      <div className="p-4 border-b border-gray-200 dark:border-gray-700">
+        <h2 className="text-lg font-semibold text-gray-900 dark:text-white">Acciones Rápidas</h2>
+      </div>
+
+      {/* Quick Actions */}
+      <div className="flex-1 p-4 space-y-4">
+        <button
+          onClick={() => setActiveForm('weight')}
+          className="w-full p-3 bg-blue-50 hover:bg-blue-100 dark:bg-blue-900 dark:hover:bg-blue-800 text-blue-700 dark:text-blue-300 rounded-lg transition-colors flex items-center space-x-3"
+        >
+          <span className="text-xl">⚖️</span>
+          <span className="font-medium">Agregar Peso</span>
+        </button>
+
+        <button
+          onClick={() => setActiveForm('cardio')}
+          className="w-full p-3 bg-red-50 hover:bg-red-100 dark:bg-red-900 dark:hover:bg-red-800 text-red-700 dark:text-red-300 rounded-lg transition-colors flex items-center space-x-3"
+        >
+          <span className="text-xl">🏃</span>
+          <span className="font-medium">Agregar Cardio</span>
+        </button>
+
+        <button
+          onClick={() => setActiveForm('diet')}
+          className="w-full p-3 bg-yellow-50 hover:bg-yellow-100 dark:bg-yellow-900 dark:hover:bg-yellow-800 text-yellow-700 dark:text-yellow-300 rounded-lg transition-colors flex items-center space-x-3"
+        >
+          <span className="text-xl">🥗</span>
+          <span className="font-medium">Agregar Dieta</span>
+        </button>
+
+        <button
+          onClick={() => setActiveForm('neat')}
+          className="w-full p-3 bg-purple-50 hover:bg-purple-100 dark:bg-purple-900 dark:hover:bg-purple-800 text-purple-700 dark:text-purple-300 rounded-lg transition-colors flex items-center space-x-3"
+        >
+          <span className="text-xl">🚶</span>
+          <span className="font-medium">Agregar NEAT</span>
+        </button>
+
+        <button
+          onClick={() => setActiveForm('entreno')}
+          className="w-full p-3 bg-teal-50 hover:bg-teal-100 dark:bg-teal-900 dark:hover:bg-teal-800 text-teal-700 dark:text-teal-300 rounded-lg transition-colors flex items-center space-x-3"
+        >
+          <span className="text-xl">🎯</span>
+          <span className="font-medium">Entreno Extra</span>
+        </button>
+      </div>
+
+      {/* Form Sidebar */}
+      {activeForm && (
+        <div className="border-t border-gray-200 dark:border-gray-700 p-4">
+          <div className="flex justify-between items-center mb-4">
+            <h3 className="font-semibold text-gray-900 dark:text-white">
+              {activeForm === 'weight' && '⚖️ Agregar Peso'}
+              {activeForm === 'cardio' && '🏃 Agregar Cardio'}
+              {activeForm === 'diet' && '🥗 Agregar Dieta'}
+              {activeForm === 'neat' && '🚶 Agregar NEAT'}
+              {activeForm === 'entreno' && '🎯 Entreno Extra'}
+            </h3>
+            <button
+              onClick={() => setActiveForm(null)}
+              className="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
+            >
+              ✕
+            </button>
+          </div>
+          
+          {activeForm === 'weight' && renderDesktopWeightForm()}
+          {activeForm === 'cardio' && renderDesktopCardioForm()}
+          {activeForm === 'diet' && renderDesktopDietForm()}
+          {activeForm === 'neat' && renderDesktopNeatForm()}
+          {activeForm === 'entreno' && renderDesktopEntrenoForm()}
+        </div>
+      )}
+    </div>
+  );
 
   const closeModal = () => {
     setActiveModal(null);
@@ -2313,7 +2520,7 @@ export default function Dashboard() {
   }
 
   return (
-    <div className="min-h-screen">
+    <div className={`min-h-screen ${darkMode ? 'dark' : ''}`}>
       <ToastContainer />
       
       {/* Mobile Dashboard */}
@@ -2344,7 +2551,7 @@ export default function Dashboard() {
               className={`bottom-nav-item cursor-pointer ${activeSection === 'history' ? 'active' : ''}`}
               onClick={() => setActiveSection('history')}
             >
-              <span className="text-xl">📋</span>
+              <span className="text-xl">📊</span>
               <span className="text-xs mt-1">Historial</span>
             </div>
             <div 
@@ -2360,45 +2567,8 @@ export default function Dashboard() {
 
       {/* Desktop Dashboard */}
       <div className="hidden md:block">
-        <div className="min-h-screen p-6">
-          <div className="max-w-4xl mx-auto">
-            <h1 className="text-3xl font-bold text-center mb-8">Mi Entrenamiento</h1>
-            
-            {/* Quick Entry Form */}
-            <div className="quick-entry">
-              <h2 className="text-xl font-bold mb-6 text-center">Entrada Rápida de Hoy</h2>
-              <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-                <div>
-                  <label className="block text-sm font-medium mb-2">Peso (kg)</label>
-                  <input 
-                    type="number" 
-                    value={desktopWeight}
-                    onChange={(e) => setDesktopWeight(e.target.value)}
-                    step="0.1" 
-                    placeholder="85.0" 
-                    className="w-full"
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium mb-2">Entrenamiento</label>
-                  <select 
-                    value={desktopWorkout}
-                    onChange={(e) => setDesktopWorkout(e.target.value)}
-                    className="w-full"
-                  >
-                    <option value="">Seleccionar...</option>
-                    <option value="Pull">🏋️ Pull</option>
-                    <option value="Push">💪 Push</option>
-                    <option value="Piernas">🦵 Piernas</option>
-                    <option value="Cardio">🏃 Cardio</option>
-                    <option value="Descanso">😴 Descanso</option>
-                  </select>
-                </div>
-                <div>
-                  <label className="block text-sm font-medium mb-2">Cardio (km)</label>
-                  <input 
-                    type="number" 
-                    value={desktopCardio}
+        {renderDesktopLayout()}
+      </div>
                     onChange={(e) => setDesktopCardio(e.target.value)}
                     step="0.1" 
                     placeholder="3.5" 
