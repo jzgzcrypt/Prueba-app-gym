@@ -933,6 +933,22 @@ body {
     font-weight: bold;
     font-size: 14px;
   }
+
+  /* Mejorar centrado de numeración en modal de ejercicios */
+  .w-5.h-5,
+  .w-6.h-6 {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    font-weight: bold;
+    font-size: 12px;
+  }
+
+  /* Mejorar alineación de elementos en ejercicios */
+  .flex.items-start.gap-2 > div:first-child,
+  .flex.items-start.gap-3 > div:first-child {
+    margin-top: 0 !important;
+  }
 }
 
 /* Utility Classes */

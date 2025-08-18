@@ -29,10 +29,12 @@ export default function Dashboard() {
     info: boolean;
     volumen: boolean;
     microciclos: { [key: number]: boolean };
+    notas: { [key: number]: boolean };
   }>({
     info: false,
     volumen: false,
-    microciclos: {}
+    microciclos: {},
+    notas: {}
   });
   
   // Estado para forzar re-render cuando cambia la fecha
@@ -206,6 +208,16 @@ export default function Dashboard() {
       microciclos: {
         ...prev.microciclos,
         [microcicloId]: !prev.microciclos[microcicloId]
+      }
+    }));
+  };
+
+  const toggleNotas = (microcicloId: number) => {
+    setExpandedSections(prev => ({
+      ...prev,
+      notas: {
+        ...prev.notas,
+        [microcicloId]: !prev.notas[microcicloId]
       }
     }));
   };
@@ -1882,7 +1894,7 @@ export default function Dashboard() {
                 <div key={microciclo.id} className="clean-card border border-purple-200 shadow-sm hover:shadow-md transition-all duration-200">
                   <button 
                     onClick={() => toggleMicrociclo(microciclo.id)}
-                    className="w-full flex items-center justify-between p-3 md:p-4 hover:bg-gradient-to-r hover:from-purple-50 hover:to-purple-100 rounded-lg transition-all duration-200"
+                    className="w-full flex items-center justify-between p-3 md:p-4 hover:bg-gradient-to-r hover:from-blue-50 hover:to-blue-100 rounded-lg transition-all duration-200 bg-gradient-to-r from-blue-50 to-blue-100"
                   >
                     <div className="flex items-center gap-3">
                       <div className="w-10 h-10 bg-gradient-to-br from-blue-200 to-blue-300 rounded-xl flex items-center justify-center shadow-sm">
@@ -1910,20 +1922,17 @@ export default function Dashboard() {
                   
                   {expandedSections.microciclos[microciclo.id] && (
                     <div className="px-3 md:px-4 pb-3 md:pb-4 animate-fadeIn">
-                      {/* Información del microciclo */}
-                      <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 md:gap-3 mb-3 md:mb-4">
-                        <div className="p-2 bg-blue-50 rounded-lg">
-                          <p className="text-xs text-blue-600 font-medium mb-2">Objetivo</p>
-                          <p className="text-xs md:text-sm leading-relaxed">{microciclo.objetivo}</p>
-                        </div>
-                        <div className="p-2 bg-green-50 rounded-lg">
-                          <p className="text-xs text-green-600 font-medium mb-2">Intensidad</p>
-                          <p className="text-xs md:text-sm leading-relaxed">{microciclo.intensidad}</p>
-                        </div>
-                        <div className="p-2 bg-orange-50 rounded-lg">
-                          <p className="text-xs text-orange-600 font-medium mb-2">Cardio</p>
-                          <p className="text-xs md:text-sm leading-relaxed">{microciclo.cardio}</p>
-                        </div>
+                      {/* Información del microciclo - Formato Compacto */}
+                      <div className="flex flex-wrap gap-2 mb-3 md:mb-4">
+                        <span className="text-xs bg-blue-50 text-blue-600 px-2 py-1 rounded-full font-medium">
+                          Objetivo: {microciclo.objetivo}
+                        </span>
+                        <span className="text-xs bg-green-50 text-green-600 px-2 py-1 rounded-full font-medium">
+                          Intensidad: {microciclo.intensidad}
+                        </span>
+                        <span className="text-xs bg-orange-50 text-orange-600 px-2 py-1 rounded-full font-medium">
+                          Cardio: {microciclo.cardio}
+                        </span>
                       </div>
                       
                       {/* Días de entrenamiento */}
@@ -1931,7 +1940,7 @@ export default function Dashboard() {
                         {microciclo.dias.map((dia, index) => (
                           <div 
                             key={index} 
-                            className="flex items-start justify-between p-3 md:p-4 bg-blue-50 rounded-lg cursor-pointer hover:bg-blue-100 transition-colors"
+                            className="flex items-start justify-between p-3 md:p-4 bg-white rounded-lg cursor-pointer hover:bg-gray-50 transition-colors border border-gray-200"
                             onClick={() => {
                               setSelectedWorkout({
                                 dia: dia.dia,
@@ -1970,6 +1979,41 @@ export default function Dashboard() {
                             </div>
                           </div>
                         ))}
+                      </div>
+                      
+                      {/* Notas del Microciclo - Desplegable */}
+                      <div className="mt-4">
+                        <button 
+                          onClick={() => toggleNotas(microciclo.id)}
+                          className="w-full flex items-center justify-between p-2 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors"
+                        >
+                          <div className="flex items-center gap-2">
+                            <span className="text-sm font-medium text-gray-700">📝 Notas del Microciclo</span>
+                          </div>
+                          <span className={`text-gray-400 transition-transform duration-200 ${expandedSections.notas[microciclo.id] ? 'rotate-180' : ''}`}>
+                            ▼
+                          </span>
+                        </button>
+                        
+                        {expandedSections.notas[microciclo.id] && (
+                          <div className="mt-2 p-3 bg-white rounded-lg border border-gray-200 animate-fadeIn">
+                            <div className="text-sm text-gray-700 space-y-2">
+                              <p><strong>💡 Consejos:</strong></p>
+                              <ul className="list-disc list-inside space-y-1 ml-2">
+                                <li>Mantén la técnica correcta en todos los ejercicios</li>
+                                <li>Respeta los tiempos de descanso entre series</li>
+                                <li>Progresivamente aumenta la intensidad</li>
+                                <li>Escucha a tu cuerpo y ajusta según sea necesario</li>
+                              </ul>
+                              <p className="mt-3"><strong>⚠️ Precauciones:</strong></p>
+                              <ul className="list-disc list-inside space-y-1 ml-2">
+                                <li>Calienta adecuadamente antes de cada sesión</li>
+                                <li>Si sientes dolor, detén el ejercicio</li>
+                                <li>Mantén una hidratación constante</li>
+                              </ul>
+                            </div>
+                          </div>
+                        )}
                       </div>
                     </div>
                   )}
@@ -3240,7 +3284,7 @@ export default function Dashboard() {
                   <div className="space-y-2 md:space-y-3">
                     {selectedWorkout.ejercicios.map((ejercicio, index) => (
                       <div key={index} className="flex items-start gap-2 md:gap-3 p-3 bg-gray-50 rounded-lg">
-                        <div className="w-5 h-5 md:w-6 md:h-6 bg-primary rounded-full flex items-center justify-center text-white text-xs font-bold flex-shrink-0 mt-1">
+                        <div className="w-5 h-5 md:w-6 md:h-6 bg-primary rounded-full flex items-center justify-center text-white text-xs font-bold flex-shrink-0">
                           {index + 1}
                         </div>
                         <div className="flex-1 min-w-0">
