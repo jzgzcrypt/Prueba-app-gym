@@ -15,10 +15,10 @@ import { getCurrentMesocicloDay, setMesocicloStartDate, testMesocicloTracking, c
 
 export default function Dashboard() {
   const { showToast } = useToast();
-  const { syncStatus, syncData, saveData } = useSync();
+  const { syncStatus, syncData, saveData, loadData } = useSync();
   const [isLoading, setIsLoading] = useState(true);
   const [activeModal, setActiveModal] = useState<string | null>(null);
-  const [activeSection, setActiveSection] = useState<'today' | 'mesociclo' | 'history' | 'settings' | 'stats'>('today');
+  const [activeSection, setActiveSection] = useState<'today' | 'mesociclo' | 'history' | 'settings' | 'stats'>('stats');
   const [showStartDateConfig, setShowStartDateConfig] = useState(false);
   const [startDateInput, setStartDateInput] = useState('');
   const [workoutType] = useState('Pull');
@@ -71,6 +71,21 @@ export default function Dashboard() {
   const [entrenosNoProgramados, setEntrenosNoProgramados] = useLocalStorage<EntrenoNoProgramado[]>('entrenosNoProgramados', []);
   const [adherenciaDiaria, setAdherenciaDiaria] = useLocalStorage<DailyAdherence>('adherenciaDiaria', {});
 
+  // Helpers seguros para mapear datos desde la nube
+  const toDateISO = (value: unknown): string => {
+    if (typeof value === 'string') return value.includes('T') ? value.split('T')[0] : value;
+    if (value instanceof Date) return value.toISOString().split('T')[0];
+    if (typeof value === 'number') return new Date(value).toISOString().split('T')[0];
+    const s = String(value);
+    return s.includes('T') ? s.split('T')[0] : s;
+  };
+
+  const toNumber = (value: unknown): number => {
+    if (typeof value === 'number') return Number.isFinite(value) ? value : 0;
+    const n = Number(typeof value === 'string' ? value : String(value));
+    return Number.isFinite(n) ? n : 0;
+  };
+
   // Effect para manejar la carga inicial
   useEffect(() => {
     // Asegurar que localStorage esté disponible
@@ -94,13 +109,94 @@ export default function Dashboard() {
         
         initDB();
         
-                  return () => {};
+        // Cargar datos desde Neon y poblar estado local al iniciar (si hay conexión)
+        const fetchCloudData = async () => {
+          try {
+            if (syncStatus.isOnline) {
+              const weights = await loadData('weights');
+              if (Array.isArray(weights)) {
+                const mapped = weights.map((w: Record<string, unknown>) => ({
+                  fecha: toDateISO(w.fecha),
+                  peso: toNumber(w.peso),
+                  cintura: w.cintura !== null && w.cintura !== undefined ? toNumber(w.cintura) : null
+                })) as WeightEntry[];
+                setEstado(mapped);
+              }
+
+              const cardioRows = await loadData('cardio');
+              if (Array.isArray(cardioRows)) {
+                const mapped = cardioRows.map((c: Record<string, unknown>) => ({
+                  fecha: toDateISO(c.fecha),
+                  microciclo: 1,
+                  sesionId: 1,
+                  km: toNumber(c.km),
+                  tiempo: toNumber(c.tiempo),
+                  ritmo: toNumber(c.ritmo),
+                  calorias: toNumber(c.calorias),
+                  tipo: (c.tipo === 'pasos' || c.tipo === 'cinta' || c.tipo === 'mesociclo') ? (c.tipo as 'pasos'|'cinta'|'mesociclo') : 'mesociclo',
+                  intensidad: typeof c['intensidad'] === 'string' ? (c['intensidad'] as string) : 'Moderado'
+                })) as CardioEntry[];
+                setCardio(mapped);
+              }
+
+              const dietRows = await loadData('diet');
+              if (Array.isArray(dietRows)) {
+                const mapped = dietRows.map((d: Record<string, unknown>) => ({
+                  fecha: toDateISO(d.fecha),
+                  calorias: toNumber(d.calorias),
+                  proteinas: toNumber(d.proteinas),
+                  carbos: toNumber(d.carbos),
+                  grasas: toNumber(d.grasas),
+                  ayuno: false
+                })) as DietEntry[];
+                setDieta(mapped);
+              }
+
+              const neatRows = await loadData('neat');
+              if (Array.isArray(neatRows)) {
+                const mapped = neatRows.map((n: Record<string, unknown>) => ({
+                  fecha: toDateISO(n.fecha),
+                  tipo: (n.tipo === 'pasos' || n.tipo === 'cinta') ? (n.tipo as 'pasos'|'cinta') : 'pasos',
+                  pasos: n.pasos !== undefined ? toNumber(n.pasos) : undefined,
+                  km: n.km !== undefined ? toNumber(n.km) : undefined,
+                  ritmoKmH: n['ritmo_kmh'] !== undefined ? toNumber(n['ritmo_kmh']) : undefined,
+                  inclinacion: n.inclinacion !== undefined ? toNumber(n.inclinacion) : undefined,
+                  calorias: toNumber(n.calorias),
+                  duracion: toNumber(n.duracion)
+                })) as NeatEntry[];
+                setNeat(mapped);
+              }
+
+              const entrenosRows = await loadData('entrenos_no_programados');
+              if (Array.isArray(entrenosRows)) {
+                const allowedTipos = ['tenis','natacion','alpinismo','ciclismo','running','futbol','baloncesto','escalada','yoga','pilates','crossfit','otro'];
+                const mapped = entrenosRows.map((e: Record<string, unknown>) => ({
+                  fecha: toDateISO(e.fecha),
+                  tipo: allowedTipos.includes(e.tipo as string) ? e.tipo as EntrenoNoProgramado['tipo'] : 'otro',
+                  duracion: toNumber(e.duracion),
+                  intensidad: (e.intensidad === 'baja' || e.intensidad === 'moderada' || e.intensidad === 'alta' || e.intensidad === 'muy alta') ? e.intensidad as EntrenoNoProgramado['intensidad'] : 'moderada',
+                  calorias: toNumber(e.calorias),
+                  esfuerzo: e['esfuerzo'] !== undefined ? toNumber(e['esfuerzo']) : 5,
+                  notas: typeof e['notas'] === 'string' ? (e['notas'] as string) : undefined
+                })) as EntrenoNoProgramado[];
+                setEntrenosNoProgramados(mapped);
+              }
+
+              showToast('☁️ Datos cargados desde la nube', 'success');
+            }
+          } catch (e) {
+            console.error('Error cargando datos en inicio:', e);
+          }
+        };
+        fetchCloudData();
+        
+        return () => {};
       } catch (error) {
         console.error('localStorage not available:', error);
         setIsLoading(false);
       }
     }
-  }, []);
+  }, [loadData, setEstado, setCardio, setDieta, setNeat, setEntrenosNoProgramados, showToast, syncStatus.isOnline]);
 
   // Form states
   const [weightInput, setWeightInput] = useState('');
