@@ -54,7 +54,6 @@ export default function Dashboard() {
   
   // Estados para versión PC
   const [viewMode, setViewMode] = useState<'mobile' | 'desktop'>('desktop');
-  const [sidebarOpen, setSidebarOpen] = useState(false);
   const [activeForm, setActiveForm] = useState<'weight' | 'cardio' | 'diet' | 'neat' | 'entreno' | null>(null);
   const [darkMode, setDarkMode] = useState(false);
   const [showAdvancedSettings, setShowAdvancedSettings] = useState(false);
@@ -473,82 +472,66 @@ export default function Dashboard() {
     openModal('history-details');
   };
 
-  // Desktop Layout Functions
+  // Desktop Layout Functions - COMPLETELY REDESIGNED
   const renderDesktopLayout = () => (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
-      {/* Header */}
-      <header className="bg-white dark:bg-gray-800 shadow-sm border-b border-gray-200 dark:border-gray-700">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center h-16">
-            <div className="flex items-center space-x-8">
-              <h1 className="text-2xl font-bold text-gray-900 dark:text-white">🏋️ GymTracker</h1>
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900">
+      {/* Modern Header */}
+      <header className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-lg border-b border-gray-200/50 dark:border-gray-700/50 sticky top-0 z-40">
+        <div className="max-w-7xl mx-auto px-6">
+          <div className="flex justify-between items-center h-20">
+            {/* Logo & Navigation */}
+            <div className="flex items-center space-x-12">
+              <div className="flex items-center space-x-3">
+                <div className="w-10 h-10 bg-gradient-to-r from-blue-600 to-purple-600 rounded-xl flex items-center justify-center shadow-lg">
+                  <span className="text-white text-xl font-bold">🏋️</span>
+                </div>
+                <h1 className="text-2xl font-bold bg-gradient-to-r from-gray-900 to-gray-600 dark:from-white dark:to-gray-300 bg-clip-text text-transparent">
+                  GymTracker Pro
+                </h1>
+              </div>
               
-              {/* Desktop Navigation */}
-              <nav className="hidden lg:flex space-x-8">
-                <button
-                  onClick={() => setActiveSection('today')}
-                  className={`px-3 py-2 rounded-md text-sm font-medium transition-colors ${
-                    activeSection === 'today'
-                      ? 'bg-blue-100 text-blue-700 dark:bg-blue-900 dark:text-blue-300'
-                      : 'text-gray-600 hover:text-gray-900 dark:text-gray-300 dark:hover:text-white'
-                  }`}
-                >
-                  🏠 Hoy
-                </button>
-                <button
-                  onClick={() => setActiveSection('mesociclo')}
-                  className={`px-3 py-2 rounded-md text-sm font-medium transition-colors ${
-                    activeSection === 'mesociclo'
-                      ? 'bg-blue-100 text-blue-700 dark:bg-blue-900 dark:text-blue-300'
-                      : 'text-gray-600 hover:text-gray-900 dark:text-gray-300 dark:hover:text-white'
-                  }`}
-                >
-                  📋 Mesociclo
-                </button>
-                <button
-                  onClick={() => setActiveSection('history')}
-                  className={`px-3 py-2 rounded-md text-sm font-medium transition-colors ${
-                    activeSection === 'history'
-                      ? 'bg-blue-100 text-blue-700 dark:bg-blue-900 dark:text-blue-300'
-                      : 'text-gray-600 hover:text-gray-900 dark:text-gray-300 dark:hover:text-white'
-                  }`}
-                >
-                  📊 Historial
-                </button>
-                <button
-                  onClick={() => setActiveSection('stats')}
-                  className={`px-3 py-2 rounded-md text-sm font-medium transition-colors ${
-                    activeSection === 'stats'
-                      ? 'bg-blue-100 text-blue-700 dark:bg-blue-900 dark:text-blue-300'
-                      : 'text-gray-600 hover:text-gray-900 dark:text-gray-300 dark:hover:text-white'
-                  }`}
-                >
-                  📈 Estadísticas
-                </button>
-                <button
-                  onClick={() => setActiveSection('settings')}
-                  className={`px-3 py-2 rounded-md text-sm font-medium transition-colors ${
-                    activeSection === 'settings'
-                      ? 'bg-blue-100 text-blue-700 dark:bg-blue-900 dark:text-blue-300'
-                      : 'text-gray-600 hover:text-gray-900 dark:text-gray-300 dark:hover:text-white'
-                  }`}
-                >
-                  ⚙️ Ajustes
-                </button>
+              {/* Modern Navigation */}
+              <nav className="hidden lg:flex space-x-1">
+                {[
+                  { id: 'today', label: 'Dashboard', icon: '🏠', color: 'blue' },
+                  { id: 'mesociclo', label: 'Mesociclo', icon: '📋', color: 'purple' },
+                  { id: 'history', label: 'Historial', icon: '📊', color: 'green' },
+                  { id: 'stats', label: 'Analytics', icon: '📈', color: 'orange' },
+                  { id: 'settings', label: 'Config', icon: '⚙️', color: 'gray' }
+                ].map((item) => (
+                  <button
+                    key={item.id}
+                    onClick={() => setActiveSection(item.id as 'today' | 'mesociclo' | 'history' | 'stats' | 'settings')}
+                    className={`group relative px-4 py-3 rounded-xl text-sm font-semibold transition-all duration-300 ${
+                      activeSection === item.id
+                        ? `bg-gradient-to-r from-${item.color}-500 to-${item.color}-600 text-white shadow-lg shadow-${item.color}-500/25`
+                        : 'text-gray-600 hover:text-gray-900 dark:text-gray-300 dark:hover:text-white hover:bg-white/50 dark:hover:bg-gray-700/50'
+                    }`}
+                  >
+                    <span className="flex items-center space-x-2">
+                      <span className="text-lg">{item.icon}</span>
+                      <span>{item.label}</span>
+                    </span>
+                    {activeSection === item.id && (
+                      <div className="absolute -bottom-px left-1/2 transform -translate-x-1/2 w-8 h-1 bg-white rounded-full"></div>
+                    )}
+                  </button>
+                ))}
               </nav>
             </div>
             
+            {/* Right Side Actions */}
             <div className="flex items-center space-x-4">
-              {/* Indicador de sincronización */}
-              <div className="flex items-center space-x-2">
-                <div className={`w-2 h-2 rounded-full ${
+              {/* Sync Status */}
+              <div className="flex items-center space-x-3 px-4 py-2 bg-white/50 dark:bg-gray-700/50 rounded-xl backdrop-blur-sm">
+                <div className={`w-3 h-3 rounded-full ${
                   syncStatus.isOnline 
                     ? syncStatus.isSyncing 
-                      ? 'bg-yellow-500 animate-pulse' 
-                      : 'bg-green-500' 
-                    : 'bg-red-500'
+                      ? 'bg-yellow-500 animate-pulse shadow-lg shadow-yellow-500/50' 
+                      : 'bg-green-500 shadow-lg shadow-green-500/50' 
+                    : 'bg-red-500 shadow-lg shadow-red-500/50'
                 }`} />
-                <span className="text-xs text-gray-600 dark:text-gray-400">
+                <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
                   {syncStatus.isOnline 
                     ? syncStatus.isSyncing 
                       ? 'Sincronizando...' 
@@ -558,137 +541,433 @@ export default function Dashboard() {
                 </span>
               </div>
               
-              <button
-                onClick={() => setDarkMode(!darkMode)}
-                className="p-2 text-gray-600 hover:text-gray-900 dark:text-gray-300 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors"
-                title={darkMode ? 'Modo claro' : 'Modo oscuro'}
-              >
-                {darkMode ? '☀️' : '🌙'}
-              </button>
-              <button
-                onClick={() => openModal('weekly-calendar')}
-                className="p-2 text-gray-600 hover:text-gray-900 dark:text-gray-300 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors"
-                title="Ver plan semanal"
-              >
-                📅
-              </button>
+              {/* Action Buttons */}
+              <div className="flex items-center space-x-2">
+                <button
+                  onClick={() => setDarkMode(!darkMode)}
+                  className="p-3 text-gray-600 hover:text-gray-900 dark:text-gray-300 dark:hover:text-white hover:bg-white/50 dark:hover:bg-gray-700/50 rounded-xl transition-all duration-300 backdrop-blur-sm"
+                  title={darkMode ? 'Modo claro' : 'Modo oscuro'}
+                >
+                  <span className="text-lg">{darkMode ? '☀️' : '🌙'}</span>
+                </button>
+                <button
+                  onClick={() => openModal('weekly-calendar')}
+                  className="p-3 text-gray-600 hover:text-gray-900 dark:text-gray-300 dark:hover:text-white hover:bg-white/50 dark:hover:bg-gray-700/50 rounded-xl transition-all duration-300 backdrop-blur-sm"
+                  title="Ver plan semanal"
+                >
+                  <span className="text-lg">📅</span>
+                </button>
+              </div>
             </div>
           </div>
         </div>
       </header>
 
-      {/* Main Content */}
-      <div className="flex">
-        {/* Sidebar */}
-        <div className={`w-80 bg-white dark:bg-gray-800 border-r border-gray-200 dark:border-gray-700 transition-all duration-300 ${
-          sidebarOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'
-        }`}>
-          {renderDesktopSidebar()}
-        </div>
+      {/* Main Content Area */}
+      <div className="max-w-7xl mx-auto px-6 py-8">
+        <div className="grid grid-cols-12 gap-8">
+          {/* Left Sidebar - Quick Actions */}
+          <div className="col-span-3">
+            <div className="sticky top-32 space-y-6">
+              {renderDesktopQuickActions()}
+            </div>
+          </div>
 
-        {/* Main Content Area */}
-        <div className="flex-1">
-          <div className="p-6">
-            {activeSection === 'today' && renderDesktopTodaySection()}
-            {activeSection === 'mesociclo' && renderDesktopMesocicloSection()}
-            {activeSection === 'history' && renderDesktopHistorySection()}
-            {activeSection === 'stats' && renderDesktopStatsSection()}
-            {activeSection === 'settings' && renderDesktopSettingsSection()}
+          {/* Main Content */}
+          <div className="col-span-6">
+            <div className="space-y-8">
+              {activeSection === 'today' && renderDesktopDashboard()}
+              {activeSection === 'mesociclo' && renderDesktopMesociclo()}
+              {activeSection === 'history' && renderDesktopHistory()}
+              {activeSection === 'stats' && renderDesktopAnalytics()}
+              {activeSection === 'settings' && renderDesktopSettings()}
+            </div>
+          </div>
+
+          {/* Right Sidebar - Stats & Insights */}
+          <div className="col-span-3">
+            <div className="sticky top-32 space-y-6">
+              {renderDesktopInsights()}
+            </div>
           </div>
         </div>
-
-        {/* Right Sidebar */}
-        <div className="w-80 bg-white dark:bg-gray-800 border-l border-gray-200 dark:border-gray-700 hidden xl:block">
-          {renderDesktopRightSidebar()}
-        </div>
       </div>
-
-      {/* Mobile Sidebar Toggle */}
-      <button
-        onClick={() => setSidebarOpen(!sidebarOpen)}
-        className="lg:hidden fixed top-20 left-4 z-50 p-2 bg-blue-600 text-white rounded-lg shadow-lg"
-      >
-        {sidebarOpen ? '✕' : '☰'}
-      </button>
     </div>
   );
 
-  const renderDesktopSidebar = () => (
-    <div className="h-full flex flex-col">
-      {/* Sidebar Header */}
-      <div className="p-4 border-b border-gray-200 dark:border-gray-700">
-        <h2 className="text-lg font-semibold text-gray-900 dark:text-white">Acciones Rápidas</h2>
+  // ===== NEW DESKTOP COMPONENTS =====
+  
+  const renderDesktopQuickActions = () => (
+    <div className="space-y-6">
+      {/* Quick Stats Card */}
+      <div className="bg-white/70 dark:bg-gray-800/70 backdrop-blur-lg rounded-2xl p-6 shadow-xl border border-white/20 dark:border-gray-700/20">
+        <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-4">📊 Resumen Rápido</h3>
+        <div className="space-y-4">
+          <div className="flex items-center justify-between">
+            <span className="text-sm text-gray-600 dark:text-gray-400">Peso Actual</span>
+            <span className="font-bold text-gray-900 dark:text-white">
+              {estado.length > 0 ? `${estado[estado.length - 1].peso} kg` : '--'}
+            </span>
+          </div>
+          <div className="flex items-center justify-between">
+            <span className="text-sm text-gray-600 dark:text-gray-400">Calorías Hoy</span>
+            <span className="font-bold text-orange-600">
+              {getCaloriasDelDia()} kcal
+            </span>
+          </div>
+          <div className="flex items-center justify-between">
+            <span className="text-sm text-gray-600 dark:text-gray-400">Progreso</span>
+            <span className="font-bold text-green-600">
+              {Math.round(progress)}%
+            </span>
+          </div>
+        </div>
       </div>
 
       {/* Quick Actions */}
-      <div className="flex-1 p-4 space-y-4">
-        <button
-          onClick={() => setActiveForm('weight')}
-          className="w-full p-3 bg-blue-50 hover:bg-blue-100 dark:bg-blue-900 dark:hover:bg-blue-800 text-blue-700 dark:text-blue-300 rounded-lg transition-colors flex items-center space-x-3"
-        >
-          <span className="text-xl">⚖️</span>
-          <span className="font-medium">Agregar Peso</span>
-        </button>
+      <div className="bg-white/70 dark:bg-gray-800/70 backdrop-blur-lg rounded-2xl p-6 shadow-xl border border-white/20 dark:border-gray-700/20">
+        <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-4">⚡ Acciones Rápidas</h3>
+        <div className="space-y-3">
+          {[
+            { icon: '⚖️', label: 'Registrar Peso', action: () => openModal('weight'), color: 'blue' },
+            { icon: '🏃', label: 'Añadir Cardio', action: () => openModal('cardio'), color: 'green' },
+            { icon: '🥗', label: 'Registrar Dieta', action: () => openModal('diet'), color: 'orange' },
+            { icon: '🚶', label: 'Añadir NEAT', action: () => openModal('neat'), color: 'purple' },
+            { icon: '🎯', label: 'Entreno Extra', action: () => openModal('entreno-no-programado'), color: 'red' }
+          ].map((item, index) => (
+            <button
+              key={index}
+              onClick={item.action}
+              className="w-full flex items-center space-x-3 p-3 rounded-xl bg-gradient-to-r from-blue-50 to-blue-100 dark:from-blue-900/20 dark:to-blue-800/20 hover:from-blue-100 hover:to-blue-200 dark:hover:from-blue-800/30 dark:hover:to-blue-700/30 transition-all duration-300 border border-blue-200/50 dark:border-blue-700/50"
+            >
+              <span className="text-xl">{item.icon}</span>
+              <span className="font-medium text-gray-700 dark:text-gray-300">{item.label}</span>
+            </button>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
 
-        <button
-          onClick={() => setActiveForm('cardio')}
-          className="w-full p-3 bg-red-50 hover:bg-red-100 dark:bg-red-900 dark:hover:bg-red-800 text-red-700 dark:text-red-300 rounded-lg transition-colors flex items-center space-x-3"
-        >
-          <span className="text-xl">🏃</span>
-          <span className="font-medium">Agregar Cardio</span>
-        </button>
-
-        <button
-          onClick={() => setActiveForm('diet')}
-          className="w-full p-3 bg-yellow-50 hover:bg-yellow-100 dark:bg-yellow-900 dark:hover:bg-yellow-800 text-yellow-700 dark:text-yellow-300 rounded-lg transition-colors flex items-center space-x-3"
-        >
-          <span className="text-xl">🥗</span>
-          <span className="font-medium">Agregar Dieta</span>
-        </button>
-
-        <button
-          onClick={() => setActiveForm('neat')}
-          className="w-full p-3 bg-purple-50 hover:bg-purple-100 dark:bg-purple-900 dark:hover:bg-purple-800 text-purple-700 dark:text-purple-300 rounded-lg transition-colors flex items-center space-x-3"
-        >
-          <span className="text-xl">🚶</span>
-          <span className="font-medium">Agregar NEAT</span>
-        </button>
-
-        <button
-          onClick={() => setActiveForm('entreno')}
-          className="w-full p-3 bg-teal-50 hover:bg-teal-100 dark:bg-teal-900 dark:hover:bg-teal-800 text-teal-700 dark:text-teal-300 rounded-lg transition-colors flex items-center space-x-3"
-        >
-          <span className="text-xl">🎯</span>
-          <span className="font-medium">Entreno Extra</span>
-        </button>
+  const renderDesktopDashboard = () => (
+    <div className="space-y-8">
+      {/* Welcome Section */}
+      <div className="bg-gradient-to-r from-blue-600 to-purple-600 rounded-2xl p-8 text-white shadow-2xl">
+        <div className="flex items-center justify-between">
+          <div>
+            <h1 className="text-3xl font-bold mb-2">¡Bienvenido de vuelta! 👋</h1>
+            <p className="text-blue-100 text-lg">Hoy es {new Date().toLocaleDateString('es-ES', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}</p>
+          </div>
+          <div className="text-right">
+            <div className="text-4xl font-bold">{Math.round(progress)}%</div>
+            <div className="text-blue-100">Progreso del día</div>
+          </div>
+        </div>
       </div>
 
-      {/* Form Sidebar */}
-      {activeForm && (
-        <div className="border-t border-gray-200 dark:border-gray-700 p-4">
-          <div className="flex justify-between items-center mb-4">
-            <h3 className="font-semibold text-gray-900 dark:text-white">
-              {activeForm === 'weight' && '⚖️ Agregar Peso'}
-              {activeForm === 'cardio' && '🏃 Agregar Cardio'}
-              {activeForm === 'diet' && '🥗 Agregar Dieta'}
-              {activeForm === 'neat' && '🚶 Agregar NEAT'}
-              {activeForm === 'entreno' && '🎯 Entreno Extra'}
-            </h3>
+      {/* Today's Progress */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        {[
+          { icon: '🏋️', label: 'Entrenamiento', status: getStatus('workout'), color: 'blue' },
+          { icon: '🏃', label: 'Cardio', status: getStatus('cardio'), color: 'green' },
+          { icon: '🥗', label: 'Dieta', status: getStatus('diet'), color: 'orange' }
+        ].map((item, index) => (
+          <div key={index} className="bg-white/70 dark:bg-gray-800/70 backdrop-blur-lg rounded-2xl p-6 shadow-xl border border-white/20 dark:border-gray-700/20">
+            <div className="flex items-center space-x-4">
+              <div className={`w-12 h-12 bg-gradient-to-r from-${item.color}-500 to-${item.color}-600 rounded-xl flex items-center justify-center shadow-lg`}>
+                <span className="text-2xl">{item.icon}</span>
+              </div>
+              <div className="flex-1">
+                <h3 className="font-bold text-gray-900 dark:text-white">{item.label}</h3>
+                <p className={`text-sm font-medium ${
+                  item.status === 'Completado' ? 'text-green-600' : 'text-gray-500'
+                }`}>
+                  {item.status}
+                </p>
+              </div>
+            </div>
+          </div>
+        ))}
+      </div>
+
+      {/* Today's Workout */}
+      <div className="bg-white/70 dark:bg-gray-800/70 backdrop-blur-lg rounded-2xl p-6 shadow-xl border border-white/20 dark:border-gray-700/20">
+        <h2 className="text-xl font-bold text-gray-900 dark:text-white mb-4">💪 Entrenamiento de Hoy</h2>
+        {(() => {
+          const currentData = getCurrentMesocicloDay();
+          if (!currentData) {
+            return (
+              <div className="text-center py-8">
+                <div className="text-4xl mb-4">😴</div>
+                <p className="text-gray-600 dark:text-gray-400">Día de descanso</p>
+              </div>
+            );
+          }
+          
+          return (
+            <div className="space-y-4">
+              <div className="flex items-center space-x-4">
+                <div className="w-16 h-16 bg-gradient-to-r from-purple-500 to-pink-500 rounded-2xl flex items-center justify-center shadow-lg">
+                  <span className="text-3xl">💪</span>
+                </div>
+                <div className="flex-1">
+                  <h3 className="text-xl font-bold text-gray-900 dark:text-white">{currentData.dia.entrenamiento}</h3>
+                  <p className="text-gray-600 dark:text-gray-400">{currentData.microciclo.nombre}</p>
+                </div>
+                <button 
+                  onClick={() => {
+                    setSelectedWorkout({
+                      dia: currentData.dia.dia,
+                      entrenamiento: currentData.dia.entrenamiento,
+                      ejercicios: currentData.dia.ejercicios,
+                      cardio: currentData.dia.cardio
+                    });
+                    openModal('workout-details');
+                  }}
+                  className="px-6 py-3 bg-gradient-to-r from-purple-500 to-pink-500 text-white rounded-xl font-semibold hover:from-purple-600 hover:to-pink-600 transition-all duration-300 shadow-lg"
+                >
+                  Ver Detalles
+                </button>
+              </div>
+              
+              {currentData.dia.cardio && (
+                <div className="bg-gradient-to-r from-green-50 to-emerald-50 dark:from-green-900/20 dark:to-emerald-900/20 rounded-xl p-4 border border-green-200/50 dark:border-green-700/50">
+                  <div className="flex items-center space-x-3">
+                    <span className="text-2xl">🏃</span>
+                    <div>
+                      <p className="font-semibold text-gray-900 dark:text-white">{currentData.dia.cardio.tipo}</p>
+                      <p className="text-sm text-gray-600 dark:text-gray-400">
+                        {currentData.dia.cardio.duracion}min • {currentData.dia.cardio.intensidad}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              )}
+            </div>
+          );
+        })()}
+      </div>
+    </div>
+  );
+
+  const renderDesktopMesociclo = () => (
+    <div className="space-y-8">
+      <div className="bg-white/70 dark:bg-gray-800/70 backdrop-blur-lg rounded-2xl p-6 shadow-xl border border-white/20 dark:border-gray-700/20">
+        <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-6">📋 Plan de Entrenamiento</h2>
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          {mesocicloData.microciclos.map((microciclo, index) => (
+            <div key={index} className="bg-gradient-to-r from-purple-50 to-pink-50 dark:from-purple-900/20 dark:to-pink-900/20 rounded-xl p-6 border border-purple-200/50 dark:border-purple-700/50">
+              <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-2">{microciclo.nombre}</h3>
+              <p className="text-sm text-gray-600 dark:text-gray-400 mb-4">{microciclo.objetivo}</p>
+              
+              <div className="space-y-3">
+                {microciclo.dias.map((dia, diaIndex) => (
+                  <div key={diaIndex} className="bg-white/50 dark:bg-gray-800/50 rounded-lg p-4">
+                    <h4 className="font-semibold text-gray-900 dark:text-white mb-2">{dia.dia}</h4>
+                    <p className="text-sm text-gray-600 dark:text-gray-400 mb-2">{dia.entrenamiento}</p>
+                    <div className="flex items-center justify-between">
+                      <span className="text-xs text-gray-500">{dia.ejercicios.length} ejercicios</span>
+                      <button 
+                        onClick={() => {
+                          setSelectedWorkout({
+                            dia: dia.dia,
+                            entrenamiento: dia.entrenamiento,
+                            ejercicios: dia.ejercicios,
+                            cardio: dia.cardio
+                          });
+                          openModal('workout-details');
+                        }}
+                        className="text-xs bg-purple-100 text-purple-700 px-2 py-1 rounded-full hover:bg-purple-200 transition-colors"
+                      >
+                        Ver
+                      </button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+
+  const renderDesktopHistory = () => (
+    <div className="space-y-8">
+      <div className="bg-white/70 dark:bg-gray-800/70 backdrop-blur-lg rounded-2xl p-6 shadow-xl border border-white/20 dark:border-gray-700/20">
+        <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-6">📊 Historial de Actividades</h2>
+        
+        {/* Filter Buttons */}
+        <div className="flex flex-wrap gap-2 mb-6">
+          {[
+            { id: 'all', label: 'Todo', icon: '📋' },
+            { id: 'pesos', label: 'Peso', icon: '⚖️' },
+            { id: 'cardio', label: 'Cardio', icon: '🏃' },
+            { id: 'dieta', label: 'Dieta', icon: '🥗' },
+            { id: 'neat', label: 'NEAT', icon: '🚶' },
+            { id: 'entrenos', label: 'Entrenos', icon: '💪' }
+          ].map((filter) => (
             <button
-              onClick={() => setActiveForm(null)}
-              className="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
+              key={filter.id}
+              onClick={() => setHistoryFilter(filter.id as 'all' | 'pesos' | 'cardio' | 'dieta' | 'neat' | 'entrenos')}
+              className={`flex items-center space-x-2 px-4 py-2 rounded-xl text-sm font-medium transition-all duration-300 ${
+                historyFilter === filter.id
+                  ? 'bg-gradient-to-r from-blue-500 to-purple-500 text-white shadow-lg'
+                  : 'bg-white/50 dark:bg-gray-700/50 text-gray-700 dark:text-gray-300 hover:bg-white dark:hover:bg-gray-600'
+              }`}
             >
-              ✕
+              <span>{filter.icon}</span>
+              <span>{filter.label}</span>
+            </button>
+          ))}
+        </div>
+
+        {/* History List */}
+        <div className="space-y-4">
+          {getFilteredHistory().slice(0, 10).map((item, index) => (
+            <div
+              key={index}
+              onClick={() => viewHistoryItem(item)}
+              className="bg-white/50 dark:bg-gray-700/50 rounded-xl p-4 cursor-pointer hover:bg-white dark:hover:bg-gray-600 transition-all duration-300 border border-white/20 dark:border-gray-600/20"
+            >
+              <div className="flex items-center space-x-4">
+                <div className="w-12 h-12 bg-gradient-to-r from-blue-500 to-purple-500 rounded-xl flex items-center justify-center">
+                  <span className="text-2xl">{item.icon}</span>
+                </div>
+                <div className="flex-1">
+                  <h3 className="font-semibold text-gray-900 dark:text-white">{item.title}</h3>
+                  <p className="text-sm text-gray-600 dark:text-gray-400">{item.fecha}</p>
+                </div>
+                <div className={`px-3 py-1 rounded-full text-xs font-medium ${item.statusClass}`}>
+                  {item.status}
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+
+  const renderDesktopAnalytics = () => (
+    <div className="space-y-8">
+      <div className="bg-white/70 dark:bg-gray-800/70 backdrop-blur-lg rounded-2xl p-6 shadow-xl border border-white/20 dark:border-gray-700/20">
+        <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-6">📈 Analytics Avanzados</h2>
+        <DesktopCharts 
+          estado={estado}
+          cardio={cardio}
+          dieta={dieta}
+          neat={neat}
+        />
+      </div>
+    </div>
+  );
+
+  const renderDesktopSettings = () => (
+    <div className="space-y-8">
+      <div className="bg-white/70 dark:bg-gray-800/70 backdrop-blur-lg rounded-2xl p-6 shadow-xl border border-white/20 dark:border-gray-700/20">
+        <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-6">⚙️ Configuración</h2>
+        
+        <div className="space-y-6">
+          {/* Sync Section */}
+          <div className="bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20 rounded-xl p-6 border border-blue-200/50 dark:border-blue-700/50">
+            <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">🔄 Sincronización</h3>
+            <button
+              onClick={async () => {
+                await syncData('weights', estado);
+                await syncData('cardio', cardio);
+                await syncData('diet', dieta);
+                await syncData('neat', neat);
+                await syncData('entrenos_no_programados', entrenosNoProgramados);
+              }}
+              disabled={!syncStatus.isOnline || syncStatus.isSyncing}
+              className="w-full px-6 py-3 bg-gradient-to-r from-blue-500 to-indigo-500 text-white rounded-xl font-semibold hover:from-blue-600 hover:to-indigo-600 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-300 shadow-lg"
+            >
+              {syncStatus.isSyncing ? 'Sincronizando...' : 'Sincronizar Datos'}
             </button>
           </div>
-          
-          {activeForm === 'weight' && renderDesktopWeightForm()}
-          {activeForm === 'cardio' && renderDesktopCardioForm()}
-          {activeForm === 'diet' && renderDesktopDietForm()}
-          {activeForm === 'neat' && renderDesktopNeatForm()}
-          {activeForm === 'entreno' && renderDesktopEntrenoForm()}
+
+          {/* Mesociclo Config */}
+          <div className="bg-gradient-to-r from-purple-50 to-pink-50 dark:from-purple-900/20 dark:to-pink-900/20 rounded-xl p-6 border border-purple-200/50 dark:border-purple-700/50">
+            <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">📅 Configuración del Mesociclo</h3>
+            <div className="space-y-4">
+              <div className="flex items-center justify-between">
+                <span className="text-gray-700 dark:text-gray-300">Mesociclo Actual:</span>
+                <span className="font-semibold text-gray-900 dark:text-white">Mesociclo 1</span>
+              </div>
+              <div className="flex items-center justify-between">
+                <span className="text-gray-700 dark:text-gray-300">Día Actual:</span>
+                <span className="font-semibold text-gray-900 dark:text-white">Día 1</span>
+              </div>
+              <button
+                onClick={() => setShowStartDateConfig(true)}
+                className="w-full px-4 py-2 bg-gradient-to-r from-purple-500 to-pink-500 text-white rounded-lg font-medium hover:from-purple-600 hover:to-pink-600 transition-all duration-300"
+              >
+                Configurar Fecha de Inicio
+              </button>
+            </div>
+          </div>
         </div>
-      )}
+      </div>
+    </div>
+  );
+
+  const renderDesktopInsights = () => (
+    <div className="space-y-6">
+      {/* Weekly Progress */}
+      <div className="bg-white/70 dark:bg-gray-800/70 backdrop-blur-lg rounded-2xl p-6 shadow-xl border border-white/20 dark:border-gray-700/20">
+        <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-4">📊 Progreso Semanal</h3>
+        <div className="space-y-4">
+          {['Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb', 'Dom'].map((day, index) => (
+            <div key={day} className="flex items-center justify-between">
+              <span className="text-sm text-gray-600 dark:text-gray-400">{day}</span>
+              <div className="flex items-center space-x-2">
+                <div className="w-16 h-2 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
+                  <div 
+                    className="h-full bg-gradient-to-r from-green-400 to-blue-500 rounded-full transition-all duration-500"
+                    style={{ width: `${Math.random() * 100}%` }}
+                  ></div>
+                </div>
+                <span className="text-xs text-gray-500">{Math.round(Math.random() * 100)}%</span>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* Recent Activity */}
+      <div className="bg-white/70 dark:bg-gray-800/70 backdrop-blur-lg rounded-2xl p-6 shadow-xl border border-white/20 dark:border-gray-700/20">
+        <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-4">🕒 Actividad Reciente</h3>
+        <div className="space-y-3">
+          {estado.length > 0 && (
+            <div className="flex items-center space-x-3 p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
+              <span className="text-xl">⚖️</span>
+              <div>
+                <p className="text-sm font-medium text-gray-900 dark:text-white">Último peso</p>
+                <p className="text-xs text-gray-600 dark:text-gray-400">{estado[estado.length - 1].peso} kg</p>
+              </div>
+            </div>
+          )}
+          {cardio.length > 0 && (
+            <div className="flex items-center space-x-3 p-3 bg-green-50 dark:bg-green-900/20 rounded-lg">
+              <span className="text-xl">🏃</span>
+              <div>
+                <p className="text-sm font-medium text-gray-900 dark:text-white">Último cardio</p>
+                <p className="text-xs text-gray-600 dark:text-gray-400">{cardio[cardio.length - 1].km} km</p>
+              </div>
+            </div>
+          )}
+          {dieta.length > 0 && (
+            <div className="flex items-center space-x-3 p-3 bg-orange-50 dark:bg-orange-900/20 rounded-lg">
+              <span className="text-xl">🥗</span>
+              <div>
+                <p className="text-sm font-medium text-gray-900 dark:text-white">Última dieta</p>
+                <p className="text-xs text-gray-600 dark:text-gray-400">{dieta[dieta.length - 1].calorias} kcal</p>
+              </div>
+            </div>
+          )}
+        </div>
+      </div>
     </div>
   );
 
