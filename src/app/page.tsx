@@ -54,6 +54,7 @@ export default function Dashboard() {
   
   // Estados para versión PC
   const [viewMode, setViewMode] = useState<'mobile' | 'desktop'>('desktop');
+  const [sidebarOpen, setSidebarOpen] = useState(false);
   const [activeForm, setActiveForm] = useState<'weight' | 'cardio' | 'diet' | 'neat' | 'entreno' | null>(null);
   const [darkMode, setDarkMode] = useState(false);
   const [showAdvancedSettings, setShowAdvancedSettings] = useState(false);
@@ -472,66 +473,82 @@ export default function Dashboard() {
     openModal('history-details');
   };
 
-  // Desktop Layout Functions - COMPLETELY REDESIGNED
+  // Desktop Layout Functions - PRACTICAL REDESIGN
   const renderDesktopLayout = () => (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900">
-      {/* Modern Header */}
-      <header className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-lg border-b border-gray-200/50 dark:border-gray-700/50 sticky top-0 z-40">
-        <div className="max-w-7xl mx-auto px-6">
-          <div className="flex justify-between items-center h-20">
-            {/* Logo & Navigation */}
-            <div className="flex items-center space-x-12">
-              <div className="flex items-center space-x-3">
-                <div className="w-10 h-10 bg-gradient-to-r from-blue-600 to-purple-600 rounded-xl flex items-center justify-center shadow-lg">
-                  <span className="text-white text-xl font-bold">🏋️</span>
-                </div>
-                <h1 className="text-2xl font-bold bg-gradient-to-r from-gray-900 to-gray-600 dark:from-white dark:to-gray-300 bg-clip-text text-transparent">
-                  GymTracker Pro
-                </h1>
-              </div>
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
+      {/* Header */}
+      <header className="bg-white dark:bg-gray-800 shadow-sm border-b border-gray-200 dark:border-gray-700">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex justify-between items-center h-16">
+            <div className="flex items-center space-x-8">
+              <h1 className="text-2xl font-bold text-gray-900 dark:text-white">🏋️ GymTracker</h1>
               
-              {/* Modern Navigation */}
-              <nav className="hidden lg:flex space-x-1">
-                {[
-                  { id: 'today', label: 'Dashboard', icon: '🏠', color: 'blue' },
-                  { id: 'mesociclo', label: 'Mesociclo', icon: '📋', color: 'purple' },
-                  { id: 'history', label: 'Historial', icon: '📊', color: 'green' },
-                  { id: 'stats', label: 'Analytics', icon: '📈', color: 'orange' },
-                  { id: 'settings', label: 'Config', icon: '⚙️', color: 'gray' }
-                ].map((item) => (
-                  <button
-                    key={item.id}
-                    onClick={() => setActiveSection(item.id as 'today' | 'mesociclo' | 'history' | 'stats' | 'settings')}
-                    className={`group relative px-4 py-3 rounded-xl text-sm font-semibold transition-all duration-300 ${
-                      activeSection === item.id
-                        ? `bg-gradient-to-r from-${item.color}-500 to-${item.color}-600 text-white shadow-lg shadow-${item.color}-500/25`
-                        : 'text-gray-600 hover:text-gray-900 dark:text-gray-300 dark:hover:text-white hover:bg-white/50 dark:hover:bg-gray-700/50'
-                    }`}
-                  >
-                    <span className="flex items-center space-x-2">
-                      <span className="text-lg">{item.icon}</span>
-                      <span>{item.label}</span>
-                    </span>
-                    {activeSection === item.id && (
-                      <div className="absolute -bottom-px left-1/2 transform -translate-x-1/2 w-8 h-1 bg-white rounded-full"></div>
-                    )}
-                  </button>
-                ))}
+              {/* Navigation */}
+              <nav className="hidden lg:flex space-x-8">
+                <button
+                  onClick={() => setActiveSection('today')}
+                  className={`px-3 py-2 rounded-md text-sm font-medium transition-colors ${
+                    activeSection === 'today'
+                      ? 'bg-blue-100 text-blue-700 dark:bg-blue-900 dark:text-blue-300'
+                      : 'text-gray-600 hover:text-gray-900 dark:text-gray-300 dark:hover:text-white'
+                  }`}
+                >
+                  🏠 Dashboard
+                </button>
+                <button
+                  onClick={() => setActiveSection('mesociclo')}
+                  className={`px-3 py-2 rounded-md text-sm font-medium transition-colors ${
+                    activeSection === 'mesociclo'
+                      ? 'bg-blue-100 text-blue-700 dark:bg-blue-900 dark:text-blue-300'
+                      : 'text-gray-600 hover:text-gray-900 dark:text-gray-300 dark:hover:text-white'
+                  }`}
+                >
+                  📋 Mesociclo
+                </button>
+                <button
+                  onClick={() => setActiveSection('history')}
+                  className={`px-3 py-2 rounded-md text-sm font-medium transition-colors ${
+                    activeSection === 'history'
+                      ? 'bg-blue-100 text-blue-700 dark:bg-blue-900 dark:text-blue-300'
+                      : 'text-gray-600 hover:text-gray-900 dark:text-gray-300 dark:hover:text-white'
+                  }`}
+                >
+                  📊 Historial
+                </button>
+                <button
+                  onClick={() => setActiveSection('stats')}
+                  className={`px-3 py-2 rounded-md text-sm font-medium transition-colors ${
+                    activeSection === 'stats'
+                      ? 'bg-blue-100 text-blue-700 dark:bg-blue-900 dark:text-blue-300'
+                      : 'text-gray-600 hover:text-gray-900 dark:text-gray-300 dark:hover:text-white'
+                  }`}
+                >
+                  📈 Estadísticas
+                </button>
+                <button
+                  onClick={() => setActiveSection('settings')}
+                  className={`px-3 py-2 rounded-md text-sm font-medium transition-colors ${
+                    activeSection === 'settings'
+                      ? 'bg-blue-100 text-blue-700 dark:bg-blue-900 dark:text-blue-300'
+                      : 'text-gray-600 hover:text-gray-900 dark:text-gray-300 dark:hover:text-white'
+                  }`}
+                >
+                  ⚙️ Ajustes
+                </button>
               </nav>
             </div>
             
-            {/* Right Side Actions */}
             <div className="flex items-center space-x-4">
               {/* Sync Status */}
-              <div className="flex items-center space-x-3 px-4 py-2 bg-white/50 dark:bg-gray-700/50 rounded-xl backdrop-blur-sm">
-                <div className={`w-3 h-3 rounded-full ${
+              <div className="flex items-center space-x-2">
+                <div className={`w-2 h-2 rounded-full ${
                   syncStatus.isOnline 
                     ? syncStatus.isSyncing 
-                      ? 'bg-yellow-500 animate-pulse shadow-lg shadow-yellow-500/50' 
-                      : 'bg-green-500 shadow-lg shadow-green-500/50' 
-                    : 'bg-red-500 shadow-lg shadow-red-500/50'
+                      ? 'bg-yellow-500 animate-pulse' 
+                      : 'bg-green-500' 
+                    : 'bg-red-500'
                 }`} />
-                <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                <span className="text-xs text-gray-600 dark:text-gray-400">
                   {syncStatus.isOnline 
                     ? syncStatus.isSyncing 
                       ? 'Sincronizando...' 
@@ -541,211 +558,282 @@ export default function Dashboard() {
                 </span>
               </div>
               
-              {/* Action Buttons */}
-              <div className="flex items-center space-x-2">
-                <button
-                  onClick={() => setDarkMode(!darkMode)}
-                  className="p-3 text-gray-600 hover:text-gray-900 dark:text-gray-300 dark:hover:text-white hover:bg-white/50 dark:hover:bg-gray-700/50 rounded-xl transition-all duration-300 backdrop-blur-sm"
-                  title={darkMode ? 'Modo claro' : 'Modo oscuro'}
-                >
-                  <span className="text-lg">{darkMode ? '☀️' : '🌙'}</span>
-                </button>
-                <button
-                  onClick={() => openModal('weekly-calendar')}
-                  className="p-3 text-gray-600 hover:text-gray-900 dark:text-gray-300 dark:hover:text-white hover:bg-white/50 dark:hover:bg-gray-700/50 rounded-xl transition-all duration-300 backdrop-blur-sm"
-                  title="Ver plan semanal"
-                >
-                  <span className="text-lg">📅</span>
-                </button>
-              </div>
+              <button
+                onClick={() => setDarkMode(!darkMode)}
+                className="p-2 text-gray-600 hover:text-gray-900 dark:text-gray-300 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors"
+                title={darkMode ? 'Modo claro' : 'Modo oscuro'}
+              >
+                {darkMode ? '☀️' : '🌙'}
+              </button>
+              <button
+                onClick={() => openModal('weekly-calendar')}
+                className="p-2 text-gray-600 hover:text-gray-900 dark:text-gray-300 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors"
+                title="Ver plan semanal"
+              >
+                📅
+              </button>
             </div>
           </div>
         </div>
       </header>
 
-      {/* Main Content Area */}
-      <div className="max-w-7xl mx-auto px-6 py-8">
-        <div className="grid grid-cols-12 gap-8">
-          {/* Left Sidebar - Quick Actions */}
-          <div className="col-span-3">
-            <div className="sticky top-32 space-y-6">
-              {renderDesktopQuickActions()}
-            </div>
-          </div>
+      {/* Main Content */}
+      <div className="flex">
+        {/* Sidebar */}
+        <div className={`w-64 bg-white dark:bg-gray-800 border-r border-gray-200 dark:border-gray-700 transition-all duration-300 ${
+          sidebarOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'
+        }`}>
+          {renderDesktopSidebar()}
+        </div>
 
-          {/* Main Content */}
-          <div className="col-span-6">
-            <div className="space-y-8">
-              {activeSection === 'today' && renderDesktopDashboard()}
-              {activeSection === 'mesociclo' && renderDesktopMesociclo()}
-              {activeSection === 'history' && renderDesktopHistory()}
-              {activeSection === 'stats' && renderDesktopAnalytics()}
-              {activeSection === 'settings' && renderDesktopSettings()}
-            </div>
-          </div>
-
-          {/* Right Sidebar - Stats & Insights */}
-          <div className="col-span-3">
-            <div className="sticky top-32 space-y-6">
-              {renderDesktopInsights()}
-            </div>
+        {/* Main Content Area */}
+        <div className="flex-1">
+          <div className="p-6">
+            {activeSection === 'today' && renderDesktopDashboard()}
+            {activeSection === 'mesociclo' && renderDesktopMesociclo()}
+            {activeSection === 'history' && renderDesktopHistory()}
+            {activeSection === 'stats' && renderDesktopAnalytics()}
+            {activeSection === 'settings' && renderDesktopSettings()}
           </div>
         </div>
       </div>
+
+      {/* Mobile Sidebar Toggle */}
+      <button
+        onClick={() => setSidebarOpen(!sidebarOpen)}
+        className="lg:hidden fixed top-20 left-4 z-50 p-2 bg-blue-600 text-white rounded-lg shadow-lg"
+      >
+        {sidebarOpen ? '✕' : '☰'}
+      </button>
     </div>
   );
 
   // ===== NEW DESKTOP COMPONENTS =====
   
-  const renderDesktopQuickActions = () => (
-    <div className="space-y-6">
-      {/* Quick Stats Card */}
-      <div className="bg-white/70 dark:bg-gray-800/70 backdrop-blur-lg rounded-2xl p-6 shadow-xl border border-white/20 dark:border-gray-700/20">
-        <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-4">📊 Resumen Rápido</h3>
-        <div className="space-y-4">
-          <div className="flex items-center justify-between">
-            <span className="text-sm text-gray-600 dark:text-gray-400">Peso Actual</span>
-            <span className="font-bold text-gray-900 dark:text-white">
-              {estado.length > 0 ? `${estado[estado.length - 1].peso} kg` : '--'}
-            </span>
-          </div>
-          <div className="flex items-center justify-between">
-            <span className="text-sm text-gray-600 dark:text-gray-400">Calorías Hoy</span>
-            <span className="font-bold text-orange-600">
-              {getCaloriasDelDia()} kcal
-            </span>
-          </div>
-          <div className="flex items-center justify-between">
-            <span className="text-sm text-gray-600 dark:text-gray-400">Progreso</span>
-            <span className="font-bold text-green-600">
-              {Math.round(progress)}%
-            </span>
-          </div>
-        </div>
+  const renderDesktopSidebar = () => (
+    <div className="h-full flex flex-col">
+      {/* Sidebar Header */}
+      <div className="p-4 border-b border-gray-200 dark:border-gray-700">
+        <h2 className="text-lg font-semibold text-gray-900 dark:text-white">Acciones Rápidas</h2>
       </div>
 
       {/* Quick Actions */}
-      <div className="bg-white/70 dark:bg-gray-800/70 backdrop-blur-lg rounded-2xl p-6 shadow-xl border border-white/20 dark:border-gray-700/20">
-        <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-4">⚡ Acciones Rápidas</h3>
-        <div className="space-y-3">
-          {[
-            { icon: '⚖️', label: 'Registrar Peso', action: () => openModal('weight'), color: 'blue' },
-            { icon: '🏃', label: 'Añadir Cardio', action: () => openModal('cardio'), color: 'green' },
-            { icon: '🥗', label: 'Registrar Dieta', action: () => openModal('diet'), color: 'orange' },
-            { icon: '🚶', label: 'Añadir NEAT', action: () => openModal('neat'), color: 'purple' },
-            { icon: '🎯', label: 'Entreno Extra', action: () => openModal('entreno-no-programado'), color: 'red' }
-          ].map((item, index) => (
-            <button
-              key={index}
-              onClick={item.action}
-              className="w-full flex items-center space-x-3 p-3 rounded-xl bg-gradient-to-r from-blue-50 to-blue-100 dark:from-blue-900/20 dark:to-blue-800/20 hover:from-blue-100 hover:to-blue-200 dark:hover:from-blue-800/30 dark:hover:to-blue-700/30 transition-all duration-300 border border-blue-200/50 dark:border-blue-700/50"
-            >
-              <span className="text-xl">{item.icon}</span>
-              <span className="font-medium text-gray-700 dark:text-gray-300">{item.label}</span>
-            </button>
-          ))}
+      <div className="flex-1 p-4 space-y-4">
+        <button
+          onClick={() => openModal('weight')}
+          className="w-full p-3 bg-blue-50 hover:bg-blue-100 dark:bg-blue-900 dark:hover:bg-blue-800 text-blue-700 dark:text-blue-300 rounded-lg transition-colors flex items-center space-x-3"
+        >
+          <span className="text-xl">⚖️</span>
+          <span className="font-medium">Registrar Peso</span>
+        </button>
+
+        <button
+          onClick={() => openModal('cardio')}
+          className="w-full p-3 bg-green-50 hover:bg-green-100 dark:bg-green-900 dark:hover:bg-green-800 text-green-700 dark:text-green-300 rounded-lg transition-colors flex items-center space-x-3"
+        >
+          <span className="text-xl">🏃</span>
+          <span className="font-medium">Añadir Cardio</span>
+        </button>
+
+        <button
+          onClick={() => openModal('diet')}
+          className="w-full p-3 bg-orange-50 hover:bg-orange-100 dark:bg-orange-900 dark:hover:bg-orange-800 text-orange-700 dark:text-orange-300 rounded-lg transition-colors flex items-center space-x-3"
+        >
+          <span className="text-xl">🥗</span>
+          <span className="font-medium">Registrar Dieta</span>
+        </button>
+
+        <button
+          onClick={() => openModal('neat')}
+          className="w-full p-3 bg-purple-50 hover:bg-purple-100 dark:bg-purple-900 dark:hover:bg-purple-800 text-purple-700 dark:text-purple-300 rounded-lg transition-colors flex items-center space-x-3"
+        >
+          <span className="text-xl">🚶</span>
+          <span className="font-medium">Añadir NEAT</span>
+        </button>
+
+        <button
+          onClick={() => openModal('entreno-no-programado')}
+          className="w-full p-3 bg-red-50 hover:bg-red-100 dark:bg-red-900 dark:hover:bg-red-800 text-red-700 dark:text-red-300 rounded-lg transition-colors flex items-center space-x-3"
+        >
+          <span className="text-xl">🎯</span>
+          <span className="font-medium">Entreno Extra</span>
+        </button>
+      </div>
+
+      {/* Quick Stats */}
+      <div className="p-4 border-t border-gray-200 dark:border-gray-700">
+        <h3 className="text-sm font-semibold text-gray-900 dark:text-white mb-3">📊 Resumen</h3>
+        <div className="space-y-2 text-sm">
+          <div className="flex justify-between">
+            <span className="text-gray-600 dark:text-gray-400">Peso:</span>
+            <span className="font-medium text-gray-900 dark:text-white">
+              {estado.length > 0 ? `${estado[estado.length - 1].peso} kg` : '--'}
+            </span>
+          </div>
+          <div className="flex justify-between">
+            <span className="text-gray-600 dark:text-gray-400">Calorías:</span>
+            <span className="font-medium text-orange-600">{getCaloriasDelDia()} kcal</span>
+          </div>
+          <div className="flex justify-between">
+            <span className="text-gray-600 dark:text-gray-400">Progreso:</span>
+            <span className="font-medium text-green-600">{Math.round(progress)}%</span>
+          </div>
         </div>
       </div>
     </div>
   );
 
   const renderDesktopDashboard = () => (
-    <div className="space-y-8">
-      {/* Welcome Section */}
-      <div className="bg-gradient-to-r from-blue-600 to-purple-600 rounded-2xl p-8 text-white shadow-2xl">
-        <div className="flex items-center justify-between">
-          <div>
-            <h1 className="text-3xl font-bold mb-2">¡Bienvenido de vuelta! 👋</h1>
-            <p className="text-blue-100 text-lg">Hoy es {new Date().toLocaleDateString('es-ES', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}</p>
+    <div className="space-y-6">
+      {/* Header */}
+      <div className="flex justify-between items-center">
+        <h1 className="text-3xl font-bold text-gray-900 dark:text-white">🏠 Dashboard</h1>
+        <div className="text-sm text-gray-600 dark:text-gray-400">
+          {new Date().toLocaleDateString('es-ES', { 
+            weekday: 'long', 
+            year: 'numeric', 
+            month: 'long', 
+            day: 'numeric' 
+          })}
+        </div>
+      </div>
+
+      {/* Progress Overview */}
+      <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
+        <div className="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700">
+          <div className="flex items-center justify-between mb-4">
+            <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Progreso del Día</h3>
+            <span className="text-2xl">📊</span>
           </div>
-          <div className="text-right">
-            <div className="text-4xl font-bold">{Math.round(progress)}%</div>
-            <div className="text-blue-100">Progreso del día</div>
+          <div className="text-center">
+            <div className="text-3xl font-bold text-blue-600 dark:text-blue-400 mb-2">
+              {Math.round(calculateProgress() * 100)}%
+            </div>
+            <div className="text-sm text-gray-600 dark:text-gray-400">
+              {Object.keys(adherenciaDiaria[todayISO()] || {}).length} de 5 actividades
+            </div>
+          </div>
+        </div>
+
+        <div className="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700">
+          <div className="flex items-center justify-between mb-4">
+            <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Peso Actual</h3>
+            <span className="text-2xl">⚖️</span>
+          </div>
+          <div className="text-center">
+            <div className="text-3xl font-bold text-green-600 dark:text-green-400 mb-2">
+              {estado.length > 0 ? `${estado[estado.length - 1].peso} kg` : '--'}
+            </div>
+            <div className="text-sm text-gray-600 dark:text-gray-400">
+              Último registro
+            </div>
+          </div>
+        </div>
+
+        <div className="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700">
+          <div className="flex items-center justify-between mb-4">
+            <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Calorías Hoy</h3>
+            <span className="text-2xl">🔥</span>
+          </div>
+          <div className="text-center">
+            <div className="text-3xl font-bold text-orange-600 dark:text-orange-400 mb-2">
+              {getCaloriasDelDia()}
+            </div>
+            <div className="text-sm text-gray-600 dark:text-gray-400">
+              kcal consumidas
+            </div>
+          </div>
+        </div>
+
+        <div className="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700">
+          <div className="flex items-center justify-between mb-4">
+            <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Entrenamiento</h3>
+            <span className="text-2xl">💪</span>
+          </div>
+          <div className="text-center">
+            <div className="text-lg font-bold text-purple-600 dark:text-purple-400 mb-2">
+              {(() => {
+                const currentData = getCurrentMesocicloDay();
+                return currentData ? currentData.dia.entrenamiento : 'Descanso';
+              })()}
+            </div>
+            <div className="text-sm text-gray-600 dark:text-gray-400">
+              {(() => {
+                const currentData = getCurrentMesocicloDay();
+                return currentData ? currentData.dia.dia : 'Hoy';
+              })()}
+            </div>
           </div>
         </div>
       </div>
 
-      {/* Today's Progress */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        {[
-          { icon: '🏋️', label: 'Entrenamiento', status: getStatus('workout'), color: 'blue' },
-          { icon: '🏃', label: 'Cardio', status: getStatus('cardio'), color: 'green' },
-          { icon: '🥗', label: 'Dieta', status: getStatus('diet'), color: 'orange' }
-        ].map((item, index) => (
-          <div key={index} className="bg-white/70 dark:bg-gray-800/70 backdrop-blur-lg rounded-2xl p-6 shadow-xl border border-white/20 dark:border-gray-700/20">
-            <div className="flex items-center space-x-4">
-              <div className={`w-12 h-12 bg-gradient-to-r from-${item.color}-500 to-${item.color}-600 rounded-xl flex items-center justify-center shadow-lg`}>
-                <span className="text-2xl">{item.icon}</span>
+      {/* Activity Cards */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <div className="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700">
+          <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-4">Actividades Completadas</h3>
+          <div className="space-y-3">
+            {adherenciaDiaria[todayISO()]?.pesos && (
+              <div className="flex items-center space-x-3 p-3 bg-green-50 dark:bg-green-900/20 rounded-lg">
+                <span className="text-green-600 dark:text-green-400">✅</span>
+                <span className="text-gray-900 dark:text-white">Peso registrado</span>
               </div>
-              <div className="flex-1">
-                <h3 className="font-bold text-gray-900 dark:text-white">{item.label}</h3>
-                <p className={`text-sm font-medium ${
-                  item.status === 'Completado' ? 'text-green-600' : 'text-gray-500'
-                }`}>
-                  {item.status}
-                </p>
+            )}
+            {adherenciaDiaria[todayISO()]?.cardio && (
+              <div className="flex items-center space-x-3 p-3 bg-green-50 dark:bg-green-900/20 rounded-lg">
+                <span className="text-green-600 dark:text-green-400">✅</span>
+                <span className="text-gray-900 dark:text-white">Cardio completado</span>
               </div>
-            </div>
+            )}
+            {adherenciaDiaria[todayISO()]?.dieta && (
+              <div className="flex items-center space-x-3 p-3 bg-green-50 dark:bg-green-900/20 rounded-lg">
+                <span className="text-green-600 dark:text-green-400">✅</span>
+                <span className="text-gray-900 dark:text-white">Dieta registrada</span>
+              </div>
+            )}
+            {adherenciaDiaria[todayISO()]?.neat && (
+              <div className="flex items-center space-x-3 p-3 bg-green-50 dark:bg-green-900/20 rounded-lg">
+                <span className="text-green-600 dark:text-green-400">✅</span>
+                <span className="text-gray-900 dark:text-white">NEAT registrado</span>
+              </div>
+            )}
+            {adherenciaDiaria[todayISO()]?.entrenoNoProgramado && (
+              <div className="flex items-center space-x-3 p-3 bg-green-50 dark:bg-green-900/20 rounded-lg">
+                <span className="text-green-600 dark:text-green-400">✅</span>
+                <span className="text-gray-900 dark:text-white">Entreno extra</span>
+              </div>
+            )}
           </div>
-        ))}
-      </div>
+        </div>
 
-      {/* Today's Workout */}
-      <div className="bg-white/70 dark:bg-gray-800/70 backdrop-blur-lg rounded-2xl p-6 shadow-xl border border-white/20 dark:border-gray-700/20">
-        <h2 className="text-xl font-bold text-gray-900 dark:text-white mb-4">💪 Entrenamiento de Hoy</h2>
-        {(() => {
-          const currentData = getCurrentMesocicloDay();
-          if (!currentData) {
-            return (
-              <div className="text-center py-8">
-                <div className="text-4xl mb-4">😴</div>
-                <p className="text-gray-600 dark:text-gray-400">Día de descanso</p>
+        <div className="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700">
+          <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-4">Próximas Actividades</h3>
+          <div className="space-y-3">
+            {!adherenciaDiaria[todayISO()]?.pesos && (
+              <div className="flex items-center space-x-3 p-3 bg-gray-50 dark:bg-gray-700 rounded-lg">
+                <span className="text-gray-400">⏳</span>
+                <span className="text-gray-900 dark:text-white">Registrar peso</span>
               </div>
-            );
-          }
-          
-          return (
-            <div className="space-y-4">
-              <div className="flex items-center space-x-4">
-                <div className="w-16 h-16 bg-gradient-to-r from-purple-500 to-pink-500 rounded-2xl flex items-center justify-center shadow-lg">
-                  <span className="text-3xl">💪</span>
-                </div>
-                <div className="flex-1">
-                  <h3 className="text-xl font-bold text-gray-900 dark:text-white">{currentData.dia.entrenamiento}</h3>
-                  <p className="text-gray-600 dark:text-gray-400">{currentData.microciclo.nombre}</p>
-                </div>
-                <button 
-                  onClick={() => {
-                    setSelectedWorkout({
-                      dia: currentData.dia.dia,
-                      entrenamiento: currentData.dia.entrenamiento,
-                      ejercicios: currentData.dia.ejercicios,
-                      cardio: currentData.dia.cardio
-                    });
-                    openModal('workout-details');
-                  }}
-                  className="px-6 py-3 bg-gradient-to-r from-purple-500 to-pink-500 text-white rounded-xl font-semibold hover:from-purple-600 hover:to-pink-600 transition-all duration-300 shadow-lg"
-                >
-                  Ver Detalles
-                </button>
+            )}
+            {!adherenciaDiaria[todayISO()]?.cardio && (
+              <div className="flex items-center space-x-3 p-3 bg-gray-50 dark:bg-gray-700 rounded-lg">
+                <span className="text-gray-400">⏳</span>
+                <span className="text-gray-900 dark:text-white">Hacer cardio</span>
               </div>
-              
-              {currentData.dia.cardio && (
-                <div className="bg-gradient-to-r from-green-50 to-emerald-50 dark:from-green-900/20 dark:to-emerald-900/20 rounded-xl p-4 border border-green-200/50 dark:border-green-700/50">
-                  <div className="flex items-center space-x-3">
-                    <span className="text-2xl">🏃</span>
-                    <div>
-                      <p className="font-semibold text-gray-900 dark:text-white">{currentData.dia.cardio.tipo}</p>
-                      <p className="text-sm text-gray-600 dark:text-gray-400">
-                        {currentData.dia.cardio.duracion}min • {currentData.dia.cardio.intensidad}
-                      </p>
-                    </div>
-                  </div>
-                </div>
-              )}
-            </div>
-          );
-        })()}
+            )}
+            {!adherenciaDiaria[todayISO()]?.dieta && (
+              <div className="flex items-center space-x-3 p-3 bg-gray-50 dark:bg-gray-700 rounded-lg">
+                <span className="text-gray-400">⏳</span>
+                <span className="text-gray-900 dark:text-white">Registrar dieta</span>
+              </div>
+            )}
+            {!adherenciaDiaria[todayISO()]?.neat && (
+              <div className="flex items-center space-x-3 p-3 bg-gray-50 dark:bg-gray-700 rounded-lg">
+                <span className="text-gray-400">⏳</span>
+                <span className="text-gray-900 dark:text-white">Actividad NEAT</span>
+              </div>
+            )}
+          </div>
+        </div>
       </div>
     </div>
   );
