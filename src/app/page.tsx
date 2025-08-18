@@ -1339,7 +1339,7 @@ export default function Dashboard() {
                 <div className="bg-white dark:bg-gray-800 rounded-lg p-3">
                   <p className="text-xs text-gray-500 dark:text-gray-400 mb-1">Promedio 7 días</p>
                   <p className="text-lg font-bold text-gray-900 dark:text-white">
-                    {estado.slice(-7).reduce((sum, e) => sum + e.peso, 0) / Math.min(estado.length, 7)}.toFixed(1)} kg
+                    {(estado.slice(-7).reduce((sum, e) => sum + e.peso, 0) / Math.min(estado.length, 7)).toFixed(1)} kg
                   </p>
                 </div>
                 <div className="bg-white dark:bg-gray-800 rounded-lg p-3">
