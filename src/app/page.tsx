@@ -9,7 +9,7 @@ import { WorkoutModal } from '@/components/WorkoutModal';
 import { WeeklyCalendar } from '@/components/WeeklyCalendar';
 import { WeightEntry, CardioEntry, DietEntry, DailyAdherence, WorkoutEntry, Exercise, NeatEntry, SeguimientoEntry, EntrenoNoProgramado } from '@/types';
 import { LoadingFallback } from '@/components/LoadingFallback';
-import { getCurrentMesocicloDay, setMesocicloStartDate, getMesocicloStartDate, testMesocicloTracking, calcularCaloriasEntrenoNoProgramado } from '@/utils/mesocicloUtils';
+import { getCurrentMesocicloDay, setMesocicloStartDate, testMesocicloTracking, calcularCaloriasEntrenoNoProgramado } from '@/utils/mesocicloUtils';
 
 export default function Dashboard() {
   const { showToast } = useToast();
@@ -38,10 +38,19 @@ export default function Dashboard() {
   });
 
   const [historyFilter, setHistoryFilter] = useState<'all' | 'pesos' | 'cardio' | 'dieta' | 'neat' | 'entrenos'>('all');
-  const [selectedHistoryItem, setSelectedHistoryItem] = useState<any>(null);
+  const [selectedHistoryItem, setSelectedHistoryItem] = useState<{
+    type: string;
+    fecha: string;
+    icon: string;
+    title: string;
+    status: string;
+    statusClass: string;
+    details: string;
+    data: WeightEntry | CardioEntry | DietEntry | NeatEntry | EntrenoNoProgramado;
+  } | null>(null);
   
   // Estado para forzar re-render cuando cambia la fecha
-  const [forceUpdate, setForceUpdate] = useState(0);
+  const [, setForceUpdate] = useState(0);
   
   // Local storage hooks
   const [estado, setEstado] = useLocalStorage<WeightEntry[]>('estado', []);
@@ -227,7 +236,16 @@ export default function Dashboard() {
 
   // Funciones para el historial
   const getFilteredHistory = () => {
-    const allItems = [];
+    const allItems: {
+      type: string;
+      fecha: string;
+      icon: string;
+      title: string;
+      status: string;
+      statusClass: string;
+      details: string;
+      data: WeightEntry | CardioEntry | DietEntry | NeatEntry | EntrenoNoProgramado;
+    }[] = [];
     
     // Agregar pesos
     estado.forEach(item => {
@@ -322,7 +340,16 @@ export default function Dashboard() {
     return names[filter as keyof typeof names] || 'actividades';
   };
 
-  const viewHistoryItem = (item: any) => {
+  const viewHistoryItem = (item: {
+    type: string;
+    fecha: string;
+    icon: string;
+    title: string;
+    status: string;
+    statusClass: string;
+    details: string;
+    data: WeightEntry | CardioEntry | DietEntry | NeatEntry | EntrenoNoProgramado;
+  }) => {
     setSelectedHistoryItem(item);
     openModal('history-details');
   };
@@ -1014,13 +1041,11 @@ export default function Dashboard() {
                 {/* Current Day Info */}
         {(() => {
           let currentData;
-          let startDate = null;
           
           // Solo ejecutar en el cliente después de la hidratación
           if (typeof window !== 'undefined' && !isLoading) {
             try {
               currentData = getCurrentMesocicloDay();
-              startDate = getMesocicloStartDate();
             } catch (error) {
               console.error('Error loading mesociclo:', error);
               currentData = {
@@ -1292,15 +1317,6 @@ export default function Dashboard() {
   );
 
   const renderMesocicloSection = () => {
-    let startDate = null;
-    if (typeof window !== 'undefined' && !isLoading) {
-      try {
-        startDate = getMesocicloStartDate();
-      } catch (error) {
-        console.error('Error loading start date:', error);
-        startDate = null;
-      }
-    }
     
     const mesociclo = {
       nombre: "Mesociclo 1 Definitivo - Definición",
@@ -1880,24 +1896,10 @@ export default function Dashboard() {
                 onClick={() => setShowStartDateConfig(true)}
                 className="btn-elegant btn-small bg-yellow-500 hover:bg-yellow-600 text-white"
               >
-                {startDate ? 'Cambiar' : 'Configurar'}
+                Configurar
               </button>
             </div>
-            {startDate && (
-              <div className="px-3 md:px-4 pb-3 md:pb-4">
-                <div className="p-3 bg-green-50 rounded-lg">
-                  <p className="text-xs text-green-600 font-medium">Fecha configurada</p>
-                  <p className="text-sm md:text-base font-semibold">
-                    {new Date(startDate).toLocaleDateString('es-ES', { 
-                      weekday: 'long', 
-                      year: 'numeric', 
-                      month: 'long', 
-                      day: 'numeric' 
-                    })}
-                  </p>
-                </div>
-              </div>
-            )}
+
           </div>
 
           {/* Información General */}
@@ -3548,12 +3550,12 @@ export default function Dashboard() {
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 md:gap-4">
                       <div className="p-3 bg-blue-50 rounded-lg">
                         <p className="text-xs text-blue-600 font-medium">Peso</p>
-                        <p className="text-sm md:text-base font-semibold">{selectedHistoryItem.data.peso} kg</p>
+                        <p className="text-sm md:text-base font-semibold">{(selectedHistoryItem.data as WeightEntry).peso} kg</p>
                       </div>
-                      {selectedHistoryItem.data.cintura && (
+                      {(selectedHistoryItem.data as WeightEntry).cintura && (
                         <div className="p-3 bg-green-50 rounded-lg">
                           <p className="text-xs text-green-600 font-medium">Cintura</p>
-                          <p className="text-sm md:text-base font-semibold">{selectedHistoryItem.data.cintura} cm</p>
+                          <p className="text-sm md:text-base font-semibold">{(selectedHistoryItem.data as WeightEntry).cintura} cm</p>
                         </div>
                       )}
                     </div>
@@ -3566,19 +3568,19 @@ export default function Dashboard() {
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 md:gap-4">
                       <div className="p-3 bg-blue-50 rounded-lg">
                         <p className="text-xs text-blue-600 font-medium">Distancia</p>
-                        <p className="text-sm md:text-base font-semibold">{selectedHistoryItem.data.km} km</p>
+                        <p className="text-sm md:text-base font-semibold">{(selectedHistoryItem.data as CardioEntry).km} km</p>
                       </div>
                       <div className="p-3 bg-green-50 rounded-lg">
                         <p className="text-xs text-green-600 font-medium">Tiempo</p>
-                        <p className="text-sm md:text-base font-semibold">{selectedHistoryItem.data.tiempo} min</p>
+                        <p className="text-sm md:text-base font-semibold">{(selectedHistoryItem.data as CardioEntry).tiempo} min</p>
                       </div>
                       <div className="p-3 bg-orange-50 rounded-lg">
                         <p className="text-xs text-orange-600 font-medium">Ritmo</p>
-                        <p className="text-sm md:text-base font-semibold">{selectedHistoryItem.data.ritmo.toFixed(2)} min/km</p>
+                        <p className="text-sm md:text-base font-semibold">{(selectedHistoryItem.data as CardioEntry).ritmo.toFixed(2)} min/km</p>
                       </div>
                       <div className="p-3 bg-purple-50 rounded-lg">
                         <p className="text-xs text-purple-600 font-medium">Calorías</p>
-                        <p className="text-sm md:text-base font-semibold">{selectedHistoryItem.data.calorias} kcal</p>
+                        <p className="text-sm md:text-base font-semibold">{(selectedHistoryItem.data as CardioEntry).calorias} kcal</p>
                       </div>
                     </div>
                   </div>
@@ -3590,19 +3592,19 @@ export default function Dashboard() {
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 md:gap-4">
                       <div className="p-3 bg-blue-50 rounded-lg">
                         <p className="text-xs text-blue-600 font-medium">Calorías</p>
-                        <p className="text-sm md:text-base font-semibold">{selectedHistoryItem.data.calorias} kcal</p>
+                        <p className="text-sm md:text-base font-semibold">{(selectedHistoryItem.data as DietEntry).calorias} kcal</p>
                       </div>
                       <div className="p-3 bg-green-50 rounded-lg">
                         <p className="text-xs text-green-600 font-medium">Proteínas</p>
-                        <p className="text-sm md:text-base font-semibold">{selectedHistoryItem.data.proteinas}g</p>
+                        <p className="text-sm md:text-base font-semibold">{(selectedHistoryItem.data as DietEntry).proteinas}g</p>
                       </div>
                       <div className="p-3 bg-orange-50 rounded-lg">
                         <p className="text-xs text-orange-600 font-medium">Carbohidratos</p>
-                        <p className="text-sm md:text-base font-semibold">{selectedHistoryItem.data.carbos}g</p>
+                        <p className="text-sm md:text-base font-semibold">{(selectedHistoryItem.data as DietEntry).carbos}g</p>
                       </div>
                       <div className="p-3 bg-purple-50 rounded-lg">
                         <p className="text-xs text-purple-600 font-medium">Grasas</p>
-                        <p className="text-sm md:text-base font-semibold">{selectedHistoryItem.data.grasas}g</p>
+                        <p className="text-sm md:text-base font-semibold">{(selectedHistoryItem.data as DietEntry).grasas}g</p>
                       </div>
                     </div>
                   </div>
@@ -3614,22 +3616,22 @@ export default function Dashboard() {
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 md:gap-4">
                       <div className="p-3 bg-blue-50 rounded-lg">
                         <p className="text-xs text-blue-600 font-medium">Tipo</p>
-                        <p className="text-sm md:text-base font-semibold">{selectedHistoryItem.data.tipo === 'pasos' ? 'Pasos' : 'Cinta'}</p>
+                        <p className="text-sm md:text-base font-semibold">{(selectedHistoryItem.data as NeatEntry).tipo === 'pasos' ? 'Pasos' : 'Cinta'}</p>
                       </div>
-                      {selectedHistoryItem.data.tipo === 'pasos' ? (
+                      {(selectedHistoryItem.data as NeatEntry).tipo === 'pasos' ? (
                         <div className="p-3 bg-green-50 rounded-lg">
                           <p className="text-xs text-green-600 font-medium">Pasos</p>
-                          <p className="text-sm md:text-base font-semibold">{selectedHistoryItem.data.pasos}</p>
+                          <p className="text-sm md:text-base font-semibold">{(selectedHistoryItem.data as NeatEntry).pasos}</p>
                         </div>
                       ) : (
                         <div className="p-3 bg-green-50 rounded-lg">
                           <p className="text-xs text-green-600 font-medium">Distancia</p>
-                          <p className="text-sm md:text-base font-semibold">{selectedHistoryItem.data.km} km</p>
+                          <p className="text-sm md:text-base font-semibold">{(selectedHistoryItem.data as NeatEntry).km} km</p>
                         </div>
                       )}
                       <div className="p-3 bg-orange-50 rounded-lg">
                         <p className="text-xs text-orange-600 font-medium">Calorías</p>
-                        <p className="text-sm md:text-base font-semibold">{selectedHistoryItem.data.calorias} kcal</p>
+                        <p className="text-sm md:text-base font-semibold">{(selectedHistoryItem.data as NeatEntry).calorias} kcal</p>
                       </div>
                     </div>
                   </div>
@@ -3641,25 +3643,25 @@ export default function Dashboard() {
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 md:gap-4">
                       <div className="p-3 bg-blue-50 rounded-lg">
                         <p className="text-xs text-blue-600 font-medium">Actividad</p>
-                        <p className="text-sm md:text-base font-semibold">{selectedHistoryItem.data.tipo}</p>
+                        <p className="text-sm md:text-base font-semibold">{(selectedHistoryItem.data as EntrenoNoProgramado).tipo}</p>
                       </div>
                       <div className="p-3 bg-green-50 rounded-lg">
                         <p className="text-xs text-green-600 font-medium">Duración</p>
-                        <p className="text-sm md:text-base font-semibold">{selectedHistoryItem.data.duracion} min</p>
+                        <p className="text-sm md:text-base font-semibold">{(selectedHistoryItem.data as EntrenoNoProgramado).duracion} min</p>
                       </div>
                       <div className="p-3 bg-orange-50 rounded-lg">
                         <p className="text-xs text-orange-600 font-medium">Intensidad</p>
-                        <p className="text-sm md:text-base font-semibold">{selectedHistoryItem.data.intensidad}</p>
+                        <p className="text-sm md:text-base font-semibold">{(selectedHistoryItem.data as EntrenoNoProgramado).intensidad}</p>
                       </div>
                       <div className="p-3 bg-purple-50 rounded-lg">
                         <p className="text-xs text-purple-600 font-medium">Calorías</p>
-                        <p className="text-sm md:text-base font-semibold">{selectedHistoryItem.data.calorias} kcal</p>
+                        <p className="text-sm md:text-base font-semibold">{(selectedHistoryItem.data as EntrenoNoProgramado).calorias} kcal</p>
                       </div>
                     </div>
-                    {selectedHistoryItem.data.notas && (
+                    {(selectedHistoryItem.data as EntrenoNoProgramado).notas && (
                       <div className="mt-4 p-3 bg-gray-50 rounded-lg">
                         <p className="text-xs text-gray-600 font-medium mb-1">Notas</p>
-                        <p className="text-sm text-gray-700">{selectedHistoryItem.data.notas}</p>
+                        <p className="text-sm text-gray-700">{(selectedHistoryItem.data as EntrenoNoProgramado).notas}</p>
                       </div>
                     )}
                   </div>
@@ -3667,116 +3669,9 @@ export default function Dashboard() {
               </div>
             </div>
             
-            <div className="flex gap-2 md:gap-3 flex-shrink-0 p-3 md:p-4 border-t border-gray-200">
+                        <div className="flex gap-2 md:gap-3 flex-shrink-0 p-3 md:p-4 border-t border-gray-200">
               <button onClick={closeModal} className="btn-elegant btn-secondary flex-1 text-sm md:text-base">
                 Cerrar
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-        <div className="modal-overlay" onClick={closeModal}>
-          <div className="modal-content max-h-[90vh] flex flex-col mx-4 md:mx-auto" onClick={(e) => e.stopPropagation()}>
-            <div className="modal-header flex-shrink-0">
-              <button className="modal-close" onClick={closeModal}>×</button>
-              <h3 className="text-base md:text-lg">🏋️ {selectedWorkout.dia} - {selectedWorkout.entrenamiento}</h3>
-            </div>
-            
-            <div className="modal-body flex-1 overflow-y-auto">
-              <div className="space-y-4 md:space-y-6">
-                {/* Cardio */}
-                {selectedWorkout.cardio && (
-                  <div className="clean-card">
-                    <div className="flex items-center gap-2 md:gap-3 mb-3 md:mb-4">
-                      <div className="w-8 h-8 md:w-10 md:h-10 bg-blue-500 rounded-full flex items-center justify-center text-white text-sm md:text-base">
-                        🏃
-                      </div>
-                      <div>
-                        <h4 className="font-semibold text-base md:text-lg">Cardio</h4>
-                        <p className="text-xs md:text-sm text-gray-600">{selectedWorkout.cardio.tipo}</p>
-                      </div>
-                    </div>
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 md:gap-4">
-                      <div className="p-3 bg-blue-50 rounded-lg">
-                        <p className="text-xs text-blue-600 font-medium">Duración</p>
-                        <p className="text-sm md:text-base font-semibold">{selectedWorkout.cardio.duracion} minutos</p>
-                      </div>
-                      <div className="p-3 bg-blue-50 rounded-lg">
-                        <p className="text-xs text-blue-600 font-medium">Intensidad</p>
-                        <p className="text-sm md:text-base font-semibold">{selectedWorkout.cardio.intensidad}</p>
-                      </div>
-                    </div>
-                  </div>
-                )}
-
-                {/* Ejercicios */}
-                <div className="clean-card">
-                  <div className="flex items-center gap-2 md:gap-3 mb-3 md:mb-4">
-                    <div className="w-8 h-8 md:w-10 md:h-10 bg-primary rounded-full flex items-center justify-center text-white text-sm md:text-base">
-                      💪
-                    </div>
-                    <div>
-                      <h4 className="font-semibold text-base md:text-lg">Ejercicios</h4>
-                      <p className="text-xs md:text-sm text-gray-600">{selectedWorkout.ejercicios.length} ejercicios</p>
-                    </div>
-                  </div>
-                  
-                  <div className="space-y-2 md:space-y-3">
-                    {selectedWorkout.ejercicios.map((ejercicio, index) => (
-                      <div key={index} className="flex items-start gap-2 md:gap-3 p-3 bg-gray-50 rounded-lg">
-                        <div className="w-5 h-5 md:w-6 md:h-6 bg-primary rounded-full flex items-center justify-center text-white text-xs font-bold flex-shrink-0">
-                          {index + 1}
-                        </div>
-                        <div className="flex-1 min-w-0">
-                          <p className="font-medium text-xs md:text-sm break-words">{ejercicio}</p>
-                          <div className="flex flex-wrap gap-1 mt-1">
-                            {ejercicio.includes('REST PAUSE') && (
-                              <span className="inline-block text-xs bg-orange-100 text-orange-700 px-2 py-1 rounded-full">
-                                Rest Pause
-                              </span>
-                            )}
-                            {ejercicio.includes('DROP SET') && (
-                              <span className="inline-block text-xs bg-red-100 text-red-700 px-2 py-1 rounded-full">
-                                Drop Set
-                              </span>
-                            )}
-                            {ejercicio.includes('PARCIALES') && (
-                              <span className="inline-block text-xs bg-purple-100 text-purple-700 px-2 py-1 rounded-full">
-                                Parciales
-                              </span>
-                            )}
-                          </div>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-
-                {/* Notas */}
-                <div className="clean-card">
-                  <h4 className="font-semibold mb-2 md:mb-3 text-sm md:text-base">📝 Notas</h4>
-                  <div className="space-y-1 md:space-y-2 text-xs md:text-sm text-gray-600">
-                    <p>• Descansa 2-3 minutos entre series</p>
-                    <p>• Mantén la técnica correcta en todos los ejercicios</p>
-                    <p>• Si no puedes completar las repeticiones objetivo, reduce el peso</p>
-                    <p>• Los ejercicios con técnicas especiales (Rest Pause, Drop Set) son opcionales si te sientes fatigado</p>
-                  </div>
-                </div>
-              </div>
-            </div>
-            
-            <div className="flex gap-2 md:gap-3 flex-shrink-0 p-3 md:p-4 border-t border-gray-200">
-              <button onClick={closeModal} className="btn-elegant btn-secondary flex-1 text-sm md:text-base">
-                Cerrar
-              </button>
-              <button 
-                onClick={() => {
-                  closeModal();
-                  openModal('workout');
-                }} 
-                className="btn-elegant btn-primary flex-1 text-sm md:text-base"
-              >
-                🎯 Iniciar Entrenamiento
               </button>
             </div>
           </div>
