@@ -89,31 +89,24 @@ export default function Dashboard() {
 
   // Effect para manejar la carga inicial
   useEffect(() => {
-    // Asegurar que localStorage esté disponible
-    if (typeof window !== 'undefined') {
-      try {
-        // Test localStorage access
-        localStorage.getItem('test');
-        setIsLoading(false);
-        
-
-        
-        // Inicializar base de datos
-        const initDB = async () => {
+    const initializeApp = async () => {
+      // Asegurar que localStorage esté disponible
+      if (typeof window !== 'undefined') {
+        try {
+          // Test localStorage access
+          localStorage.getItem('test');
+          
+          // Inicializar base de datos
           try {
             await fetch('/api/init-db', { method: 'POST' });
             console.log('✅ Base de datos inicializada');
           } catch (error) {
             console.error('❌ Error inicializando base de datos:', error);
           }
-        };
-        
-        initDB();
-        
-        // Cargar datos desde Neon y poblar estado local al iniciar (si hay conexión)
-        const fetchCloudData = async () => {
-          try {
-            if (syncStatus.isOnline) {
+          
+          // Cargar datos desde Neon si hay conexión
+          if (syncStatus.isOnline) {
+            try {
               const weights = await loadData('weights');
               if (Array.isArray(weights)) {
                 const mapped = weights.map((w: Record<string, unknown>) => ({
@@ -184,20 +177,22 @@ export default function Dashboard() {
               }
 
               showToast('☁️ Datos cargados desde la nube', 'success');
+            } catch (e) {
+              console.error('Error cargando datos en inicio:', e);
             }
-          } catch (e) {
-            console.error('Error cargando datos en inicio:', e);
           }
-        };
-        fetchCloudData();
-        
-        return () => {};
-      } catch (error) {
-        console.error('localStorage not available:', error);
-        setIsLoading(false);
+          
+          // Marcar como cargado
+          setIsLoading(false);
+        } catch (error) {
+          console.error('localStorage not available:', error);
+          setIsLoading(false);
+        }
       }
-    }
-  }, [loadData, setEstado, setCardio, setDieta, setNeat, setEntrenosNoProgramados, showToast, syncStatus.isOnline]);
+    };
+
+    initializeApp();
+  }, []); // Solo se ejecuta una vez al montar el componente
 
   // Form states
   const [weightInput, setWeightInput] = useState('');
@@ -3722,13 +3717,13 @@ export default function Dashboard() {
   // ===== DESKTOP FUNCTIONS =====
   
   const renderDesktopDashboard = () => (
-    <div className="space-y-6">
-      {/* Welcome Card */}
-      <div className="bg-gradient-to-r from-blue-500 to-blue-600 rounded-xl p-6 text-white shadow-lg">
+    <div className="space-y-8">
+      {/* Welcome Section */}
+      <div className="bg-gradient-to-r from-blue-500 to-blue-600 rounded-2xl p-8 text-white shadow-xl">
         <div className="flex items-center justify-between">
           <div>
-            <h2 className="text-2xl font-bold mb-1">¡Bienvenido de vuelta! 👋</h2>
-            <p className="text-blue-100">
+            <h2 className="text-3xl font-bold mb-2">¡Bienvenido de vuelta! 👋</h2>
+            <p className="text-blue-100 text-lg">
               Hoy es {new Date().toLocaleDateString('es-ES', { 
                 weekday: 'long', 
                 year: 'numeric', 
@@ -3738,32 +3733,35 @@ export default function Dashboard() {
             </p>
           </div>
           <div className="text-right">
-            <div className="text-4xl font-bold mb-1">{Math.round(progress)}%</div>
-            <div className="text-blue-100">Progreso del día</div>
+            <div className="text-5xl font-bold mb-2">{Math.round(progress)}%</div>
+            <div className="text-blue-100 text-lg">Progreso del día</div>
           </div>
         </div>
       </div>
 
-      {/* Stats Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+      {/* Quick Stats */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
         {[
           { 
             icon: '📊', 
             label: 'Progreso del Día', 
             value: `${Math.round(calculateProgress() * 100)}%`,
-            subtitle: `${Object.keys(adherenciaDiaria[todayISO()] || {}).length} de 5 actividades`
+            subtitle: `${Object.keys(adherenciaDiaria[todayISO()] || {}).length} de 5 actividades`,
+            color: 'blue'
           },
           { 
             icon: '⚖️', 
             label: 'Peso Actual', 
             value: estado.length > 0 ? `${estado[estado.length - 1].peso} kg` : '--',
-            subtitle: 'Último registro'
+            subtitle: 'Último registro',
+            color: 'green'
           },
           { 
             icon: '🔥', 
             label: 'Calorías Hoy', 
             value: `${getCaloriasDelDia()}`,
-            subtitle: 'kcal consumidas'
+            subtitle: 'kcal consumidas',
+            color: 'orange'
           },
           { 
             icon: '💪', 
@@ -3775,23 +3773,24 @@ export default function Dashboard() {
             subtitle: (() => {
               const currentData = getCurrentMesocicloDay();
               return currentData ? currentData.dia.dia : 'Hoy';
-            })()
+            })(),
+            color: 'purple'
           }
         ].map((stat, index) => (
-          <div key={index} className="bg-white rounded-xl p-4 shadow-lg border border-blue-200">
-            <div className="flex items-center space-x-3 mb-3">
-              <div className="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center">
-                <span className="text-xl">{stat.icon}</span>
+          <div key={index} className="bg-white rounded-xl p-6 shadow-lg border border-blue-200 hover:shadow-xl transition-all duration-300">
+            <div className="flex items-center space-x-4 mb-4">
+              <div className={`w-12 h-12 bg-${stat.color}-100 rounded-xl flex items-center justify-center`}>
+                <span className="text-2xl">{stat.icon}</span>
               </div>
               <div>
                 <h3 className="text-sm font-semibold text-blue-900">{stat.label}</h3>
               </div>
             </div>
             <div className="text-center">
-              <div className="text-2xl font-bold text-blue-900 mb-1">
+              <div className="text-3xl font-bold text-blue-900 mb-2">
                 {stat.value}
               </div>
-              <div className="text-xs text-blue-600">
+              <div className="text-sm text-blue-600">
                 {stat.subtitle}
               </div>
             </div>
@@ -3799,99 +3798,181 @@ export default function Dashboard() {
         ))}
       </div>
 
-      {/* Activity Overview */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <div className="bg-white rounded-xl p-6 shadow-lg border border-blue-200">
-          <div className="flex items-center space-x-3 mb-4">
-            <div className="w-8 h-8 bg-green-100 rounded-lg flex items-center justify-center">
-              <span className="text-green-600">✅</span>
+      {/* Main Content Grid */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        {/* Activity Overview */}
+        <div className="lg:col-span-2 space-y-6">
+          <div className="bg-white rounded-xl p-6 shadow-lg border border-blue-200">
+            <div className="flex items-center space-x-3 mb-6">
+              <div className="w-10 h-10 bg-green-100 rounded-xl flex items-center justify-center">
+                <span className="text-green-600 text-xl">✅</span>
+              </div>
+              <h3 className="text-xl font-semibold text-blue-900">Actividades Completadas</h3>
             </div>
-            <h3 className="text-lg font-semibold text-blue-900">Actividades Completadas</h3>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {adherenciaDiaria[todayISO()]?.pesos && (
+                <div className="flex items-center space-x-3 p-4 bg-green-50 rounded-xl border border-green-200">
+                  <div className="w-8 h-8 bg-green-500 rounded-lg flex items-center justify-center">
+                    <span className="text-white text-sm">⚖️</span>
+                  </div>
+                  <span className="font-medium text-blue-900">Peso registrado</span>
+                </div>
+              )}
+              {adherenciaDiaria[todayISO()]?.cardio && (
+                <div className="flex items-center space-x-3 p-4 bg-green-50 rounded-xl border border-green-200">
+                  <div className="w-8 h-8 bg-green-500 rounded-lg flex items-center justify-center">
+                    <span className="text-white text-sm">🏃</span>
+                  </div>
+                  <span className="font-medium text-blue-900">Cardio completado</span>
+                </div>
+              )}
+              {adherenciaDiaria[todayISO()]?.dieta && (
+                <div className="flex items-center space-x-3 p-4 bg-green-50 rounded-xl border border-green-200">
+                  <div className="w-8 h-8 bg-green-500 rounded-lg flex items-center justify-center">
+                    <span className="text-white text-sm">🥗</span>
+                  </div>
+                  <span className="font-medium text-blue-900">Dieta registrada</span>
+                </div>
+              )}
+              {adherenciaDiaria[todayISO()]?.neat && (
+                <div className="flex items-center space-x-3 p-4 bg-green-50 rounded-xl border border-green-200">
+                  <div className="w-8 h-8 bg-green-500 rounded-lg flex items-center justify-center">
+                    <span className="text-white text-sm">🚶</span>
+                  </div>
+                  <span className="font-medium text-blue-900">NEAT registrado</span>
+                </div>
+              )}
+              {adherenciaDiaria[todayISO()]?.entrenoNoProgramado && (
+                <div className="flex items-center space-x-3 p-4 bg-green-50 rounded-xl border border-green-200">
+                  <div className="w-8 h-8 bg-green-500 rounded-lg flex items-center justify-center">
+                    <span className="text-white text-sm">🎯</span>
+                  </div>
+                  <span className="font-medium text-blue-900">Entreno extra</span>
+                </div>
+              )}
+            </div>
           </div>
-          <div className="space-y-2">
-            {adherenciaDiaria[todayISO()]?.pesos && (
-              <div className="flex items-center space-x-3 p-3 bg-green-50 rounded-lg border border-green-200">
-                <div className="w-6 h-6 bg-green-500 rounded flex items-center justify-center">
-                  <span className="text-white text-xs">⚖️</span>
-                </div>
-                <span className="font-medium text-blue-900">Peso registrado</span>
+
+          <div className="bg-white rounded-xl p-6 shadow-lg border border-blue-200">
+            <div className="flex items-center space-x-3 mb-6">
+              <div className="w-10 h-10 bg-amber-100 rounded-xl flex items-center justify-center">
+                <span className="text-amber-600 text-xl">⏳</span>
               </div>
-            )}
-            {adherenciaDiaria[todayISO()]?.cardio && (
-              <div className="flex items-center space-x-3 p-3 bg-green-50 rounded-lg border border-green-200">
-                <div className="w-6 h-6 bg-green-500 rounded flex items-center justify-center">
-                  <span className="text-white text-xs">🏃</span>
+              <h3 className="text-xl font-semibold text-blue-900">Próximas Actividades</h3>
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {!adherenciaDiaria[todayISO()]?.pesos && (
+                <div className="flex items-center space-x-3 p-4 bg-gray-50 rounded-xl border border-gray-200">
+                  <div className="w-8 h-8 bg-gray-400 rounded-lg flex items-center justify-center">
+                    <span className="text-white text-sm">⚖️</span>
+                  </div>
+                  <span className="font-medium text-blue-700">Registrar peso</span>
                 </div>
-                <span className="font-medium text-blue-900">Cardio completado</span>
-              </div>
-            )}
-            {adherenciaDiaria[todayISO()]?.dieta && (
-              <div className="flex items-center space-x-3 p-3 bg-green-50 rounded-lg border border-green-200">
-                <div className="w-6 h-6 bg-green-500 rounded flex items-center justify-center">
-                  <span className="text-white text-xs">🥗</span>
+              )}
+              {!adherenciaDiaria[todayISO()]?.cardio && (
+                <div className="flex items-center space-x-3 p-4 bg-gray-50 rounded-xl border border-gray-200">
+                  <div className="w-8 h-8 bg-gray-400 rounded-lg flex items-center justify-center">
+                    <span className="text-white text-sm">🏃</span>
+                  </div>
+                  <span className="font-medium text-blue-700">Hacer cardio</span>
                 </div>
-                <span className="font-medium text-blue-900">Dieta registrada</span>
-              </div>
-            )}
-            {adherenciaDiaria[todayISO()]?.neat && (
-              <div className="flex items-center space-x-3 p-3 bg-green-50 rounded-lg border border-green-200">
-                <div className="w-6 h-6 bg-green-500 rounded flex items-center justify-center">
-                  <span className="text-white text-xs">🚶</span>
+              )}
+              {!adherenciaDiaria[todayISO()]?.dieta && (
+                <div className="flex items-center space-x-3 p-4 bg-gray-50 rounded-xl border border-gray-200">
+                  <div className="w-8 h-8 bg-gray-400 rounded-lg flex items-center justify-center">
+                    <span className="text-white text-sm">🥗</span>
+                  </div>
+                  <span className="font-medium text-blue-700">Registrar dieta</span>
                 </div>
-                <span className="font-medium text-blue-900">NEAT registrado</span>
-              </div>
-            )}
-            {adherenciaDiaria[todayISO()]?.entrenoNoProgramado && (
-              <div className="flex items-center space-x-3 p-3 bg-green-50 rounded-lg border border-green-200">
-                <div className="w-6 h-6 bg-green-500 rounded flex items-center justify-center">
-                  <span className="text-white text-xs">🎯</span>
+              )}
+              {!adherenciaDiaria[todayISO()]?.neat && (
+                <div className="flex items-center space-x-3 p-4 bg-gray-50 rounded-xl border border-gray-200">
+                  <div className="w-8 h-8 bg-gray-400 rounded-lg flex items-center justify-center">
+                    <span className="text-white text-sm">🚶</span>
+                  </div>
+                  <span className="font-medium text-blue-700">Actividad NEAT</span>
                 </div>
-                <span className="font-medium text-blue-900">Entreno extra</span>
-              </div>
-            )}
+              )}
+            </div>
           </div>
         </div>
 
-        <div className="bg-white rounded-xl p-6 shadow-lg border border-blue-200">
-          <div className="flex items-center space-x-3 mb-4">
-            <div className="w-8 h-8 bg-amber-100 rounded-lg flex items-center justify-center">
-              <span className="text-amber-600">⏳</span>
+        {/* Quick Actions Sidebar */}
+        <div className="space-y-6">
+          <div className="bg-white rounded-xl p-6 shadow-lg border border-blue-200">
+            <h3 className="text-lg font-semibold text-blue-900 mb-4">⚡ Acciones Rápidas</h3>
+            <div className="space-y-3">
+              <button
+                onClick={() => setActiveForm('weight')}
+                className="w-full flex items-center space-x-3 p-4 bg-blue-50 rounded-xl border border-blue-200 hover:bg-blue-100 transition-colors"
+              >
+                <div className="w-8 h-8 bg-blue-500 rounded-lg flex items-center justify-center">
+                  <span className="text-white text-sm">⚖️</span>
+                </div>
+                <span className="font-medium text-blue-900">Registrar Peso</span>
+              </button>
+              <button
+                onClick={() => setActiveForm('cardio')}
+                className="w-full flex items-center space-x-3 p-4 bg-green-50 rounded-xl border border-green-200 hover:bg-green-100 transition-colors"
+              >
+                <div className="w-8 h-8 bg-green-500 rounded-lg flex items-center justify-center">
+                  <span className="text-white text-sm">🏃</span>
+                </div>
+                <span className="font-medium text-blue-900">Añadir Cardio</span>
+              </button>
+              <button
+                onClick={() => setActiveForm('diet')}
+                className="w-full flex items-center space-x-3 p-4 bg-orange-50 rounded-xl border border-orange-200 hover:bg-orange-100 transition-colors"
+              >
+                <div className="w-8 h-8 bg-orange-500 rounded-lg flex items-center justify-center">
+                  <span className="text-white text-sm">🥗</span>
+                </div>
+                <span className="font-medium text-blue-900">Registrar Dieta</span>
+              </button>
+              <button
+                onClick={() => setActiveForm('neat')}
+                className="w-full flex items-center space-x-3 p-4 bg-purple-50 rounded-xl border border-purple-200 hover:bg-purple-100 transition-colors"
+              >
+                <div className="w-8 h-8 bg-purple-500 rounded-lg flex items-center justify-center">
+                  <span className="text-white text-sm">🚶</span>
+                </div>
+                <span className="font-medium text-blue-900">Añadir NEAT</span>
+              </button>
             </div>
-            <h3 className="text-lg font-semibold text-blue-900">Próximas Actividades</h3>
           </div>
-          <div className="space-y-2">
-            {!adherenciaDiaria[todayISO()]?.pesos && (
-              <div className="flex items-center space-x-3 p-3 bg-gray-50 rounded-lg border border-gray-200">
-                <div className="w-6 h-6 bg-gray-400 rounded flex items-center justify-center">
-                  <span className="text-white text-xs">⚖️</span>
+
+          {/* Recent Activity */}
+          <div className="bg-white rounded-xl p-6 shadow-lg border border-blue-200">
+            <h3 className="text-lg font-semibold text-blue-900 mb-4">📈 Actividad Reciente</h3>
+            <div className="space-y-3">
+              {estado.length > 0 && (
+                <div className="flex items-center space-x-3 p-3 bg-blue-50 rounded-lg">
+                  <span className="text-xl">⚖️</span>
+                  <div>
+                    <p className="text-sm font-medium text-blue-900">Último peso</p>
+                    <p className="text-xs text-blue-600">{estado[estado.length - 1].peso} kg</p>
+                  </div>
                 </div>
-                <span className="font-medium text-blue-700">Registrar peso</span>
-              </div>
-            )}
-            {!adherenciaDiaria[todayISO()]?.cardio && (
-              <div className="flex items-center space-x-3 p-3 bg-gray-50 rounded-lg border border-gray-200">
-                <div className="w-6 h-6 bg-gray-400 rounded flex items-center justify-center">
-                  <span className="text-white text-xs">🏃</span>
+              )}
+              {cardio.length > 0 && (
+                <div className="flex items-center space-x-3 p-3 bg-green-50 rounded-lg">
+                  <span className="text-xl">🏃</span>
+                  <div>
+                    <p className="text-sm font-medium text-blue-900">Último cardio</p>
+                    <p className="text-xs text-blue-600">{cardio[cardio.length - 1].km} km</p>
+                  </div>
                 </div>
-                <span className="font-medium text-blue-700">Hacer cardio</span>
-              </div>
-            )}
-            {!adherenciaDiaria[todayISO()]?.dieta && (
-              <div className="flex items-center space-x-3 p-3 bg-gray-50 rounded-lg border border-gray-200">
-                <div className="w-6 h-6 bg-gray-400 rounded flex items-center justify-center">
-                  <span className="text-white text-xs">🥗</span>
+              )}
+              {dieta.length > 0 && (
+                <div className="flex items-center space-x-3 p-3 bg-orange-50 rounded-lg">
+                  <span className="text-xl">🥗</span>
+                  <div>
+                    <p className="text-sm font-medium text-blue-900">Última dieta</p>
+                    <p className="text-xs text-blue-600">{dieta[dieta.length - 1].calorias} kcal</p>
+                  </div>
                 </div>
-                <span className="font-medium text-blue-700">Registrar dieta</span>
-              </div>
-            )}
-            {!adherenciaDiaria[todayISO()]?.neat && (
-              <div className="flex items-center space-x-3 p-3 bg-gray-50 rounded-lg border border-gray-200">
-                <div className="w-6 h-6 bg-gray-400 rounded flex items-center justify-center">
-                  <span className="text-white text-xs">🚶</span>
-                </div>
-                <span className="font-medium text-blue-700">Actividad NEAT</span>
-              </div>
-            )}
+              )}
+            </div>
           </div>
         </div>
       </div>
