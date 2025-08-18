@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useLocalStorage } from '@/hooks/useLocalStorage';
 import { useToast } from '@/hooks/useToast';
+import { useSync } from '@/hooks/useSync';
 import { ToastContainer } from '@/components/ToastContainer';
 import { ProgressCircle } from '@/components/ProgressCircle';
 import { WorkoutModal } from '@/components/WorkoutModal';
@@ -13,6 +14,7 @@ import { getCurrentMesocicloDay, setMesocicloStartDate, testMesocicloTracking, c
 
 export default function Dashboard() {
   const { showToast } = useToast();
+  const { syncStatus, syncData, saveData, loadData, autoSync } = useSync();
   const [isLoading, setIsLoading] = useState(true);
   const [activeModal, setActiveModal] = useState<string | null>(null);
   const [activeSection, setActiveSection] = useState<'today' | 'mesociclo' | 'history' | 'settings'>('today');
@@ -850,7 +852,7 @@ export default function Dashboard() {
     </div>
   );
 
-  const saveWeight = () => {
+  const saveWeight = async () => {
     const weight = parseFloat(weightInput);
     if (!weight || weight <= 0) {
       showToast('⚠️ Ingresa un peso válido', 'error');
@@ -859,17 +861,22 @@ export default function Dashboard() {
 
     const fecha = todayISO();
     const newEstado = estado.filter(e => e.fecha !== fecha);
-    newEstado.push({ fecha, peso: weight, cintura: null });
+    const newWeight = { fecha, peso: weight, cintura: null };
+    newEstado.push(newWeight);
     newEstado.sort((a, b) => new Date(a.fecha).getTime() - new Date(b.fecha).getTime());
     
     setEstado(newEstado);
+    
+    // Sincronizar con Neon
+    await saveData('weights', newWeight);
+    
     showToast(`✅ Peso guardado: ${weight} kg`);
     closeModal();
   };
 
 
 
-  const saveCardio = () => {
+  const saveCardio = async () => {
     const km = parseFloat(cardioKm);
     const time = parseInt(cardioTime);
     
@@ -883,7 +890,7 @@ export default function Dashboard() {
 
     const fecha = todayISO();
     const newCardio = cardio.filter(c => c.fecha !== fecha);
-    newCardio.push({
+    const newCardioEntry = {
       fecha,
       microciclo: 1,
       sesionId: 1,
@@ -893,7 +900,8 @@ export default function Dashboard() {
       calorias: Math.round(time * 10),
       tipo: 'mesociclo',
       intensidad: cardioMesociclo?.intensidad || 'Moderado'
-    });
+    };
+    newCardio.push(newCardioEntry);
 
     const newAdherencia = { ...adherenciaDiaria };
     if (!newAdherencia[fecha]) newAdherencia[fecha] = {};
@@ -901,6 +909,10 @@ export default function Dashboard() {
 
     setCardio(newCardio);
     setAdherenciaDiaria(newAdherencia);
+    
+    // Sincronizar con Neon
+    await saveData('cardio', newCardioEntry);
+    
     showToast(`✅ Cardio guardado: ${km}km en ${time}min (${cardioMesociclo?.tipo || 'Cardio'})`);
     closeModal();
   };
