@@ -53,6 +53,7 @@ export default function Dashboard() {
   } | null>(null);
   
   // Estados para versión PC
+  const [viewMode, setViewMode] = useState<'mobile' | 'desktop'>('desktop');
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [activeForm, setActiveForm] = useState<'weight' | 'cardio' | 'diet' | 'neat' | 'entreno' | null>(null);
   const [darkMode, setDarkMode] = useState(false);
@@ -3387,52 +3388,68 @@ export default function Dashboard() {
     <div className={`min-h-screen ${darkMode ? 'dark' : ''}`}>
       <ToastContainer />
       
+      {/* Selector de Modo */}
+      <div className="fixed top-4 left-4 z-50">
+        <select
+          value={viewMode}
+          onChange={(e) => setViewMode(e.target.value as 'mobile' | 'desktop')}
+          className="bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg px-3 py-2 text-sm font-medium shadow-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
+        >
+          <option value="mobile">📱 Móvil</option>
+          <option value="desktop">🖥️ PC</option>
+        </select>
+      </div>
+      
       {/* Mobile Dashboard */}
-      <div className="block md:hidden">
-        {activeSection === 'today' && renderTodaySection()}
-        {activeSection === 'mesociclo' && renderMesocicloSection()}
-        {activeSection === 'history' && renderHistorySection()}
-        {activeSection === 'settings' && renderSettingsSection()}
-        
-        {/* Mobile Navigation */}
-        <div className="bottom-nav">
-          <div className="grid grid-cols-4 gap-1 px-2">
-            <div 
-              className={`bottom-nav-item cursor-pointer ${activeSection === 'today' ? 'active' : ''}`}
-              onClick={() => setActiveSection('today')}
-            >
-              <span className="text-xl">🏠</span>
-              <span className="text-xs mt-1">Hoy</span>
-            </div>
-            <div 
-              className={`bottom-nav-item cursor-pointer ${activeSection === 'mesociclo' ? 'active' : ''}`}
-              onClick={() => setActiveSection('mesociclo')}
-            >
-              <span className="text-xl">📋</span>
-              <span className="text-xs mt-1">Mesociclo</span>
-            </div>
-            <div 
-              className={`bottom-nav-item cursor-pointer ${activeSection === 'history' ? 'active' : ''}`}
-              onClick={() => setActiveSection('history')}
-            >
-              <span className="text-xl">📊</span>
-              <span className="text-xs mt-1">Historial</span>
-            </div>
-            <div 
-              className={`bottom-nav-item cursor-pointer ${activeSection === 'settings' ? 'active' : ''}`}
-              onClick={() => setActiveSection('settings')}
-            >
-              <span className="text-xl">⚙️</span>
-              <span className="text-xs mt-1">Ajustes</span>
+      {viewMode === 'mobile' && (
+        <div className="block">
+          {activeSection === 'today' && renderTodaySection()}
+          {activeSection === 'mesociclo' && renderMesocicloSection()}
+          {activeSection === 'history' && renderHistorySection()}
+          {activeSection === 'settings' && renderSettingsSection()}
+          
+          {/* Mobile Navigation */}
+          <div className="bottom-nav">
+            <div className="grid grid-cols-4 gap-1 px-2">
+              <div 
+                className={`bottom-nav-item cursor-pointer ${activeSection === 'today' ? 'active' : ''}`}
+                onClick={() => setActiveSection('today')}
+              >
+                <span className="text-xl">🏠</span>
+                <span className="text-xs mt-1">Hoy</span>
+              </div>
+              <div 
+                className={`bottom-nav-item cursor-pointer ${activeSection === 'mesociclo' ? 'active' : ''}`}
+                onClick={() => setActiveSection('mesociclo')}
+              >
+                <span className="text-xl">📋</span>
+                <span className="text-xs mt-1">Mesociclo</span>
+              </div>
+              <div 
+                className={`bottom-nav-item cursor-pointer ${activeSection === 'history' ? 'active' : ''}`}
+                onClick={() => setActiveSection('history')}
+              >
+                <span className="text-xl">📊</span>
+                <span className="text-xs mt-1">Historial</span>
+              </div>
+              <div 
+                className={`bottom-nav-item cursor-pointer ${activeSection === 'settings' ? 'active' : ''}`}
+                onClick={() => setActiveSection('settings')}
+              >
+                <span className="text-xl">⚙️</span>
+                <span className="text-xs mt-1">Ajustes</span>
+              </div>
             </div>
           </div>
         </div>
-      </div>
+      )}
 
       {/* Desktop Dashboard */}
-      <div className="hidden md:block">
-        {renderDesktopLayout()}
-      </div>
+      {viewMode === 'desktop' && (
+        <div className="block">
+          {renderDesktopLayout()}
+        </div>
+      )}
 
       {/* Modals */}
       {activeModal === 'weight' && (
