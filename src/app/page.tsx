@@ -56,8 +56,6 @@ export default function Dashboard() {
   const [viewMode, setViewMode] = useState<'mobile' | 'desktop'>('desktop');
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [activeForm, setActiveForm] = useState<'weight' | 'cardio' | 'diet' | 'neat' | 'entreno' | null>(null);
-  const [darkMode, setDarkMode] = useState(false);
-  const [showAdvancedSettings, setShowAdvancedSettings] = useState(false);
   
   // Estado para forzar re-render cuando cambia la fecha
   const [, setForceUpdate] = useState(0);
@@ -468,90 +466,67 @@ export default function Dashboard() {
     openModal('history-details');
   };
 
-  // Desktop Layout Functions - ELEGANT CARDS & SIDEBAR DESIGN
+  // Desktop Layout Functions - SIMPLIFIED VERSION
   const renderDesktopLayout = () => (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-blue-100/50">
+    <div className="min-h-screen bg-gray-50">
       {/* Header */}
-      <header className="bg-white/90 backdrop-blur-sm border-b border-blue-200/50 sticky top-0 z-50 shadow-sm">
-        <div className="max-w-7xl mx-auto px-6">
-          <div className="flex justify-between items-center h-16">
-            {/* Logo & Brand */}
-            <div className="flex items-center space-x-8">
-              <div className="flex items-center space-x-3">
-                <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl flex items-center justify-center shadow-lg">
-                  <span className="text-white text-lg font-bold">🏋️</span>
-                </div>
-                <div>
-                  <h1 className="text-xl font-bold text-blue-900">GymTracker</h1>
-                  <p className="text-xs text-blue-600">Fitness Platform</p>
-                </div>
-              </div>
-              
-              {/* Sync Status */}
-              <div className="flex items-center space-x-2 px-3 py-1 bg-blue-50 rounded-lg border border-blue-200">
-                <div className={`w-2 h-2 rounded-full ${
-                  syncStatus.isOnline 
-                    ? syncStatus.isSyncing 
-                      ? 'bg-yellow-500 animate-pulse' 
-                      : 'bg-green-500' 
-                    : 'bg-red-500'
-                }`} />
-                <span className="text-xs font-medium text-blue-700">
-                  {syncStatus.isOnline 
-                    ? syncStatus.isSyncing 
-                      ? 'Sincronizando...' 
-                      : 'Conectado' 
-                    : 'Sin conexión'
-                  }
-                </span>
-              </div>
+      <header className="bg-white shadow-sm border-b">
+        <div className="flex items-center justify-between px-6 py-4">
+          {/* Logo */}
+          <div className="flex items-center space-x-3">
+            <div className="w-8 h-8 bg-blue-500 rounded-lg flex items-center justify-center">
+              <span className="text-white font-bold">G</span>
             </div>
-            
-            {/* Right Side Actions */}
-            <div className="flex items-center space-x-3">
-              <button
-                onClick={() => setDarkMode(!darkMode)}
-                className="p-2 text-blue-600 hover:text-blue-800 hover:bg-blue-50 rounded-lg transition-colors"
-                title={darkMode ? 'Modo claro' : 'Modo oscuro'}
-              >
-                <span className="text-lg">{darkMode ? '☀️' : '🌙'}</span>
-              </button>
-              <button
-                onClick={() => openModal('weekly-calendar')}
-                className="p-2 text-blue-600 hover:text-blue-800 hover:bg-blue-50 rounded-lg transition-colors"
-                title="Ver plan semanal"
-              >
-                <span className="text-lg">📅</span>
-              </button>
+            <h1 className="text-xl font-bold text-gray-900">GymTracker</h1>
+          </div>
+
+          {/* Controles */}
+          <div className="flex items-center space-x-4">
+            {/* Menú hamburguesa para sidebar */}
+            <button
+              onClick={() => setSidebarOpen(!sidebarOpen)}
+              className="p-2 rounded-lg hover:bg-gray-100 lg:hidden"
+            >
+              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+              </svg>
+            </button>
+
+            {/* Indicador de sincronización */}
+            <div className="flex items-center space-x-2">
+              <div className={`w-2 h-2 rounded-full ${syncStatus.isOnline ? 'bg-green-500' : 'bg-red-500'}`}></div>
+              <span className="text-sm text-gray-600 hidden sm:block">
+                {syncStatus.isOnline ? 'Conectado' : 'Sin conexión'}
+              </span>
             </div>
+
+            {/* Selector de modo */}
+            <select
+              value={viewMode}
+              onChange={(e) => setViewMode(e.target.value as 'mobile' | 'desktop')}
+              className="px-3 py-1.5 border border-gray-300 rounded-lg text-sm bg-white"
+            >
+              <option value="mobile">📱 Móvil</option>
+              <option value="desktop">💻 PC</option>
+            </select>
           </div>
         </div>
       </header>
 
-      {/* Main Content Area */}
+      {/* Layout principal */}
       <div className="flex">
         {/* Sidebar */}
-        <div className={`w-64 bg-white/90 backdrop-blur-sm border-r border-blue-200/50 transition-all duration-300 ${
+        <div className={`w-64 bg-white border-r border-gray-200 transition-all duration-300 ${
           sidebarOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'
         }`}>
           {renderDesktopSidebar()}
         </div>
 
-        {/* Main Content */}
-        <div className="flex-1">
-          <div className="p-6">
-            {renderDesktopMainContent()}
-          </div>
+        {/* Contenido principal */}
+        <div className="flex-1 p-6">
+          {renderDesktopMainContent()}
         </div>
       </div>
-
-      {/* Mobile Sidebar Toggle */}
-      <button
-        onClick={() => setSidebarOpen(!sidebarOpen)}
-        className="lg:hidden fixed top-20 left-4 z-50 p-2 bg-blue-600 text-white rounded-lg shadow-lg"
-      >
-        {sidebarOpen ? '✕' : '☰'}
-      </button>
     </div>
   );
 
@@ -560,93 +535,49 @@ export default function Dashboard() {
   const renderDesktopSidebar = () => (
     <div className="h-full flex flex-col">
       {/* Sidebar Header */}
-      <div className="p-4 border-b border-blue-200">
-        <h2 className="text-lg font-semibold text-blue-900">Menú Principal</h2>
-        <p className="text-xs text-blue-600 mt-1">Navegación rápida</p>
+      <div className="p-4 border-b border-gray-200">
+        <h2 className="text-lg font-semibold text-gray-900">Menú</h2>
       </div>
 
       {/* Navigation Menu */}
       <div className="flex-1 p-4 space-y-2">
         {[
-          { 
-            id: 'today', 
-            label: 'Dashboard', 
-            icon: '🏠', 
-            description: 'Vista general del día',
-            color: 'blue'
-          },
-          { 
-            id: 'mesociclo', 
-            label: 'Mesociclo', 
-            icon: '📋', 
-            description: 'Plan de entrenamiento',
-            color: 'blue'
-          },
-          { 
-            id: 'history', 
-            label: 'Historial', 
-            icon: '📊', 
-            description: 'Registros anteriores',
-            color: 'blue'
-          },
-          { 
-            id: 'stats', 
-            label: 'Estadísticas', 
-            icon: '📈', 
-            description: 'Análisis y gráficos',
-            color: 'blue'
-          },
-          { 
-            id: 'settings', 
-            label: 'Configuración', 
-            icon: '⚙️', 
-            description: 'Ajustes del sistema',
-            color: 'blue'
-          }
+          { id: 'today', label: 'Dashboard', icon: '🏠' },
+          { id: 'mesociclo', label: 'Mesociclo', icon: '📋' },
+          { id: 'history', label: 'Historial', icon: '📊' },
+          { id: 'stats', label: 'Estadísticas', icon: '📈' },
+          { id: 'settings', label: 'Configuración', icon: '⚙️' }
         ].map((item) => (
           <button
             key={item.id}
             onClick={() => setActiveSection(item.id as 'today' | 'mesociclo' | 'history' | 'stats' | 'settings')}
-            className={`w-full text-left p-3 rounded-lg transition-all duration-200 ${
+            className={`w-full text-left p-3 rounded-lg transition-colors ${
               activeSection === item.id
-                ? 'bg-blue-100 text-blue-900 border border-blue-300 shadow-sm'
-                : 'text-blue-700 hover:bg-blue-50 hover:text-blue-900'
+                ? 'bg-blue-100 text-blue-900'
+                : 'text-gray-700 hover:bg-gray-100'
             }`}
           >
             <div className="flex items-center space-x-3">
-              <div className={`w-8 h-8 rounded-lg flex items-center justify-center ${
-                activeSection === item.id
-                  ? 'bg-blue-600 text-white'
-                  : 'bg-blue-100 text-blue-600'
-              }`}>
-                <span className="text-sm">{item.icon}</span>
-              </div>
-              <div>
-                <div className="font-medium text-sm">{item.label}</div>
-                <div className="text-xs text-blue-600">{item.description}</div>
-              </div>
+              <span className="text-lg">{item.icon}</span>
+              <span className="font-medium">{item.label}</span>
             </div>
           </button>
         ))}
       </div>
 
       {/* Quick Stats */}
-      <div className="p-4 border-t border-blue-200 bg-blue-50/50">
-        <h3 className="text-sm font-semibold text-blue-900 mb-3">📊 Resumen Rápido</h3>
+      <div className="p-4 border-t border-gray-200">
+        <h3 className="text-sm font-semibold text-gray-900 mb-3">Resumen</h3>
         <div className="space-y-2 text-sm">
-          <div className="flex justify-between items-center p-2 bg-white rounded-lg border border-blue-200">
-            <span className="text-blue-700">Peso:</span>
-            <span className="font-semibold text-blue-900">
+          <div className="flex justify-between">
+            <span className="text-gray-600">Peso:</span>
+            <span className="font-semibold">
               {estado.length > 0 ? `${estado[estado.length - 1].peso} kg` : '--'}
             </span>
           </div>
-          <div className="flex justify-between items-center p-2 bg-white rounded-lg border border-blue-200">
-            <span className="text-blue-700">Calorías:</span>
-            <span className="font-semibold text-blue-900">{getCaloriasDelDia()} kcal</span>
-          </div>
-          <div className="flex justify-between items-center p-2 bg-white rounded-lg border border-blue-200">
-            <span className="text-blue-700">Progreso:</span>
-            <span className="font-semibold text-blue-900">{Math.round(progress)}%</span>
+          <div className="flex justify-between">
+            <span className="text-gray-600">Calorías:</span>
+            <span className="font-semibold">{getCaloriasDelDia()} kcal</span>
           </div>
         </div>
       </div>
@@ -658,96 +589,34 @@ export default function Dashboard() {
       {/* Section Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold text-blue-900">
-            {activeSection === 'today' && '🏠 Dashboard'}
-            {activeSection === 'mesociclo' && '📋 Mesociclo'}
-            {activeSection === 'history' && '📊 Historial'}
-            {activeSection === 'stats' && '📈 Estadísticas'}
-            {activeSection === 'settings' && '⚙️ Configuración'}
+          <h1 className="text-2xl font-bold text-gray-900">
+            {activeSection === 'today' && 'Dashboard'}
+            {activeSection === 'mesociclo' && 'Mesociclo'}
+            {activeSection === 'history' && 'Historial'}
+            {activeSection === 'stats' && 'Estadísticas'}
+            {activeSection === 'settings' && 'Configuración'}
           </h1>
-          <p className="text-blue-600 mt-1">
-            {activeSection === 'today' && 'Vista general del día'}
-            {activeSection === 'mesociclo' && 'Plan de entrenamiento'}
-            {activeSection === 'history' && 'Registros anteriores'}
-            {activeSection === 'stats' && 'Análisis y gráficos'}
-            {activeSection === 'settings' && 'Ajustes del sistema'}
-          </p>
-        </div>
-        <div className="text-sm text-blue-600">
-          {new Date().toLocaleDateString('es-ES', { 
-            weekday: 'long', 
-            year: 'numeric', 
-            month: 'long', 
-            day: 'numeric' 
-          })}
         </div>
       </div>
 
-      {/* Function Cards Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+      {/* Function Cards */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
         {[
-          { 
-            icon: '⚖️', 
-            title: 'Registrar Peso', 
-            description: 'Añadir peso y medidas',
-            color: 'blue',
-            action: () => setActiveForm('weight')
-          },
-          { 
-            icon: '🏃', 
-            title: 'Añadir Cardio', 
-            description: 'Registrar actividad cardiovascular',
-            color: 'blue',
-            action: () => setActiveForm('cardio')
-          },
-          { 
-            icon: '🥗', 
-            title: 'Registrar Dieta', 
-            description: 'Añadir calorías y macronutrientes',
-            color: 'blue',
-            action: () => setActiveForm('diet')
-          },
-          { 
-            icon: '🚶', 
-            title: 'Añadir NEAT', 
-            description: 'Actividad física no estructurada',
-            color: 'blue',
-            action: () => setActiveForm('neat')
-          },
-          { 
-            icon: '🎯', 
-            title: 'Entreno Extra', 
-            description: 'Entrenamiento no programado',
-            color: 'blue',
-            action: () => setActiveForm('entreno')
-          },
-          { 
-            icon: '📊', 
-            title: 'Ver Estadísticas', 
-            description: 'Análisis y progreso',
-            color: 'blue',
-            action: () => setActiveSection('stats')
-          }
+          { icon: '⚖️', title: 'Registrar Peso', action: () => setActiveForm('weight') },
+          { icon: '🏃', title: 'Añadir Cardio', action: () => setActiveForm('cardio') },
+          { icon: '🥗', title: 'Registrar Dieta', action: () => setActiveForm('diet') },
+          { icon: '🚶', title: 'Añadir NEAT', action: () => setActiveForm('neat') },
+          { icon: '🎯', title: 'Entreno Extra', action: () => setActiveForm('entreno') },
+          { icon: '📊', title: 'Ver Estadísticas', action: () => setActiveSection('stats') }
         ].map((card, index) => (
           <div 
             key={index}
             onClick={card.action}
-            className="bg-white rounded-xl p-6 shadow-lg border border-blue-200 hover:shadow-xl transition-all duration-300 cursor-pointer group"
+            className="bg-white p-4 rounded-lg shadow border hover:shadow-md transition-shadow cursor-pointer"
           >
-            <div className="flex items-center space-x-4 mb-4">
-              <div className="w-12 h-12 bg-blue-100 rounded-xl flex items-center justify-center group-hover:bg-blue-200 transition-colors">
-                <span className="text-2xl">{card.icon}</span>
-              </div>
-              <div>
-                <h3 className="text-lg font-semibold text-blue-900">{card.title}</h3>
-                <p className="text-sm text-blue-600">{card.description}</p>
-              </div>
-            </div>
-            <div className="flex items-center justify-between">
-              <span className="text-xs text-blue-500 font-medium">Hacer clic para abrir</span>
-              <div className="w-6 h-6 bg-blue-100 rounded-full flex items-center justify-center group-hover:bg-blue-200 transition-colors">
-                <span className="text-blue-600 text-xs">→</span>
-              </div>
+            <div className="flex items-center space-x-3">
+              <span className="text-2xl">{card.icon}</span>
+              <span className="font-medium">{card.title}</span>
             </div>
           </div>
         ))}
@@ -755,28 +624,27 @@ export default function Dashboard() {
 
       {/* Horizontal Tabs */}
       {activeForm && (
-        <div className="mt-8">
-          <div className="bg-white rounded-xl shadow-lg border border-blue-200">
+        <div className="mt-6">
+          <div className="bg-white rounded-lg shadow border">
             {/* Tab Headers */}
-            <div className="flex border-b border-blue-200">
+            <div className="flex border-b">
               {[
-                { id: 'weight', label: '⚖️ Peso', icon: '⚖️' },
-                { id: 'cardio', label: '🏃 Cardio', icon: '🏃' },
-                { id: 'diet', label: '🥗 Dieta', icon: '🥗' },
-                { id: 'neat', label: '🚶 NEAT', icon: '🚶' },
-                { id: 'entreno', label: '🎯 Entreno', icon: '🎯' }
+                { id: 'weight', label: 'Peso' },
+                { id: 'cardio', label: 'Cardio' },
+                { id: 'diet', label: 'Dieta' },
+                { id: 'neat', label: 'NEAT' },
+                { id: 'entreno', label: 'Entreno' }
               ].map((tab) => (
                 <button
                   key={tab.id}
                   onClick={() => setActiveForm(tab.id as 'weight' | 'cardio' | 'diet' | 'neat' | 'entreno')}
-                  className={`flex items-center space-x-2 px-6 py-4 text-sm font-medium transition-colors ${
+                  className={`px-6 py-3 text-sm font-medium transition-colors ${
                     activeForm === tab.id
-                      ? 'text-blue-900 border-b-2 border-blue-600 bg-blue-50'
-                      : 'text-blue-600 hover:text-blue-900 hover:bg-blue-50'
+                      ? 'text-blue-600 border-b-2 border-blue-600'
+                      : 'text-gray-600 hover:text-blue-600'
                   }`}
                 >
-                  <span className="text-lg">{tab.icon}</span>
-                  <span>{tab.label}</span>
+                  {tab.label}
                 </button>
               ))}
             </div>
@@ -807,37 +675,34 @@ export default function Dashboard() {
   );
 
   const renderDesktopMesociclo = () => (
-    <div className="space-y-8">
-      <div className="bg-white/70 dark:bg-gray-800/70 backdrop-blur-lg rounded-2xl p-6 shadow-xl border border-white/20 dark:border-gray-700/20">
-        <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-6">📋 Plan de Entrenamiento</h2>
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+    <div className="space-y-6">
+      <div className="bg-white p-6 rounded-lg shadow border">
+        <h2 className="text-xl font-bold mb-4">Plan de Entrenamiento</h2>
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
           {getMesocicloData().microciclos.map((microciclo, index) => (
-            <div key={index} className="bg-gradient-to-r from-purple-50 to-pink-50 dark:from-purple-900/20 dark:to-pink-900/20 rounded-xl p-6 border border-purple-200/50 dark:border-purple-700/50">
-              <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-2">{microciclo.nombre}</h3>
-              <p className="text-sm text-gray-600 dark:text-gray-400 mb-4">{microciclo.objetivo}</p>
+            <div key={index} className="bg-gray-50 p-4 rounded-lg border">
+              <h3 className="font-bold mb-2">{microciclo.nombre}</h3>
+              <p className="text-sm text-gray-600 mb-4">{microciclo.objetivo}</p>
               
-              <div className="space-y-3">
+              <div className="space-y-2">
                 {microciclo.dias.map((dia, diaIndex) => (
-                  <div key={diaIndex} className="bg-white/50 dark:bg-gray-800/50 rounded-lg p-4">
-                    <h4 className="font-semibold text-gray-900 dark:text-white mb-2">{dia.dia}</h4>
-                    <p className="text-sm text-gray-600 dark:text-gray-400 mb-2">{dia.entrenamiento}</p>
-                    <div className="flex items-center justify-between">
-                      <span className="text-xs text-gray-500">{dia.ejercicios.length} ejercicios</span>
-                      <button 
-                        onClick={() => {
-                          setSelectedWorkout({
-                            dia: dia.dia,
-                            entrenamiento: dia.entrenamiento,
-                            ejercicios: dia.ejercicios,
-                            cardio: dia.cardio
-                          });
-                          openModal('workout-details');
-                        }}
-                        className="text-xs bg-purple-100 text-purple-700 px-2 py-1 rounded-full hover:bg-purple-200 transition-colors"
-                      >
-                        Ver
-                      </button>
-                    </div>
+                  <div key={diaIndex} className="bg-white p-3 rounded border">
+                    <h4 className="font-semibold mb-1">{dia.dia}</h4>
+                    <p className="text-sm text-gray-600 mb-2">{dia.entrenamiento}</p>
+                    <button 
+                      onClick={() => {
+                        setSelectedWorkout({
+                          dia: dia.dia,
+                          entrenamiento: dia.entrenamiento,
+                          ejercicios: dia.ejercicios,
+                          cardio: dia.cardio
+                        });
+                        openModal('workout-details');
+                      }}
+                      className="text-xs bg-blue-100 text-blue-700 px-2 py-1 rounded hover:bg-blue-200"
+                    >
+                      Ver detalles
+                    </button>
                   </div>
                 ))}
               </div>
@@ -849,54 +714,51 @@ export default function Dashboard() {
   );
 
   const renderDesktopHistory = () => (
-    <div className="space-y-8">
-      <div className="bg-white/70 dark:bg-gray-800/70 backdrop-blur-lg rounded-2xl p-6 shadow-xl border border-white/20 dark:border-gray-700/20">
-        <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-6">📊 Historial de Actividades</h2>
+    <div className="space-y-6">
+      <div className="bg-white p-6 rounded-lg shadow border">
+        <h2 className="text-xl font-bold mb-4">Historial de Actividades</h2>
         
         {/* Filter Buttons */}
-        <div className="flex flex-wrap gap-2 mb-6">
+        <div className="flex flex-wrap gap-2 mb-4">
           {[
-            { id: 'all', label: 'Todo', icon: '📋' },
-            { id: 'pesos', label: 'Peso', icon: '⚖️' },
-            { id: 'cardio', label: 'Cardio', icon: '🏃' },
-            { id: 'dieta', label: 'Dieta', icon: '🥗' },
-            { id: 'neat', label: 'NEAT', icon: '🚶' },
-            { id: 'entrenos', label: 'Entrenos', icon: '💪' }
+            { id: 'all', label: 'Todo' },
+            { id: 'pesos', label: 'Peso' },
+            { id: 'cardio', label: 'Cardio' },
+            { id: 'dieta', label: 'Dieta' },
+            { id: 'neat', label: 'NEAT' },
+            { id: 'entrenos', label: 'Entrenos' }
           ].map((filter) => (
             <button
               key={filter.id}
               onClick={() => setHistoryFilter(filter.id as 'all' | 'pesos' | 'cardio' | 'dieta' | 'neat' | 'entrenos')}
-              className={`flex items-center space-x-2 px-4 py-2 rounded-xl text-sm font-medium transition-all duration-300 ${
+              className={`px-3 py-1 rounded text-sm ${
                 historyFilter === filter.id
-                  ? 'bg-gradient-to-r from-blue-500 to-purple-500 text-white shadow-lg'
-                  : 'bg-white/50 dark:bg-gray-700/50 text-gray-700 dark:text-gray-300 hover:bg-white dark:hover:bg-gray-600'
+                  ? 'bg-blue-500 text-white'
+                  : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
               }`}
             >
-              <span>{filter.icon}</span>
-              <span>{filter.label}</span>
+              {filter.label}
             </button>
           ))}
         </div>
 
         {/* History List */}
-        <div className="space-y-4">
+        <div className="space-y-3">
           {getFilteredHistory().slice(0, 10).map((item, index) => (
             <div
               key={index}
               onClick={() => viewHistoryItem(item)}
-              className="bg-white/50 dark:bg-gray-700/50 rounded-xl p-4 cursor-pointer hover:bg-white dark:hover:bg-gray-600 transition-all duration-300 border border-white/20 dark:border-gray-600/20"
+              className="bg-gray-50 p-4 rounded border cursor-pointer hover:bg-gray-100"
             >
-              <div className="flex items-center space-x-4">
-                <div className="w-12 h-12 bg-gradient-to-r from-blue-500 to-purple-500 rounded-xl flex items-center justify-center">
-                  <span className="text-2xl">{item.icon}</span>
-                </div>
+              <div className="flex items-center space-x-3">
+                <span className="text-xl">{item.icon}</span>
                 <div className="flex-1">
-                  <h3 className="font-semibold text-gray-900 dark:text-white">{item.title}</h3>
-                  <p className="text-sm text-gray-600 dark:text-gray-400">{item.fecha}</p>
+                  <h3 className="font-semibold">{item.title}</h3>
+                  <p className="text-sm text-gray-600">{item.fecha}</p>
                 </div>
-                <div className={`px-3 py-1 rounded-full text-xs font-medium ${item.statusClass}`}>
+                <span className={`px-2 py-1 rounded text-xs ${item.statusClass}`}>
                   {item.status}
-                </div>
+                </span>
               </div>
             </div>
           ))}
@@ -906,9 +768,9 @@ export default function Dashboard() {
   );
 
   const renderDesktopAnalytics = () => (
-    <div className="space-y-8">
-      <div className="bg-white/70 dark:bg-gray-800/70 backdrop-blur-lg rounded-2xl p-6 shadow-xl border border-white/20 dark:border-gray-700/20">
-        <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-6">📈 Analytics Avanzados</h2>
+    <div className="space-y-6">
+      <div className="bg-white p-6 rounded-lg shadow border">
+        <h2 className="text-xl font-bold mb-4">Estadísticas</h2>
         <DesktopCharts 
           estado={estado}
           cardio={cardio}
@@ -920,14 +782,14 @@ export default function Dashboard() {
   );
 
   const renderDesktopSettings = () => (
-    <div className="space-y-8">
-      <div className="bg-white/70 dark:bg-gray-800/70 backdrop-lg rounded-2xl p-6 shadow-xl border border-white/20 dark:border-gray-700/20">
-        <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-6">⚙️ Configuración</h2>
+    <div className="space-y-6">
+      <div className="bg-white p-6 rounded-lg shadow border">
+        <h2 className="text-xl font-bold mb-4">Configuración</h2>
         
-        <div className="space-y-6">
+        <div className="space-y-4">
           {/* Sync Section */}
-          <div className="bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20 rounded-xl p-6 border border-blue-200/50 dark:border-blue-700/50">
-            <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">🔄 Sincronización</h3>
+          <div className="bg-gray-50 p-4 rounded-lg border">
+            <h3 className="font-semibold mb-3">Sincronización</h3>
             <button
               onClick={async () => {
                 await syncData('weights', estado);
@@ -2078,7 +1940,7 @@ export default function Dashboard() {
               📈 Ver estadísticas
             </button>
             <button
-              onClick={() => setShowAdvancedSettings(true)}
+              onClick={() => {}}
               className="w-full text-left p-2 hover:bg-gray-100 dark:hover:bg-gray-600 rounded text-sm text-gray-700 dark:text-gray-300 transition-colors"
             >
               ⚙️ Configuración avanzada
@@ -2333,22 +2195,18 @@ export default function Dashboard() {
           <div className="space-y-4">
             <div className="flex items-center justify-between">
               <span className="text-gray-700 dark:text-gray-300">Modo oscuro</span>
-              <button
-                onClick={() => setDarkMode(!darkMode)}
-                className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
-                  darkMode ? 'bg-blue-600' : 'bg-gray-200'
-                }`}
-              >
-                <span className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
-                  darkMode ? 'translate-x-6' : 'translate-x-1'
-                }`} />
+                              <button
+                  onClick={() => {}}
+                  className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors bg-gray-200`}
+                >
+                                  <span className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform translate-x-1`} />
               </button>
             </div>
             
             <div className="flex items-center justify-between">
               <span className="text-gray-700 dark:text-gray-300">Configuración avanzada</span>
               <button
-                onClick={() => setShowAdvancedSettings(!showAdvancedSettings)}
+                onClick={() => {}}
                 className="text-blue-600 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300"
               >
                 Configurar
@@ -3717,269 +3575,73 @@ export default function Dashboard() {
   // ===== DESKTOP FUNCTIONS =====
   
   const renderDesktopDashboard = () => (
-    <div className="space-y-8">
+    <div className="space-y-6">
       {/* Welcome Section */}
-      <div className="bg-gradient-to-r from-blue-500 to-blue-600 rounded-2xl p-8 text-white shadow-xl">
-        <div className="flex items-center justify-between">
-          <div>
-            <h2 className="text-3xl font-bold mb-2">¡Bienvenido de vuelta! 👋</h2>
-            <p className="text-blue-100 text-lg">
-              Hoy es {new Date().toLocaleDateString('es-ES', { 
-                weekday: 'long', 
-                year: 'numeric', 
-                month: 'long', 
-                day: 'numeric' 
-              })}
-            </p>
-          </div>
-          <div className="text-right">
-            <div className="text-5xl font-bold mb-2">{Math.round(progress)}%</div>
-            <div className="text-blue-100 text-lg">Progreso del día</div>
-          </div>
-        </div>
+      <div className="bg-blue-500 rounded-lg p-6 text-white">
+        <h2 className="text-2xl font-bold mb-2">¡Bienvenido! 👋</h2>
+        <p className="text-blue-100">
+          Hoy es {new Date().toLocaleDateString('es-ES', { 
+            weekday: 'long', 
+            year: 'numeric', 
+            month: 'long', 
+            day: 'numeric' 
+          })}
+        </p>
       </div>
 
       {/* Quick Stats */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
         {[
-          { 
-            icon: '📊', 
-            label: 'Progreso del Día', 
-            value: `${Math.round(calculateProgress() * 100)}%`,
-            subtitle: `${Object.keys(adherenciaDiaria[todayISO()] || {}).length} de 5 actividades`,
-            color: 'blue'
-          },
-          { 
-            icon: '⚖️', 
-            label: 'Peso Actual', 
-            value: estado.length > 0 ? `${estado[estado.length - 1].peso} kg` : '--',
-            subtitle: 'Último registro',
-            color: 'green'
-          },
-          { 
-            icon: '🔥', 
-            label: 'Calorías Hoy', 
-            value: `${getCaloriasDelDia()}`,
-            subtitle: 'kcal consumidas',
-            color: 'orange'
-          },
-          { 
-            icon: '💪', 
-            label: 'Entrenamiento', 
-            value: (() => {
-              const currentData = getCurrentMesocicloDay();
-              return currentData ? currentData.dia.entrenamiento : 'Descanso';
-            })(),
-            subtitle: (() => {
-              const currentData = getCurrentMesocicloDay();
-              return currentData ? currentData.dia.dia : 'Hoy';
-            })(),
-            color: 'purple'
-          }
+          { icon: '📊', label: 'Progreso', value: `${Math.round(calculateProgress() * 100)}%` },
+          { icon: '⚖️', label: 'Peso', value: estado.length > 0 ? `${estado[estado.length - 1].peso} kg` : '--' },
+          { icon: '🔥', label: 'Calorías', value: `${getCaloriasDelDia()}` },
+          { icon: '💪', label: 'Entreno', value: (() => {
+            const currentData = getCurrentMesocicloDay();
+            return currentData ? currentData.dia.entrenamiento : 'Descanso';
+          })() }
         ].map((stat, index) => (
-          <div key={index} className="bg-white rounded-xl p-6 shadow-lg border border-blue-200 hover:shadow-xl transition-all duration-300">
-            <div className="flex items-center space-x-4 mb-4">
-              <div className={`w-12 h-12 bg-${stat.color}-100 rounded-xl flex items-center justify-center`}>
-                <span className="text-2xl">{stat.icon}</span>
-              </div>
-              <div>
-                <h3 className="text-sm font-semibold text-blue-900">{stat.label}</h3>
-              </div>
+          <div key={index} className="bg-white p-4 rounded-lg shadow border">
+            <div className="flex items-center space-x-3 mb-2">
+              <span className="text-2xl">{stat.icon}</span>
+              <span className="font-medium">{stat.label}</span>
             </div>
-            <div className="text-center">
-              <div className="text-3xl font-bold text-blue-900 mb-2">
-                {stat.value}
-              </div>
-              <div className="text-sm text-blue-600">
-                {stat.subtitle}
-              </div>
-            </div>
+            <div className="text-2xl font-bold text-gray-900">{stat.value}</div>
           </div>
         ))}
       </div>
 
-      {/* Main Content Grid */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-        {/* Activity Overview */}
-        <div className="lg:col-span-2 space-y-6">
-          <div className="bg-white rounded-xl p-6 shadow-lg border border-blue-200">
-            <div className="flex items-center space-x-3 mb-6">
-              <div className="w-10 h-10 bg-green-100 rounded-xl flex items-center justify-center">
-                <span className="text-green-600 text-xl">✅</span>
-              </div>
-              <h3 className="text-xl font-semibold text-blue-900">Actividades Completadas</h3>
+      {/* Activities */}
+      <div className="bg-white p-6 rounded-lg shadow border">
+        <h3 className="text-lg font-semibold mb-4">Actividades de Hoy</h3>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          {adherenciaDiaria[todayISO()]?.pesos && (
+            <div className="flex items-center space-x-3 p-3 bg-green-50 rounded-lg border border-green-200">
+              <span className="text-green-600">✅</span>
+              <span>Peso registrado</span>
             </div>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {adherenciaDiaria[todayISO()]?.pesos && (
-                <div className="flex items-center space-x-3 p-4 bg-green-50 rounded-xl border border-green-200">
-                  <div className="w-8 h-8 bg-green-500 rounded-lg flex items-center justify-center">
-                    <span className="text-white text-sm">⚖️</span>
-                  </div>
-                  <span className="font-medium text-blue-900">Peso registrado</span>
-                </div>
-              )}
-              {adherenciaDiaria[todayISO()]?.cardio && (
-                <div className="flex items-center space-x-3 p-4 bg-green-50 rounded-xl border border-green-200">
-                  <div className="w-8 h-8 bg-green-500 rounded-lg flex items-center justify-center">
-                    <span className="text-white text-sm">🏃</span>
-                  </div>
-                  <span className="font-medium text-blue-900">Cardio completado</span>
-                </div>
-              )}
-              {adherenciaDiaria[todayISO()]?.dieta && (
-                <div className="flex items-center space-x-3 p-4 bg-green-50 rounded-xl border border-green-200">
-                  <div className="w-8 h-8 bg-green-500 rounded-lg flex items-center justify-center">
-                    <span className="text-white text-sm">🥗</span>
-                  </div>
-                  <span className="font-medium text-blue-900">Dieta registrada</span>
-                </div>
-              )}
-              {adherenciaDiaria[todayISO()]?.neat && (
-                <div className="flex items-center space-x-3 p-4 bg-green-50 rounded-xl border border-green-200">
-                  <div className="w-8 h-8 bg-green-500 rounded-lg flex items-center justify-center">
-                    <span className="text-white text-sm">🚶</span>
-                  </div>
-                  <span className="font-medium text-blue-900">NEAT registrado</span>
-                </div>
-              )}
-              {adherenciaDiaria[todayISO()]?.entrenoNoProgramado && (
-                <div className="flex items-center space-x-3 p-4 bg-green-50 rounded-xl border border-green-200">
-                  <div className="w-8 h-8 bg-green-500 rounded-lg flex items-center justify-center">
-                    <span className="text-white text-sm">🎯</span>
-                  </div>
-                  <span className="font-medium text-blue-900">Entreno extra</span>
-                </div>
-              )}
+          )}
+          {adherenciaDiaria[todayISO()]?.cardio && (
+            <div className="flex items-center space-x-3 p-3 bg-green-50 rounded-lg border border-green-200">
+              <span className="text-green-600">✅</span>
+              <span>Cardio completado</span>
             </div>
-          </div>
-
-          <div className="bg-white rounded-xl p-6 shadow-lg border border-blue-200">
-            <div className="flex items-center space-x-3 mb-6">
-              <div className="w-10 h-10 bg-amber-100 rounded-xl flex items-center justify-center">
-                <span className="text-amber-600 text-xl">⏳</span>
-              </div>
-              <h3 className="text-xl font-semibold text-blue-900">Próximas Actividades</h3>
+          )}
+          {adherenciaDiaria[todayISO()]?.dieta && (
+            <div className="flex items-center space-x-3 p-3 bg-green-50 rounded-lg border border-green-200">
+              <span className="text-green-600">✅</span>
+              <span>Dieta registrada</span>
             </div>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {!adherenciaDiaria[todayISO()]?.pesos && (
-                <div className="flex items-center space-x-3 p-4 bg-gray-50 rounded-xl border border-gray-200">
-                  <div className="w-8 h-8 bg-gray-400 rounded-lg flex items-center justify-center">
-                    <span className="text-white text-sm">⚖️</span>
-                  </div>
-                  <span className="font-medium text-blue-700">Registrar peso</span>
-                </div>
-              )}
-              {!adherenciaDiaria[todayISO()]?.cardio && (
-                <div className="flex items-center space-x-3 p-4 bg-gray-50 rounded-xl border border-gray-200">
-                  <div className="w-8 h-8 bg-gray-400 rounded-lg flex items-center justify-center">
-                    <span className="text-white text-sm">🏃</span>
-                  </div>
-                  <span className="font-medium text-blue-700">Hacer cardio</span>
-                </div>
-              )}
-              {!adherenciaDiaria[todayISO()]?.dieta && (
-                <div className="flex items-center space-x-3 p-4 bg-gray-50 rounded-xl border border-gray-200">
-                  <div className="w-8 h-8 bg-gray-400 rounded-lg flex items-center justify-center">
-                    <span className="text-white text-sm">🥗</span>
-                  </div>
-                  <span className="font-medium text-blue-700">Registrar dieta</span>
-                </div>
-              )}
-              {!adherenciaDiaria[todayISO()]?.neat && (
-                <div className="flex items-center space-x-3 p-4 bg-gray-50 rounded-xl border border-gray-200">
-                  <div className="w-8 h-8 bg-gray-400 rounded-lg flex items-center justify-center">
-                    <span className="text-white text-sm">🚶</span>
-                  </div>
-                  <span className="font-medium text-blue-700">Actividad NEAT</span>
-                </div>
-              )}
+          )}
+          {adherenciaDiaria[todayISO()]?.neat && (
+            <div className="flex items-center space-x-3 p-3 bg-green-50 rounded-lg border border-green-200">
+              <span className="text-green-600">✅</span>
+              <span>NEAT completado</span>
             </div>
-          </div>
-        </div>
-
-        {/* Quick Actions Sidebar */}
-        <div className="space-y-6">
-          <div className="bg-white rounded-xl p-6 shadow-lg border border-blue-200">
-            <h3 className="text-lg font-semibold text-blue-900 mb-4">⚡ Acciones Rápidas</h3>
-            <div className="space-y-3">
-              <button
-                onClick={() => setActiveForm('weight')}
-                className="w-full flex items-center space-x-3 p-4 bg-blue-50 rounded-xl border border-blue-200 hover:bg-blue-100 transition-colors"
-              >
-                <div className="w-8 h-8 bg-blue-500 rounded-lg flex items-center justify-center">
-                  <span className="text-white text-sm">⚖️</span>
-                </div>
-                <span className="font-medium text-blue-900">Registrar Peso</span>
-              </button>
-              <button
-                onClick={() => setActiveForm('cardio')}
-                className="w-full flex items-center space-x-3 p-4 bg-green-50 rounded-xl border border-green-200 hover:bg-green-100 transition-colors"
-              >
-                <div className="w-8 h-8 bg-green-500 rounded-lg flex items-center justify-center">
-                  <span className="text-white text-sm">🏃</span>
-                </div>
-                <span className="font-medium text-blue-900">Añadir Cardio</span>
-              </button>
-              <button
-                onClick={() => setActiveForm('diet')}
-                className="w-full flex items-center space-x-3 p-4 bg-orange-50 rounded-xl border border-orange-200 hover:bg-orange-100 transition-colors"
-              >
-                <div className="w-8 h-8 bg-orange-500 rounded-lg flex items-center justify-center">
-                  <span className="text-white text-sm">🥗</span>
-                </div>
-                <span className="font-medium text-blue-900">Registrar Dieta</span>
-              </button>
-              <button
-                onClick={() => setActiveForm('neat')}
-                className="w-full flex items-center space-x-3 p-4 bg-purple-50 rounded-xl border border-purple-200 hover:bg-purple-100 transition-colors"
-              >
-                <div className="w-8 h-8 bg-purple-500 rounded-lg flex items-center justify-center">
-                  <span className="text-white text-sm">🚶</span>
-                </div>
-                <span className="font-medium text-blue-900">Añadir NEAT</span>
-              </button>
-            </div>
-          </div>
-
-          {/* Recent Activity */}
-          <div className="bg-white rounded-xl p-6 shadow-lg border border-blue-200">
-            <h3 className="text-lg font-semibold text-blue-900 mb-4">📈 Actividad Reciente</h3>
-            <div className="space-y-3">
-              {estado.length > 0 && (
-                <div className="flex items-center space-x-3 p-3 bg-blue-50 rounded-lg">
-                  <span className="text-xl">⚖️</span>
-                  <div>
-                    <p className="text-sm font-medium text-blue-900">Último peso</p>
-                    <p className="text-xs text-blue-600">{estado[estado.length - 1].peso} kg</p>
-                  </div>
-                </div>
-              )}
-              {cardio.length > 0 && (
-                <div className="flex items-center space-x-3 p-3 bg-green-50 rounded-lg">
-                  <span className="text-xl">🏃</span>
-                  <div>
-                    <p className="text-sm font-medium text-blue-900">Último cardio</p>
-                    <p className="text-xs text-blue-600">{cardio[cardio.length - 1].km} km</p>
-                  </div>
-                </div>
-              )}
-              {dieta.length > 0 && (
-                <div className="flex items-center space-x-3 p-3 bg-orange-50 rounded-lg">
-                  <span className="text-xl">🥗</span>
-                  <div>
-                    <p className="text-sm font-medium text-blue-900">Última dieta</p>
-                    <p className="text-xs text-blue-600">{dieta[dieta.length - 1].calorias} kcal</p>
-                  </div>
-                </div>
-              )}
-            </div>
-          </div>
+          )}
         </div>
       </div>
     </div>
   );
-
-
 
   // Mostrar loading mientras se inicializa
   if (isLoading) {
@@ -3987,7 +3649,7 @@ export default function Dashboard() {
   }
 
   return (
-    <div className={`min-h-screen ${darkMode ? 'dark' : ''}`}>
+    <div className="min-h-screen">
       <ToastContainer />
       
       {/* Selector de Modo */}
