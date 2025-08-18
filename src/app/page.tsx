@@ -36,6 +36,9 @@ export default function Dashboard() {
     microciclos: {},
     notas: {}
   });
+
+  const [historyFilter, setHistoryFilter] = useState<'all' | 'pesos' | 'cardio' | 'dieta' | 'neat' | 'entrenos'>('all');
+  const [selectedHistoryItem, setSelectedHistoryItem] = useState<any>(null);
   
   // Estado para forzar re-render cuando cambia la fecha
   const [forceUpdate, setForceUpdate] = useState(0);
@@ -220,6 +223,108 @@ export default function Dashboard() {
         [microcicloId]: !prev.notas[microcicloId]
       }
     }));
+  };
+
+  // Funciones para el historial
+  const getFilteredHistory = () => {
+    const allItems = [];
+    
+    // Agregar pesos
+    estado.forEach(item => {
+      allItems.push({
+        type: 'pesos',
+        fecha: item.fecha,
+        icon: '⚖️',
+        title: 'Pesaje Diario',
+        status: 'Completado',
+        statusClass: 'bg-green-100 text-green-700',
+        details: `${item.peso} kg${item.cintura ? ` • Cintura: ${item.cintura} cm` : ''}`,
+        data: item
+      });
+    });
+
+    // Agregar cardio
+    cardio.forEach(item => {
+      allItems.push({
+        type: 'cardio',
+        fecha: item.fecha,
+        icon: '🏃',
+        title: 'Cardio',
+        status: 'Completado',
+        statusClass: 'bg-green-100 text-green-700',
+        details: `${item.km} km en ${item.tiempo} min • ${item.tipo}`,
+        data: item
+      });
+    });
+
+    // Agregar dieta
+    dieta.forEach(item => {
+      allItems.push({
+        type: 'dieta',
+        fecha: item.fecha,
+        icon: '🥗',
+        title: 'Dieta',
+        status: 'Completado',
+        statusClass: 'bg-green-100 text-green-700',
+        details: `${item.calorias} kcal • ${item.proteinas}g proteínas`,
+        data: item
+      });
+    });
+
+    // Agregar NEAT
+    neat.forEach(item => {
+      allItems.push({
+        type: 'neat',
+        fecha: item.fecha,
+        icon: '🚶',
+        title: 'NEAT',
+        status: 'Completado',
+        statusClass: 'bg-green-100 text-green-700',
+        details: item.tipo === 'pasos' ? `${item.pasos} pasos` : `${item.km} km en cinta`,
+        data: item
+      });
+    });
+
+    // Agregar entrenos extra
+    entrenosNoProgramados.forEach(item => {
+      allItems.push({
+        type: 'entrenos',
+        fecha: item.fecha,
+        icon: '🎯',
+        title: 'Entreno Extra',
+        status: 'Completado',
+        statusClass: 'bg-green-100 text-green-700',
+        details: `${item.tipo} • ${item.duracion} min • ${item.intensidad}`,
+        data: item
+      });
+    });
+
+    // Ordenar por fecha (más reciente primero)
+    allItems.sort((a, b) => new Date(b.fecha).getTime() - new Date(a.fecha).getTime());
+
+    // Filtrar según el filtro seleccionado
+    if (historyFilter === 'all') {
+      return allItems;
+    } else {
+      return allItems.filter(item => item.type === historyFilter);
+    }
+  };
+
+  const getFilterName = (filter: string) => {
+    const names = {
+      'all': 'todas las actividades',
+      'pesos': 'pesajes',
+      'cardio': 'cardio',
+      'dieta': 'dieta',
+      'neat': 'NEAT',
+      'entrenos': 'entrenos extra'
+    };
+    return names[filter as keyof typeof names] || 'actividades';
+  };
+
+  const viewHistoryItem = (item: any) => {
+    setSelectedHistoryItem(item);
+    openModal('history-details');
   };
 
   const closeModal = () => {
@@ -2029,48 +2134,120 @@ export default function Dashboard() {
     <div className="min-h-screen pb-20 p-6">
       <h1 className="text-2xl font-bold text-center mb-6">Historial</h1>
       
-      {/* Recent Activities */}
+      {/* Filtros */}
+      <div className="mb-6">
+        <div className="flex flex-wrap gap-2">
+          <button 
+            onClick={() => setHistoryFilter('all')}
+            className={`px-3 py-1 rounded-full text-sm font-medium transition-colors ${
+              historyFilter === 'all' 
+                ? 'bg-blue-100 text-blue-700' 
+                : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+            }`}
+          >
+            Todos
+          </button>
+          <button 
+            onClick={() => setHistoryFilter('pesos')}
+            className={`px-3 py-1 rounded-full text-sm font-medium transition-colors ${
+              historyFilter === 'pesos' 
+                ? 'bg-blue-100 text-blue-700' 
+                : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+            }`}
+          >
+            ⚖️ Pesos
+          </button>
+          <button 
+            onClick={() => setHistoryFilter('cardio')}
+            className={`px-3 py-1 rounded-full text-sm font-medium transition-colors ${
+              historyFilter === 'cardio' 
+                ? 'bg-red-100 text-red-700' 
+                : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+            }`}
+          >
+            🏃 Cardio
+          </button>
+          <button 
+            onClick={() => setHistoryFilter('dieta')}
+            className={`px-3 py-1 rounded-full text-sm font-medium transition-colors ${
+              historyFilter === 'dieta' 
+                ? 'bg-yellow-100 text-yellow-700' 
+                : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+            }`}
+          >
+            🥗 Dieta
+          </button>
+          <button 
+            onClick={() => setHistoryFilter('neat')}
+            className={`px-3 py-1 rounded-full text-sm font-medium transition-colors ${
+              historyFilter === 'neat' 
+                ? 'bg-purple-100 text-purple-700' 
+                : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+            }`}
+          >
+            🚶 NEAT
+          </button>
+          <button 
+            onClick={() => setHistoryFilter('entrenos')}
+            className={`px-3 py-1 rounded-full text-sm font-medium transition-colors ${
+              historyFilter === 'entrenos' 
+                ? 'bg-teal-100 text-teal-700' 
+                : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+            }`}
+          >
+            🎯 Entrenos Extra
+          </button>
+        </div>
+      </div>
+      
+      {/* Lista de Actividades */}
       <div className="space-y-4">
-        {Object.keys(adherenciaDiaria)
-          .sort((a, b) => new Date(b).getTime() - new Date(a).getTime())
-          .slice(0, 10)
-          .map(date => {
-            const adherence = adherenciaDiaria[date];
-            const activities = [];
-            if (adherence.pesos) activities.push('🏋️ Entrenamiento');
-            if (adherence.cardio) activities.push('🏃 Cardio');
-            if (adherence.dieta) activities.push('🥗 Dieta');
-            
-            return (
-              <div key={date} className="mobile-card">
-                <div className="flex justify-between items-start">
-                  <div>
-                    <h3 className="font-semibold">
-                      {new Date(date).toLocaleDateString('es-ES', { 
-                        weekday: 'long', 
-                        day: '2-digit', 
-                        month: 'long' 
-                      })}
-                    </h3>
-                    <div className="mt-2 space-y-1">
-                      {activities.map((activity, index) => (
-                        <div key={index} className="text-sm text-gray-600 flex items-center">
-                          <span className="mr-2">✅</span>
-                          {activity}
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                  <div className="text-right">
-                    <div className="text-sm text-gray-500">
-                      {Math.round((activities.length / 3) * 100)}%
-                    </div>
-                  </div>
+        {getFilteredHistory().map((item, index) => (
+          <div key={index} className="mobile-card cursor-pointer hover:bg-gray-50 transition-colors" onClick={() => viewHistoryItem(item)}>
+            <div className="flex justify-between items-start">
+              <div className="flex-1">
+                <div className="flex items-center gap-2 mb-2">
+                  <span className="text-lg">{item.icon}</span>
+                  <h3 className="font-semibold text-base">{item.title}</h3>
+                  <span className={`text-xs px-2 py-1 rounded-full font-medium ${item.statusClass}`}>
+                    {item.status}
+                  </span>
+                </div>
+                <p className="text-sm text-gray-600 mb-1">
+                  {new Date(item.fecha).toLocaleDateString('es-ES', { 
+                    weekday: 'long', 
+                    day: '2-digit', 
+                    month: 'long',
+                    year: 'numeric'
+                  })}
+                </p>
+                <div className="text-sm text-gray-500">
+                  {item.details}
                 </div>
               </div>
-            );
-          })}
+              <div className="text-right flex-shrink-0 ml-3">
+                <div className="flex flex-col items-end gap-1">
+                  <span className="text-xs text-gray-400">Ver detalles</span>
+                  <span className="text-gray-400">→</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        ))}
       </div>
+
+      {getFilteredHistory().length === 0 && (
+        <div className="text-center py-8">
+          <div className="text-gray-400 text-6xl mb-4">📊</div>
+          <h3 className="text-lg font-medium text-gray-600 mb-2">No hay registros</h3>
+          <p className="text-sm text-gray-500">
+            {historyFilter === 'all' 
+              ? 'Aún no has registrado ninguna actividad'
+              : `No hay registros de ${getFilterName(historyFilter)}`
+            }
+          </p>
+        </div>
+      )}
     </div>
   );
 
@@ -3235,6 +3412,269 @@ export default function Dashboard() {
       )}
 
       {activeModal === 'workout-details' && selectedWorkout && (
+        <div className="modal-overlay" onClick={closeModal}>
+          <div className="modal-content max-h-[90vh] flex flex-col mx-4 md:mx-auto" onClick={(e) => e.stopPropagation()}>
+            <div className="modal-header flex-shrink-0">
+              <button className="modal-close" onClick={closeModal}>×</button>
+              <h3 className="text-base md:text-lg">🏋️ {selectedWorkout.dia} - {selectedWorkout.entrenamiento}</h3>
+            </div>
+            
+            <div className="modal-body flex-1 overflow-y-auto">
+              <div className="space-y-4 md:space-y-6">
+                {/* Cardio */}
+                {selectedWorkout.cardio && (
+                  <div className="clean-card">
+                    <div className="flex items-center gap-2 md:gap-3 mb-3 md:mb-4">
+                      <div className="w-8 h-8 md:w-10 md:h-10 bg-blue-500 rounded-full flex items-center justify-center text-white text-sm md:text-base">
+                        🏃
+                      </div>
+                      <div>
+                        <h4 className="font-semibold text-base md:text-lg">Cardio</h4>
+                        <p className="text-xs md:text-sm text-gray-600">{selectedWorkout.cardio.tipo}</p>
+                      </div>
+                    </div>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 md:gap-4">
+                      <div className="p-3 bg-blue-50 rounded-lg">
+                        <p className="text-xs text-blue-600 font-medium">Duración</p>
+                        <p className="text-sm md:text-base font-semibold">{selectedWorkout.cardio.duracion} minutos</p>
+                      </div>
+                      <div className="p-3 bg-blue-50 rounded-lg">
+                        <p className="text-xs text-blue-600 font-medium">Intensidad</p>
+                        <p className="text-sm md:text-base font-semibold">{selectedWorkout.cardio.intensidad}</p>
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {/* Ejercicios */}
+                <div className="clean-card">
+                  <div className="flex items-center gap-2 md:gap-3 mb-3 md:mb-4">
+                    <div className="w-8 h-8 md:w-10 md:h-10 bg-primary rounded-full flex items-center justify-center text-white text-sm md:text-base">
+                      💪
+                    </div>
+                    <div>
+                      <h4 className="font-semibold text-base md:text-lg">Ejercicios</h4>
+                      <p className="text-xs md:text-sm text-gray-600">{selectedWorkout.ejercicios.length} ejercicios</p>
+                    </div>
+                  </div>
+                  
+                  <div className="space-y-2 md:space-y-3">
+                    {selectedWorkout.ejercicios.map((ejercicio, index) => (
+                      <div key={index} className="flex items-start gap-2 md:gap-3 p-3 bg-gray-50 rounded-lg">
+                        <div className="w-5 h-5 md:w-6 md:h-6 bg-primary rounded-full flex items-center justify-center text-white text-xs font-bold flex-shrink-0">
+                          {index + 1}
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <p className="font-medium text-xs md:text-sm break-words">{ejercicio}</p>
+                          <div className="flex flex-wrap gap-1 mt-1">
+                            {ejercicio.includes('REST PAUSE') && (
+                              <span className="inline-block text-xs bg-orange-100 text-orange-700 px-2 py-1 rounded-full">
+                                Rest Pause
+                              </span>
+                            )}
+                            {ejercicio.includes('DROP SET') && (
+                              <span className="inline-block text-xs bg-red-100 text-red-700 px-2 py-1 rounded-full">
+                                Drop Set
+                              </span>
+                            )}
+                            {ejercicio.includes('PARCIALES') && (
+                              <span className="inline-block text-xs bg-purple-100 text-purple-700 px-2 py-1 rounded-full">
+                                Parciales
+                              </span>
+                            )}
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Notas */}
+                <div className="clean-card">
+                  <h4 className="font-semibold mb-2 md:mb-3 text-sm md:text-base">📝 Notas</h4>
+                  <div className="space-y-1 md:space-y-2 text-xs md:text-sm text-gray-600">
+                    <p>• Descansa 2-3 minutos entre series</p>
+                    <p>• Mantén la técnica correcta en todos los ejercicios</p>
+                    <p>• Si no puedes completar las repeticiones objetivo, reduce el peso</p>
+                    <p>• Los ejercicios con técnicas especiales (Rest Pause, Drop Set) son opcionales si te sientes fatigado</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+            
+            <div className="flex gap-2 md:gap-3 flex-shrink-0 p-3 md:p-4 border-t border-gray-200">
+              <button onClick={closeModal} className="btn-elegant btn-secondary flex-1 text-sm md:text-base">
+                Cerrar
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {activeModal === 'history-details' && selectedHistoryItem && (
+        <div className="modal-overlay" onClick={closeModal}>
+          <div className="modal-content max-h-[90vh] flex flex-col mx-4 md:mx-auto" onClick={(e) => e.stopPropagation()}>
+            <div className="modal-header flex-shrink-0">
+              <button className="modal-close" onClick={closeModal}>×</button>
+              <h3 className="text-base md:text-lg">{selectedHistoryItem.icon} {selectedHistoryItem.title}</h3>
+            </div>
+            
+            <div className="modal-body flex-1 overflow-y-auto">
+              <div className="space-y-4 md:space-y-6">
+                {/* Fecha */}
+                <div className="clean-card">
+                  <div className="flex items-center gap-2 md:gap-3 mb-3 md:mb-4">
+                    <div className="w-8 h-8 md:w-10 md:h-10 bg-gray-100 rounded-full flex items-center justify-center text-gray-700 text-sm md:text-base">
+                      📅
+                    </div>
+                    <div>
+                      <h4 className="font-semibold text-base md:text-lg">Fecha</h4>
+                      <p className="text-xs md:text-sm text-gray-600">
+                        {new Date(selectedHistoryItem.fecha).toLocaleDateString('es-ES', { 
+                          weekday: 'long', 
+                          day: '2-digit', 
+                          month: 'long',
+                          year: 'numeric'
+                        })}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Detalles específicos según el tipo */}
+                {selectedHistoryItem.type === 'pesos' && (
+                  <div className="clean-card">
+                    <h4 className="font-semibold mb-3 md:mb-4 text-base md:text-lg">📊 Datos del Pesaje</h4>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 md:gap-4">
+                      <div className="p-3 bg-blue-50 rounded-lg">
+                        <p className="text-xs text-blue-600 font-medium">Peso</p>
+                        <p className="text-sm md:text-base font-semibold">{selectedHistoryItem.data.peso} kg</p>
+                      </div>
+                      {selectedHistoryItem.data.cintura && (
+                        <div className="p-3 bg-green-50 rounded-lg">
+                          <p className="text-xs text-green-600 font-medium">Cintura</p>
+                          <p className="text-sm md:text-base font-semibold">{selectedHistoryItem.data.cintura} cm</p>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                )}
+
+                {selectedHistoryItem.type === 'cardio' && (
+                  <div className="clean-card">
+                    <h4 className="font-semibold mb-3 md:mb-4 text-base md:text-lg">🏃 Detalles del Cardio</h4>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 md:gap-4">
+                      <div className="p-3 bg-blue-50 rounded-lg">
+                        <p className="text-xs text-blue-600 font-medium">Distancia</p>
+                        <p className="text-sm md:text-base font-semibold">{selectedHistoryItem.data.km} km</p>
+                      </div>
+                      <div className="p-3 bg-green-50 rounded-lg">
+                        <p className="text-xs text-green-600 font-medium">Tiempo</p>
+                        <p className="text-sm md:text-base font-semibold">{selectedHistoryItem.data.tiempo} min</p>
+                      </div>
+                      <div className="p-3 bg-orange-50 rounded-lg">
+                        <p className="text-xs text-orange-600 font-medium">Ritmo</p>
+                        <p className="text-sm md:text-base font-semibold">{selectedHistoryItem.data.ritmo.toFixed(2)} min/km</p>
+                      </div>
+                      <div className="p-3 bg-purple-50 rounded-lg">
+                        <p className="text-xs text-purple-600 font-medium">Calorías</p>
+                        <p className="text-sm md:text-base font-semibold">{selectedHistoryItem.data.calorias} kcal</p>
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {selectedHistoryItem.type === 'dieta' && (
+                  <div className="clean-card">
+                    <h4 className="font-semibold mb-3 md:mb-4 text-base md:text-lg">🥗 Detalles de la Dieta</h4>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 md:gap-4">
+                      <div className="p-3 bg-blue-50 rounded-lg">
+                        <p className="text-xs text-blue-600 font-medium">Calorías</p>
+                        <p className="text-sm md:text-base font-semibold">{selectedHistoryItem.data.calorias} kcal</p>
+                      </div>
+                      <div className="p-3 bg-green-50 rounded-lg">
+                        <p className="text-xs text-green-600 font-medium">Proteínas</p>
+                        <p className="text-sm md:text-base font-semibold">{selectedHistoryItem.data.proteinas}g</p>
+                      </div>
+                      <div className="p-3 bg-orange-50 rounded-lg">
+                        <p className="text-xs text-orange-600 font-medium">Carbohidratos</p>
+                        <p className="text-sm md:text-base font-semibold">{selectedHistoryItem.data.carbos}g</p>
+                      </div>
+                      <div className="p-3 bg-purple-50 rounded-lg">
+                        <p className="text-xs text-purple-600 font-medium">Grasas</p>
+                        <p className="text-sm md:text-base font-semibold">{selectedHistoryItem.data.grasas}g</p>
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {selectedHistoryItem.type === 'neat' && (
+                  <div className="clean-card">
+                    <h4 className="font-semibold mb-3 md:mb-4 text-base md:text-lg">🚶 Detalles del NEAT</h4>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 md:gap-4">
+                      <div className="p-3 bg-blue-50 rounded-lg">
+                        <p className="text-xs text-blue-600 font-medium">Tipo</p>
+                        <p className="text-sm md:text-base font-semibold">{selectedHistoryItem.data.tipo === 'pasos' ? 'Pasos' : 'Cinta'}</p>
+                      </div>
+                      {selectedHistoryItem.data.tipo === 'pasos' ? (
+                        <div className="p-3 bg-green-50 rounded-lg">
+                          <p className="text-xs text-green-600 font-medium">Pasos</p>
+                          <p className="text-sm md:text-base font-semibold">{selectedHistoryItem.data.pasos}</p>
+                        </div>
+                      ) : (
+                        <div className="p-3 bg-green-50 rounded-lg">
+                          <p className="text-xs text-green-600 font-medium">Distancia</p>
+                          <p className="text-sm md:text-base font-semibold">{selectedHistoryItem.data.km} km</p>
+                        </div>
+                      )}
+                      <div className="p-3 bg-orange-50 rounded-lg">
+                        <p className="text-xs text-orange-600 font-medium">Calorías</p>
+                        <p className="text-sm md:text-base font-semibold">{selectedHistoryItem.data.calorias} kcal</p>
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {selectedHistoryItem.type === 'entrenos' && (
+                  <div className="clean-card">
+                    <h4 className="font-semibold mb-3 md:mb-4 text-base md:text-lg">🎯 Detalles del Entreno Extra</h4>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 md:gap-4">
+                      <div className="p-3 bg-blue-50 rounded-lg">
+                        <p className="text-xs text-blue-600 font-medium">Actividad</p>
+                        <p className="text-sm md:text-base font-semibold">{selectedHistoryItem.data.tipo}</p>
+                      </div>
+                      <div className="p-3 bg-green-50 rounded-lg">
+                        <p className="text-xs text-green-600 font-medium">Duración</p>
+                        <p className="text-sm md:text-base font-semibold">{selectedHistoryItem.data.duracion} min</p>
+                      </div>
+                      <div className="p-3 bg-orange-50 rounded-lg">
+                        <p className="text-xs text-orange-600 font-medium">Intensidad</p>
+                        <p className="text-sm md:text-base font-semibold">{selectedHistoryItem.data.intensidad}</p>
+                      </div>
+                      <div className="p-3 bg-purple-50 rounded-lg">
+                        <p className="text-xs text-purple-600 font-medium">Calorías</p>
+                        <p className="text-sm md:text-base font-semibold">{selectedHistoryItem.data.calorias} kcal</p>
+                      </div>
+                    </div>
+                    {selectedHistoryItem.data.notas && (
+                      <div className="mt-4 p-3 bg-gray-50 rounded-lg">
+                        <p className="text-xs text-gray-600 font-medium mb-1">Notas</p>
+                        <p className="text-sm text-gray-700">{selectedHistoryItem.data.notas}</p>
+                      </div>
+                    )}
+                  </div>
+                )}
+              </div>
+            </div>
+            
+            <div className="flex gap-2 md:gap-3 flex-shrink-0 p-3 md:p-4 border-t border-gray-200">
+              <button onClick={closeModal} className="btn-elegant btn-secondary flex-1 text-sm md:text-base">
+                Cerrar
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
         <div className="modal-overlay" onClick={closeModal}>
           <div className="modal-content max-h-[90vh] flex flex-col mx-4 md:mx-auto" onClick={(e) => e.stopPropagation()}>
             <div className="modal-header flex-shrink-0">
