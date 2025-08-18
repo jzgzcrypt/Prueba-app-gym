@@ -616,13 +616,13 @@ body {
 
   /* Mejorar elementos de fondo gris - Gradientes Suaves */
   .bg-gray-50 {
-    background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%) !important;
-    border: 1px solid #e2e8f0;
+    background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%) !important;
+    border: 1px solid #bae6fd;
   }
 
   .bg-gray-100 {
-    background: linear-gradient(135deg, #f1f5f9 0%, #e2e8f0 100%) !important;
-    border: 1px solid #cbd5e1;
+    background: linear-gradient(135deg, #e0f2fe 0%, #bae6fd 100%) !important;
+    border: 1px solid #7dd3fc;
   }
 
   /* Mejorar espaciado en elementos expandibles */
@@ -728,8 +728,8 @@ body {
 
   /* Mejorar elementos de días - Diseño de Tarjetas */
   .bg-gray-50.rounded-lg {
-    background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%) !important;
-    border: 1px solid #e2e8f0;
+    background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%) !important;
+    border: 1px solid #bae6fd;
     border-radius: 16px;
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
     margin-bottom: 12px;
@@ -741,15 +741,15 @@ body {
     padding: 4px 8px;
     border-radius: 6px;
     font-weight: 500;
-    background: linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%) !important;
-    border: 1px solid #bfdbfe;
+    background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%) !important;
+    border: 1px solid #bae6fd;
   }
 
   /* Mejorar elementos de cardio */
   .text-xs.bg-blue-100.text-blue-700 {
-    background: linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%) !important;
-    color: #1d4ed8 !important;
-    border: 1px solid #bfdbfe;
+    background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%) !important;
+    color: #0369a1 !important;
+    border: 1px solid #bae6fd;
   }
 
   /* Mejorar elementos de números - Círculos Medianos */
@@ -778,34 +778,34 @@ body {
 
   /* Mejorar botones de acción - Sutiles */
   .bg-primary.hover\\:bg-primary-dark {
-    background: linear-gradient(135deg, #f1f5f9 0%, #e2e8f0 100%) !important;
-    color: #475569 !important;
-    border: 1px solid #cbd5e1;
+    background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%) !important;
+    color: #0369a1 !important;
+    border: 1px solid #bae6fd;
     box-shadow: none;
   }
 
   .bg-primary.hover\\:bg-primary-dark:hover {
-    background: linear-gradient(135deg, #e2e8f0 0%, #cbd5e1 100%) !important;
+    background: linear-gradient(135deg, #e0f2fe 0%, #bae6fd 100%) !important;
     box-shadow: none;
   }
 
   /* Mejorar elementos de estado */
   .text-sm.text-gray-600.font-medium.bg-gray-100 {
-    background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%) !important;
-    border: 1px solid #e2e8f0;
+    background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%) !important;
+    border: 1px solid #bae6fd;
   }
 
   /* Mejorar elementos de cardio */
   .text-xs.bg-blue-100.text-blue-700.font-medium {
-    background: linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%) !important;
-    border: 1px solid #bfdbfe;
+    background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%) !important;
+    border: 1px solid #bae6fd;
   }
 
   /* Mejorar elementos de números */
   .w-10.h-10.bg-primary {
-    background: linear-gradient(135deg, #f1f5f9 0%, #e2e8f0 100%) !important;
-    color: #475569 !important;
-    border: 1px solid #cbd5e1;
+    background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%) !important;
+    color: #0369a1 !important;
+    border: 1px solid #bae6fd;
     box-shadow: none;
   }
 
@@ -830,9 +830,9 @@ body {
   /* Mejorar elementos de botón - Sutiles */
   .bg-primary.hover\\:bg-primary-dark.text-white {
     font-weight: 500;
-    background: linear-gradient(135deg, #f1f5f9 0%, #e2e8f0 100%) !important;
-    color: #475569 !important;
-    border: 1px solid #cbd5e1;
+    background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%) !important;
+    color: #0369a1 !important;
+    border: 1px solid #bae6fd;
   }
 
   /* Mejorar elementos de icono */
@@ -923,6 +923,15 @@ body {
 
   .font-bold {
     font-weight: 700;
+  }
+
+  /* Mejorar centrado de numeración de ejercicios */
+  .w-8.h-8 {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    font-weight: bold;
+    font-size: 14px;
   }
 }
 

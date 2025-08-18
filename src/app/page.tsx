@@ -871,7 +871,7 @@ export default function Dashboard() {
           <div className="flex-1 flex justify-end">
             <button 
               onClick={() => openModal('calendar')}
-              className="w-12 h-12 bg-gray-100 rounded-full flex items-center justify-center hover:scale-110 transition-all text-gray-700 shadow-sm hover:shadow-md"
+              className="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center hover:scale-110 transition-all text-blue-700 shadow-sm hover:shadow-md"
               title="Ver plan semanal"
             >
               <span className="text-xl">📅</span>
@@ -935,7 +935,7 @@ export default function Dashboard() {
           return (
             <div className="clean-card mb-4">
               <div className="flex items-start gap-3 mb-3">
-                <div className="w-10 h-10 bg-gray-100 rounded-full flex items-center justify-center text-gray-700 font-bold text-sm flex-shrink-0">
+                <div className="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center text-blue-700 font-bold text-sm flex-shrink-0">
                   {currentData.dia.dia.split(' ')[1]}
                 </div>
                 <div className="flex-1 min-w-0">
@@ -954,7 +954,7 @@ export default function Dashboard() {
                 </div>
               )}
               <div className="flex items-center justify-between">
-                <span className="text-sm text-gray-600 font-medium bg-gray-50 px-3 py-1 rounded-full">
+                <span className="text-sm text-gray-600 font-medium bg-blue-50 px-3 py-1 rounded-full">
                   {currentData.dia.ejercicios.length > 0 ? `${currentData.dia.ejercicios.length} ejercicios` : 'Descanso activo'}
                 </span>
                 <button 
@@ -967,7 +967,7 @@ export default function Dashboard() {
                     });
                     openModal('workout-details');
                   }}
-                  className="bg-gray-100 hover:bg-gray-200 text-gray-700 px-4 py-2 rounded-lg font-medium text-sm transition-all"
+                  className="bg-blue-100 hover:bg-blue-200 text-blue-700 px-4 py-2 rounded-lg font-medium text-sm transition-all"
                 >
                   Ver detalles
                 </button>
@@ -1885,8 +1885,8 @@ export default function Dashboard() {
                     className="w-full flex items-center justify-between p-3 md:p-4 hover:bg-gradient-to-r hover:from-purple-50 hover:to-purple-100 rounded-lg transition-all duration-200"
                   >
                     <div className="flex items-center gap-3">
-                      <div className="w-10 h-10 bg-gradient-to-br from-purple-400 to-purple-600 rounded-xl flex items-center justify-center shadow-md">
-                        <span className="text-white text-sm font-bold">{microciclo.id}</span>
+                      <div className="w-10 h-10 bg-gradient-to-br from-blue-200 to-blue-300 rounded-xl flex items-center justify-center shadow-sm">
+                        <span className="text-blue-700 text-sm font-bold">MC</span>
                       </div>
                       <div className="text-left">
                         <h3 className="text-base md:text-lg font-semibold">{microciclo.nombre}</h3>
@@ -1931,7 +1931,7 @@ export default function Dashboard() {
                         {microciclo.dias.map((dia, index) => (
                           <div 
                             key={index} 
-                            className="flex items-start justify-between p-3 md:p-4 bg-gray-50 rounded-lg cursor-pointer hover:bg-gray-100 transition-colors"
+                            className="flex items-start justify-between p-3 md:p-4 bg-blue-50 rounded-lg cursor-pointer hover:bg-blue-100 transition-colors"
                             onClick={() => {
                               setSelectedWorkout({
                                 dia: dia.dia,
@@ -1944,9 +1944,6 @@ export default function Dashboard() {
                           >
                             <div className="flex-1 min-w-0">
                               <div className="flex items-start gap-3">
-                                <div className="w-8 h-8 bg-gray-100 rounded-full flex items-center justify-center text-gray-700 font-bold text-sm flex-shrink-0">
-                                  {index + 1}
-                                </div>
                                 <div className="min-w-0 flex-1">
                                   <p className="font-semibold text-sm leading-tight mb-1">{dia.dia}</p>
                                   <p className="text-xs text-gray-600 leading-relaxed mb-2">{dia.entrenamiento}</p>
@@ -1965,7 +1962,7 @@ export default function Dashboard() {
                             </div>
                             <div className="text-right flex-shrink-0 ml-3">
                               <div className="flex flex-col items-end gap-1">
-                                <span className="text-xs font-medium text-gray-700 bg-gray-50 px-2 py-1 rounded-full">
+                                <span className="text-xs font-medium text-gray-700 bg-blue-50 px-2 py-1 rounded-full">
                                   {dia.ejercicios.length > 0 ? `${dia.ejercicios.length} ejercicios` : 'Descanso'}
                                 </span>
                                 <span className="text-gray-500 text-lg font-bold">→</span>
