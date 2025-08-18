@@ -871,7 +871,8 @@ export default function Dashboard() {
           <div className="flex-1 flex justify-end">
             <button 
               onClick={() => openModal('calendar')}
-              className="w-12 h-12 bg-primary rounded-full flex items-center justify-center hover:scale-110 transition-all text-white"
+              className="w-12 h-12 bg-primary rounded-full flex items-center justify-center hover:scale-110 transition-all text-white shadow-lg hover:shadow-xl"
+              title="Ver plan semanal"
             >
               <span className="text-xl">📅</span>
             </button>
@@ -933,27 +934,27 @@ export default function Dashboard() {
           
           return (
             <div className="clean-card mb-4">
-              <div className="flex items-center gap-3 mb-3">
-                <div className="w-10 h-10 bg-primary rounded-full flex items-center justify-center text-white font-bold">
+              <div className="flex items-start gap-3 mb-3">
+                <div className="w-10 h-10 bg-primary rounded-full flex items-center justify-center text-white font-bold text-sm flex-shrink-0">
                   {currentData.dia.dia.split(' ')[1]}
                 </div>
-                <div>
-                  <h3 className="font-semibold text-lg">{currentData.dia.entrenamiento}</h3>
-                  <p className="text-sm text-gray-600">{currentData.microciclo.nombre}</p>
+                <div className="flex-1 min-w-0">
+                  <h3 className="font-semibold text-lg leading-tight mb-1">{currentData.dia.entrenamiento}</h3>
+                  <p className="text-sm text-gray-600 leading-relaxed">{currentData.microciclo.nombre}</p>
                 </div>
               </div>
               {currentData.dia.cardio && (
-                <div className="flex items-center gap-2 mb-3">
-                  <span className="text-xs bg-blue-100 text-blue-700 px-2 py-1 rounded-full">
+                <div className="flex items-center gap-2 mb-3 flex-wrap">
+                  <span className="text-xs bg-blue-100 text-blue-700 px-2 py-1 rounded-full font-medium">
                     🏃 {currentData.dia.cardio.tipo}
                   </span>
-                  <span className="text-xs text-gray-500">
+                  <span className="text-xs text-gray-500 font-medium">
                     {currentData.dia.cardio.duracion}min • {currentData.dia.cardio.intensidad}
                   </span>
                 </div>
               )}
               <div className="flex items-center justify-between">
-                <span className="text-sm text-gray-600">
+                <span className="text-sm text-gray-600 font-medium bg-gray-100 px-3 py-1 rounded-full">
                   {currentData.dia.ejercicios.length > 0 ? `${currentData.dia.ejercicios.length} ejercicios` : 'Descanso activo'}
                 </span>
                 <button 
@@ -966,9 +967,9 @@ export default function Dashboard() {
                     });
                     openModal('workout-details');
                   }}
-                  className="btn-elegant btn-small bg-primary hover:bg-primary-dark text-white"
+                  className="bg-primary hover:bg-primary-dark text-white px-4 py-2 rounded-lg font-medium text-sm transition-all hover:scale-105 shadow-sm"
                 >
-                  Ver detalles
+                  📋 Ver detalles
                 </button>
               </div>
               
@@ -1016,17 +1017,17 @@ export default function Dashboard() {
           }
           return (
             <div className="clean-card mb-4 bg-gradient-to-r from-orange-50 to-red-50 border-orange-200">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center">
-                  <div className="w-10 h-10 bg-gradient-to-r from-orange-400 to-red-500 rounded-full flex items-center justify-center mr-3">
+              <div className="flex items-start justify-between gap-3">
+                <div className="flex items-start gap-3 flex-1 min-w-0">
+                  <div className="w-10 h-10 bg-gradient-to-r from-orange-400 to-red-500 rounded-full flex items-center justify-center shadow-lg flex-shrink-0">
                     <span className="text-white text-lg">🔥</span>
                   </div>
-                  <div>
-                    <h3 className="font-semibold text-lg">Calorías Quemadas</h3>
-                    <p className="text-sm text-gray-600">Total del día</p>
+                  <div className="flex-1 min-w-0">
+                    <h3 className="font-semibold text-lg leading-tight mb-1">Calorías Quemadas</h3>
+                    <p className="text-sm text-gray-600 leading-relaxed">Total del día</p>
                   </div>
                 </div>
-                <div className="text-right">
+                <div className="text-right flex-shrink-0">
                   <div className="text-2xl font-bold text-orange-600">{caloriasHoy}</div>
                   <div className="text-xs text-gray-500">kcal</div>
                 </div>
@@ -1037,114 +1038,114 @@ export default function Dashboard() {
         
         {/* Weight Entry */}
         <div className="clean-card cursor-pointer hover:scale-[1.02] transition-transform" onClick={() => openModal('weight')}>
-          <div className="flex items-center justify-between">
-            <div className="flex items-center">
-              <div className="w-12 h-12 bg-gradient-to-r from-blue-400 to-blue-500 rounded-full flex items-center justify-center mr-4 shadow-lg">
+          <div className="flex items-start justify-between gap-3">
+            <div className="flex items-start gap-3 flex-1 min-w-0">
+              <div className="w-12 h-12 bg-gradient-to-r from-blue-400 to-blue-500 rounded-full flex items-center justify-center shadow-lg flex-shrink-0">
                 <span className="text-2xl">⚖️</span>
               </div>
-              <div>
-                <h3 className="font-semibold">Pesaje Diario</h3>
-                <p className="text-sm text-gray-600">Registra tu peso de hoy</p>
+              <div className="flex-1 min-w-0">
+                <h3 className="font-semibold text-base leading-tight mb-1">Pesaje Diario</h3>
+                <p className="text-sm text-gray-600 leading-relaxed">Registra tu peso de hoy</p>
               </div>
             </div>
-            <div className="text-right">
+            <div className="text-right flex-shrink-0">
               <div className={getStatusClass('weight')}>{getStatus('weight')}</div>
-              <div className="text-xs text-gray-500">Toca para registrar</div>
+              <div className="text-xs text-gray-500 mt-1">Toca para registrar</div>
             </div>
           </div>
         </div>
         
         {/* Workout Entry */}
         <div className="clean-card cursor-pointer hover:scale-[1.02] transition-transform" onClick={() => openModal('workout')}>
-          <div className="flex items-center justify-between">
-            <div className="flex items-center">
-              <div className="w-12 h-12 bg-gradient-to-r from-green-400 to-green-500 rounded-full flex items-center justify-center mr-4 shadow-lg">
+          <div className="flex items-start justify-between gap-3">
+            <div className="flex items-start gap-3 flex-1 min-w-0">
+              <div className="w-12 h-12 bg-gradient-to-r from-green-400 to-green-500 rounded-full flex items-center justify-center shadow-lg flex-shrink-0">
                 <span className="text-2xl">🏋️</span>
               </div>
-              <div>
-                <h3 className="font-semibold">Entrenamiento</h3>
-                <p className="text-sm text-gray-600">Completa tu rutina de hoy</p>
+              <div className="flex-1 min-w-0">
+                <h3 className="font-semibold text-base leading-tight mb-1">Entrenamiento</h3>
+                <p className="text-sm text-gray-600 leading-relaxed">Completa tu rutina de hoy</p>
               </div>
             </div>
-            <div className="text-right">
+            <div className="text-right flex-shrink-0">
               <div className={getStatusClass('workout')}>{getStatus('workout')}</div>
-              <div className="text-xs text-gray-500">Toca para entrenar</div>
+              <div className="text-xs text-gray-500 mt-1">Toca para entrenar</div>
             </div>
           </div>
         </div>
         
         {/* Cardio Entry */}
         <div className="clean-card cursor-pointer hover:scale-[1.02] transition-transform" onClick={() => openModal('cardio')}>
-          <div className="flex items-center justify-between">
-            <div className="flex items-center">
-              <div className="w-12 h-12 bg-gradient-to-r from-red-400 to-red-500 rounded-full flex items-center justify-center mr-4 shadow-lg">
+          <div className="flex items-start justify-between gap-3">
+            <div className="flex items-start gap-3 flex-1 min-w-0">
+              <div className="w-12 h-12 bg-gradient-to-r from-red-400 to-red-500 rounded-full flex items-center justify-center shadow-lg flex-shrink-0">
                 <span className="text-2xl">🏃</span>
               </div>
-              <div>
-                <h3 className="font-semibold">Cardio</h3>
-                <p className="text-sm text-gray-600">Registra tu actividad cardiovascular</p>
+              <div className="flex-1 min-w-0">
+                <h3 className="font-semibold text-base leading-tight mb-1">Cardio</h3>
+                <p className="text-sm text-gray-600 leading-relaxed">Registra tu actividad cardiovascular</p>
               </div>
             </div>
-            <div className="text-right">
+            <div className="text-right flex-shrink-0">
               <div className={getStatusClass('cardio')}>{getStatus('cardio')}</div>
-              <div className="text-xs text-gray-500">Toca para registrar</div>
+              <div className="text-xs text-gray-500 mt-1">Toca para registrar</div>
             </div>
           </div>
         </div>
         
         {/* Diet Entry */}
         <div className="clean-card cursor-pointer hover:scale-[1.02] transition-transform" onClick={() => openModal('diet')}>
-          <div className="flex items-center justify-between">
-            <div className="flex items-center">
-              <div className="w-12 h-12 bg-gradient-to-r from-yellow-400 to-yellow-500 rounded-full flex items-center justify-center mr-4 shadow-lg">
+          <div className="flex items-start justify-between gap-3">
+            <div className="flex items-start gap-3 flex-1 min-w-0">
+              <div className="w-12 h-12 bg-gradient-to-r from-yellow-400 to-yellow-500 rounded-full flex items-center justify-center shadow-lg flex-shrink-0">
                 <span className="text-2xl">🥗</span>
               </div>
-              <div>
-                <h3 className="font-semibold">Dieta</h3>
-                <p className="text-sm text-gray-600">1800 kcal - 150g proteínas</p>
+              <div className="flex-1 min-w-0">
+                <h3 className="font-semibold text-base leading-tight mb-1">Dieta</h3>
+                <p className="text-sm text-gray-600 leading-relaxed">1800 kcal - 150g proteínas</p>
               </div>
             </div>
-            <div className="text-right">
+            <div className="text-right flex-shrink-0">
               <div className={getStatusClass('diet')}>{getStatus('diet')}</div>
-              <div className="text-xs text-gray-500">Toca para registrar</div>
+              <div className="text-xs text-gray-500 mt-1">Toca para registrar</div>
             </div>
           </div>
         </div>
         
         {/* NEAT Entry */}
         <div className="clean-card cursor-pointer hover:scale-[1.02] transition-transform" onClick={() => openModal('neat')}>
-          <div className="flex items-center justify-between">
-            <div className="flex items-center">
-              <div className="w-12 h-12 bg-gradient-to-r from-purple-400 to-purple-500 rounded-full flex items-center justify-center mr-4 shadow-lg">
+          <div className="flex items-start justify-between gap-3">
+            <div className="flex items-start gap-3 flex-1 min-w-0">
+              <div className="w-12 h-12 bg-gradient-to-r from-purple-400 to-purple-500 rounded-full flex items-center justify-center shadow-lg flex-shrink-0">
                 <span className="text-2xl">🚶</span>
               </div>
-              <div>
-                <h3 className="font-semibold">NEAT</h3>
-                <p className="text-sm text-gray-600">Actividad física no estructurada</p>
+              <div className="flex-1 min-w-0">
+                <h3 className="font-semibold text-base leading-tight mb-1">NEAT</h3>
+                <p className="text-sm text-gray-600 leading-relaxed">Actividad física no estructurada</p>
               </div>
             </div>
-            <div className="text-right">
+            <div className="text-right flex-shrink-0">
               <div className={getStatusClass('neat')}>{getStatus('neat')}</div>
-              <div className="text-xs text-gray-500">Toca para registrar</div>
+              <div className="text-xs text-gray-500 mt-1">Toca para registrar</div>
             </div>
           </div>
         </div>
         
         {/* Entreno No Programado Entry */}
         <div className="clean-card cursor-pointer hover:scale-[1.02] transition-transform" onClick={() => openModal('entreno-no-programado')}>
-          <div className="flex items-center justify-between">
-            <div className="flex items-center">
-              <div className="w-12 h-12 bg-gradient-to-r from-teal-400 to-teal-500 rounded-full flex items-center justify-center mr-4 shadow-lg">
+          <div className="flex items-start justify-between gap-3">
+            <div className="flex items-start gap-3 flex-1 min-w-0">
+              <div className="w-12 h-12 bg-gradient-to-r from-teal-400 to-teal-500 rounded-full flex items-center justify-center shadow-lg flex-shrink-0">
                 <span className="text-2xl">🎯</span>
               </div>
-              <div>
-                <h3 className="font-semibold">Entreno Extra</h3>
-                <p className="text-sm text-gray-600">Tenis, natación, alpinismo, etc.</p>
+              <div className="flex-1 min-w-0">
+                <h3 className="font-semibold text-base leading-tight mb-1">Entreno Extra</h3>
+                <p className="text-sm text-gray-600 leading-relaxed">Tenis, natación, alpinismo, etc.</p>
               </div>
             </div>
-            <div className="text-right">
+            <div className="text-right flex-shrink-0">
               <div className={getStatusClass('entrenoNoProgramado')}>{getStatus('entrenoNoProgramado')}</div>
-              <div className="text-xs text-gray-500">Toca para registrar</div>
+              <div className="text-xs text-gray-500 mt-1">Toca para registrar</div>
             </div>
           </div>
         </div>
@@ -1152,19 +1153,19 @@ export default function Dashboard() {
         {/* Seguimiento Entry - Solo domingos */}
         {new Date().getDay() === 0 && (
           <div className="clean-card cursor-pointer hover:scale-[1.02] transition-transform" onClick={() => openModal('seguimiento')}>
-            <div className="flex items-center justify-between">
-              <div className="flex items-center">
-                <div className="w-12 h-12 bg-gradient-to-r from-indigo-400 to-indigo-500 rounded-full flex items-center justify-center mr-4 shadow-lg">
+            <div className="flex items-start justify-between gap-3">
+              <div className="flex items-start gap-3 flex-1 min-w-0">
+                <div className="w-12 h-12 bg-gradient-to-r from-indigo-400 to-indigo-500 rounded-full flex items-center justify-center shadow-lg flex-shrink-0">
                   <span className="text-2xl">📊</span>
                 </div>
-                <div>
-                  <h3 className="font-semibold">Seguimiento Semanal</h3>
-                  <p className="text-sm text-gray-600">Peso, cintura y medidas</p>
+                <div className="flex-1 min-w-0">
+                  <h3 className="font-semibold text-base leading-tight mb-1">Seguimiento Semanal</h3>
+                  <p className="text-sm text-gray-600 leading-relaxed">Peso, cintura y medidas</p>
                 </div>
               </div>
-              <div className="text-right">
+              <div className="text-right flex-shrink-0">
                 <div className={getStatusClass('seguimiento')}>{getStatus('seguimiento')}</div>
-                <div className="text-xs text-gray-500">Toca para registrar</div>
+                <div className="text-xs text-gray-500 mt-1">Toca para registrar</div>
               </div>
             </div>
           </div>
@@ -1802,26 +1803,26 @@ export default function Dashboard() {
             {expandedSections.info && (
               <div className="px-3 md:px-4 pb-3 md:pb-4 space-y-3 md:space-y-4 animate-fadeIn">
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 md:gap-4">
-                  <div className="p-3 bg-blue-50 rounded-lg">
-                    <p className="text-xs text-blue-600 font-medium">Objetivo</p>
-                    <p className="text-sm md:text-base font-semibold">{mesociclo.objetivo}</p>
+                  <div className="p-3 bg-white rounded-lg shadow-sm border border-blue-100">
+                    <p className="text-xs text-blue-600 font-medium mb-1">Objetivo</p>
+                    <p className="text-sm md:text-base font-semibold leading-relaxed">{mesociclo.objetivo}</p>
                   </div>
-                  <div className="p-3 bg-green-50 rounded-lg">
-                    <p className="text-xs text-green-600 font-medium">Estructura</p>
-                    <p className="text-sm md:text-base font-semibold">{mesociclo.estructura}</p>
+                  <div className="p-3 bg-white rounded-lg shadow-sm border border-green-100">
+                    <p className="text-xs text-green-600 font-medium mb-1">Estructura</p>
+                    <p className="text-sm md:text-base font-semibold leading-relaxed">{mesociclo.estructura}</p>
                   </div>
-                  <div className="p-3 bg-orange-50 rounded-lg">
-                    <p className="text-xs text-orange-600 font-medium">Intensidad</p>
-                    <p className="text-sm md:text-base font-semibold">{mesociclo.intensidad}</p>
+                  <div className="p-3 bg-white rounded-lg shadow-sm border border-orange-100">
+                    <p className="text-xs text-orange-600 font-medium mb-1">Intensidad</p>
+                    <p className="text-sm md:text-base font-semibold leading-relaxed">{mesociclo.intensidad}</p>
                   </div>
-                  <div className="p-3 bg-purple-50 rounded-lg">
-                    <p className="text-xs text-purple-600 font-medium">Cardio</p>
-                    <p className="text-sm md:text-base font-semibold">{mesociclo.cardio}</p>
+                  <div className="p-3 bg-white rounded-lg shadow-sm border border-purple-100">
+                    <p className="text-xs text-purple-600 font-medium mb-1">Cardio</p>
+                    <p className="text-sm md:text-base font-semibold leading-relaxed">{mesociclo.cardio}</p>
                   </div>
                 </div>
-                <div className="p-3 bg-yellow-50 rounded-lg">
-                  <p className="text-xs text-yellow-600 font-medium">Dieta</p>
-                  <p className="text-sm md:text-base font-semibold">{mesociclo.dieta}</p>
+                <div className="p-3 bg-white rounded-lg shadow-sm border border-yellow-100">
+                  <p className="text-xs text-yellow-600 font-medium mb-1">Dieta</p>
+                  <p className="text-sm md:text-base font-semibold leading-relaxed">{mesociclo.dieta}</p>
                 </div>
               </div>
             )}
@@ -1911,17 +1912,17 @@ export default function Dashboard() {
                     <div className="px-3 md:px-4 pb-3 md:pb-4 animate-fadeIn">
                       {/* Información del microciclo */}
                       <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 md:gap-3 mb-3 md:mb-4">
-                        <div className="p-2 bg-blue-50 rounded-lg">
-                          <p className="text-xs text-blue-600 font-medium">Objetivo</p>
-                          <p className="text-xs md:text-sm">{microciclo.objetivo}</p>
+                        <div className="p-2 bg-white rounded-lg shadow-sm border border-blue-100">
+                          <p className="text-xs text-blue-600 font-medium mb-1">Objetivo</p>
+                          <p className="text-xs md:text-sm leading-relaxed">{microciclo.objetivo}</p>
                         </div>
-                        <div className="p-2 bg-green-50 rounded-lg">
-                          <p className="text-xs text-green-600 font-medium">Intensidad</p>
-                          <p className="text-xs md:text-sm">{microciclo.intensidad}</p>
+                        <div className="p-2 bg-white rounded-lg shadow-sm border border-green-100">
+                          <p className="text-xs text-green-600 font-medium mb-1">Intensidad</p>
+                          <p className="text-xs md:text-sm leading-relaxed">{microciclo.intensidad}</p>
                         </div>
-                        <div className="p-2 bg-orange-50 rounded-lg">
-                          <p className="text-xs text-orange-600 font-medium">Cardio</p>
-                          <p className="text-xs md:text-sm">{microciclo.cardio}</p>
+                        <div className="p-2 bg-white rounded-lg shadow-sm border border-orange-100">
+                          <p className="text-xs text-orange-600 font-medium mb-1">Cardio</p>
+                          <p className="text-xs md:text-sm leading-relaxed">{microciclo.cardio}</p>
                         </div>
                       </div>
                       
@@ -1930,7 +1931,7 @@ export default function Dashboard() {
                         {microciclo.dias.map((dia, index) => (
                           <div 
                             key={index} 
-                            className="flex items-center justify-between p-2 md:p-3 bg-gray-50 rounded-lg cursor-pointer hover:bg-gray-100 transition-colors border-l-3 border-primary"
+                            className="flex items-start justify-between p-3 md:p-4 bg-white rounded-lg cursor-pointer hover:bg-gray-50 transition-colors border border-gray-200 shadow-sm"
                             onClick={() => {
                               setSelectedWorkout({
                                 dia: dia.dia,
@@ -1942,32 +1943,32 @@ export default function Dashboard() {
                             }}
                           >
                             <div className="flex-1 min-w-0">
-                              <div className="flex items-center gap-2">
-                                <div className="w-6 h-6 md:w-8 md:h-8 bg-primary rounded-full flex items-center justify-center text-white font-bold text-xs flex-shrink-0">
+                              <div className="flex items-start gap-3">
+                                <div className="w-8 h-8 bg-primary rounded-full flex items-center justify-center text-white font-bold text-sm flex-shrink-0">
                                   {index + 1}
                                 </div>
                                 <div className="min-w-0 flex-1">
-                                  <p className="font-semibold text-sm truncate">{dia.dia}</p>
-                                  <p className="text-xs text-gray-600 truncate">{dia.entrenamiento}</p>
+                                  <p className="font-semibold text-sm leading-tight mb-1">{dia.dia}</p>
+                                  <p className="text-xs text-gray-600 leading-relaxed mb-2">{dia.entrenamiento}</p>
+                                  {dia.cardio && (
+                                    <div className="flex items-center gap-2 flex-wrap">
+                                      <span className="text-xs bg-blue-100 text-blue-700 px-2 py-1 rounded-full font-medium">
+                                        🏃 {dia.cardio.tipo}
+                                      </span>
+                                      <span className="text-xs text-gray-500 font-medium">
+                                        {dia.cardio.duracion}min
+                                      </span>
+                                    </div>
+                                  )}
                                 </div>
                               </div>
-                              {dia.cardio && (
-                                <div className="mt-1 flex items-center gap-1">
-                                  <span className="text-xs bg-blue-100 text-blue-700 px-1.5 py-0.5 rounded-full">
-                                    🏃 {dia.cardio.tipo}
-                                  </span>
-                                  <span className="text-xs text-gray-500">
-                                    {dia.cardio.duracion}min
-                                  </span>
-                                </div>
-                              )}
                             </div>
-                            <div className="text-right flex-shrink-0 ml-2">
-                              <div className="flex items-center gap-1">
-                                <span className="text-xs font-medium text-gray-700">
+                            <div className="text-right flex-shrink-0 ml-3">
+                              <div className="flex flex-col items-end gap-1">
+                                <span className="text-xs font-medium text-gray-700 bg-gray-100 px-2 py-1 rounded-full">
                                   {dia.ejercicios.length > 0 ? `${dia.ejercicios.length} ejercicios` : 'Descanso'}
                                 </span>
-                                <span className="text-primary text-sm">→</span>
+                                <span className="text-primary text-lg font-bold">→</span>
                               </div>
                             </div>
                           </div>

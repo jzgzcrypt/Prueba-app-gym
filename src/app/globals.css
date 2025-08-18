@@ -544,6 +544,9 @@ body {
     border-radius: 12px;
     padding: 16px;
     margin: 8px;
+    /* Mejorar encuadre de textos */
+    word-wrap: break-word;
+    overflow-wrap: break-word;
   }
   
   .activity-block {
@@ -559,6 +562,351 @@ body {
   .input-compact {
     padding: 8px 10px;
     font-size: 16px;
+  }
+
+  /* Mejorar espaciado en cards */
+  .clean-card h3 {
+    margin-bottom: 8px;
+    line-height: 1.3;
+    word-break: break-word;
+  }
+
+  .clean-card p {
+    line-height: 1.4;
+    margin-bottom: 4px;
+  }
+
+  /* Mejorar layout de elementos flexibles */
+  .clean-card .flex {
+    gap: 8px;
+  }
+
+  .clean-card .flex > div {
+    min-width: 0; /* Permite que los elementos se compriman */
+  }
+
+  /* Mejorar textos en elementos de estado */
+  .clean-card .text-right {
+    text-align: right;
+    flex-shrink: 0;
+  }
+
+  .clean-card .text-right > div {
+    white-space: nowrap;
+  }
+
+  /* Mejorar espaciado en desplegables */
+  .clean-card button {
+    padding: 12px 16px;
+  }
+
+  .clean-card button .flex {
+    align-items: center;
+    gap: 12px;
+  }
+
+  /* Mejorar números en recuadros azules */
+  .clean-card .w-10.h-10 {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+    font-size: 14px;
+  }
+
+  /* Mejorar elementos de fondo gris - cambiar a blancos con sombras */
+  .bg-gray-50 {
+    background: white !important;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+    border: 1px solid #f3f4f6;
+  }
+
+  .bg-gray-100 {
+    background: white !important;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+    border: 1px solid #e5e7eb;
+  }
+
+  /* Mejorar espaciado en elementos expandibles */
+  .animate-fadeIn {
+    padding: 12px 16px;
+  }
+
+  .animate-fadeIn .grid {
+    gap: 12px;
+  }
+
+  .animate-fadeIn .p-3 {
+    padding: 12px;
+  }
+
+  /* Mejorar elementos de microciclo */
+  .clean-card .space-y-2 > div {
+    margin-bottom: 8px;
+  }
+
+  .clean-card .space-y-2 > div:last-child {
+    margin-bottom: 0;
+  }
+
+  /* Mejorar layout de días de entrenamiento */
+  .clean-card .flex.items-center.justify-between {
+    align-items: flex-start;
+    gap: 12px;
+  }
+
+  .clean-card .flex.items-center.justify-between > div:first-child {
+    flex: 1;
+    min-width: 0;
+  }
+
+  .clean-card .flex.items-center.justify-between > div:last-child {
+    flex-shrink: 0;
+    text-align: right;
+  }
+
+  /* Mejorar elementos de cardio */
+  .clean-card .mt-1.flex.items-center.gap-1 {
+    margin-top: 8px;
+    flex-wrap: wrap;
+    gap: 6px;
+  }
+
+  /* Mejorar botones de acción */
+  .clean-card .text-primary {
+    font-weight: 600;
+  }
+
+  /* Asegurar que el contenido no se cruce con el menú */
+  .min-h-screen {
+    padding-bottom: 80px; /* Espacio para el menú inferior */
+  }
+
+  .bottom-nav {
+    z-index: 1000;
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: white;
+    border-top: 1px solid #e5e7eb;
+    box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.1);
+  }
+
+  /* Mejorar modal para evitar problemas de z-index */
+  .modal-overlay {
+    z-index: 2000;
+  }
+
+  .modal-content {
+    z-index: 2001;
+  }
+}
+
+/* Mejorar estilos generales para móvil */
+@media (max-width: 768px) {
+  /* Mejorar cards de volumen */
+  .bg-gradient-to-r {
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  }
+
+  /* Mejorar elementos de información */
+  .p-3.bg-blue-50,
+  .p-3.bg-green-50,
+  .p-3.bg-orange-50,
+  .p-3.bg-purple-50,
+  .p-3.bg-yellow-50 {
+    background: white !important;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+    border: 1px solid #f3f4f6;
+    border-radius: 12px;
+  }
+
+  /* Mejorar elementos de microciclo */
+  .clean-card.border.border-purple-200 {
+    border-radius: 16px;
+    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
+  }
+
+  /* Mejorar elementos de días */
+  .bg-gray-50.rounded-lg {
+    background: white !important;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+    border: 1px solid #f3f4f6;
+    border-radius: 12px;
+  }
+
+  /* Mejorar elementos de estado */
+  .text-xs.bg-blue-100,
+  .text-xs.bg-orange-100 {
+    padding: 4px 8px;
+    border-radius: 6px;
+    font-weight: 500;
+  }
+
+  /* Mejorar elementos de cardio */
+  .text-xs.bg-blue-100.text-blue-700 {
+    background: #dbeafe !important;
+    color: #1d4ed8 !important;
+  }
+
+  /* Mejorar elementos de números */
+  .w-6.h-6.md\\:w-8.md\\:h-8 {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+    font-size: 12px;
+  }
+
+  /* Mejorar elementos de texto */
+  .text-sm.truncate {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  /* Mejorar elementos de flecha */
+  .text-primary.text-sm {
+    font-weight: 600;
+    font-size: 16px;
+  }
+
+  /* Mejorar botones de acción */
+  .bg-primary.hover\\:bg-primary-dark {
+    box-shadow: 0 2px 8px rgba(59, 130, 246, 0.2);
+  }
+
+  .bg-primary.hover\\:bg-primary-dark:hover {
+    box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+  }
+
+  /* Mejorar elementos de estado */
+  .text-sm.text-gray-600.font-medium.bg-gray-100 {
+    background: #f3f4f6 !important;
+    border: 1px solid #e5e7eb;
+  }
+
+  /* Mejorar elementos de cardio */
+  .text-xs.bg-blue-100.text-blue-700.font-medium {
+    background: #dbeafe !important;
+    border: 1px solid #bfdbfe;
+  }
+
+  /* Mejorar elementos de números */
+  .w-10.h-10.bg-primary {
+    box-shadow: 0 2px 8px rgba(59, 130, 246, 0.2);
+  }
+
+  /* Mejorar elementos de texto */
+  .text-sm.leading-relaxed {
+    line-height: 1.5;
+  }
+
+  /* Mejorar elementos de título */
+  .text-lg.leading-tight {
+    line-height: 1.3;
+  }
+
+  /* Mejorar elementos de descripción */
+  .text-sm.text-gray-600.leading-relaxed {
+    line-height: 1.4;
+  }
+
+  /* Mejorar elementos de botón */
+  .bg-primary.hover\\:bg-primary-dark.text-white {
+    font-weight: 500;
+  }
+
+  /* Mejorar elementos de icono */
+  .text-2xl {
+    font-size: 1.5rem;
+  }
+
+  /* Mejorar elementos de sombra */
+  .shadow-lg {
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+  }
+
+  /* Mejorar elementos de hover */
+  .hover\\:scale-\\[1\\.02\\] {
+    transition: transform 0.2s ease;
+  }
+
+  .hover\\:scale-\\[1\\.02\\]:hover {
+    transform: scale(1.02);
+  }
+
+  /* Mejorar elementos de transición */
+  .transition-all {
+    transition: all 0.2s ease;
+  }
+
+  /* Mejorar elementos de cursor */
+  .cursor-pointer {
+    cursor: pointer;
+  }
+
+  /* Mejorar elementos de flex */
+  .flex-1 {
+    flex: 1 1 0%;
+  }
+
+  .flex-shrink-0 {
+    flex-shrink: 0;
+  }
+
+  /* Mejorar elementos de min-width */
+  .min-w-0 {
+    min-width: 0;
+  }
+
+  /* Mejorar elementos de gap */
+  .gap-3 {
+    gap: 0.75rem;
+  }
+
+  /* Mejorar elementos de margin */
+  .mb-1 {
+    margin-bottom: 0.25rem;
+  }
+
+  .mb-2 {
+    margin-bottom: 0.5rem;
+  }
+
+  /* Mejorar elementos de padding */
+  .px-2 {
+    padding-left: 0.5rem;
+    padding-right: 0.5rem;
+  }
+
+  .py-1 {
+    padding-top: 0.25rem;
+    padding-bottom: 0.25rem;
+  }
+
+  /* Mejorar elementos de border-radius */
+  .rounded-full {
+    border-radius: 9999px;
+  }
+
+  .rounded-lg {
+    border-radius: 0.5rem;
+  }
+
+  /* Mejorar elementos de font-weight */
+  .font-medium {
+    font-weight: 500;
+  }
+
+  .font-semibold {
+    font-weight: 600;
+  }
+
+  .font-bold {
+    font-weight: 700;
   }
 }
 

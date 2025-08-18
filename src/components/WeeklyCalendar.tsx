@@ -1,5 +1,6 @@
 'use client';
 
+import { useState, useEffect } from 'react';
 import { WeeklyPlan } from '@/types';
 import { getWeeklyPlan } from '@/utils/mesocicloUtils';
 
@@ -9,6 +10,10 @@ interface WeeklyCalendarProps {
 }
 
 const getWeeklyPlanLocal = (): WeeklyPlan => {
+  // Verificar que estamos en el cliente antes de acceder a localStorage
+  if (typeof window === 'undefined') {
+    return {};
+  }
   return getWeeklyPlan();
 };
 
@@ -42,10 +47,45 @@ const getActivityIcon = (type: string): string => {
 };
 
 export function WeeklyCalendar({ isOpen, onClose }: WeeklyCalendarProps) {
-  const weeklyPlan = getWeeklyPlanLocal();
-  const today = new Date().toLocaleDateString('es-ES', { weekday: 'long' });
+  const [weeklyPlan, setWeeklyPlan] = useState<WeeklyPlan>({});
+  const [isLoading, setIsLoading] = useState(true);
+  const [today, setToday] = useState('');
+
+  useEffect(() => {
+    if (isOpen && typeof window !== 'undefined') {
+      try {
+        const plan = getWeeklyPlanLocal();
+        setWeeklyPlan(plan);
+        setToday(new Date().toLocaleDateString('es-ES', { weekday: 'long' }));
+      } catch (error) {
+        console.error('Error loading weekly plan:', error);
+        setWeeklyPlan({});
+      } finally {
+        setIsLoading(false);
+      }
+    }
+  }, [isOpen]);
 
   if (!isOpen) return null;
+
+  if (isLoading) {
+    return (
+      <div className="modal-overlay" onClick={onClose}>
+        <div className="modal-content max-w-2xl max-h-[90vh] flex flex-col" onClick={(e) => e.stopPropagation()}>
+          <div className="modal-header flex-shrink-0">
+            <button className="modal-close" onClick={onClose}>×</button>
+            <h3>📅 Plan Semanal</h3>
+          </div>
+          <div className="modal-body flex-1 overflow-y-auto flex items-center justify-center">
+            <div className="text-center">
+              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500 mx-auto mb-4"></div>
+              <p className="text-gray-600">Cargando plan semanal...</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="modal-overlay" onClick={onClose}>
