@@ -13,7 +13,7 @@ const getDatabaseConnection = () => {
     console.error('Ejemplo: DATABASE_URL=postgresql://usuario:contraseña@host/database?sslmode=require');
     
     // Retornar una función mock para evitar errores en desarrollo
-    return (strings: TemplateStringsArray, ...values: any[]) => {
+    return () => {
       console.warn('Base de datos no configurada - retornando datos vacíos');
       return Promise.resolve([]);
     };
@@ -24,7 +24,7 @@ const getDatabaseConnection = () => {
   } catch (error) {
     console.error('Error al conectar con Neon:', error);
     // Retornar función mock en caso de error
-    return (strings: TemplateStringsArray, ...values: any[]) => {
+    return () => {
       console.warn('Error de conexión - retornando datos vacíos');
       return Promise.resolve([]);
     };
