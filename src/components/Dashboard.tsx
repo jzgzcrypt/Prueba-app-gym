@@ -316,6 +316,26 @@ export function Dashboard({ showToast }: DashboardProps) {
             )}
           </div>
         )}
+
+        {/* Programming System */}
+        <div 
+          className="bg-white rounded-lg shadow p-6 cursor-pointer hover:shadow-md transition-shadow"
+          onClick={() => window.location.href = '/programming'}
+        >
+          <div className="flex items-center justify-between mb-4">
+            <div className="w-12 h-12 bg-purple-100 rounded-full flex items-center justify-center">
+              <span className="text-2xl">📋</span>
+            </div>
+            <span className="text-sm font-medium text-blue-600">
+              Nuevo
+            </span>
+          </div>
+          <h3 className="font-semibold text-lg mb-2">Sistema de Programación</h3>
+          <p className="text-gray-600 text-sm">Flujo de observaciones y tareas</p>
+          <div className="mt-3 p-2 bg-blue-50 rounded text-sm">
+            <span className="font-medium text-blue-700">Acceder al sistema</span>
+          </div>
+        </div>
       </div>
 
       {/* Modals */}
