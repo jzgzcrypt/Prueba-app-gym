@@ -5,6 +5,9 @@ import { Dashboard } from '@/components/Dashboard';
 import { Navigation } from '@/components/Navigation';
 import { LoadingSpinner } from '@/components/LoadingSpinner';
 import { ToastContainer } from '@/components/ToastContainer';
+import { MesocicloView } from '@/components/MesocicloView';
+import { HistoryView } from '@/components/HistoryView';
+import { SettingsView } from '@/components/SettingsView';
 import { useToast } from '@/hooks/useToast';
 
 export default function HomePage() {
@@ -37,34 +40,13 @@ export default function HomePage() {
           <Dashboard showToast={showToast} />
         )}
         {activeSection === 'mesociclo' && (
-          <div className="text-center py-12">
-            <h2 className="text-2xl font-bold text-gray-800 mb-4">
-              📅 Visualización del Mesociclo
-            </h2>
-            <p className="text-gray-600">
-              Vista macro de semanas de entrenamiento - En desarrollo
-            </p>
-          </div>
+          <MesocicloView onBack={() => setActiveSection('dashboard')} />
         )}
         {activeSection === 'history' && (
-          <div className="text-center py-12">
-            <h2 className="text-2xl font-bold text-gray-800 mb-4">
-              📊 Historial de Progresos
-            </h2>
-            <p className="text-gray-600">
-              Gráficas de NEAT, cardio, peso, medidas y entrenamientos - En desarrollo
-            </p>
-          </div>
+          <HistoryView onBack={() => setActiveSection('dashboard')} />
         )}
         {activeSection === 'settings' && (
-          <div className="text-center py-12">
-            <h2 className="text-2xl font-bold text-gray-800 mb-4">
-              ⚙️ Configuración
-            </h2>
-            <p className="text-gray-600">
-              Parámetros de usuario, unidades y recordatorios - En desarrollo
-            </p>
-          </div>
+          <SettingsView onBack={() => setActiveSection('dashboard')} />
         )}
       </main>
 
