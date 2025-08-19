@@ -1,27 +1,26 @@
-import type { Metadata } from "next";
-import { Inter } from "next/font/google";
-import "./globals.css";
+import type { Metadata } from 'next'
+import { Inter } from 'next/font/google'
+import './globals.css'
 
-const inter = Inter({ subsets: ["latin"] });
+const inter = Inter({ subsets: ['latin'] })
 
 export const metadata: Metadata = {
-  title: "Mi Entrenamiento — Zero Friction",
-  description: "Dashboard de entrenamiento optimizado para móvil y desktop",
-};
-
-export const viewport = {
-  width: 'device-width',
-  initialScale: 1,
-};
+  title: 'Gym Tracker - Seguimiento de Gimnasio',
+  description: 'Aplicación para seguimiento de entrenamientos, peso, cardio y NEAT',
+}
 
 export default function RootLayout({
   children,
-}: Readonly<{
-  children: React.ReactNode;
-}>) {
+}: {
+  children: React.ReactNode
+}) {
   return (
     <html lang="es">
-      <body className={inter.className}>{children}</body>
+      <body className={inter.className}>
+        <div className="min-h-screen bg-gray-50">
+          {children}
+        </div>
+      </body>
     </html>
-  );
+  )
 }
