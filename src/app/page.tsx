@@ -148,10 +148,30 @@ export default function Dashboard() {
 
   // Obtener datos del día actual del mesociclo (memoizado para evitar recálculos)
   const [currentData, setCurrentData] = useState(() => {
+    // No intentar acceder a localStorage durante SSR
+    if (typeof window === 'undefined') {
+      return {
+        microciclo: { nombre: 'Cargando...', dias: [] },
+        dia: { 
+          dia: 'Cargando...', 
+          entrenamiento: 'Cargando...', 
+          ejercicios: [],
+          cardio: undefined
+        },
+        mesociclo: { nombre: 'Cargando...', microciclos: [] },
+        semanaActual: 1,
+        diaSemana: 0,
+        diaMesociclo: 1,
+        diasTranscurridos: 0,
+        diasEnMicrociclo: 0,
+        microcicloCompletado: false
+      };
+    }
+    
     try {
       return getCurrentMesocicloDay();
     } catch {
-      // Fallback en caso de error durante SSR
+      // Fallback en caso de error
       return {
         microciclo: { nombre: 'Cargando...', dias: [] },
         dia: { 
