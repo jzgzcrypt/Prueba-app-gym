@@ -753,7 +753,7 @@ body {
   }
 
   /* Mejorar elementos de números - Círculos Medianos */
-  .w-6.h-6.md\\:w-8.md\\:h-8 {
+  .w-6.h-6.md\:w-8.md\:h-8 {
     display: flex;
     align-items: center;
     justify-content: center;
@@ -777,14 +777,14 @@ body {
   }
 
   /* Mejorar botones de acción - Sutiles */
-  .bg-primary.hover\\:bg-primary-dark {
+  .bg-primary.hover\:bg-primary-dark {
     background: linear-gradient(135deg, #f1f5f9 0%, #e2e8f0 100%) !important;
     color: #475569 !important;
     border: 1px solid #cbd5e1;
     box-shadow: none;
   }
 
-  .bg-primary.hover\\:bg-primary-dark:hover {
+  .bg-primary.hover\:bg-primary-dark:hover {
     background: linear-gradient(135deg, #e2e8f0 0%, #cbd5e1 100%) !important;
     box-shadow: none;
   }
@@ -828,7 +828,7 @@ body {
   }
 
   /* Mejorar elementos de botón - Sutiles */
-  .bg-primary.hover\\:bg-primary-dark.text-white {
+  .bg-primary.hover\:bg-primary-dark.text-white {
     font-weight: 500;
     background: linear-gradient(135deg, #f1f5f9 0%, #e2e8f0 100%) !important;
     color: #475569 !important;
@@ -846,13 +846,6 @@ body {
   }
 
   /* Mejorar elementos de hover */
-  .hover\\:scale-\\[1\\.02\\] {
-    transition: transform 0.2s ease;
-  }
-
-  .hover\\:scale-\\[1\\.02\\]:hover {
-    transform: scale(1.02);
-  }
 
   /* Mejorar elementos de transición */
   .transition-all {
@@ -942,3 +935,15 @@ body {
 .shadow-elevated {
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1), 0 2px 4px rgba(0, 0, 0, 0.06);
 }
+
+/* Reglas temporalmente deshabilitadas por problemas de sintaxis
+   Se pueden habilitar una vez se corrijan los escapes */
+/*
+.hover\:scale-\[1\.02\] {
+  transition: transform 0.2s ease;
+}
+
+.hover\:scale-\[1\.02\]:hover {
+  transform: scale(1.02);
+}
+*/
