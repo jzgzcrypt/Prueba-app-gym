@@ -1,15 +1,16 @@
 import { NextResponse } from 'next/server';
-import { db } from '@/lib/database';
 
 export async function GET() {
   try {
     console.log('🔍 Probando conexión con la base de datos...');
     
+    // Solo importar la base de datos en runtime, no en build time
+    const { db } = await import('@/lib/database');
+    
     // Probar conexión simple
-    const result = await db.getWeights(1);
+    const weights = await db.getWeights(1);
     
     // Obtener estadísticas
-    const tables = await db.getWeights(1);
     const cardioCount = await db.getCardio(1);
     const neatCount = await db.getNeat(1);
     
@@ -17,7 +18,7 @@ export async function GET() {
       success: true,
       message: '✅ Conexión exitosa con Neon PostgreSQL',
       data: {
-        weightsCount: tables.length,
+        weightsCount: weights.length,
         cardioCount: cardioCount.length,
         neatCount: neatCount.length,
         timestamp: new Date().toISOString()
