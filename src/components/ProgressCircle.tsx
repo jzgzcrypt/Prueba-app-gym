@@ -44,19 +44,19 @@ export function ProgressCircle({
           stroke="url(#gradient)"
           strokeLinecap="round"
           style={{
-            filter: 'drop-shadow(0 4px 8px rgba(14, 165, 233, 0.3))'
+            filter: 'drop-shadow(0 2px 4px rgba(14, 165, 233, 0.2))'
           }}
         />
         <defs>
           <linearGradient id="gradient" x1="0%" y1="0%" x2="100%" y2="100%">
             <stop offset="0%" stopColor="#0ea5e9" />
-            <stop offset="100%" stopColor="#8b5cf6" />
+            <stop offset="100%" stopColor="#0284c7" />
           </linearGradient>
         </defs>
       </svg>
       <div className="absolute inset-0 flex items-center justify-center">
         <div className="text-center">
-          <span className="text-3xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+          <span className="text-3xl font-bold bg-gradient-to-r from-slate-700 to-blue-600 bg-clip-text text-transparent">
             {Math.round(progress)}%
           </span>
           <div className="text-xs text-gray-500 mt-1">Completado</div>

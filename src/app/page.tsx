@@ -858,9 +858,9 @@ export default function Dashboard() {
         <div className="flex items-center justify-between">
           <div className="flex-1"></div>
           <div className="text-center flex-1">
-            <h1 className="text-3xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent mb-2">
-              Mi Entrenamiento
-            </h1>
+                          <h1 className="text-3xl font-bold bg-gradient-to-r from-slate-700 to-blue-600 bg-clip-text text-transparent mb-2">
+                Mi Entrenamiento
+              </h1>
             <p className="text-gray-600 text-lg">
               Hoy es {new Date().toLocaleDateString('es-ES', { 
                 weekday: 'long', 
@@ -873,7 +873,7 @@ export default function Dashboard() {
           <div className="flex-1 flex justify-end">
             <button 
               onClick={() => openModal('calendar')}
-              className="w-14 h-14 bg-gradient-to-r from-blue-500 to-purple-500 rounded-full flex items-center justify-center hover:scale-110 transition-all text-white shadow-lg"
+              className="w-14 h-14 bg-gradient-to-r from-blue-500 to-blue-600 rounded-full flex items-center justify-center hover:scale-110 transition-all text-white shadow-lg"
             >
               <span className="text-xl">📅</span>
             </button>
@@ -891,7 +891,7 @@ export default function Dashboard() {
       
       {/* Today's Tasks */}
       <div className="mb-6">
-        <h2 className="text-2xl font-bold mb-6 text-white text-center">🎯 Hoy toca</h2>
+        <h2 className="text-2xl font-bold mb-6 text-slate-700 text-center">🎯 Hoy toca</h2>
         
                 {/* Current Day Info */}
         {(() => {
@@ -934,7 +934,7 @@ export default function Dashboard() {
           return (
             <div className="glass-card mb-6">
               <div className="flex items-center gap-4 mb-4">
-                <div className="w-14 h-14 bg-gradient-to-r from-blue-500 to-purple-500 rounded-full flex items-center justify-center text-white font-bold text-lg shadow-lg">
+                <div className="w-14 h-14 bg-gradient-to-r from-blue-500 to-blue-600 rounded-full flex items-center justify-center text-white font-bold text-lg shadow-lg">
                   {currentData.dia.dia.split(' ')[1]}
                 </div>
                 <div>
@@ -2106,7 +2106,7 @@ export default function Dashboard() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-600 via-purple-600 to-indigo-700">
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50">
       <ToastContainer />
       
       {/* Mobile Dashboard */}
