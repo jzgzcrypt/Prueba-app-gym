@@ -852,14 +852,16 @@ export default function Dashboard() {
 
 
   const renderTodaySection = () => (
-    <div className="min-h-screen pb-20">
+    <div className="min-h-screen pb-32 p-4">
       {/* Header */}
-      <div className="nav-clean p-6">
+      <div className="glass-card mb-6">
         <div className="flex items-center justify-between">
           <div className="flex-1"></div>
           <div className="text-center flex-1">
-            <h1 className="text-2xl font-bold text-primary">Mi Entrenamiento</h1>
-            <p className="text-gray-600 mt-2">
+            <h1 className="text-3xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent mb-2">
+              Mi Entrenamiento
+            </h1>
+            <p className="text-gray-600 text-lg">
               Hoy es {new Date().toLocaleDateString('es-ES', { 
                 weekday: 'long', 
                 year: 'numeric', 
@@ -871,7 +873,7 @@ export default function Dashboard() {
           <div className="flex-1 flex justify-end">
             <button 
               onClick={() => openModal('calendar')}
-              className="w-12 h-12 bg-primary rounded-full flex items-center justify-center hover:scale-110 transition-all text-white"
+              className="w-14 h-14 bg-gradient-to-r from-blue-500 to-purple-500 rounded-full flex items-center justify-center hover:scale-110 transition-all text-white shadow-lg"
             >
               <span className="text-xl">📅</span>
             </button>
@@ -880,18 +882,16 @@ export default function Dashboard() {
       </div>
       
       {/* Progress Overview */}
-      <div className="px-6 pb-6">
-        <div className="clean-card text-center">
-          <div className="flex justify-center mb-4">
-            <ProgressCircle progress={progress} />
-          </div>
-          <p className="text-sm text-gray-600">Progreso del día</p>
+      <div className="glass-card text-center mb-6">
+        <div className="flex justify-center mb-4">
+          <ProgressCircle progress={progress} />
         </div>
+        <p className="text-sm text-gray-600">Progreso del día</p>
       </div>
       
       {/* Today's Tasks */}
-      <div className="px-6">
-        <h2 className="text-xl font-semibold mb-4">🎯 Hoy toca (Actualizado):</h2>
+      <div className="mb-6">
+        <h2 className="text-2xl font-bold mb-6 text-white text-center">🎯 Hoy toca</h2>
         
                 {/* Current Day Info */}
         {(() => {
@@ -932,22 +932,22 @@ export default function Dashboard() {
           }
           
           return (
-            <div className="clean-card mb-4">
-              <div className="flex items-center gap-3 mb-3">
-                <div className="w-10 h-10 bg-primary rounded-full flex items-center justify-center text-white font-bold">
+            <div className="glass-card mb-6">
+              <div className="flex items-center gap-4 mb-4">
+                <div className="w-14 h-14 bg-gradient-to-r from-blue-500 to-purple-500 rounded-full flex items-center justify-center text-white font-bold text-lg shadow-lg">
                   {currentData.dia.dia.split(' ')[1]}
                 </div>
                 <div>
-                  <h3 className="font-semibold text-lg">{currentData.dia.entrenamiento}</h3>
+                  <h3 className="font-bold text-xl text-gray-800">{currentData.dia.entrenamiento}</h3>
                   <p className="text-sm text-gray-600">{currentData.microciclo.nombre}</p>
                 </div>
               </div>
               {currentData.dia.cardio && (
-                <div className="flex items-center gap-2 mb-3">
-                  <span className="text-xs bg-blue-100 text-blue-700 px-2 py-1 rounded-full">
+                <div className="flex items-center gap-3 mb-4">
+                  <span className="text-sm bg-gradient-to-r from-blue-100 to-blue-200 text-blue-700 px-3 py-2 rounded-full font-medium">
                     🏃 {currentData.dia.cardio.tipo}
                   </span>
-                  <span className="text-xs text-gray-500">
+                  <span className="text-sm text-gray-600">
                     {currentData.dia.cardio.duracion}min • {currentData.dia.cardio.intensidad}
                   </span>
                 </div>
@@ -966,7 +966,7 @@ export default function Dashboard() {
                     });
                     openModal('workout-details');
                   }}
-                  className="btn-elegant btn-small bg-primary hover:bg-primary-dark text-white"
+                  className="btn-modern btn-small"
                 >
                   Ver detalles
                 </button>
@@ -1015,19 +1015,19 @@ export default function Dashboard() {
             }
           }
           return (
-            <div className="clean-card mb-4 bg-gradient-to-r from-orange-50 to-red-50 border-orange-200">
+            <div className="glass-card mb-6 bg-gradient-to-r from-orange-50 to-red-50 border-orange-200">
               <div className="flex items-center justify-between">
                 <div className="flex items-center">
-                  <div className="w-10 h-10 bg-gradient-to-r from-orange-400 to-red-500 rounded-full flex items-center justify-center mr-3">
-                    <span className="text-white text-lg">🔥</span>
+                  <div className="w-12 h-12 bg-gradient-to-r from-orange-400 to-red-500 rounded-full flex items-center justify-center mr-4 shadow-lg">
+                    <span className="text-white text-xl">🔥</span>
                   </div>
                   <div>
-                    <h3 className="font-semibold text-lg">Calorías Quemadas</h3>
+                    <h3 className="font-bold text-xl">Calorías Quemadas</h3>
                     <p className="text-sm text-gray-600">Total del día</p>
                   </div>
                 </div>
                 <div className="text-right">
-                  <div className="text-2xl font-bold text-orange-600">{caloriasHoy}</div>
+                  <div className="text-3xl font-bold text-orange-600">{caloriasHoy}</div>
                   <div className="text-xs text-gray-500">kcal</div>
                 </div>
               </div>
@@ -1036,135 +1036,149 @@ export default function Dashboard() {
         })()}
         
         {/* Weight Entry */}
-        <div className="clean-card cursor-pointer hover:scale-[1.02] transition-transform" onClick={() => openModal('weight')}>
+        <div className="activity-card cursor-pointer" onClick={() => openModal('weight')}>
           <div className="flex items-center justify-between">
             <div className="flex items-center">
-              <div className="w-12 h-12 bg-gradient-to-r from-blue-400 to-blue-500 rounded-full flex items-center justify-center mr-4 shadow-lg">
+              <div className="w-14 h-14 bg-white bg-opacity-20 rounded-full flex items-center justify-center mr-4 shadow-lg">
                 <span className="text-2xl">⚖️</span>
               </div>
               <div>
-                <h3 className="font-semibold">Pesaje Diario</h3>
-                <p className="text-sm text-gray-600">Registra tu peso de hoy</p>
+                <h3 className="font-bold text-lg">Pesaje Diario</h3>
+                <p className="text-sm text-white text-opacity-80">Registra tu peso de hoy</p>
               </div>
             </div>
             <div className="text-right">
-              <div className={getStatusClass('weight')}>{getStatus('weight')}</div>
-              <div className="text-xs text-gray-500">Toca para registrar</div>
+              <div className={`text-sm font-semibold ${getStatus('weight') === 'Completado' ? 'text-green-200' : 'text-yellow-200'}`}>
+                {getStatus('weight')}
+              </div>
+              <div className="text-xs text-white text-opacity-60">Toca para registrar</div>
             </div>
           </div>
         </div>
         
         {/* Workout Entry */}
-        <div className="clean-card cursor-pointer hover:scale-[1.02] transition-transform" onClick={() => openModal('workout')}>
+        <div className="activity-card success cursor-pointer" onClick={() => openModal('workout')}>
           <div className="flex items-center justify-between">
             <div className="flex items-center">
-              <div className="w-12 h-12 bg-gradient-to-r from-green-400 to-green-500 rounded-full flex items-center justify-center mr-4 shadow-lg">
+              <div className="w-14 h-14 bg-white bg-opacity-20 rounded-full flex items-center justify-center mr-4 shadow-lg">
                 <span className="text-2xl">🏋️</span>
               </div>
               <div>
-                <h3 className="font-semibold">Entrenamiento</h3>
-                <p className="text-sm text-gray-600">Completa tu rutina de hoy</p>
+                <h3 className="font-bold text-lg">Entrenamiento</h3>
+                <p className="text-sm text-white text-opacity-80">Completa tu rutina de hoy</p>
               </div>
             </div>
             <div className="text-right">
-              <div className={getStatusClass('workout')}>{getStatus('workout')}</div>
-              <div className="text-xs text-gray-500">Toca para entrenar</div>
+              <div className={`text-sm font-semibold ${getStatus('workout') === 'Completado' ? 'text-green-200' : 'text-yellow-200'}`}>
+                {getStatus('workout')}
+              </div>
+              <div className="text-xs text-white text-opacity-60">Toca para entrenar</div>
             </div>
           </div>
         </div>
         
         {/* Cardio Entry */}
-        <div className="clean-card cursor-pointer hover:scale-[1.02] transition-transform" onClick={() => openModal('cardio')}>
+        <div className="activity-card warning cursor-pointer" onClick={() => openModal('cardio')}>
           <div className="flex items-center justify-between">
             <div className="flex items-center">
-              <div className="w-12 h-12 bg-gradient-to-r from-red-400 to-red-500 rounded-full flex items-center justify-center mr-4 shadow-lg">
+              <div className="w-14 h-14 bg-white bg-opacity-20 rounded-full flex items-center justify-center mr-4 shadow-lg">
                 <span className="text-2xl">🏃</span>
               </div>
               <div>
-                <h3 className="font-semibold">Cardio</h3>
-                <p className="text-sm text-gray-600">Registra tu actividad cardiovascular</p>
+                <h3 className="font-bold text-lg">Cardio</h3>
+                <p className="text-sm text-white text-opacity-80">Registra tu actividad cardiovascular</p>
               </div>
             </div>
             <div className="text-right">
-              <div className={getStatusClass('cardio')}>{getStatus('cardio')}</div>
-              <div className="text-xs text-gray-500">Toca para registrar</div>
+              <div className={`text-sm font-semibold ${getStatus('cardio') === 'Completado' ? 'text-green-200' : 'text-yellow-200'}`}>
+                {getStatus('cardio')}
+              </div>
+              <div className="text-xs text-white text-opacity-60">Toca para registrar</div>
             </div>
           </div>
         </div>
         
         {/* Diet Entry */}
-        <div className="clean-card cursor-pointer hover:scale-[1.02] transition-transform" onClick={() => openModal('diet')}>
+        <div className="activity-card cursor-pointer" onClick={() => openModal('diet')}>
           <div className="flex items-center justify-between">
             <div className="flex items-center">
-              <div className="w-12 h-12 bg-gradient-to-r from-yellow-400 to-yellow-500 rounded-full flex items-center justify-center mr-4 shadow-lg">
+              <div className="w-14 h-14 bg-white bg-opacity-20 rounded-full flex items-center justify-center mr-4 shadow-lg">
                 <span className="text-2xl">🥗</span>
               </div>
               <div>
-                <h3 className="font-semibold">Dieta</h3>
-                <p className="text-sm text-gray-600">1800 kcal - 150g proteínas</p>
+                <h3 className="font-bold text-lg">Dieta</h3>
+                <p className="text-sm text-white text-opacity-80">1800 kcal - 150g proteínas</p>
               </div>
             </div>
             <div className="text-right">
-              <div className={getStatusClass('diet')}>{getStatus('diet')}</div>
-              <div className="text-xs text-gray-500">Toca para registrar</div>
+              <div className={`text-sm font-semibold ${getStatus('diet') === 'Completado' ? 'text-green-200' : 'text-yellow-200'}`}>
+                {getStatus('diet')}
+              </div>
+              <div className="text-xs text-white text-opacity-60">Toca para registrar</div>
             </div>
           </div>
         </div>
         
         {/* NEAT Entry */}
-        <div className="clean-card cursor-pointer hover:scale-[1.02] transition-transform" onClick={() => openModal('neat')}>
+        <div className="activity-card cursor-pointer" onClick={() => openModal('neat')}>
           <div className="flex items-center justify-between">
             <div className="flex items-center">
-              <div className="w-12 h-12 bg-gradient-to-r from-purple-400 to-purple-500 rounded-full flex items-center justify-center mr-4 shadow-lg">
+              <div className="w-14 h-14 bg-white bg-opacity-20 rounded-full flex items-center justify-center mr-4 shadow-lg">
                 <span className="text-2xl">🚶</span>
               </div>
               <div>
-                <h3 className="font-semibold">NEAT</h3>
-                <p className="text-sm text-gray-600">Actividad física no estructurada</p>
+                <h3 className="font-bold text-lg">NEAT</h3>
+                <p className="text-sm text-white text-opacity-80">Actividad física no estructurada</p>
               </div>
             </div>
             <div className="text-right">
-              <div className={getStatusClass('neat')}>{getStatus('neat')}</div>
-              <div className="text-xs text-gray-500">Toca para registrar</div>
+              <div className={`text-sm font-semibold ${getStatus('neat') === 'Completado' ? 'text-green-200' : 'text-yellow-200'}`}>
+                {getStatus('neat')}
+              </div>
+              <div className="text-xs text-white text-opacity-60">Toca para registrar</div>
             </div>
           </div>
         </div>
         
         {/* Entreno No Programado Entry */}
-        <div className="clean-card cursor-pointer hover:scale-[1.02] transition-transform" onClick={() => openModal('entreno-no-programado')}>
+        <div className="activity-card cursor-pointer" onClick={() => openModal('entreno-no-programado')}>
           <div className="flex items-center justify-between">
             <div className="flex items-center">
-              <div className="w-12 h-12 bg-gradient-to-r from-teal-400 to-teal-500 rounded-full flex items-center justify-center mr-4 shadow-lg">
+              <div className="w-14 h-14 bg-white bg-opacity-20 rounded-full flex items-center justify-center mr-4 shadow-lg">
                 <span className="text-2xl">🎯</span>
               </div>
               <div>
-                <h3 className="font-semibold">Entreno Extra</h3>
-                <p className="text-sm text-gray-600">Tenis, natación, alpinismo, etc.</p>
+                <h3 className="font-bold text-lg">Entreno Extra</h3>
+                <p className="text-sm text-white text-opacity-80">Tenis, natación, alpinismo, etc.</p>
               </div>
             </div>
             <div className="text-right">
-              <div className={getStatusClass('entrenoNoProgramado')}>{getStatus('entrenoNoProgramado')}</div>
-              <div className="text-xs text-gray-500">Toca para registrar</div>
+              <div className={`text-sm font-semibold ${getStatus('entrenoNoProgramado') === 'Completado' ? 'text-green-200' : 'text-yellow-200'}`}>
+                {getStatus('entrenoNoProgramado')}
+              </div>
+              <div className="text-xs text-white text-opacity-60">Toca para registrar</div>
             </div>
           </div>
         </div>
         
         {/* Seguimiento Entry - Solo domingos */}
         {new Date().getDay() === 0 && (
-          <div className="clean-card cursor-pointer hover:scale-[1.02] transition-transform" onClick={() => openModal('seguimiento')}>
+          <div className="activity-card cursor-pointer" onClick={() => openModal('seguimiento')}>
             <div className="flex items-center justify-between">
               <div className="flex items-center">
-                <div className="w-12 h-12 bg-gradient-to-r from-indigo-400 to-indigo-500 rounded-full flex items-center justify-center mr-4 shadow-lg">
+                <div className="w-14 h-14 bg-white bg-opacity-20 rounded-full flex items-center justify-center mr-4 shadow-lg">
                   <span className="text-2xl">📊</span>
                 </div>
                 <div>
-                  <h3 className="font-semibold">Seguimiento Semanal</h3>
-                  <p className="text-sm text-gray-600">Peso, cintura y medidas</p>
+                  <h3 className="font-bold text-lg">Seguimiento Semanal</h3>
+                  <p className="text-sm text-white text-opacity-80">Peso, cintura y medidas</p>
                 </div>
               </div>
               <div className="text-right">
-                <div className={getStatusClass('seguimiento')}>{getStatus('seguimiento')}</div>
-                <div className="text-xs text-gray-500">Toca para registrar</div>
+                <div className={`text-sm font-semibold ${getStatus('seguimiento') === 'Completado' ? 'text-green-200' : 'text-yellow-200'}`}>
+                  {getStatus('seguimiento')}
+                </div>
+                <div className="text-xs text-white text-opacity-60">Toca para registrar</div>
               </div>
             </div>
           </div>
@@ -2092,7 +2106,7 @@ export default function Dashboard() {
   }
 
   return (
-    <div className="min-h-screen">
+    <div className="min-h-screen bg-gradient-to-br from-blue-600 via-purple-600 to-indigo-700">
       <ToastContainer />
       
       {/* Mobile Dashboard */}
@@ -2102,50 +2116,67 @@ export default function Dashboard() {
         {activeSection === 'history' && renderHistorySection()}
         {activeSection === 'settings' && renderSettingsSection()}
         
-        {/* Mobile Navigation */}
-        <div className="bottom-nav">
-          <div className="grid grid-cols-4 gap-1 px-2">
-            <div 
-              className={`bottom-nav-item cursor-pointer ${activeSection === 'today' ? 'active' : ''}`}
+        {/* Modern Mobile Navigation */}
+        <div className="fixed bottom-0 left-0 right-0 z-50 p-4">
+          <div className="nav-tabs max-w-md mx-auto">
+            <button 
+              className={`nav-tab flex-1 ${activeSection === 'today' ? 'active' : ''}`}
               onClick={() => setActiveSection('today')}
             >
-              <span className="text-xl">🏠</span>
-              <span className="text-xs mt-1">Hoy</span>
-            </div>
-            <div 
-              className={`bottom-nav-item cursor-pointer ${activeSection === 'mesociclo' ? 'active' : ''}`}
+              <span className="text-lg">🏠</span>
+              <span className="text-xs mt-1 block">Hoy</span>
+            </button>
+            <button 
+              className={`nav-tab flex-1 ${activeSection === 'mesociclo' ? 'active' : ''}`}
               onClick={() => setActiveSection('mesociclo')}
             >
-              <span className="text-xl">📋</span>
-              <span className="text-xs mt-1">Mesociclo</span>
-            </div>
-            <div 
-              className={`bottom-nav-item cursor-pointer ${activeSection === 'history' ? 'active' : ''}`}
+              <span className="text-lg">📋</span>
+              <span className="text-xs mt-1 block">Mesociclo</span>
+            </button>
+            <button 
+              className={`nav-tab flex-1 ${activeSection === 'history' ? 'active' : ''}`}
               onClick={() => setActiveSection('history')}
             >
-              <span className="text-xl">📋</span>
-              <span className="text-xs mt-1">Historial</span>
-            </div>
-            <div 
-              className={`bottom-nav-item cursor-pointer ${activeSection === 'settings' ? 'active' : ''}`}
+              <span className="text-lg">📊</span>
+              <span className="text-xs mt-1 block">Historial</span>
+            </button>
+            <button 
+              className={`nav-tab flex-1 ${activeSection === 'settings' ? 'active' : ''}`}
               onClick={() => setActiveSection('settings')}
             >
-              <span className="text-xl">⚙️</span>
-              <span className="text-xs mt-1">Ajustes</span>
-            </div>
+              <span className="text-lg">⚙️</span>
+              <span className="text-xs mt-1 block">Ajustes</span>
+            </button>
           </div>
         </div>
       </div>
+      
+      {/* Floating Action Button */}
+      <button 
+        className="fab"
+        onClick={() => {
+          // Quick access to most common action (weight entry)
+          openModal('weight');
+        }}
+        title="Registrar peso"
+      >
+        ⚖️
+      </button>
 
       {/* Desktop Dashboard */}
       <div className="hidden md:block">
         <div className="min-h-screen p-6">
           <div className="max-w-4xl mx-auto">
-            <h1 className="text-3xl font-bold text-center mb-8">Mi Entrenamiento</h1>
+            <div className="glass-card text-center mb-8">
+              <h1 className="text-4xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent mb-2">
+                Mi Entrenamiento
+              </h1>
+              <p className="text-gray-600 text-lg">Dashboard de seguimiento diario</p>
+            </div>
             
             {/* Quick Entry Form */}
-            <div className="quick-entry">
-              <h2 className="text-xl font-bold mb-6 text-center">Entrada Rápida de Hoy</h2>
+            <div className="glass-card mb-8">
+              <h2 className="text-2xl font-bold mb-6 text-center text-gray-800">Entrada Rápida de Hoy</h2>
               <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
                 <div>
                   <label className="block text-sm font-medium mb-2">Peso (kg)</label>
@@ -2155,7 +2186,7 @@ export default function Dashboard() {
                     onChange={(e) => setDesktopWeight(e.target.value)}
                     step="0.1" 
                     placeholder="85.0" 
-                    className="w-full"
+                    className="input-modern"
                   />
                 </div>
                 <div>
@@ -2163,7 +2194,7 @@ export default function Dashboard() {
                   <select 
                     value={desktopWorkout}
                     onChange={(e) => setDesktopWorkout(e.target.value)}
-                    className="w-full"
+                    className="input-modern"
                   >
                     <option value="">Seleccionar...</option>
                     <option value="Pull">🏋️ Pull</option>
@@ -2181,13 +2212,13 @@ export default function Dashboard() {
                     onChange={(e) => setDesktopCardio(e.target.value)}
                     step="0.1" 
                     placeholder="3.5" 
-                    className="w-full"
+                    className="input-modern"
                   />
                 </div>
                 <div className="flex items-end">
                   <button 
                     onClick={handleDesktopSave}
-                    className="w-full bg-white text-purple-600 py-4 px-6 rounded-lg font-semibold hover:bg-gray-100 transition-colors"
+                    className="btn-modern w-full"
                   >
                     💾 Guardar Todo
                   </button>
@@ -2197,15 +2228,15 @@ export default function Dashboard() {
             
             {/* Progress Cards */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-              <div className="bg-white p-6 rounded-xl shadow">
-                <h3 className="font-semibold mb-4">Progreso General</h3>
+              <div className="glass-card">
+                <h3 className="font-bold text-lg mb-4 text-gray-800">Progreso General</h3>
                 <div className="flex justify-center">
                   <ProgressCircle progress={progress} size={90} />
                 </div>
               </div>
               
-              <div className="bg-white p-6 rounded-xl shadow">
-                <h3 className="font-semibold mb-4">Estado Actual</h3>
+              <div className="glass-card">
+                <h3 className="font-bold text-lg mb-4 text-gray-800">Estado Actual</h3>
                 <div className="space-y-3">
                   <div className="flex justify-between">
                     <span className="text-sm text-gray-600">Peso</span>
@@ -2213,17 +2244,17 @@ export default function Dashboard() {
                       {estado.length > 0 ? `${estado[estado.length - 1].peso.toFixed(1)} kg` : '85.0 kg'}
                     </span>
                   </div>
-                  <div className="w-full bg-gray-200 rounded-full h-2">
+                  <div className="progress-bar">
                     <div 
-                      className="bg-gradient-to-r from-blue-500 to-blue-600 h-2 rounded-full transition-all duration-500" 
+                      className="progress-fill" 
                       style={{ width: `${Math.max(0, Math.min(100, ((85 - (estado.length > 0 ? estado[estado.length - 1].peso : 85)) / 5) * 100))}%` }}
                     ></div>
                   </div>
                 </div>
               </div>
               
-              <div className="bg-white p-6 rounded-xl shadow">
-                <h3 className="font-semibold mb-4">Completado Hoy</h3>
+              <div className="glass-card">
+                <h3 className="font-bold text-lg mb-4 text-gray-800">Completado Hoy</h3>
                 <div className="space-y-3">
                   {[
                     { id: 'pesos', label: 'Entrenamiento', icon: '🏋️' },
@@ -2255,33 +2286,31 @@ export default function Dashboard() {
 
       {/* Modals */}
       {activeModal === 'weight' && (
-        <div className="modal-overlay" onClick={closeModal}>
-          <div className="modal-content" onClick={(e) => e.stopPropagation()}>
-            <div className="modal-header">
-              <button className="modal-close" onClick={closeModal}>×</button>
-              <h3>⚖️ Pesaje Diario</h3>
+        <div className="fixed inset-0 bg-black bg-opacity-50 backdrop-blur-sm flex items-center justify-center p-4 z-50" onClick={closeModal}>
+          <div className="glass-card max-w-md w-full" onClick={(e) => e.stopPropagation()}>
+            <div className="flex items-center justify-between mb-6">
+              <h3 className="text-2xl font-bold text-gray-800">⚖️ Pesaje Diario</h3>
+              <button className="w-8 h-8 bg-gray-100 rounded-full flex items-center justify-center hover:bg-gray-200 transition-colors" onClick={closeModal}>×</button>
             </div>
-            <div className="modal-body">
-              <div className="space-y-4">
-                <div>
-                  <label className="block text-sm font-medium mb-2 text-gray-700">Peso (kg)</label>
-                  <input 
-                    type="number" 
-                    value={weightInput}
-                    onChange={(e) => setWeightInput(e.target.value)}
-                    step="0.1" 
-                    placeholder="85.0" 
-                    className="input-compact"
-                  />
-                </div>
-                <div className="flex gap-3">
-                  <button onClick={closeModal} className="btn-elegant btn-secondary flex-1">
-                    Cancelar
-                  </button>
-                  <button onClick={saveWeight} className="btn-elegant btn-primary flex-1">
-                    💾 Guardar
-                  </button>
-                </div>
+            <div className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium mb-2 text-gray-700">Peso (kg)</label>
+                <input 
+                  type="number" 
+                  value={weightInput}
+                  onChange={(e) => setWeightInput(e.target.value)}
+                  step="0.1" 
+                  placeholder="85.0" 
+                  className="input-modern"
+                />
+              </div>
+              <div className="flex gap-3 pt-4">
+                <button onClick={closeModal} className="btn-modern btn-secondary flex-1">
+                  Cancelar
+                </button>
+                <button onClick={saveWeight} className="btn-modern flex-1">
+                  💾 Guardar
+                </button>
               </div>
             </div>
           </div>
@@ -2305,43 +2334,41 @@ export default function Dashboard() {
       )}
 
       {activeModal === 'cardio' && (
-        <div className="modal-overlay" onClick={closeModal}>
-          <div className="modal-content" onClick={(e) => e.stopPropagation()}>
-            <div className="modal-header">
-              <button className="modal-close" onClick={closeModal}>×</button>
-              <h3>🏃 Cardio</h3>
+        <div className="fixed inset-0 bg-black bg-opacity-50 backdrop-blur-sm flex items-center justify-center p-4 z-50" onClick={closeModal}>
+          <div className="glass-card max-w-md w-full" onClick={(e) => e.stopPropagation()}>
+            <div className="flex items-center justify-between mb-6">
+              <h3 className="text-2xl font-bold text-gray-800">🏃 Cardio</h3>
+              <button className="w-8 h-8 bg-gray-100 rounded-full flex items-center justify-center hover:bg-gray-200 transition-colors" onClick={closeModal}>×</button>
             </div>
-            <div className="modal-body">
-              <div className="space-y-4">
-                <div>
-                  <label className="block text-sm font-medium mb-2 text-gray-700">Distancia (km)</label>
-                  <input 
-                    type="number" 
-                    value={cardioKm}
-                    onChange={(e) => setCardioKm(e.target.value)}
-                    step="0.1" 
-                    placeholder="3.5" 
-                    className="input-compact"
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium mb-2 text-gray-700">Tiempo (min)</label>
-                  <input 
-                    type="number" 
-                    value={cardioTime}
-                    onChange={(e) => setCardioTime(e.target.value)}
-                    placeholder="25" 
-                    className="input-compact"
-                  />
-                </div>
-                <div className="flex gap-3">
-                  <button onClick={closeModal} className="btn-elegant btn-secondary flex-1">
-                    Cancelar
-                  </button>
-                  <button onClick={saveCardio} className="btn-elegant btn-primary flex-1">
-                    💾 Guardar
-                  </button>
-                </div>
+            <div className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium mb-2 text-gray-700">Distancia (km)</label>
+                <input 
+                  type="number" 
+                  value={cardioKm}
+                  onChange={(e) => setCardioKm(e.target.value)}
+                  step="0.1" 
+                  placeholder="3.5" 
+                  className="input-modern"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium mb-2 text-gray-700">Tiempo (min)</label>
+                <input 
+                  type="number" 
+                  value={cardioTime}
+                  onChange={(e) => setCardioTime(e.target.value)}
+                  placeholder="25" 
+                  className="input-modern"
+                />
+              </div>
+              <div className="flex gap-3 pt-4">
+                <button onClick={closeModal} className="btn-modern btn-secondary flex-1">
+                  Cancelar
+                </button>
+                <button onClick={saveCardio} className="btn-modern flex-1">
+                  💾 Guardar
+                </button>
               </div>
             </div>
           </div>
@@ -2349,42 +2376,40 @@ export default function Dashboard() {
       )}
 
       {activeModal === 'diet' && (
-        <div className="modal-overlay" onClick={closeModal}>
-          <div className="modal-content" onClick={(e) => e.stopPropagation()}>
-            <div className="modal-header">
-              <button className="modal-close" onClick={closeModal}>×</button>
-              <h3>🥗 Dieta</h3>
+        <div className="fixed inset-0 bg-black bg-opacity-50 backdrop-blur-sm flex items-center justify-center p-4 z-50" onClick={closeModal}>
+          <div className="glass-card max-w-md w-full" onClick={(e) => e.stopPropagation()}>
+            <div className="flex items-center justify-between mb-6">
+              <h3 className="text-2xl font-bold text-gray-800">🥗 Dieta</h3>
+              <button className="w-8 h-8 bg-gray-100 rounded-full flex items-center justify-center hover:bg-gray-200 transition-colors" onClick={closeModal}>×</button>
             </div>
-            <div className="modal-body">
-              <div className="space-y-4">
-                <div>
-                  <label className="block text-sm font-medium mb-2 text-gray-700">Calorías</label>
-                  <input 
-                    type="number" 
-                    value={dietCalories}
-                    onChange={(e) => setDietCalories(e.target.value)}
-                    placeholder="1800" 
-                    className="input-compact"
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium mb-2 text-gray-700">Proteínas (g)</label>
-                  <input 
-                    type="number" 
-                    value={dietProtein}
-                    onChange={(e) => setDietProtein(e.target.value)}
-                    placeholder="150" 
-                    className="input-compact"
-                  />
-                </div>
-                <div className="flex gap-3">
-                  <button onClick={closeModal} className="btn-elegant btn-secondary flex-1">
-                    Cancelar
-                  </button>
-                  <button onClick={saveDiet} className="btn-elegant btn-primary flex-1">
-                    💾 Guardar
-                  </button>
-                </div>
+            <div className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium mb-2 text-gray-700">Calorías</label>
+                <input 
+                  type="number" 
+                  value={dietCalories}
+                  onChange={(e) => setDietCalories(e.target.value)}
+                  placeholder="1800" 
+                  className="input-modern"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium mb-2 text-gray-700">Proteínas (g)</label>
+                <input 
+                  type="number" 
+                  value={dietProtein}
+                  onChange={(e) => setDietProtein(e.target.value)}
+                  placeholder="150" 
+                  className="input-modern"
+                />
+              </div>
+              <div className="flex gap-3 pt-4">
+                <button onClick={closeModal} className="btn-modern btn-secondary flex-1">
+                  Cancelar
+                </button>
+                <button onClick={saveDiet} className="btn-modern flex-1">
+                  💾 Guardar
+                </button>
               </div>
             </div>
           </div>

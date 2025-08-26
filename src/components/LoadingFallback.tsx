@@ -4,28 +4,19 @@ import React from 'react';
 
 export const LoadingFallback: React.FC = () => {
   return (
-    <div className="min-h-screen pb-20">
-      {/* Header */}
-      <div className="nav-clean p-6">
-        <div className="flex items-center justify-between">
-          <div className="flex-1"></div>
-          <div className="text-center flex-1">
-            <h1 className="text-2xl font-bold text-primary">Mi Entrenamiento</h1>
-            <p className="text-gray-600 mt-2">
-              Cargando...
-            </p>
-          </div>
-          <div className="flex-1"></div>
+    <div className="min-h-screen bg-gradient-to-br from-blue-600 via-purple-600 to-indigo-700 flex items-center justify-center p-4">
+      <div className="glass-card text-center max-w-md w-full">
+        <div className="flex justify-center mb-6">
+          <div className="loading-spinner"></div>
         </div>
-      </div>
-      
-      {/* Loading Content */}
-      <div className="px-6">
-        <div className="clean-card text-center">
-          <div className="flex justify-center mb-4">
-            <div className="w-16 h-16 border-4 border-primary border-t-transparent rounded-full animate-spin"></div>
+        <h2 className="text-2xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent mb-2">
+          Mi Entrenamiento
+        </h2>
+        <p className="text-gray-600">Cargando aplicación...</p>
+        <div className="mt-6">
+          <div className="progress-bar">
+            <div className="progress-fill" style={{ width: '60%' }}></div>
           </div>
-          <p className="text-sm text-gray-600">Cargando aplicación...</p>
         </div>
       </div>
     </div>
