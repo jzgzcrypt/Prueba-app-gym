@@ -2406,6 +2406,20 @@ export default function Dashboard() {
         Active Modal: {activeModal || 'null'}
       </div>
       
+      {/* Test Button */}
+      <div className="fixed top-4 left-4 z-[70]">
+        <button 
+          className="bg-green-500 text-white p-2 rounded text-xs"
+          onClick={() => {
+            console.log('🔍 TEST BUTTON CLICKED!');
+            alert('Test button works!');
+            setActiveModal('weight');
+          }}
+        >
+          TEST MODAL
+        </button>
+      </div>
+      
       {/* Mobile Dashboard */}
       <div className="block md:hidden">
         {activeSection === 'today' && renderTodaySection()}
@@ -2598,10 +2612,8 @@ export default function Dashboard() {
       </div>
 
       {/* Modals */}
-      {activeModal === 'weight' && (() => {
-        console.log('🔍 Rendering weight modal!');
-        return (
-        <div className="fixed inset-0 bg-black bg-opacity-50 backdrop-blur-sm flex items-center justify-center p-4 z-[60]" onClick={closeModal}>
+      {activeModal === 'weight' && (
+        <div className="fixed inset-0 bg-red-500 bg-opacity-80 flex items-center justify-center p-4 z-[60]" onClick={closeModal}>
           <div className="glass-card max-w-md w-full" onClick={(e) => e.stopPropagation()}>
             <div className="flex items-center justify-between mb-6">
               <h3 className="text-2xl font-bold text-gray-800">⚖️ Pesaje Diario</h3>
@@ -2630,8 +2642,7 @@ export default function Dashboard() {
             </div>
           </div>
         </div>
-        );
-      })()}
+      )}
 
       {activeModal === 'workout' && (
         <WorkoutModal
