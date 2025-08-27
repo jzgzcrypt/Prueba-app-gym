@@ -1,3 +1,23 @@
+/**
+ * Dashboard Principal - Aplicación de Seguimiento de Entrenamiento
+ * 
+ * Esta aplicación permite a los usuarios:
+ * - Registrar peso diario, entrenamientos, cardio, dieta y NEAT
+ * - Seguir un mesociclo estructurado de 6 semanas
+ * - Visualizar progreso y adherencia diaria
+ * - Exportar datos y gestionar configuraciones
+ * 
+ * Funcionalidades principales:
+ * - Sistema de modales para registro de actividades
+ * - Cálculo automático de adherencia diaria
+ * - Seguimiento de mesociclo con microciclos
+ * - Historial de actividades y progreso
+ * - Interfaz responsive con glassmorphism
+ * 
+ * @author Sistema de Entrenamiento
+ * @version 1.0.0
+ */
+
 'use client';
 
 import { useState, useEffect } from 'react';
@@ -11,11 +31,15 @@ import { WeightEntry, CardioEntry, DietEntry, DailyAdherence, WorkoutEntry, Exer
 import { LoadingFallback } from '@/components/LoadingFallback';
 import { getCurrentMesocicloDay, setMesocicloStartDate, getMesocicloStartDate, testMesocicloTracking, calcularCaloriasEntrenoNoProgramado } from '@/utils/mesocicloUtils';
 
+/**
+ * Componente principal del Dashboard
+ * Maneja el estado global de la aplicación y renderiza las diferentes secciones
+ */
 export default function Dashboard() {
   const { showToast } = useToast();
   const [isLoading, setIsLoading] = useState(true);
   const [activeModal, setActiveModal] = useState<string | null>(null);
-  const [activeSection, setActiveSection] = useState<'today' | 'mesociclo' | 'history' | 'settings'>('today');
+  const [activeSection, setActiveSection] = useState<'today' | 'mesociclo' | 'history' | 'settings' | 'recommendations' | 'progress'>('today');
   const [showStartDateConfig, setShowStartDateConfig] = useState(false);
   const [startDateInput, setStartDateInput] = useState('');
   const [workoutType] = useState('Pull');
@@ -35,8 +59,8 @@ export default function Dashboard() {
     microciclos: {}
   });
   
-  // Estado para forzar re-render cuando cambia la fecha
-  const [forceUpdate, setForceUpdate] = useState(0);
+  // Estado para forzar re-render cuando cambia la fecha (reservado para futuras funcionalidades)
+  // const [forceUpdate, setForceUpdate] = useState(0);
   
   // Local storage hooks
   const [estado, setEstado] = useLocalStorage<WeightEntry[]>('estado', []);
@@ -48,7 +72,10 @@ export default function Dashboard() {
   const [entrenosNoProgramados, setEntrenosNoProgramados] = useLocalStorage<EntrenoNoProgramado[]>('entrenosNoProgramados', []);
   const [adherenciaDiaria, setAdherenciaDiaria] = useLocalStorage<DailyAdherence>('adherenciaDiaria', {});
 
-  // Effect para manejar la carga inicial
+  /**
+   * Effect para manejar la carga inicial de la aplicación
+   * Verifica que localStorage esté disponible antes de continuar
+   */
   useEffect(() => {
     // Asegurar que localStorage esté disponible
     if (typeof window !== 'undefined') {
@@ -726,8 +753,8 @@ export default function Dashboard() {
       showToast(`✅ Fecha de inicio configurada: ${startDate.toLocaleDateString()}`);
       setShowStartDateConfig(false);
       setStartDateInput('');
-      // Forzar re-render sin recarga
-      setForceUpdate(prev => prev + 1);
+      // Forzar re-render sin recarga (reservado para futuras funcionalidades)
+      // setForceUpdate(prev => prev + 1);
     } catch (error) {
       console.error('Error al configurar fecha:', error);
       showToast('⚠️ Error al configurar fecha', 'error');
@@ -786,6 +813,11 @@ export default function Dashboard() {
     }
   };
 
+  /**
+   * Obtiene el estado de completado de una actividad específica para el día actual
+   * @param type - Tipo de actividad a verificar
+   * @returns 'Completado' si la actividad está registrada, 'Pendiente' en caso contrario
+   */
   const getStatus = (type: 'weight' | 'workout' | 'cardio' | 'diet' | 'neat' | 'seguimiento' | 'entrenoNoProgramado') => {
     const today = todayISO();
     const todayAdherence = adherenciaDiaria[today] || {};
@@ -810,11 +842,16 @@ export default function Dashboard() {
     }
   };
 
-  const getStatusClass = (type: 'weight' | 'workout' | 'cardio' | 'diet' | 'neat' | 'seguimiento' | 'entrenoNoProgramado') => {
-    const status = getStatus(type);
-    return `text-sm ${status === 'Completado' ? 'success' : 'pending'}`;
-  };
+  // Función para obtener clase de estado (reservada para futuras funcionalidades)
+  // const getStatusClass = (type: 'weight' | 'workout' | 'cardio' | 'diet' | 'neat' | 'seguimiento' | 'entrenoNoProgramado') => {
+  //   const status = getStatus(type);
+  //   return `text-sm ${status === 'Completado' ? 'success' : 'pending'}`;
+  // };
 
+  /**
+   * Calcula el progreso diario basado en las actividades completadas
+   * @returns Objeto con el progreso total y por actividad
+   */
   const progress = calculateProgress();
 
   // Función para calcular calorías totales del día
@@ -896,13 +933,13 @@ export default function Dashboard() {
                 {/* Current Day Info */}
         {(() => {
           let currentData;
-          let startDate = null;
+          // let startDate = null; // Reservado para futuras funcionalidades
           
           // Solo ejecutar en el cliente después de la hidratación
           if (typeof window !== 'undefined' && !isLoading) {
             try {
               currentData = getCurrentMesocicloDay();
-              startDate = getMesocicloStartDate();
+              // startDate = getMesocicloStartDate(); // Reservado para futuras funcionalidades
             } catch (error) {
               console.error('Error loading mesociclo:', error);
               currentData = {
@@ -2046,6 +2083,181 @@ export default function Dashboard() {
     </div>
   );
 
+  /**
+   * Sección de recomendaciones basadas en RP Strength y mejores prácticas
+   */
+  const renderRecommendationsSection = () => (
+    <div className="min-h-screen pb-20 p-6">
+      <h1 className="text-2xl font-bold text-center mb-6">💡 Recomendaciones</h1>
+      
+      <div className="space-y-4">
+        {/* RP Strength Recommendations */}
+        <div className="glass-card">
+          <h3 className="font-semibold mb-4 flex items-center">
+            <span className="mr-2">🏋️</span>
+            RP Strength - Principios Fundamentales
+          </h3>
+          <div className="space-y-3 text-sm">
+            <div className="p-3 bg-blue-50 rounded-lg">
+              <h4 className="font-semibold text-blue-800">Volumen Óptimo</h4>
+              <p className="text-blue-700">10-20 series por grupo muscular por semana para mantenimiento, 20+ para crecimiento</p>
+            </div>
+            <div className="p-3 bg-green-50 rounded-lg">
+              <h4 className="font-semibold text-green-800">Frecuencia</h4>
+              <p className="text-green-700">2-3 veces por semana por grupo muscular para maximizar adaptaciones</p>
+            </div>
+            <div className="p-3 bg-purple-50 rounded-lg">
+              <h4 className="font-semibold text-purple-800">Intensidad (RIR)</h4>
+              <p className="text-purple-700">RIR 0-2 para fuerza máxima, RIR 2-4 para hipertrofia, RIR 4+ para resistencia</p>
+            </div>
+            <div className="p-3 bg-orange-50 rounded-lg">
+              <h4 className="font-semibold text-orange-800">Progresión</h4>
+              <p className="text-orange-700">Aumentar peso cuando puedas hacer 2+ repeticiones más que el objetivo</p>
+            </div>
+          </div>
+        </div>
+
+        {/* Nutrition Recommendations */}
+        <div className="glass-card">
+          <h3 className="font-semibold mb-4 flex items-center">
+            <span className="mr-2">🥗</span>
+            Nutrición y Recuperación
+          </h3>
+          <div className="space-y-3 text-sm">
+            <div className="p-3 bg-yellow-50 rounded-lg">
+              <h4 className="font-semibold text-yellow-800">Proteína</h4>
+              <p className="text-yellow-700">1.6-2.2g por kg de peso corporal para optimizar síntesis proteica</p>
+            </div>
+            <div className="p-3 bg-red-50 rounded-lg">
+              <h4 className="font-semibold text-red-800">Sueño</h4>
+              <p className="text-red-700">7-9 horas de sueño de calidad para recuperación óptima</p>
+            </div>
+            <div className="p-3 bg-teal-50 rounded-lg">
+              <h4 className="font-semibold text-teal-800">Hidratación</h4>
+              <p className="text-teal-700">35ml por kg de peso corporal, más durante entrenamientos intensos</p>
+            </div>
+          </div>
+        </div>
+
+        {/* Training Tips */}
+        <div className="glass-card">
+          <h3 className="font-semibold mb-4 flex items-center">
+            <span className="mr-2">🎯</span>
+            Consejos de Entrenamiento
+          </h3>
+          <div className="space-y-3 text-sm">
+            <div className="p-3 bg-indigo-50 rounded-lg">
+              <h4 className="font-semibold text-indigo-800">Técnica Primero</h4>
+              <p className="text-indigo-700">La técnica correcta es más importante que el peso levantado</p>
+            </div>
+            <div className="p-3 bg-pink-50 rounded-lg">
+              <h4 className="font-semibold text-pink-800">Calentamiento</h4>
+              <p className="text-pink-700">5-10 minutos de cardio ligero + movilidad articular</p>
+            </div>
+            <div className="p-3 bg-gray-50 rounded-lg">
+              <h4 className="font-semibold text-gray-800">Descanso Entre Series</h4>
+              <p className="text-gray-700">2-3 minutos para ejercicios compuestos, 1-2 minutos para aislamiento</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+
+  /**
+   * Sección de progreso y estadísticas avanzadas
+   */
+  const renderProgressSection = () => {
+    const totalDays = Object.keys(adherenciaDiaria).length;
+    const completedWorkouts = Object.values(adherenciaDiaria).filter(day => day.pesos).length;
+    const completedCardio = Object.values(adherenciaDiaria).filter(day => day.cardio).length;
+    const completedDiet = Object.values(adherenciaDiaria).filter(day => day.dieta).length;
+    
+    const adherenceRate = totalDays > 0 ? Math.round((completedWorkouts + completedCardio + completedDiet) / (totalDays * 3) * 100) : 0;
+    
+    return (
+      <div className="min-h-screen pb-20 p-6">
+        <h1 className="text-2xl font-bold text-center mb-6">📈 Progreso</h1>
+        
+        <div className="space-y-4">
+          {/* Overall Stats */}
+          <div className="glass-card">
+            <h3 className="font-semibold mb-4">📊 Estadísticas Generales</h3>
+            <div className="grid grid-cols-2 gap-4">
+              <div className="text-center p-3 bg-blue-50 rounded-lg">
+                <div className="text-2xl font-bold text-blue-600">{totalDays}</div>
+                <div className="text-sm text-blue-700">Días Activos</div>
+              </div>
+              <div className="text-center p-3 bg-green-50 rounded-lg">
+                <div className="text-2xl font-bold text-green-600">{adherenceRate}%</div>
+                <div className="text-sm text-green-700">Adherencia</div>
+              </div>
+              <div className="text-center p-3 bg-purple-50 rounded-lg">
+                <div className="text-2xl font-bold text-purple-600">{completedWorkouts}</div>
+                <div className="text-sm text-purple-700">Entrenamientos</div>
+              </div>
+              <div className="text-center p-3 bg-orange-50 rounded-lg">
+                <div className="text-2xl font-bold text-orange-600">{completedCardio}</div>
+                <div className="text-sm text-orange-700">Cardio</div>
+              </div>
+            </div>
+          </div>
+
+          {/* Weight Progress */}
+          <div className="glass-card">
+            <h3 className="font-semibold mb-4">⚖️ Progreso de Peso</h3>
+            {estado.length > 0 ? (
+              <div className="space-y-2">
+                <div className="flex justify-between">
+                  <span>Peso inicial:</span>
+                  <span className="font-semibold">{estado[0].peso} kg</span>
+                </div>
+                <div className="flex justify-between">
+                  <span>Peso actual:</span>
+                  <span className="font-semibold">{estado[estado.length - 1].peso} kg</span>
+                </div>
+                <div className="flex justify-between">
+                  <span>Cambio:</span>
+                  <span className={`font-semibold ${estado[estado.length - 1].peso - estado[0].peso > 0 ? 'text-green-600' : 'text-red-600'}`}>
+                    {estado[estado.length - 1].peso - estado[0].peso > 0 ? '+' : ''}{estado[estado.length - 1].peso - estado[0].peso} kg
+                  </span>
+                </div>
+              </div>
+            ) : (
+              <p className="text-gray-500 text-center py-4">No hay datos de peso registrados</p>
+            )}
+          </div>
+
+          {/* Weekly Adherence */}
+          <div className="glass-card">
+            <h3 className="font-semibold mb-4">📅 Adherencia Semanal</h3>
+            <div className="space-y-2">
+              {Object.keys(adherenciaDiaria)
+                .sort((a, b) => new Date(b).getTime() - new Date(a).getTime())
+                .slice(0, 7)
+                .map(date => {
+                  const adherence = adherenciaDiaria[date];
+                  const activities = [];
+                  if (adherence.pesos) activities.push('🏋️');
+                  if (adherence.cardio) activities.push('🏃');
+                  if (adherence.dieta) activities.push('🥗');
+                  
+                  return (
+                    <div key={date} className="flex justify-between items-center p-2 bg-gray-50 rounded">
+                      <span className="text-sm">{new Date(date).toLocaleDateString('es-ES', { weekday: 'short', day: '2-digit' })}</span>
+                      <div className="flex space-x-1">
+                        {activities.length > 0 ? activities : <span className="text-gray-400">-</span>}
+                      </div>
+                    </div>
+                  );
+                })}
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  };
+
   const renderSettingsSection = () => (
     <div className="min-h-screen pb-20 p-6">
       <h1 className="text-2xl font-bold text-center mb-6">Ajustes</h1>
@@ -2096,6 +2308,85 @@ export default function Dashboard() {
             <p>📱 <strong>Versión:</strong> 1.0.0</p>
           </div>
         </div>
+
+        {/* Debug/Testing Section */}
+        <div className="mobile-card">
+          <h3 className="font-semibold mb-4">🧪 Testing & Debug</h3>
+          <div className="space-y-3">
+            <div className="text-sm text-gray-600">
+              <p><strong>Fecha actual simulada:</strong> {new Date().toLocaleDateString('es-ES')}</p>
+              <p><strong>Día del mesociclo:</strong> {getCurrentMesocicloDay()?.dia?.dia || 'N/A'}</p>
+              <p><strong>Entrenamiento:</strong> {getCurrentMesocicloDay()?.dia?.entrenamiento || 'N/A'}</p>
+            </div>
+            
+            <div className="grid grid-cols-2 gap-2">
+              <button 
+                onClick={() => {
+                  // Simular día 27
+                  const testDate = new Date('2025-01-27');
+                  const result = testMesocicloTracking(testDate);
+                  console.log('🧪 Test día 27:', result);
+                  showToast('🧪 Test día 27 ejecutado - ver consola');
+                }}
+                className="bg-blue-500 text-white py-2 px-3 rounded text-sm hover:bg-blue-600 transition-colors"
+              >
+                Test Día 27
+              </button>
+              
+              <button 
+                onClick={() => {
+                  // Simular día 28
+                  const testDate = new Date('2025-01-28');
+                  const result = testMesocicloTracking(testDate);
+                  console.log('🧪 Test día 28:', result);
+                  showToast('🧪 Test día 28 ejecutado - ver consola');
+                }}
+                className="bg-green-500 text-white py-2 px-3 rounded text-sm hover:bg-green-600 transition-colors"
+              >
+                Test Día 28
+              </button>
+              
+              <button 
+                onClick={() => {
+                  // Simular día 31
+                  const testDate = new Date('2025-01-31');
+                  const result = testMesocicloTracking(testDate);
+                  console.log('🧪 Test día 31:', result);
+                  showToast('🧪 Test día 31 ejecutado - ver consola');
+                }}
+                className="bg-purple-500 text-white py-2 px-3 rounded text-sm hover:bg-purple-600 transition-colors"
+              >
+                Test Día 31
+              </button>
+              
+              <button 
+                onClick={() => {
+                  // Simular día extra de descanso
+                  const testDate = new Date('2025-02-01');
+                  const result = testMesocicloTracking(testDate);
+                  console.log('🧪 Test día extra:', result);
+                  showToast('🧪 Test día extra ejecutado - ver consola');
+                }}
+                className="bg-orange-500 text-white py-2 px-3 rounded text-sm hover:bg-orange-600 transition-colors"
+              >
+                Test Día Extra
+              </button>
+            </div>
+            
+            <button 
+              onClick={() => {
+                // Mostrar información completa del mesociclo
+                const currentDay = getCurrentMesocicloDay();
+                const testResult = testMesocicloTracking();
+                console.log('📊 Información completa:', { currentDay, testResult });
+                showToast('📊 Info completa en consola');
+              }}
+              className="w-full bg-gray-600 text-white py-2 px-3 rounded text-sm hover:bg-gray-700 transition-colors"
+            >
+              📊 Mostrar Info Completa
+            </button>
+          </div>
+        </div>
       </div>
     </div>
   );
@@ -2114,6 +2405,8 @@ export default function Dashboard() {
         {activeSection === 'today' && renderTodaySection()}
         {activeSection === 'mesociclo' && renderMesocicloSection()}
         {activeSection === 'history' && renderHistorySection()}
+        {activeSection === 'progress' && renderProgressSection()}
+        {activeSection === 'recommendations' && renderRecommendationsSection()}
         {activeSection === 'settings' && renderSettingsSection()}
         
         {/* Modern Mobile Navigation */}
@@ -2131,7 +2424,14 @@ export default function Dashboard() {
               onClick={() => setActiveSection('mesociclo')}
             >
               <span className="text-lg">📋</span>
-              <span className="text-xs mt-1 block">Mesociclo</span>
+              <span className="text-xs mt-1 block">Plan</span>
+            </button>
+            <button 
+              className={`nav-tab flex-1 ${activeSection === 'progress' ? 'active' : ''}`}
+              onClick={() => setActiveSection('progress')}
+            >
+              <span className="text-lg">📈</span>
+              <span className="text-xs mt-1 block">Progreso</span>
             </button>
             <button 
               className={`nav-tab flex-1 ${activeSection === 'history' ? 'active' : ''}`}
@@ -2139,6 +2439,13 @@ export default function Dashboard() {
             >
               <span className="text-lg">📊</span>
               <span className="text-xs mt-1 block">Historial</span>
+            </button>
+            <button 
+              className={`nav-tab flex-1 ${activeSection === 'recommendations' ? 'active' : ''}`}
+              onClick={() => setActiveSection('recommendations')}
+            >
+              <span className="text-lg">💡</span>
+              <span className="text-xs mt-1 block">Tips</span>
             </button>
             <button 
               className={`nav-tab flex-1 ${activeSection === 'settings' ? 'active' : ''}`}
