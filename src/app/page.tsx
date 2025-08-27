@@ -37,7 +37,7 @@ import { getCurrentMesocicloDay, setMesocicloStartDate, getMesocicloStartDate, t
  */
 export default function Dashboard() {
   const { showToast } = useToast();
-  const [isLoading, setIsLoading] = useState(true);
+  const [isLoading] = useState(false);
   const [activeModal, setActiveModal] = useState<string | null>(null);
   const [activeSection, setActiveSection] = useState<'today' | 'mesociclo' | 'history' | 'settings' | 'recommendations' | 'progress'>('today');
   const [showStartDateConfig, setShowStartDateConfig] = useState(false);
@@ -77,17 +77,8 @@ export default function Dashboard() {
    * Verifica que localStorage esté disponible antes de continuar
    */
   useEffect(() => {
-    // Asegurar que localStorage esté disponible
-    if (typeof window !== 'undefined') {
-      try {
-        // Test localStorage access
-        localStorage.getItem('test');
-        setIsLoading(false);
-      } catch (error) {
-        console.error('localStorage not available:', error);
-        setIsLoading(false);
-      }
-    }
+    // Inicialización simple
+    console.log('🔍 App initialized');
   }, []);
 
   // Form states
@@ -2398,9 +2389,13 @@ export default function Dashboard() {
   );
 
   // Mostrar loading mientras se inicializa
+  console.log('🔍 Current isLoading state:', isLoading);
   if (isLoading) {
+    console.log('🔍 Showing LoadingFallback');
     return <LoadingFallback />;
   }
+  
+  console.log('🔍 Rendering main app');
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50">
