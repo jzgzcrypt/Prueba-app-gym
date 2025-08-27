@@ -1076,7 +1076,10 @@ export default function Dashboard() {
         })()}
         
         {/* Weight Entry */}
-        <div className="activity-card cursor-pointer" onClick={() => openModal('weight')}>
+        <div className="activity-card cursor-pointer" onClick={() => {
+          console.log('🔍 Weight button clicked!');
+          openModal('weight');
+        }}>
           <div className="flex items-center justify-between">
             <div className="flex items-center">
               <div className="w-14 h-14 bg-blue-100 rounded-full flex items-center justify-center mr-4 shadow-lg">
@@ -2600,7 +2603,9 @@ export default function Dashboard() {
       </div>
 
       {/* Modals */}
-      {activeModal === 'weight' && (
+      {activeModal === 'weight' && (() => {
+        console.log('🔍 Rendering weight modal!');
+        return (
         <div className="fixed inset-0 bg-black bg-opacity-50 backdrop-blur-sm flex items-center justify-center p-4 z-[60]" onClick={closeModal}>
           <div className="glass-card max-w-md w-full" onClick={(e) => e.stopPropagation()}>
             <div className="flex items-center justify-between mb-6">
@@ -2630,7 +2635,8 @@ export default function Dashboard() {
             </div>
           </div>
         </div>
-      )}
+        );
+      })()}
 
       {activeModal === 'workout' && (
         <WorkoutModal
