@@ -48,19 +48,19 @@ export function WeeklyCalendar({ isOpen, onClose }: WeeklyCalendarProps) {
   if (!isOpen) return null;
 
   return (
-    <div className="modal-overlay" onClick={onClose}>
-      <div className="modal-content max-w-2xl max-h-[90vh] flex flex-col" onClick={(e) => e.stopPropagation()}>
-        <div className="modal-header flex-shrink-0">
-          <button className="modal-close" onClick={onClose}>×</button>
-          <h3>📅 Plan Semanal</h3>
+    <div className="fixed inset-0 bg-black bg-opacity-50 backdrop-blur-sm flex items-center justify-center p-4 z-50" onClick={onClose}>
+      <div className="glass-card max-w-2xl w-full max-h-[90vh] flex flex-col" onClick={(e) => e.stopPropagation()}>
+        <div className="flex items-center justify-between mb-6 flex-shrink-0">
+          <h3 className="text-2xl font-bold text-gray-800">📅 Plan Semanal</h3>
+          <button className="w-8 h-8 bg-gray-100 rounded-full flex items-center justify-center hover:bg-gray-200 transition-colors" onClick={onClose}>×</button>
         </div>
         
-        <div className="modal-body flex-1 overflow-y-auto">
+        <div className="flex-1 overflow-y-auto">
           <div className="grid grid-cols-1 gap-4">
             {Object.entries(weeklyPlan).map(([day, plan]) => (
               <div 
                 key={day} 
-                className={`clean-card ${day === today ? 'ring-2 ring-blue-400 ring-opacity-50' : ''}`}
+                className={`glass-card ${day === today ? 'ring-2 ring-blue-400 ring-opacity-50' : ''}`}
               >
                 {/* Day Header */}
                 <div className="flex items-center justify-between mb-4">

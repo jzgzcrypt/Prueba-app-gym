@@ -2325,6 +2325,8 @@ export default function Dashboard() {
           workoutType={workoutType}
         />
       )}
+      
+
 
       {activeModal === 'calendar' && (
         <WeeklyCalendar

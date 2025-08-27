@@ -142,17 +142,17 @@ export function WorkoutModal({ isOpen, onClose, onComplete, workoutType }: Worko
   if (!isOpen) return null;
 
   return (
-    <div className="modal-overlay" onClick={onClose}>
-      <div className="modal-content max-h-[90vh] flex flex-col" onClick={(e) => e.stopPropagation()}>
-        <div className="modal-header flex-shrink-0">
-          <button className="modal-close" onClick={onClose}>×</button>
-          <h3>🏋️ {workoutType} - Entrenamiento</h3>
+    <div className="fixed inset-0 bg-black bg-opacity-50 backdrop-blur-sm flex items-center justify-center p-4 z-50" onClick={onClose}>
+      <div className="glass-card max-w-4xl w-full max-h-[90vh] flex flex-col" onClick={(e) => e.stopPropagation()}>
+        <div className="flex items-center justify-between mb-6 flex-shrink-0">
+          <h3 className="text-2xl font-bold text-gray-800">🏋️ {workoutType} - Entrenamiento</h3>
+          <button className="w-8 h-8 bg-gray-100 rounded-full flex items-center justify-center hover:bg-gray-200 transition-colors" onClick={onClose}>×</button>
         </div>
         
-        <div className="modal-body flex-1 overflow-y-auto">
+        <div className="flex-1 overflow-y-auto">
           <div className="space-y-6">
             {exercises.map((exercise, exerciseIndex) => (
-              <div key={exerciseIndex} className="clean-card">
+              <div key={exerciseIndex} className="glass-card">
                 <div className="flex items-center justify-between mb-4">
                   <div>
                     <h4 className="font-semibold text-lg">{exercise.nombre}</h4>
@@ -185,7 +185,7 @@ export function WorkoutModal({ isOpen, onClose, onComplete, workoutType }: Worko
                   <button
                     onClick={() => completeExercise(exerciseIndex)}
                     disabled={exercise.completado}
-                    className={`btn-elegant btn-small ${
+                    className={`btn-modern btn-small ${
                       exercise.completado 
                         ? 'btn-success' 
                         : 'btn-secondary'
@@ -224,7 +224,7 @@ export function WorkoutModal({ isOpen, onClose, onComplete, workoutType }: Worko
                               value={set.peso || ''}
                               onChange={(e) => updateSet(exerciseIndex, setIndex, 'peso', Number(e.target.value))}
                               placeholder={exercise.pesoSugerido ? exercise.pesoSugerido.toString() : "0"}
-                              className="input-compact w-20"
+                              className="input-modern w-20"
                               disabled={set.completado}
                             />
                           </td>
@@ -234,7 +234,7 @@ export function WorkoutModal({ isOpen, onClose, onComplete, workoutType }: Worko
                               value={set.repeticiones || ''}
                               onChange={(e) => updateSet(exerciseIndex, setIndex, 'repeticiones', Number(e.target.value))}
                               placeholder="0"
-                              className="input-compact w-20"
+                              className="input-modern w-20"
                               disabled={set.completado}
                             />
                           </td>
@@ -249,7 +249,7 @@ export function WorkoutModal({ isOpen, onClose, onComplete, workoutType }: Worko
                               placeholder="0"
                               min="1"
                               max="10"
-                              className="input-compact w-16"
+                              className="input-modern w-16"
                               disabled={set.completado}
                             />
                           </td>
@@ -260,7 +260,7 @@ export function WorkoutModal({ isOpen, onClose, onComplete, workoutType }: Worko
                             <button
                               onClick={() => completeSet(exerciseIndex, setIndex)}
                               disabled={set.completado || !set.peso || !set.repeticiones}
-                              className={`btn-elegant btn-small ${
+                              className={`btn-modern btn-small ${
                                 set.completado 
                                   ? 'btn-success' 
                                   : (!set.peso || !set.repeticiones)
@@ -282,13 +282,13 @@ export function WorkoutModal({ isOpen, onClose, onComplete, workoutType }: Worko
         </div>
         
         <div className="flex gap-3 flex-shrink-0 p-4 border-t border-gray-200">
-          <button onClick={onClose} className="btn-elegant btn-secondary flex-1">
+          <button onClick={onClose} className="btn-modern btn-secondary flex-1">
             Cancelar
           </button>
           <button
             onClick={handleComplete}
             disabled={!isWorkoutComplete()}
-            className={`btn-elegant flex-1 ${
+            className={`btn-modern flex-1 ${
               isWorkoutComplete() 
                 ? 'btn-primary' 
                 : 'btn-secondary opacity-50 cursor-not-allowed'
