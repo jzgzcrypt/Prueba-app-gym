@@ -1078,22 +1078,22 @@ export default function Dashboard() {
         </div>
         
         {/* Cardio Entry */}
-        <div className="activity-card warning cursor-pointer" onClick={() => openModal('cardio')}>
+        <div className="activity-card cursor-pointer" onClick={() => openModal('cardio')}>
           <div className="flex items-center justify-between">
             <div className="flex items-center">
-              <div className="w-14 h-14 bg-white bg-opacity-20 rounded-full flex items-center justify-center mr-4 shadow-lg">
+              <div className="w-14 h-14 bg-red-100 rounded-full flex items-center justify-center mr-4 shadow-lg">
                 <span className="text-2xl">🏃</span>
               </div>
               <div>
-                <h3 className="font-bold text-lg">Cardio</h3>
-                <p className="text-sm text-white text-opacity-80">Registra tu actividad cardiovascular</p>
+                <h3 className="font-bold text-lg text-gray-800">Cardio</h3>
+                <p className="text-sm text-gray-600">Registra tu actividad cardiovascular</p>
               </div>
             </div>
             <div className="text-right">
-              <div className={`text-sm font-semibold ${getStatus('cardio') === 'Completado' ? 'text-green-200' : 'text-yellow-200'}`}>
+              <div className={`text-sm font-semibold ${getStatus('cardio') === 'Completado' ? 'text-green-600' : 'text-orange-600'}`}>
                 {getStatus('cardio')}
               </div>
-              <div className="text-xs text-white text-opacity-60">Toca para registrar</div>
+              <div className="text-xs text-gray-500">Toca para registrar</div>
             </div>
           </div>
         </div>
@@ -1102,19 +1102,19 @@ export default function Dashboard() {
         <div className="activity-card cursor-pointer" onClick={() => openModal('diet')}>
           <div className="flex items-center justify-between">
             <div className="flex items-center">
-              <div className="w-14 h-14 bg-white bg-opacity-20 rounded-full flex items-center justify-center mr-4 shadow-lg">
+              <div className="w-14 h-14 bg-yellow-100 rounded-full flex items-center justify-center mr-4 shadow-lg">
                 <span className="text-2xl">🥗</span>
               </div>
               <div>
-                <h3 className="font-bold text-lg">Dieta</h3>
-                <p className="text-sm text-white text-opacity-80">1800 kcal - 150g proteínas</p>
+                <h3 className="font-bold text-lg text-gray-800">Dieta</h3>
+                <p className="text-sm text-gray-600">1800 kcal - 150g proteínas</p>
               </div>
             </div>
             <div className="text-right">
-              <div className={`text-sm font-semibold ${getStatus('diet') === 'Completado' ? 'text-green-200' : 'text-yellow-200'}`}>
+              <div className={`text-sm font-semibold ${getStatus('diet') === 'Completado' ? 'text-green-600' : 'text-orange-600'}`}>
                 {getStatus('diet')}
               </div>
-              <div className="text-xs text-white text-opacity-60">Toca para registrar</div>
+              <div className="text-xs text-gray-500">Toca para registrar</div>
             </div>
           </div>
         </div>
@@ -1123,19 +1123,19 @@ export default function Dashboard() {
         <div className="activity-card cursor-pointer" onClick={() => openModal('neat')}>
           <div className="flex items-center justify-between">
             <div className="flex items-center">
-              <div className="w-14 h-14 bg-white bg-opacity-20 rounded-full flex items-center justify-center mr-4 shadow-lg">
+              <div className="w-14 h-14 bg-purple-100 rounded-full flex items-center justify-center mr-4 shadow-lg">
                 <span className="text-2xl">🚶</span>
               </div>
               <div>
-                <h3 className="font-bold text-lg">NEAT</h3>
-                <p className="text-sm text-white text-opacity-80">Actividad física no estructurada</p>
+                <h3 className="font-bold text-lg text-gray-800">NEAT</h3>
+                <p className="text-sm text-gray-600">Actividad física no estructurada</p>
               </div>
             </div>
             <div className="text-right">
-              <div className={`text-sm font-semibold ${getStatus('neat') === 'Completado' ? 'text-green-200' : 'text-yellow-200'}`}>
+              <div className={`text-sm font-semibold ${getStatus('neat') === 'Completado' ? 'text-green-600' : 'text-orange-600'}`}>
                 {getStatus('neat')}
               </div>
-              <div className="text-xs text-white text-opacity-60">Toca para registrar</div>
+              <div className="text-xs text-gray-500">Toca para registrar</div>
             </div>
           </div>
         </div>
@@ -1144,19 +1144,19 @@ export default function Dashboard() {
         <div className="activity-card cursor-pointer" onClick={() => openModal('entreno-no-programado')}>
           <div className="flex items-center justify-between">
             <div className="flex items-center">
-              <div className="w-14 h-14 bg-white bg-opacity-20 rounded-full flex items-center justify-center mr-4 shadow-lg">
+              <div className="w-14 h-14 bg-indigo-100 rounded-full flex items-center justify-center mr-4 shadow-lg">
                 <span className="text-2xl">🎯</span>
               </div>
               <div>
-                <h3 className="font-bold text-lg">Entreno Extra</h3>
-                <p className="text-sm text-white text-opacity-80">Tenis, natación, alpinismo, etc.</p>
+                <h3 className="font-bold text-lg text-gray-800">Entreno Extra</h3>
+                <p className="text-sm text-gray-600">Tenis, natación, alpinismo, etc.</p>
               </div>
             </div>
             <div className="text-right">
-              <div className={`text-sm font-semibold ${getStatus('entrenoNoProgramado') === 'Completado' ? 'text-green-200' : 'text-yellow-200'}`}>
+              <div className={`text-sm font-semibold ${getStatus('entrenoNoProgramado') === 'Completado' ? 'text-green-600' : 'text-orange-600'}`}>
                 {getStatus('entrenoNoProgramado')}
               </div>
-              <div className="text-xs text-white text-opacity-60">Toca para registrar</div>
+              <div className="text-xs text-gray-500">Toca para registrar</div>
             </div>
           </div>
         </div>
@@ -1166,19 +1166,19 @@ export default function Dashboard() {
           <div className="activity-card cursor-pointer" onClick={() => openModal('seguimiento')}>
             <div className="flex items-center justify-between">
               <div className="flex items-center">
-                <div className="w-14 h-14 bg-white bg-opacity-20 rounded-full flex items-center justify-center mr-4 shadow-lg">
+                <div className="w-14 h-14 bg-teal-100 rounded-full flex items-center justify-center mr-4 shadow-lg">
                   <span className="text-2xl">📊</span>
                 </div>
                 <div>
-                  <h3 className="font-bold text-lg">Seguimiento Semanal</h3>
-                  <p className="text-sm text-white text-opacity-80">Peso, cintura y medidas</p>
+                  <h3 className="font-bold text-lg text-gray-800">Seguimiento Semanal</h3>
+                  <p className="text-sm text-gray-600">Peso, cintura y medidas</p>
                 </div>
               </div>
               <div className="text-right">
-                <div className={`text-sm font-semibold ${getStatus('seguimiento') === 'Completado' ? 'text-green-200' : 'text-yellow-200'}`}>
+                <div className={`text-sm font-semibold ${getStatus('seguimiento') === 'Completado' ? 'text-green-600' : 'text-orange-600'}`}>
                   {getStatus('seguimiento')}
                 </div>
-                <div className="text-xs text-white text-opacity-60">Toca para registrar</div>
+                <div className="text-xs text-gray-500">Toca para registrar</div>
               </div>
             </div>
           </div>
@@ -1774,7 +1774,7 @@ export default function Dashboard() {
               </div>
               <button
                 onClick={() => setShowStartDateConfig(true)}
-                className="btn-elegant btn-small bg-yellow-500 hover:bg-yellow-600 text-white"
+                className="btn-modern btn-small bg-yellow-500 hover:bg-yellow-600 text-white"
               >
                 {startDate ? 'Cambiar' : 'Configurar'}
               </button>
@@ -2419,20 +2419,20 @@ export default function Dashboard() {
       )}
 
       {activeModal === 'neat' && (
-        <div className="modal-overlay" onClick={closeModal}>
-          <div className="modal-content" onClick={(e) => e.stopPropagation()}>
-            <div className="modal-header">
-              <button className="modal-close" onClick={closeModal}>×</button>
-              <h3>🚶 NEAT</h3>
+        <div className="fixed inset-0 bg-black bg-opacity-50 backdrop-blur-sm flex items-center justify-center p-4 z-50" onClick={closeModal}>
+          <div className="glass-card max-w-md w-full" onClick={(e) => e.stopPropagation()}>
+            <div className="flex items-center justify-between mb-6">
+              <h3 className="text-2xl font-bold text-gray-800">🚶 NEAT</h3>
+              <button className="w-8 h-8 bg-gray-100 rounded-full flex items-center justify-center hover:bg-gray-200 transition-colors" onClick={closeModal}>×</button>
             </div>
-            <div className="modal-body">
+            <div className="space-y-4">
               <div className="space-y-4">
                 <div>
                   <label className="block text-sm font-medium mb-2 text-gray-700">Tipo de registro</label>
                   <select 
                     value={neatTipo}
                     onChange={(e) => setNeatTipo(e.target.value as 'pasos' | 'cinta')}
-                    className="input-compact"
+                    className="input-modern"
                   >
                     <option value="pasos">Pasos y ritmo</option>
                     <option value="cinta">Cinta (km, ritmo, inclinación)</option>
@@ -2448,7 +2448,7 @@ export default function Dashboard() {
                         value={neatPasos}
                         onChange={(e) => setNeatPasos(e.target.value)}
                         placeholder="8000" 
-                        className="input-compact"
+                        className="input-modern"
                       />
                     </div>
                     <div>
@@ -2456,7 +2456,7 @@ export default function Dashboard() {
                       <select 
                         value={neatRitmo}
                         onChange={(e) => setNeatRitmo(e.target.value)}
-                        className="input-compact"
+                        className="input-modern"
                       >
                         <option value="">Seleccionar ritmo...</option>
                         <option value="ritmo rápido">Ritmo rápido</option>
@@ -2476,7 +2476,7 @@ export default function Dashboard() {
                         onChange={(e) => setNeatKm(e.target.value)}
                         placeholder="3.5" 
                         step="0.1"
-                        className="input-compact"
+                        className="input-modern"
                       />
                     </div>
                     <div>
@@ -2487,7 +2487,7 @@ export default function Dashboard() {
                         onChange={(e) => setNeatRitmoKmH(e.target.value)}
                         placeholder="6.0" 
                         step="0.1"
-                        className="input-compact"
+                        className="input-modern"
                       />
                     </div>
                     <div>
@@ -2498,7 +2498,7 @@ export default function Dashboard() {
                         onChange={(e) => setNeatInclinacion(e.target.value)}
                         placeholder="0" 
                         step="0.5"
-                        className="input-compact"
+                        className="input-modern"
                       />
                     </div>
                     <div>
@@ -2508,17 +2508,17 @@ export default function Dashboard() {
                         value={neatDuracion}
                         onChange={(e) => setNeatDuracion(e.target.value)}
                         placeholder="30" 
-                        className="input-compact"
+                        className="input-modern"
                       />
                     </div>
                   </>
                 )}
 
                 <div className="flex gap-3">
-                  <button onClick={closeModal} className="btn-elegant btn-secondary flex-1">
+                  <button onClick={closeModal} className="btn-modern btn-secondary flex-1">
                     Cancelar
                   </button>
-                  <button onClick={saveNeat} className="btn-elegant btn-primary flex-1">
+                  <button onClick={saveNeat} className="btn-modern btn-primary flex-1">
                     💾 Guardar
                   </button>
                 </div>
@@ -2556,13 +2556,13 @@ export default function Dashboard() {
               </div>
             </div>
             <div className="flex gap-3 flex-shrink-0 p-4 border-t border-gray-200">
-              <button onClick={closeModal} className="btn-elegant btn-secondary flex-1">
+              <button onClick={closeModal} className="btn-modern btn-secondary flex-1">
                 Cancelar
               </button>
               <button
                 onClick={handleStartDateConfig}
                 disabled={!startDateInput}
-                className={`btn-elegant flex-1 ${
+                className={`btn-modern flex-1 ${
                   startDateInput 
                     ? 'btn-primary' 
                     : 'btn-secondary opacity-50 cursor-not-allowed'
@@ -2576,14 +2576,14 @@ export default function Dashboard() {
       )}
 
       {activeModal === 'entreno-no-programado' && (
-        <div className="modal-overlay" onClick={closeModal}>
-          <div className="modal-content max-h-[90vh] flex flex-col" onClick={(e) => e.stopPropagation()}>
-            <div className="modal-header flex-shrink-0">
-              <button className="modal-close" onClick={closeModal}>×</button>
-              <h3>🎯 Entreno No Programado</h3>
+        <div className="fixed inset-0 bg-black bg-opacity-50 backdrop-blur-sm flex items-center justify-center p-4 z-50" onClick={closeModal}>
+          <div className="glass-card max-w-2xl w-full max-h-[90vh] flex flex-col" onClick={(e) => e.stopPropagation()}>
+            <div className="flex items-center justify-between mb-6 flex-shrink-0">
+              <h3 className="text-2xl font-bold text-gray-800">🎯 Entreno No Programado</h3>
+              <button className="w-8 h-8 bg-gray-100 rounded-full flex items-center justify-center hover:bg-gray-200 transition-colors" onClick={closeModal}>×</button>
             </div>
             
-            <div className="modal-body flex-1 overflow-y-auto">
+            <div className="flex-1 overflow-y-auto">
               <div className="space-y-4">
                 {/* Tipo de actividad */}
                 <div>
@@ -2591,7 +2591,7 @@ export default function Dashboard() {
                   <select 
                     value={entrenoTipo}
                     onChange={(e) => setEntrenoTipo(e.target.value as 'tenis' | 'natacion' | 'alpinismo' | 'ciclismo' | 'running' | 'futbol' | 'baloncesto' | 'escalada' | 'yoga' | 'pilates' | 'crossfit' | 'otro')}
-                    className="input-compact"
+                    className="input-modern"
                   >
                     <option value="tenis">🎾 Tenis</option>
                     <option value="natacion">🏊 Natación</option>
@@ -2617,7 +2617,7 @@ export default function Dashboard() {
                       value={entrenoDuracion}
                       onChange={(e) => setEntrenoDuracion(e.target.value)}
                       placeholder="60" 
-                      className="input-compact"
+                      className="input-modern"
                     />
                   </div>
                   <div>
@@ -2629,7 +2629,7 @@ export default function Dashboard() {
                       placeholder="7" 
                       min="1"
                       max="10"
-                      className="input-compact"
+                      className="input-modern"
                     />
                   </div>
                 </div>
@@ -2640,7 +2640,7 @@ export default function Dashboard() {
                   <select 
                     value={entrenoIntensidad}
                     onChange={(e) => setEntrenoIntensidad(e.target.value as 'baja' | 'moderada' | 'alta' | 'muy alta')}
-                    className="input-compact"
+                    className="input-modern"
                   >
                     <option value="baja">Baja</option>
                     <option value="moderada">Moderada</option>
@@ -2661,7 +2661,7 @@ export default function Dashboard() {
                           value={entrenoTenisSets}
                           onChange={(e) => setEntrenoTenisSets(e.target.value)}
                           placeholder="3" 
-                          className="input-compact"
+                          className="input-modern"
                         />
                       </div>
                       <div>
@@ -2671,7 +2671,7 @@ export default function Dashboard() {
                           value={entrenoTenisDuracionSet}
                           onChange={(e) => setEntrenoTenisDuracionSet(e.target.value)}
                           placeholder="20" 
-                          className="input-compact"
+                          className="input-modern"
                         />
                       </div>
                     </div>
@@ -2680,7 +2680,7 @@ export default function Dashboard() {
                       <select 
                         value={entrenoTenisNivel}
                         onChange={(e) => setEntrenoTenisNivel(e.target.value as 'principiante' | 'intermedio' | 'avanzado')}
-                        className="input-compact"
+                        className="input-modern"
                       >
                         <option value="principiante">Principiante</option>
                         <option value="intermedio">Intermedio</option>
@@ -2700,7 +2700,7 @@ export default function Dashboard() {
                         value={entrenoNatacionMetros}
                         onChange={(e) => setEntrenoNatacionMetros(e.target.value)}
                         placeholder="1000" 
-                        className="input-compact"
+                        className="input-modern"
                       />
                     </div>
                     <div className="grid grid-cols-2 gap-3">
@@ -2709,7 +2709,7 @@ export default function Dashboard() {
                         <select 
                           value={entrenoNatacionEstilo}
                           onChange={(e) => setEntrenoNatacionEstilo(e.target.value as 'libre' | 'espalda' | 'braza' | 'mariposa' | 'combinado')}
-                          className="input-compact"
+                          className="input-modern"
                         >
                           <option value="libre">Libre</option>
                           <option value="espalda">Espalda</option>
@@ -2723,7 +2723,7 @@ export default function Dashboard() {
                         <select 
                           value={entrenoNatacionRitmo}
                           onChange={(e) => setEntrenoNatacionRitmo(e.target.value as 'lento' | 'moderado' | 'rápido' | 'competitivo')}
-                          className="input-compact"
+                          className="input-modern"
                         >
                           <option value="lento">Lento</option>
                           <option value="moderado">Moderado</option>
@@ -2745,7 +2745,7 @@ export default function Dashboard() {
                         value={entrenoAlpinismoRuta}
                         onChange={(e) => setEntrenoAlpinismoRuta(e.target.value)}
                         placeholder="Nombre de la ruta" 
-                        className="input-compact"
+                        className="input-modern"
                       />
                     </div>
                     <div className="grid grid-cols-2 gap-3">
@@ -2756,7 +2756,7 @@ export default function Dashboard() {
                           value={entrenoAlpinismoDesnivel}
                           onChange={(e) => setEntrenoAlpinismoDesnivel(e.target.value)}
                           placeholder="500" 
-                          className="input-compact"
+                          className="input-modern"
                         />
                       </div>
                       <div>
@@ -2764,7 +2764,7 @@ export default function Dashboard() {
                         <select 
                           value={entrenoAlpinismoDificultad}
                           onChange={(e) => setEntrenoAlpinismoDificultad(e.target.value as 'facil' | 'moderada' | 'dificil' | 'muy dificil')}
-                          className="input-compact"
+                          className="input-modern"
                         >
                           <option value="facil">Fácil</option>
                           <option value="moderada">Moderada</option>
@@ -2778,7 +2778,7 @@ export default function Dashboard() {
                       <select 
                         value={entrenoAlpinismoCondiciones}
                         onChange={(e) => setEntrenoAlpinismoCondiciones(e.target.value as 'buenas' | 'regulares' | 'malas')}
-                        className="input-compact"
+                        className="input-modern"
                       >
                         <option value="buenas">Buenas</option>
                         <option value="regulares">Regulares</option>
@@ -2800,7 +2800,7 @@ export default function Dashboard() {
                           onChange={(e) => setEntrenoCiclismoKm(e.target.value)}
                           placeholder="30" 
                           step="0.1"
-                          className="input-compact"
+                          className="input-modern"
                         />
                       </div>
                       <div>
@@ -2811,7 +2811,7 @@ export default function Dashboard() {
                           onChange={(e) => setEntrenoCiclismoRitmo(e.target.value)}
                           placeholder="25" 
                           step="0.1"
-                          className="input-compact"
+                          className="input-modern"
                         />
                       </div>
                     </div>
@@ -2823,7 +2823,7 @@ export default function Dashboard() {
                           value={entrenoCiclismoDesnivel}
                           onChange={(e) => setEntrenoCiclismoDesnivel(e.target.value)}
                           placeholder="200" 
-                          className="input-compact"
+                          className="input-modern"
                         />
                       </div>
                       <div>
@@ -2831,7 +2831,7 @@ export default function Dashboard() {
                         <select 
                           value={entrenoCiclismoTipo}
                           onChange={(e) => setEntrenoCiclismoTipo(e.target.value as 'carretera' | 'mtb' | 'urbano')}
-                          className="input-compact"
+                          className="input-modern"
                         >
                           <option value="carretera">Carretera</option>
                           <option value="mtb">MTB</option>
@@ -2854,7 +2854,7 @@ export default function Dashboard() {
                           onChange={(e) => setEntrenoRunningKm(e.target.value)}
                           placeholder="5" 
                           step="0.1"
-                          className="input-compact"
+                          className="input-modern"
                         />
                       </div>
                       <div>
@@ -2865,7 +2865,7 @@ export default function Dashboard() {
                           onChange={(e) => setEntrenoRunningRitmo(e.target.value)}
                           placeholder="5.30" 
                           step="0.1"
-                          className="input-compact"
+                          className="input-modern"
                         />
                       </div>
                     </div>
@@ -2874,7 +2874,7 @@ export default function Dashboard() {
                       <select 
                         value={entrenoRunningTipo}
                         onChange={(e) => setEntrenoRunningTipo(e.target.value as 'carrera' | 'trail' | 'intervalos')}
-                        className="input-compact"
+                        className="input-modern"
                       >
                         <option value="carrera">Carrera</option>
                         <option value="trail">Trail</option>
@@ -2895,7 +2895,7 @@ export default function Dashboard() {
                           value={entrenoFutbolDuracion}
                           onChange={(e) => setEntrenoFutbolDuracion(e.target.value)}
                           placeholder="90" 
-                          className="input-compact"
+                          className="input-modern"
                         />
                       </div>
                       <div>
@@ -2903,7 +2903,7 @@ export default function Dashboard() {
                         <select 
                           value={entrenoFutbolPosicion}
                           onChange={(e) => setEntrenoFutbolPosicion(e.target.value as 'portero' | 'defensa' | 'centrocampista' | 'delantero')}
-                          className="input-compact"
+                          className="input-modern"
                         >
                           <option value="portero">Portero</option>
                           <option value="defensa">Defensa</option>
@@ -2917,7 +2917,7 @@ export default function Dashboard() {
                       <select 
                         value={entrenoFutbolIntensidad}
                         onChange={(e) => setEntrenoFutbolIntensidad(e.target.value as 'amistoso' | 'competitivo')}
-                        className="input-compact"
+                        className="input-modern"
                       >
                         <option value="amistoso">Amistoso</option>
                         <option value="competitivo">Competitivo</option>
@@ -2937,7 +2937,7 @@ export default function Dashboard() {
                           value={entrenoBaloncestoDuracion}
                           onChange={(e) => setEntrenoBaloncestoDuracion(e.target.value)}
                           placeholder="40" 
-                          className="input-compact"
+                          className="input-modern"
                         />
                       </div>
                       <div>
@@ -2945,7 +2945,7 @@ export default function Dashboard() {
                         <select 
                           value={entrenoBaloncestoPosicion}
                           onChange={(e) => setEntrenoBaloncestoPosicion(e.target.value as 'base' | 'escolta' | 'ala' | 'ala-pivot' | 'pivot')}
-                          className="input-compact"
+                          className="input-modern"
                         >
                           <option value="base">Base</option>
                           <option value="escolta">Escolta</option>
@@ -2960,7 +2960,7 @@ export default function Dashboard() {
                       <select 
                         value={entrenoBaloncestoIntensidad}
                         onChange={(e) => setEntrenoBaloncestoIntensidad(e.target.value as 'amistoso' | 'competitivo')}
-                        className="input-compact"
+                        className="input-modern"
                       >
                         <option value="amistoso">Amistoso</option>
                         <option value="competitivo">Competitivo</option>
@@ -2980,7 +2980,7 @@ export default function Dashboard() {
                           value={entrenoEscaladaRutas}
                           onChange={(e) => setEntrenoEscaladaRutas(e.target.value)}
                           placeholder="5" 
-                          className="input-compact"
+                          className="input-modern"
                         />
                       </div>
                       <div>
@@ -2990,7 +2990,7 @@ export default function Dashboard() {
                           value={entrenoEscaladaGrado}
                           onChange={(e) => setEntrenoEscaladaGrado(e.target.value)}
                           placeholder="6a" 
-                          className="input-compact"
+                          className="input-modern"
                         />
                       </div>
                     </div>
@@ -2999,7 +2999,7 @@ export default function Dashboard() {
                       <select 
                         value={entrenoEscaladaTipo}
                         onChange={(e) => setEntrenoEscaladaTipo(e.target.value as 'boulder' | 'deportiva' | 'tradicional')}
-                        className="input-compact"
+                        className="input-modern"
                       >
                         <option value="boulder">Boulder</option>
                         <option value="deportiva">Deportiva</option>
@@ -3018,7 +3018,7 @@ export default function Dashboard() {
                         <select 
                           value={entrenoYogaTipo}
                           onChange={(e) => setEntrenoYogaTipo(e.target.value as 'hatha' | 'vinyasa' | 'ashtanga' | 'yin' | 'restaurativo')}
-                          className="input-compact"
+                          className="input-modern"
                         >
                           <option value="hatha">Hatha</option>
                           <option value="vinyasa">Vinyasa</option>
@@ -3032,7 +3032,7 @@ export default function Dashboard() {
                         <select 
                           value={entrenoYogaNivel}
                           onChange={(e) => setEntrenoYogaNivel(e.target.value as 'principiante' | 'intermedio' | 'avanzado')}
-                          className="input-compact"
+                          className="input-modern"
                         >
                           <option value="principiante">Principiante</option>
                           <option value="intermedio">Intermedio</option>
@@ -3052,7 +3052,7 @@ export default function Dashboard() {
                         <select 
                           value={entrenoPilatesTipo}
                           onChange={(e) => setEntrenoPilatesTipo(e.target.value as 'mat' | 'reformer' | 'cadillac')}
-                          className="input-compact"
+                          className="input-modern"
                         >
                           <option value="mat">Mat</option>
                           <option value="reformer">Reformer</option>
@@ -3064,7 +3064,7 @@ export default function Dashboard() {
                         <select 
                           value={entrenoPilatesNivel}
                           onChange={(e) => setEntrenoPilatesNivel(e.target.value as 'principiante' | 'intermedio' | 'avanzado')}
-                          className="input-compact"
+                          className="input-modern"
                         >
                           <option value="principiante">Principiante</option>
                           <option value="intermedio">Intermedio</option>
@@ -3085,7 +3085,7 @@ export default function Dashboard() {
                         value={entrenoCrossfitWod}
                         onChange={(e) => setEntrenoCrossfitWod(e.target.value)}
                         placeholder="Descripción del WOD" 
-                        className="input-compact"
+                        className="input-modern"
                       />
                     </div>
                     <div className="grid grid-cols-2 gap-3">
@@ -3096,7 +3096,7 @@ export default function Dashboard() {
                           value={entrenoCrossfitTiempo}
                           onChange={(e) => setEntrenoCrossfitTiempo(e.target.value)}
                           placeholder="15" 
-                          className="input-compact"
+                          className="input-modern"
                         />
                       </div>
                       <div className="flex items-center">
@@ -3122,7 +3122,7 @@ export default function Dashboard() {
                         value={entrenoOtroActividad}
                         onChange={(e) => setEntrenoOtroActividad(e.target.value)}
                         placeholder="Nombre de la actividad" 
-                        className="input-compact"
+                        className="input-modern"
                       />
                     </div>
                     <div>
@@ -3131,7 +3131,7 @@ export default function Dashboard() {
                         value={entrenoOtroDetalles}
                         onChange={(e) => setEntrenoOtroDetalles(e.target.value)}
                         placeholder="Descripción de la actividad..." 
-                        className="input-compact"
+                        className="input-modern"
                         rows={3}
                       />
                     </div>
@@ -3145,7 +3145,7 @@ export default function Dashboard() {
                     value={entrenoNotas}
                     onChange={(e) => setEntrenoNotas(e.target.value)}
                     placeholder="Observaciones del entrenamiento..." 
-                    className="input-compact"
+                    className="input-modern"
                     rows={3}
                   />
                 </div>
@@ -3153,10 +3153,10 @@ export default function Dashboard() {
             </div>
             
             <div className="flex gap-3 flex-shrink-0 p-4 border-t border-gray-200">
-              <button onClick={closeModal} className="btn-elegant btn-secondary flex-1">
+              <button onClick={closeModal} className="btn-modern btn-secondary flex-1">
                 Cancelar
               </button>
-              <button onClick={saveEntrenoNoProgramado} className="btn-elegant btn-primary flex-1">
+              <button onClick={saveEntrenoNoProgramado} className="btn-modern btn-primary flex-1">
                 💾 Guardar Entreno
               </button>
             </div>
@@ -3165,13 +3165,13 @@ export default function Dashboard() {
       )}
 
       {activeModal === 'seguimiento' && (
-        <div className="modal-overlay" onClick={closeModal}>
-          <div className="modal-content" onClick={(e) => e.stopPropagation()}>
-            <div className="modal-header">
-              <button className="modal-close" onClick={closeModal}>×</button>
-              <h3>📊 Seguimiento Semanal</h3>
+        <div className="fixed inset-0 bg-black bg-opacity-50 backdrop-blur-sm flex items-center justify-center p-4 z-50" onClick={closeModal}>
+          <div className="glass-card max-w-md w-full" onClick={(e) => e.stopPropagation()}>
+            <div className="flex items-center justify-between mb-6">
+              <h3 className="text-2xl font-bold text-gray-800">📊 Seguimiento Semanal</h3>
+              <button className="w-8 h-8 bg-gray-100 rounded-full flex items-center justify-center hover:bg-gray-200 transition-colors" onClick={closeModal}>×</button>
             </div>
-            <div className="modal-body">
+            <div className="space-y-4">
               <div className="space-y-4">
                 <div>
                   <label className="block text-sm font-medium mb-2 text-gray-700">Peso (kg)</label>
@@ -3181,7 +3181,7 @@ export default function Dashboard() {
                     onChange={(e) => setSeguimientoPeso(e.target.value)}
                     placeholder="75.5" 
                     step="0.1"
-                    className="input-compact"
+                    className="input-modern"
                   />
                 </div>
                 <div>
@@ -3192,7 +3192,7 @@ export default function Dashboard() {
                     onChange={(e) => setSeguimientoCintura(e.target.value)}
                     placeholder="85" 
                     step="0.1"
-                    className="input-compact"
+                    className="input-modern"
                   />
                 </div>
                 <div>
@@ -3201,15 +3201,15 @@ export default function Dashboard() {
                     value={seguimientoNotas}
                     onChange={(e) => setSeguimientoNotas(e.target.value)}
                     placeholder="Observaciones del día..." 
-                    className="input-compact"
+                    className="input-modern"
                     rows={3}
                   />
                 </div>
                 <div className="flex gap-3">
-                  <button onClick={closeModal} className="btn-elegant btn-secondary flex-1">
+                  <button onClick={closeModal} className="btn-modern btn-secondary flex-1">
                     Cancelar
                   </button>
-                  <button onClick={saveSeguimiento} className="btn-elegant btn-primary flex-1">
+                  <button onClick={saveSeguimiento} className="btn-modern btn-primary flex-1">
                     💾 Guardar
                   </button>
                 </div>
@@ -3311,7 +3311,7 @@ export default function Dashboard() {
             </div>
             
             <div className="flex gap-2 md:gap-3 flex-shrink-0 p-3 md:p-4 border-t border-gray-200">
-              <button onClick={closeModal} className="btn-elegant btn-secondary flex-1 text-sm md:text-base">
+              <button onClick={closeModal} className="btn-modern btn-secondary flex-1 text-sm md:text-base">
                 Cerrar
               </button>
               <button 
@@ -3319,7 +3319,7 @@ export default function Dashboard() {
                   closeModal();
                   openModal('workout');
                 }} 
-                className="btn-elegant btn-primary flex-1 text-sm md:text-base"
+                className="btn-modern btn-primary flex-1 text-sm md:text-base"
               >
                 🎯 Iniciar Entrenamiento
               </button>
