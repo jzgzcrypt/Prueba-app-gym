@@ -2402,12 +2402,12 @@ export default function Dashboard() {
       <ToastContainer />
       
       {/* Debug Info */}
-      <div className="fixed top-4 right-4 z-[70] bg-red-500 text-white p-2 rounded text-xs">
+      <div className="fixed top-4 right-4 z-[1200] bg-red-500 text-white p-2 rounded text-xs">
         Active Modal: {activeModal || 'null'}
       </div>
       
       {/* Test Button */}
-      <div className="fixed top-4 left-4 z-[70]">
+      <div className="fixed top-4 left-4 z-[1200]">
         <button 
           className="bg-green-500 text-white p-2 rounded text-xs"
           onClick={() => {
@@ -2613,7 +2613,7 @@ export default function Dashboard() {
 
       {/* Modals */}
       {activeModal === 'weight' && (
-        <div className="fixed inset-0 bg-red-500 bg-opacity-80 flex items-center justify-center p-4 z-[60]" onClick={closeModal}>
+        <div className="fixed inset-0 bg-red-500 bg-opacity-80 flex items-center justify-center p-4 z-[1100]" onClick={closeModal}>
           <div className="glass-card max-w-md w-full" onClick={(e) => e.stopPropagation()}>
             <div className="flex items-center justify-between mb-6">
               <h3 className="text-2xl font-bold text-gray-800">⚖️ Pesaje Diario</h3>
