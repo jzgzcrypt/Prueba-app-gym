@@ -217,7 +217,10 @@ export default function Dashboard() {
   };
 
   const openModal = (type: string) => {
+    console.log('🔍 Opening modal:', type);
+    console.log('🔍 Current activeModal:', activeModal);
     setActiveModal(type);
+    console.log('🔍 Modal state set to:', type);
   };
 
   const toggleSection = (section: 'info' | 'volumen') => {
@@ -2400,6 +2403,11 @@ export default function Dashboard() {
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50">
       <ToastContainer />
       
+      {/* Debug Info */}
+      <div className="fixed top-4 right-4 z-[70] bg-red-500 text-white p-2 rounded text-xs">
+        Active Modal: {activeModal || 'null'}
+      </div>
+      
       {/* Mobile Dashboard */}
       <div className="block md:hidden">
         {activeSection === 'today' && renderTodaySection()}
@@ -2593,7 +2601,7 @@ export default function Dashboard() {
 
       {/* Modals */}
       {activeModal === 'weight' && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 backdrop-blur-sm flex items-center justify-center p-4 z-50" onClick={closeModal}>
+        <div className="fixed inset-0 bg-black bg-opacity-50 backdrop-blur-sm flex items-center justify-center p-4 z-[60]" onClick={closeModal}>
           <div className="glass-card max-w-md w-full" onClick={(e) => e.stopPropagation()}>
             <div className="flex items-center justify-between mb-6">
               <h3 className="text-2xl font-bold text-gray-800">⚖️ Pesaje Diario</h3>
@@ -2643,7 +2651,7 @@ export default function Dashboard() {
       )}
 
       {activeModal === 'cardio' && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 backdrop-blur-sm flex items-center justify-center p-4 z-50" onClick={closeModal}>
+        <div className="fixed inset-0 bg-black bg-opacity-50 backdrop-blur-sm flex items-center justify-center p-4 z-[60]" onClick={closeModal}>
           <div className="glass-card max-w-md w-full" onClick={(e) => e.stopPropagation()}>
             <div className="flex items-center justify-between mb-6">
               <h3 className="text-2xl font-bold text-gray-800">🏃 Cardio</h3>
@@ -2685,7 +2693,7 @@ export default function Dashboard() {
       )}
 
       {activeModal === 'diet' && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 backdrop-blur-sm flex items-center justify-center p-4 z-50" onClick={closeModal}>
+        <div className="fixed inset-0 bg-black bg-opacity-50 backdrop-blur-sm flex items-center justify-center p-4 z-[60]" onClick={closeModal}>
           <div className="glass-card max-w-md w-full" onClick={(e) => e.stopPropagation()}>
             <div className="flex items-center justify-between mb-6">
               <h3 className="text-2xl font-bold text-gray-800">🥗 Dieta</h3>
@@ -2726,7 +2734,7 @@ export default function Dashboard() {
       )}
 
       {activeModal === 'neat' && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 backdrop-blur-sm flex items-center justify-center p-4 z-50" onClick={closeModal}>
+        <div className="fixed inset-0 bg-black bg-opacity-50 backdrop-blur-sm flex items-center justify-center p-4 z-[60]" onClick={closeModal}>
           <div className="glass-card max-w-md w-full" onClick={(e) => e.stopPropagation()}>
             <div className="flex items-center justify-between mb-6">
               <h3 className="text-2xl font-bold text-gray-800">🚶 NEAT</h3>
@@ -2883,7 +2891,7 @@ export default function Dashboard() {
       )}
 
       {activeModal === 'entreno-no-programado' && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 backdrop-blur-sm flex items-center justify-center p-4 z-50" onClick={closeModal}>
+        <div className="fixed inset-0 bg-black bg-opacity-50 backdrop-blur-sm flex items-center justify-center p-4 z-[60]" onClick={closeModal}>
           <div className="glass-card max-w-2xl w-full max-h-[90vh] flex flex-col" onClick={(e) => e.stopPropagation()}>
             <div className="flex items-center justify-between mb-6 flex-shrink-0">
               <h3 className="text-2xl font-bold text-gray-800">🎯 Entreno No Programado</h3>
@@ -3472,7 +3480,7 @@ export default function Dashboard() {
       )}
 
       {activeModal === 'seguimiento' && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 backdrop-blur-sm flex items-center justify-center p-4 z-50" onClick={closeModal}>
+        <div className="fixed inset-0 bg-black bg-opacity-50 backdrop-blur-sm flex items-center justify-center p-4 z-[60]" onClick={closeModal}>
           <div className="glass-card max-w-md w-full" onClick={(e) => e.stopPropagation()}>
             <div className="flex items-center justify-between mb-6">
               <h3 className="text-2xl font-bold text-gray-800">📊 Seguimiento Semanal</h3>
