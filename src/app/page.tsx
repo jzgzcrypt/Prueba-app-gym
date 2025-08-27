@@ -2408,17 +2408,74 @@ export default function Dashboard() {
       
       {/* Test Button */}
       <div className="fixed top-4 left-4 z-[1200]">
-        <button 
-          className="bg-green-500 text-white p-2 rounded text-xs"
-          onClick={() => {
-            console.log('🔍 TEST BUTTON CLICKED!');
-            alert('Test button works!');
-            setActiveModal('weight');
-          }}
-        >
-          TEST MODAL
-        </button>
+        <div className="space-y-2">
+          <button 
+            className="bg-green-500 text-white p-2 rounded text-xs block w-full"
+            onClick={() => {
+              console.log('🔍 TEST BUTTON CLICKED!');
+              alert('Test button works!');
+              setActiveModal('weight');
+            }}
+          >
+            TEST WEIGHT MODAL
+          </button>
+          <button 
+            className="bg-blue-500 text-white p-2 rounded text-xs block w-full"
+            onClick={() => {
+              console.log('🔍 SIMPLE TEST MODAL CLICKED!');
+              setActiveModal('test');
+            }}
+          >
+            SIMPLE TEST MODAL
+          </button>
+        </div>
       </div>
+      
+      {/* Simple Test Modal */}
+      {activeModal === 'test' && (
+        <div 
+          style={{
+            position: 'fixed',
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            backgroundColor: 'rgba(0,0,0,0.8)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            zIndex: 9999
+          }}
+          onClick={() => setActiveModal(null)}
+        >
+          <div 
+            style={{
+              backgroundColor: 'white',
+              padding: '20px',
+              borderRadius: '10px',
+              maxWidth: '400px',
+              width: '90%'
+            }}
+            onClick={(e) => e.stopPropagation()}
+          >
+            <h2>Test Modal</h2>
+            <p>This is a simple test modal with inline styles.</p>
+            <button 
+              onClick={() => setActiveModal(null)}
+              style={{
+                backgroundColor: '#ef4444',
+                color: 'white',
+                padding: '10px 20px',
+                border: 'none',
+                borderRadius: '5px',
+                cursor: 'pointer'
+              }}
+            >
+              Close
+            </button>
+          </div>
+        </div>
+      )}
       
       {/* Mobile Dashboard */}
       <div className="block md:hidden">
