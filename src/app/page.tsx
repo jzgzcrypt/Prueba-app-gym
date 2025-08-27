@@ -1039,40 +1039,40 @@ export default function Dashboard() {
         <div className="activity-card cursor-pointer" onClick={() => openModal('weight')}>
           <div className="flex items-center justify-between">
             <div className="flex items-center">
-              <div className="w-14 h-14 bg-white bg-opacity-20 rounded-full flex items-center justify-center mr-4 shadow-lg">
+              <div className="w-14 h-14 bg-blue-100 rounded-full flex items-center justify-center mr-4 shadow-lg">
                 <span className="text-2xl">⚖️</span>
               </div>
               <div>
-                <h3 className="font-bold text-lg">Pesaje Diario</h3>
-                <p className="text-sm text-white text-opacity-80">Registra tu peso de hoy</p>
+                <h3 className="font-bold text-lg text-gray-800">Pesaje Diario</h3>
+                <p className="text-sm text-gray-600">Registra tu peso de hoy</p>
               </div>
             </div>
             <div className="text-right">
-              <div className={`text-sm font-semibold ${getStatus('weight') === 'Completado' ? 'text-green-200' : 'text-yellow-200'}`}>
+              <div className={`text-sm font-semibold ${getStatus('weight') === 'Completado' ? 'text-green-600' : 'text-orange-600'}`}>
                 {getStatus('weight')}
               </div>
-              <div className="text-xs text-white text-opacity-60">Toca para registrar</div>
+              <div className="text-xs text-gray-500">Toca para registrar</div>
             </div>
           </div>
         </div>
         
         {/* Workout Entry */}
-        <div className="activity-card success cursor-pointer" onClick={() => openModal('workout')}>
+        <div className="activity-card cursor-pointer" onClick={() => openModal('workout')}>
           <div className="flex items-center justify-between">
             <div className="flex items-center">
-              <div className="w-14 h-14 bg-white bg-opacity-20 rounded-full flex items-center justify-center mr-4 shadow-lg">
+              <div className="w-14 h-14 bg-green-100 rounded-full flex items-center justify-center mr-4 shadow-lg">
                 <span className="text-2xl">🏋️</span>
               </div>
               <div>
-                <h3 className="font-bold text-lg">Entrenamiento</h3>
-                <p className="text-sm text-white text-opacity-80">Completa tu rutina de hoy</p>
+                <h3 className="font-bold text-lg text-gray-800">Entrenamiento</h3>
+                <p className="text-sm text-gray-600">Completa tu rutina de hoy</p>
               </div>
             </div>
             <div className="text-right">
-              <div className={`text-sm font-semibold ${getStatus('workout') === 'Completado' ? 'text-green-200' : 'text-yellow-200'}`}>
+              <div className={`text-sm font-semibold ${getStatus('workout') === 'Completado' ? 'text-green-600' : 'text-orange-600'}`}>
                 {getStatus('workout')}
               </div>
-              <div className="text-xs text-white text-opacity-60">Toca para entrenar</div>
+              <div className="text-xs text-gray-500">Toca para entrenar</div>
             </div>
           </div>
         </div>

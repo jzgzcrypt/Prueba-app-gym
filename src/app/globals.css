@@ -191,11 +191,12 @@ body {
 
 /* Activity Cards */
 .activity-card {
-  background: linear-gradient(135deg, var(--accent-500), var(--accent-600));
+  background: linear-gradient(135deg, var(--gray-100), var(--gray-200));
+  border: 2px solid var(--gray-300);
   border-radius: 16px;
   padding: 20px;
-  color: white;
-  box-shadow: 0 4px 16px rgba(14, 165, 233, 0.2);
+  color: var(--gray-800);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
   transition: all 0.15s ease;
   position: relative;
   overflow: hidden;
