@@ -2661,6 +2661,156 @@ export default function Dashboard() {
                 </div>
               </div>
             </div>
+            
+            {/* Desktop Activities */}
+            <div className="glass-card">
+              <h2 className="text-2xl font-bold mb-6 text-center text-gray-800">🎯 Actividades de Hoy</h2>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                {/* Weight Entry */}
+                <div className="activity-card cursor-pointer" onClick={() => {
+                  console.log('🔍 DEBUG: Desktop Weight card clicked!');
+                  openModal('weight');
+                }}>
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center">
+                      <div className="w-16 h-16 bg-gradient-to-r from-blue-500 to-blue-600 rounded-2xl flex items-center justify-center text-white text-2xl shadow-lg">
+                        ⚖️
+                      </div>
+                      <div className="ml-4">
+                        <h3 className="font-semibold text-lg text-gray-900">Pesaje Diario</h3>
+                        <p className="text-sm text-gray-600">Registra tu peso de hoy</p>
+                      </div>
+                    </div>
+                    <div className="text-right">
+                      <div className={`text-sm font-semibold ${getStatus('weight') === 'Completado' ? 'text-green-600' : 'text-blue-600'}`}>
+                        {getStatus('weight')}
+                      </div>
+                      <div className="w-3 h-3 rounded-full ${getStatus('weight') === 'Completado' ? 'bg-green-500' : 'bg-gray-300'} mt-1"></div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Workout Entry */}
+                <div className="activity-card cursor-pointer" onClick={() => {
+                  console.log('🔍 DEBUG: Desktop Workout card clicked!');
+                  openModal('workout');
+                }}>
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center">
+                      <div className="w-16 h-16 bg-gradient-to-r from-green-500 to-green-600 rounded-2xl flex items-center justify-center text-white text-2xl shadow-lg">
+                        🏋️
+                      </div>
+                      <div className="ml-4">
+                        <h3 className="font-semibold text-lg text-gray-900">Entrenamiento</h3>
+                        <p className="text-sm text-gray-600">Completa tu rutina de hoy</p>
+                      </div>
+                    </div>
+                    <div className="text-right">
+                      <div className={`text-sm font-semibold ${getStatus('workout') === 'Completado' ? 'text-green-600' : 'text-blue-600'}`}>
+                        {getStatus('workout')}
+                      </div>
+                      <div className="w-3 h-3 rounded-full ${getStatus('workout') === 'Completado' ? 'bg-green-500' : 'bg-gray-300'} mt-1"></div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Cardio Entry */}
+                <div className="activity-card cursor-pointer" onClick={() => {
+                  console.log('🔍 DEBUG: Desktop Cardio card clicked!');
+                  openModal('cardio');
+                }}>
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center">
+                      <div className="w-16 h-16 bg-gradient-to-r from-red-500 to-red-600 rounded-2xl flex items-center justify-center text-white text-2xl shadow-lg">
+                        🏃
+                      </div>
+                      <div className="ml-4">
+                        <h3 className="font-semibold text-lg text-gray-900">Cardio</h3>
+                        <p className="text-sm text-gray-600">Actividad cardiovascular</p>
+                      </div>
+                    </div>
+                    <div className="text-right">
+                      <div className={`text-sm font-semibold ${getStatus('cardio') === 'Completado' ? 'text-green-600' : 'text-blue-600'}`}>
+                        {getStatus('cardio')}
+                      </div>
+                      <div className="w-3 h-3 rounded-full ${getStatus('cardio') === 'Completado' ? 'bg-green-500' : 'bg-gray-300'} mt-1"></div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Diet Entry */}
+                <div className="activity-card cursor-pointer" onClick={() => {
+                  console.log('🔍 DEBUG: Desktop Diet card clicked!');
+                  openModal('diet');
+                }}>
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center">
+                      <div className="w-16 h-16 bg-gradient-to-r from-orange-500 to-orange-600 rounded-2xl flex items-center justify-center text-white text-2xl shadow-lg">
+                        🍎
+                      </div>
+                      <div className="ml-4">
+                        <h3 className="font-semibold text-lg text-gray-900">Dieta</h3>
+                        <p className="text-sm text-gray-600">Registra tu alimentación</p>
+                      </div>
+                    </div>
+                    <div className="text-right">
+                      <div className={`text-sm font-semibold ${getStatus('diet') === 'Completado' ? 'text-green-600' : 'text-blue-600'}`}>
+                        {getStatus('diet')}
+                      </div>
+                      <div className="w-3 h-3 rounded-full ${getStatus('diet') === 'Completado' ? 'bg-green-500' : 'bg-gray-300'} mt-1"></div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* NEAT Entry */}
+                <div className="activity-card cursor-pointer" onClick={() => {
+                  console.log('🔍 DEBUG: Desktop NEAT card clicked!');
+                  openModal('neat');
+                }}>
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center">
+                      <div className="w-16 h-16 bg-gradient-to-r from-purple-500 to-purple-600 rounded-2xl flex items-center justify-center text-white text-2xl shadow-lg">
+                        🚶
+                      </div>
+                      <div className="ml-4">
+                        <h3 className="font-semibold text-lg text-gray-900">NEAT</h3>
+                        <p className="text-sm text-gray-600">Actividad física adicional</p>
+                      </div>
+                    </div>
+                    <div className="text-right">
+                      <div className={`text-sm font-semibold ${getStatus('neat') === 'Completado' ? 'text-green-600' : 'text-blue-600'}`}>
+                        {getStatus('neat')}
+                      </div>
+                      <div className="w-3 h-3 rounded-full ${getStatus('neat') === 'Completado' ? 'bg-green-500' : 'bg-gray-300'} mt-1"></div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Entreno No Programado Entry */}
+                <div className="activity-card cursor-pointer" onClick={() => {
+                  console.log('🔍 DEBUG: Desktop Extra workout card clicked!');
+                  openModal('entreno-no-programado');
+                }}>
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center">
+                      <div className="w-16 h-16 bg-gradient-to-r from-yellow-500 to-yellow-600 rounded-2xl flex items-center justify-center text-white text-2xl shadow-lg">
+                        ⚡
+                      </div>
+                      <div className="ml-4">
+                        <h3 className="font-semibold text-lg text-gray-900">Actividad Extra</h3>
+                        <p className="text-sm text-gray-600">Entrenamientos adicionales</p>
+                      </div>
+                    </div>
+                    <div className="text-right">
+                      <div className={`text-sm font-semibold ${getStatus('entrenoNoProgramado') === 'Completado' ? 'text-green-600' : 'text-blue-600'}`}>
+                        {getStatus('entrenoNoProgramado')}
+                      </div>
+                      <div className="w-3 h-3 rounded-full ${getStatus('entrenoNoProgramado') === 'Completado' ? 'bg-green-500' : 'bg-gray-300'} mt-1"></div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       </div>
