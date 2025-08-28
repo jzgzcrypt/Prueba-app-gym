@@ -2325,8 +2325,29 @@ export default function Dashboard() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50">
+    <div className="dashboard-container">
       <ToastContainer />
+      
+      {/* Modern Dashboard Header */}
+      <div className="dashboard-header">
+        <div className="max-w-7xl mx-auto px-4">
+          <div className="flex items-center justify-between">
+            <div>
+              <h1 className="text-2xl font-bold text-gray-900">💪 Gym Dashboard</h1>
+              <p className="text-sm text-gray-600">Seguimiento de entrenamiento y progreso</p>
+            </div>
+            <div className="flex items-center space-x-3">
+              <div className="text-right">
+                <div className="text-sm font-medium text-gray-900">Día {getCurrentMesocicloDay()?.dia?.dia || 'N/A'}</div>
+                <div className="text-xs text-gray-500">{getCurrentMesocicloDay()?.dia?.entrenamiento || 'Descanso'}</div>
+              </div>
+              <div className="w-12 h-12 bg-gradient-to-r from-blue-500 to-blue-600 rounded-full flex items-center justify-center text-white font-bold">
+                {Math.round(calculateTodayAdherence())}%
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
       
 
       
