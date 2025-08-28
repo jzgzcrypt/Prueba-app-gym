@@ -208,7 +208,9 @@ export default function Dashboard() {
   };
 
   const openModal = (type: string) => {
+    console.log('🔍 DEBUG: Opening modal:', type);
     setActiveModal(type);
+    console.log('🔍 DEBUG: Modal state set to:', type);
   };
 
   const toggleSection = (section: 'info' | 'volumen') => {
@@ -303,18 +305,22 @@ export default function Dashboard() {
   };
 
   const saveWeight = () => {
+    console.log('🔍 DEBUG: saveWeight called with weightInput:', weightInput);
     const weight = parseFloat(weightInput);
     if (!weight || weight <= 0) {
+      console.log('🔍 DEBUG: Invalid weight:', weight);
       showToast('⚠️ Ingresa un peso válido', 'error');
       return;
     }
 
     const fecha = todayISO();
+    console.log('🔍 DEBUG: Saving weight:', weight, 'for date:', fecha);
     const newEstado = estado.filter(e => e.fecha !== fecha);
     newEstado.push({ fecha, peso: weight, cintura: null });
     newEstado.sort((a, b) => new Date(a.fecha).getTime() - new Date(b.fecha).getTime());
     
     setEstado(newEstado);
+    console.log('🔍 DEBUG: Estado updated, showing toast');
     showToast(`✅ Peso guardado: ${weight} kg`);
     closeModal();
   };
@@ -322,18 +328,21 @@ export default function Dashboard() {
 
 
   const saveCardio = () => {
+    console.log('🔍 DEBUG: saveCardio called with km:', cardioKm, 'time:', cardioTime);
     const km = parseFloat(cardioKm);
     const time = parseInt(cardioTime);
     
     if (!km || !time || km <= 0 || time <= 0) {
+      console.log('🔍 DEBUG: Invalid cardio values:', { km, time });
       showToast('⚠️ Ingresa valores válidos', 'error');
       return;
     }
 
-    // Obtener cardio del mesociclo para hoy
-    const cardioMesociclo = currentData.dia.cardio;
+    // Obtener cardio del mesociclo para hoy (con fallback seguro)
+    const cardioMesociclo = currentData?.dia?.cardio || {};
 
     const fecha = todayISO();
+    console.log('🔍 DEBUG: Saving cardio for date:', fecha);
     const newCardio = cardio.filter(c => c.fecha !== fecha);
     newCardio.push({
       fecha,
@@ -353,6 +362,7 @@ export default function Dashboard() {
 
     setCardio(newCardio);
     setAdherenciaDiaria(newAdherencia);
+    console.log('🔍 DEBUG: Cardio saved, showing toast');
     showToast(`✅ Cardio guardado: ${km}km en ${time}min (${cardioMesociclo?.tipo || 'Cardio'})`);
     closeModal();
   };
@@ -2327,6 +2337,11 @@ export default function Dashboard() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50">
       <ToastContainer />
+      
+      {/* DEBUG: Modal State Indicator */}
+      <div className="fixed top-4 right-4 z-[1200] bg-red-500 text-white p-2 rounded text-xs">
+        Active Modal: {activeModal || 'null'}
+      </div>
       
 
       
