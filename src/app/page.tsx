@@ -2449,6 +2449,73 @@ export default function Dashboard() {
         Active Modal: {activeModal || 'null'}
       </div>
       
+      {/* Modals - Moved to top for testing */}
+      {activeModal === 'weight' && (
+        <div className="fixed inset-0 bg-black bg-opacity-80 flex items-center justify-center p-4 z-[9999]" onClick={closeModal}>
+          <div className="bg-white rounded-2xl max-w-md w-full p-6" onClick={(e) => e.stopPropagation()}>
+            <div className="flex items-center justify-between mb-6">
+              <h3 className="text-2xl font-bold text-gray-800">⚖️ Pesaje Diario</h3>
+              <button className="w-8 h-8 bg-gray-100 rounded-full flex items-center justify-center hover:bg-gray-200 transition-colors" onClick={closeModal}>×</button>
+            </div>
+            <div className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium mb-2 text-gray-700">Peso (kg)</label>
+                <input 
+                  type="number" 
+                  value={weightInput}
+                  onChange={(e) => setWeightInput(e.target.value)}
+                  step="0.1" 
+                  placeholder="85.0" 
+                  className="w-full p-3 border border-gray-300 rounded-lg"
+                />
+              </div>
+              <div className="flex gap-3 pt-4">
+                <button onClick={closeModal} className="flex-1 py-3 px-4 bg-gray-200 text-gray-800 rounded-lg hover:bg-gray-300">
+                  Cancelar
+                </button>
+                <button onClick={saveWeight} className="flex-1 py-3 px-4 bg-blue-600 text-white rounded-lg hover:bg-blue-700">
+                  💾 Guardar
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+      
+      {activeModal === 'test-simple' && (
+        <div className="fixed inset-0 bg-black bg-opacity-80 flex items-center justify-center p-4 z-[9999]" onClick={closeModal}>
+          <div className="bg-white rounded-2xl max-w-md w-full p-6" onClick={(e) => e.stopPropagation()}>
+            <h2 className="text-xl font-bold mb-4">Test Modal</h2>
+            <p className="mb-4">Este es un modal de prueba simple.</p>
+            <button onClick={closeModal} className="w-full py-3 px-4 bg-red-600 text-white rounded-lg hover:bg-red-700">
+              Cerrar
+            </button>
+          </div>
+        </div>
+      )}
+      
+      {/* TEST BUTTONS */}
+      <div className="fixed top-20 right-4 z-[1200] space-y-2">
+        <button 
+          onClick={() => {
+            console.log('🔍 TEST: Opening weight modal');
+            openModal('weight');
+          }}
+          className="block w-full bg-green-500 text-white p-2 rounded text-sm hover:bg-green-600"
+        >
+          TEST Weight Modal
+        </button>
+        <button 
+          onClick={() => {
+            console.log('🔍 TEST: Opening test-simple modal');
+            openModal('test-simple');
+          }}
+          className="block w-full bg-blue-500 text-white p-2 rounded text-sm hover:bg-blue-600"
+        >
+          TEST Simple Modal
+        </button>
+      </div>
+
       {/* Modern Dashboard Header */}
       <div className="dashboard-header">
         <div className="max-w-7xl mx-auto px-4">
