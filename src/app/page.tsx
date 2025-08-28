@@ -85,8 +85,11 @@ export default function Dashboard() {
   const [weightInput, setWeightInput] = useState('');
   const [cardioKm, setCardioKm] = useState('');
   const [cardioTime, setCardioTime] = useState('');
+  const [cardioTipo, setCardioTipo] = useState('Correr');
   const [dietCalories, setDietCalories] = useState('');
   const [dietProtein, setDietProtein] = useState('');
+  const [dietAdherence, setDietAdherence] = useState('');
+  const [dietNotes, setDietNotes] = useState('');
   
   // NEAT form states
   const [neatTipo, setNeatTipo] = useState<'pasos' | 'cinta'>('pasos');
@@ -2529,6 +2532,184 @@ export default function Dashboard() {
         </div>
       )}
       
+      {/* Modal de Cardio */}
+      {activeModal === 'cardio' && (
+        <div 
+          className="fixed top-0 left-0 w-full h-full bg-black bg-opacity-50 flex items-center justify-center z-[10000]" 
+          onClick={closeModal}
+          style={{
+            position: 'fixed',
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            backgroundColor: 'rgba(0, 0, 0, 0.5)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            zIndex: 10000
+          }}
+        >
+          <div 
+            className="bg-white rounded-xl max-w-md w-full mx-4 p-6 shadow-2xl" 
+            onClick={(e) => e.stopPropagation()}
+            style={{
+              backgroundColor: 'white',
+              borderRadius: '12px',
+              padding: '24px',
+              maxWidth: '400px',
+              width: '90%',
+              margin: '0 16px',
+              boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.25)'
+            }}
+          >
+            <div className="flex items-center justify-between mb-6">
+              <h3 className="text-2xl font-bold text-gray-800">🏃 Registro de Cardio</h3>
+              <button 
+                className="w-8 h-8 bg-gray-100 rounded-full flex items-center justify-center hover:bg-gray-200 transition-colors text-gray-600 font-bold text-lg" 
+                onClick={closeModal}
+              >
+                ×
+              </button>
+            </div>
+            <div className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium mb-2 text-gray-700">Tipo de Cardio</label>
+                <select 
+                  value={cardioTipo}
+                  onChange={(e) => setCardioTipo(e.target.value)}
+                  className="w-full p-3 border-2 border-gray-300 rounded-lg focus:border-blue-500 focus:outline-none"
+                >
+                  <option value="Correr">🏃 Correr</option>
+                  <option value="Bicicleta">🚴 Bicicleta</option>
+                  <option value="Caminar">🚶 Caminar</option>
+                  <option value="Natación">🏊 Natación</option>
+                </select>
+              </div>
+              <div>
+                <label className="block text-sm font-medium mb-2 text-gray-700">Duración (minutos)</label>
+                <input 
+                  type="number" 
+                  value={cardioTime}
+                  onChange={(e) => setCardioTime(e.target.value)}
+                  placeholder="30" 
+                  className="w-full p-3 border-2 border-gray-300 rounded-lg focus:border-blue-500 focus:outline-none text-lg"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium mb-2 text-gray-700">Distancia (km) - Opcional</label>
+                <input 
+                  type="number" 
+                  value={cardioKm}
+                  onChange={(e) => setCardioKm(e.target.value)}
+                  step="0.1"
+                  placeholder="5.0" 
+                  className="w-full p-3 border-2 border-gray-300 rounded-lg focus:border-blue-500 focus:outline-none text-lg"
+                />
+              </div>
+              <div className="flex gap-3 pt-4">
+                <button 
+                  onClick={closeModal} 
+                  className="flex-1 py-3 px-4 bg-gray-200 text-gray-800 rounded-lg hover:bg-gray-300 transition-colors font-medium"
+                >
+                  Cancelar
+                </button>
+                <button 
+                  onClick={saveCardio} 
+                  className="flex-1 py-3 px-4 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors font-medium"
+                >
+                  🏃 Guardar
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+      
+      {/* Modal de Dieta */}
+      {activeModal === 'diet' && (
+        <div 
+          className="fixed top-0 left-0 w-full h-full bg-black bg-opacity-50 flex items-center justify-center z-[10000]" 
+          onClick={closeModal}
+          style={{
+            position: 'fixed',
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            backgroundColor: 'rgba(0, 0, 0, 0.5)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            zIndex: 10000
+          }}
+        >
+          <div 
+            className="bg-white rounded-xl max-w-md w-full mx-4 p-6 shadow-2xl" 
+            onClick={(e) => e.stopPropagation()}
+            style={{
+              backgroundColor: 'white',
+              borderRadius: '12px',
+              padding: '24px',
+              maxWidth: '400px',
+              width: '90%',
+              margin: '0 16px',
+              boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.25)'
+            }}
+          >
+            <div className="flex items-center justify-between mb-6">
+              <h3 className="text-2xl font-bold text-gray-800">🍎 Registro de Dieta</h3>
+              <button 
+                className="w-8 h-8 bg-gray-100 rounded-full flex items-center justify-center hover:bg-gray-200 transition-colors text-gray-600 font-bold text-lg" 
+                onClick={closeModal}
+              >
+                ×
+              </button>
+            </div>
+            <div className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium mb-2 text-gray-700">Adherencia a la Dieta</label>
+                <select 
+                  value={dietAdherence}
+                  onChange={(e) => setDietAdherence(e.target.value)}
+                  className="w-full p-3 border-2 border-gray-300 rounded-lg focus:border-blue-500 focus:outline-none"
+                >
+                  <option value="">Seleccionar...</option>
+                  <option value="100">✅ Perfecta (100%)</option>
+                  <option value="75">😊 Buena (75%)</option>
+                  <option value="50">😐 Regular (50%)</option>
+                  <option value="25">😔 Mala (25%)</option>
+                </select>
+              </div>
+              <div>
+                <label className="block text-sm font-medium mb-2 text-gray-700">Notas (opcional)</label>
+                <textarea 
+                  value={dietNotes}
+                  onChange={(e) => setDietNotes(e.target.value)}
+                  placeholder="Comí fuera de plan, antojos, etc..." 
+                  rows={3}
+                  className="w-full p-3 border-2 border-gray-300 rounded-lg focus:border-blue-500 focus:outline-none resize-none"
+                />
+              </div>
+              <div className="flex gap-3 pt-4">
+                <button 
+                  onClick={closeModal} 
+                  className="flex-1 py-3 px-4 bg-gray-200 text-gray-800 rounded-lg hover:bg-gray-300 transition-colors font-medium"
+                >
+                  Cancelar
+                </button>
+                <button 
+                  onClick={saveDiet} 
+                  className="flex-1 py-3 px-4 bg-orange-600 text-white rounded-lg hover:bg-orange-700 transition-colors font-medium"
+                >
+                  🍎 Guardar
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+      
       {activeModal === 'test-simple' && (
         <div 
           className="fixed top-0 left-0 w-full h-full bg-black bg-opacity-50 flex items-center justify-center z-[10000]" 
@@ -2572,24 +2753,51 @@ export default function Dashboard() {
       )}
       
       {/* TEST BUTTONS */}
-      <div className="fixed top-20 right-4 z-[1200] space-y-2">
+      <div className="fixed top-20 right-4 z-[1200] space-y-1">
         <button 
           onClick={() => {
             console.log('🔍 TEST: Opening weight modal');
             openModal('weight');
           }}
-          className="block w-full bg-green-500 text-white p-2 rounded text-sm hover:bg-green-600"
+          className="block w-full bg-blue-500 text-white p-2 rounded text-xs hover:bg-blue-600"
         >
-          TEST Weight Modal
+          ⚖️ Weight
+        </button>
+        <button 
+          onClick={() => {
+            console.log('🔍 TEST: Opening cardio modal');
+            openModal('cardio');
+          }}
+          className="block w-full bg-green-500 text-white p-2 rounded text-xs hover:bg-green-600"
+        >
+          🏃 Cardio
+        </button>
+        <button 
+          onClick={() => {
+            console.log('🔍 TEST: Opening diet modal');
+            openModal('diet');
+          }}
+          className="block w-full bg-orange-500 text-white p-2 rounded text-xs hover:bg-orange-600"
+        >
+          🍎 Diet
+        </button>
+        <button 
+          onClick={() => {
+            console.log('🔍 TEST: Opening workout modal');
+            openModal('workout');
+          }}
+          className="block w-full bg-purple-500 text-white p-2 rounded text-xs hover:bg-purple-600"
+        >
+          🏋️ Workout
         </button>
         <button 
           onClick={() => {
             console.log('🔍 TEST: Opening test-simple modal');
             openModal('test-simple');
           }}
-          className="block w-full bg-blue-500 text-white p-2 rounded text-sm hover:bg-blue-600"
+          className="block w-full bg-gray-500 text-white p-2 rounded text-xs hover:bg-gray-600"
         >
-          TEST Simple Modal
+          🧪 Test
         </button>
       </div>
 
