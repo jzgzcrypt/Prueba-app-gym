@@ -208,7 +208,10 @@ export default function Dashboard() {
   };
 
   const openModal = (type: string) => {
+    console.log('🔍 DEBUG: openModal called with type:', type);
+    console.log('🔍 DEBUG: Current activeModal before:', activeModal);
     setActiveModal(type);
+    console.log('🔍 DEBUG: activeModal should now be:', type);
   };
 
   const toggleSection = (section: 'info' | 'volumen') => {
@@ -926,7 +929,10 @@ export default function Dashboard() {
       
       <div className="activity-grid mb-8">
         {/* Weight Entry */}
-        <div className="activity-card cursor-pointer" onClick={() => openModal('weight')}>
+        <div className="activity-card cursor-pointer" onClick={() => {
+          console.log('🔍 DEBUG: Weight card clicked!');
+          openModal('weight');
+        }}>
           <div className="flex items-center justify-between">
             <div className="flex items-center">
               <div className="w-16 h-16 bg-gradient-to-r from-blue-500 to-blue-600 rounded-2xl flex items-center justify-center text-white text-2xl shadow-lg">
@@ -2437,6 +2443,11 @@ export default function Dashboard() {
   return (
     <div className="dashboard-container">
       <ToastContainer />
+      
+      {/* DEBUG: Modal State Indicator */}
+      <div className="fixed top-4 right-4 z-[1200] bg-red-500 text-white p-2 rounded text-xs">
+        Active Modal: {activeModal || 'null'}
+      </div>
       
       {/* Modern Dashboard Header */}
       <div className="dashboard-header">
