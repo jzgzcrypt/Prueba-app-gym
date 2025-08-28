@@ -78,7 +78,7 @@ export default function Dashboard() {
    */
   useEffect(() => {
     // Inicialización simple
-    console.log('🔍 App initialized');
+    // App initialized
   }, []);
 
   // Form states
@@ -208,10 +208,7 @@ export default function Dashboard() {
   };
 
   const openModal = (type: string) => {
-    console.log('🔍 Opening modal:', type);
-    console.log('🔍 Current activeModal:', activeModal);
     setActiveModal(type);
-    console.log('🔍 Modal state set to:', type);
   };
 
   const toggleSection = (section: 'info' | 'volumen') => {
@@ -1068,7 +1065,7 @@ export default function Dashboard() {
         
         {/* Weight Entry */}
         <div className="activity-card cursor-pointer" onClick={() => {
-          console.log('🔍 Weight button clicked!');
+
           openModal('weight');
         }}>
           <div className="flex items-center justify-between">
@@ -2315,73 +2312,7 @@ export default function Dashboard() {
               <p><strong>Día del mesociclo:</strong> {getCurrentMesocicloDay()?.dia?.dia || 'N/A'}</p>
               <p><strong>Entrenamiento:</strong> {getCurrentMesocicloDay()?.dia?.entrenamiento || 'N/A'}</p>
             </div>
-            
-            <div className="grid grid-cols-2 gap-2">
-              <button 
-                onClick={() => {
-                  // Simular día 27
-                  const testDate = new Date('2025-01-27');
-                  const result = testMesocicloTracking(testDate);
-                  console.log('🧪 Test día 27:', result);
-                  showToast('🧪 Test día 27 ejecutado - ver consola');
-                }}
-                className="bg-blue-500 text-white py-2 px-3 rounded text-sm hover:bg-blue-600 transition-colors"
-              >
-                Test Día 27
-              </button>
-              
-              <button 
-                onClick={() => {
-                  // Simular día 28
-                  const testDate = new Date('2025-01-28');
-                  const result = testMesocicloTracking(testDate);
-                  console.log('🧪 Test día 28:', result);
-                  showToast('🧪 Test día 28 ejecutado - ver consola');
-                }}
-                className="bg-green-500 text-white py-2 px-3 rounded text-sm hover:bg-green-600 transition-colors"
-              >
-                Test Día 28
-              </button>
-              
-              <button 
-                onClick={() => {
-                  // Simular día 31
-                  const testDate = new Date('2025-01-31');
-                  const result = testMesocicloTracking(testDate);
-                  console.log('🧪 Test día 31:', result);
-                  showToast('🧪 Test día 31 ejecutado - ver consola');
-                }}
-                className="bg-purple-500 text-white py-2 px-3 rounded text-sm hover:bg-purple-600 transition-colors"
-              >
-                Test Día 31
-              </button>
-              
-              <button 
-                onClick={() => {
-                  // Simular día extra de descanso
-                  const testDate = new Date('2025-02-01');
-                  const result = testMesocicloTracking(testDate);
-                  console.log('🧪 Test día extra:', result);
-                  showToast('🧪 Test día extra ejecutado - ver consola');
-                }}
-                className="bg-orange-500 text-white py-2 px-3 rounded text-sm hover:bg-orange-600 transition-colors"
-              >
-                Test Día Extra
-              </button>
-            </div>
-            
-            <button 
-              onClick={() => {
-                // Mostrar información completa del mesociclo
-                const currentDay = getCurrentMesocicloDay();
-                const testResult = testMesocicloTracking();
-                console.log('📊 Información completa:', { currentDay, testResult });
-                showToast('📊 Info completa en consola');
-              }}
-              className="w-full bg-gray-600 text-white py-2 px-3 rounded text-sm hover:bg-gray-700 transition-colors"
-            >
-              📊 Mostrar Info Completa
-            </button>
+
           </div>
         </div>
       </div>
@@ -2389,93 +2320,15 @@ export default function Dashboard() {
   );
 
   // Mostrar loading mientras se inicializa
-  console.log('🔍 Current isLoading state:', isLoading);
   if (isLoading) {
-    console.log('🔍 Showing LoadingFallback');
     return <LoadingFallback />;
   }
-  
-  console.log('🔍 Rendering main app');
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50">
       <ToastContainer />
       
-      {/* Debug Info */}
-      <div className="fixed top-4 right-4 z-[1200] bg-red-500 text-white p-2 rounded text-xs">
-        Active Modal: {activeModal || 'null'}
-      </div>
-      
-      {/* Test Button */}
-      <div className="fixed top-4 left-4 z-[1200]">
-        <div className="space-y-2">
-          <button 
-            className="bg-green-500 text-white p-2 rounded text-xs block w-full"
-            onClick={() => {
-              console.log('🔍 TEST BUTTON CLICKED!');
-              alert('Test button works!');
-              setActiveModal('weight');
-            }}
-          >
-            TEST WEIGHT MODAL
-          </button>
-          <button 
-            className="bg-blue-500 text-white p-2 rounded text-xs block w-full"
-            onClick={() => {
-              console.log('🔍 SIMPLE TEST MODAL CLICKED!');
-              setActiveModal('test');
-            }}
-          >
-            SIMPLE TEST MODAL
-          </button>
-        </div>
-      </div>
-      
-      {/* Simple Test Modal */}
-      {activeModal === 'test' && (
-        <div 
-          style={{
-            position: 'fixed',
-            top: 0,
-            left: 0,
-            right: 0,
-            bottom: 0,
-            backgroundColor: 'rgba(0,0,0,0.8)',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            zIndex: 9999
-          }}
-          onClick={() => setActiveModal(null)}
-        >
-          <div 
-            style={{
-              backgroundColor: 'white',
-              padding: '20px',
-              borderRadius: '10px',
-              maxWidth: '400px',
-              width: '90%'
-            }}
-            onClick={(e) => e.stopPropagation()}
-          >
-            <h2>Test Modal</h2>
-            <p>This is a simple test modal with inline styles.</p>
-            <button 
-              onClick={() => setActiveModal(null)}
-              style={{
-                backgroundColor: '#ef4444',
-                color: 'white',
-                padding: '10px 20px',
-                border: 'none',
-                borderRadius: '5px',
-                cursor: 'pointer'
-              }}
-            >
-              Close
-            </button>
-          </div>
-        </div>
-      )}
+
       
       {/* Mobile Dashboard */}
       <div className="block md:hidden">
