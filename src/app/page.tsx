@@ -2710,6 +2710,317 @@ export default function Dashboard() {
         </div>
       )}
       
+      {/* Modal de NEAT */}
+      {activeModal === 'neat' && (
+        <div 
+          className="fixed top-0 left-0 w-full h-full bg-black bg-opacity-50 flex items-center justify-center z-[10000]" 
+          onClick={closeModal}
+          style={{
+            position: 'fixed',
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            backgroundColor: 'rgba(0, 0, 0, 0.5)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            zIndex: 10000
+          }}
+        >
+          <div 
+            className="bg-white rounded-xl max-w-md w-full mx-4 p-6 shadow-2xl" 
+            onClick={(e) => e.stopPropagation()}
+            style={{
+              backgroundColor: 'white',
+              borderRadius: '12px',
+              padding: '24px',
+              maxWidth: '400px',
+              width: '90%',
+              margin: '0 16px',
+              boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.25)'
+            }}
+          >
+            <div className="flex items-center justify-between mb-6">
+              <h3 className="text-2xl font-bold text-gray-800">🚶 NEAT - Actividad Diaria</h3>
+              <button 
+                className="w-8 h-8 bg-gray-100 rounded-full flex items-center justify-center hover:bg-gray-200 transition-colors text-gray-600 font-bold text-lg" 
+                onClick={closeModal}
+              >
+                ×
+              </button>
+            </div>
+            <div className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium mb-2 text-gray-700">Tipo de Actividad</label>
+                <select 
+                  value={neatTipo}
+                  onChange={(e) => setNeatTipo(e.target.value as 'pasos' | 'cinta')}
+                  className="w-full p-3 border-2 border-gray-300 rounded-lg focus:border-blue-500 focus:outline-none"
+                >
+                  <option value="pasos">👣 Pasos del día</option>
+                  <option value="cinta">🏃 Cinta caminadora</option>
+                </select>
+              </div>
+              
+              {neatTipo === 'pasos' ? (
+                <div>
+                  <label className="block text-sm font-medium mb-2 text-gray-700">Pasos totales</label>
+                  <input 
+                    type="number" 
+                    value={neatPasos}
+                    onChange={(e) => setNeatPasos(e.target.value)}
+                    placeholder="10000" 
+                    className="w-full p-3 border-2 border-gray-300 rounded-lg focus:border-blue-500 focus:outline-none text-lg"
+                  />
+                </div>
+              ) : (
+                <>
+                  <div>
+                    <label className="block text-sm font-medium mb-2 text-gray-700">Duración (minutos)</label>
+                    <input 
+                      type="number" 
+                      value={neatDuracion}
+                      onChange={(e) => setNeatDuracion(e.target.value)}
+                      placeholder="30" 
+                      className="w-full p-3 border-2 border-gray-300 rounded-lg focus:border-blue-500 focus:outline-none text-lg"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium mb-2 text-gray-700">Distancia (km)</label>
+                    <input 
+                      type="number" 
+                      value={neatKm}
+                      onChange={(e) => setNeatKm(e.target.value)}
+                      step="0.1"
+                      placeholder="3.0" 
+                      className="w-full p-3 border-2 border-gray-300 rounded-lg focus:border-blue-500 focus:outline-none text-lg"
+                    />
+                  </div>
+                </>
+              )}
+              
+              <div className="flex gap-3 pt-4">
+                <button 
+                  onClick={closeModal} 
+                  className="flex-1 py-3 px-4 bg-gray-200 text-gray-800 rounded-lg hover:bg-gray-300 transition-colors font-medium"
+                >
+                  Cancelar
+                </button>
+                <button 
+                  onClick={saveNeat} 
+                  className="flex-1 py-3 px-4 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors font-medium"
+                >
+                  🚶 Guardar
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+      
+      {/* Modal de Entrenamiento No Programado */}
+      {activeModal === 'entreno-no-programado' && (
+        <div 
+          className="fixed top-0 left-0 w-full h-full bg-black bg-opacity-50 flex items-center justify-center z-[10000]" 
+          onClick={closeModal}
+          style={{
+            position: 'fixed',
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            backgroundColor: 'rgba(0, 0, 0, 0.5)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            zIndex: 10000
+          }}
+        >
+          <div 
+            className="bg-white rounded-xl max-w-md w-full mx-4 p-6 shadow-2xl" 
+            onClick={(e) => e.stopPropagation()}
+            style={{
+              backgroundColor: 'white',
+              borderRadius: '12px',
+              padding: '24px',
+              maxWidth: '400px',
+              width: '90%',
+              margin: '0 16px',
+              boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.25)'
+            }}
+          >
+            <div className="flex items-center justify-between mb-6">
+              <h3 className="text-2xl font-bold text-gray-800">⚡ Entrenamiento Extra</h3>
+              <button 
+                className="w-8 h-8 bg-gray-100 rounded-full flex items-center justify-center hover:bg-gray-200 transition-colors text-gray-600 font-bold text-lg" 
+                onClick={closeModal}
+              >
+                ×
+              </button>
+            </div>
+            <div className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium mb-2 text-gray-700">Tipo de Actividad</label>
+                <input 
+                  type="text" 
+                  value={entrenoOtroActividad}
+                  onChange={(e) => setEntrenoOtroActividad(e.target.value)}
+                  placeholder="Ej: Running, Fútbol, Tennis..." 
+                  className="w-full p-3 border-2 border-gray-300 rounded-lg focus:border-blue-500 focus:outline-none text-lg"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium mb-2 text-gray-700">Duración (minutos)</label>
+                <input 
+                  type="number" 
+                  value={entrenoDuracion}
+                  onChange={(e) => setEntrenoDuracion(e.target.value)}
+                  placeholder="60" 
+                  className="w-full p-3 border-2 border-gray-300 rounded-lg focus:border-blue-500 focus:outline-none text-lg"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium mb-2 text-gray-700">Esfuerzo (1-10)</label>
+                <select 
+                  value={entrenoEsfuerzo}
+                  onChange={(e) => setEntrenoEsfuerzo(e.target.value)}
+                  className="w-full p-3 border-2 border-gray-300 rounded-lg focus:border-blue-500 focus:outline-none"
+                >
+                  <option value="">Seleccionar...</option>
+                  <option value="1">1 - Muy fácil</option>
+                  <option value="2">2 - Fácil</option>
+                  <option value="3">3 - Ligero</option>
+                  <option value="4">4 - Moderado bajo</option>
+                  <option value="5">5 - Moderado</option>
+                  <option value="6">6 - Moderado alto</option>
+                  <option value="7">7 - Intenso</option>
+                  <option value="8">8 - Muy intenso</option>
+                  <option value="9">9 - Máximo</option>
+                  <option value="10">10 - Al límite</option>
+                </select>
+              </div>
+              <div>
+                <label className="block text-sm font-medium mb-2 text-gray-700">Notas (opcional)</label>
+                <textarea 
+                  value={entrenoNotas}
+                  onChange={(e) => setEntrenoNotas(e.target.value)}
+                  placeholder="Detalles del entrenamiento..." 
+                  rows={3}
+                  className="w-full p-3 border-2 border-gray-300 rounded-lg focus:border-blue-500 focus:outline-none resize-none"
+                />
+              </div>
+              <div className="flex gap-3 pt-4">
+                <button 
+                  onClick={closeModal} 
+                  className="flex-1 py-3 px-4 bg-gray-200 text-gray-800 rounded-lg hover:bg-gray-300 transition-colors font-medium"
+                >
+                  Cancelar
+                </button>
+                <button 
+                  onClick={saveEntrenoNoProgramado} 
+                  className="flex-1 py-3 px-4 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors font-medium"
+                >
+                  ⚡ Guardar
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+      
+      {/* Modal de Seguimiento */}
+      {activeModal === 'seguimiento' && (
+        <div 
+          className="fixed top-0 left-0 w-full h-full bg-black bg-opacity-50 flex items-center justify-center z-[10000]" 
+          onClick={closeModal}
+          style={{
+            position: 'fixed',
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            backgroundColor: 'rgba(0, 0, 0, 0.5)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            zIndex: 10000
+          }}
+        >
+          <div 
+            className="bg-white rounded-xl max-w-md w-full mx-4 p-6 shadow-2xl" 
+            onClick={(e) => e.stopPropagation()}
+            style={{
+              backgroundColor: 'white',
+              borderRadius: '12px',
+              padding: '24px',
+              maxWidth: '400px',
+              width: '90%',
+              margin: '0 16px',
+              boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.25)'
+            }}
+          >
+            <div className="flex items-center justify-between mb-6">
+              <h3 className="text-2xl font-bold text-gray-800">📊 Seguimiento Corporal</h3>
+              <button 
+                className="w-8 h-8 bg-gray-100 rounded-full flex items-center justify-center hover:bg-gray-200 transition-colors text-gray-600 font-bold text-lg" 
+                onClick={closeModal}
+              >
+                ×
+              </button>
+            </div>
+            <div className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium mb-2 text-gray-700">Peso (kg)</label>
+                <input 
+                  type="number" 
+                  value={seguimientoPeso}
+                  onChange={(e) => setSeguimientoPeso(e.target.value)}
+                  step="0.1"
+                  placeholder="75.0" 
+                  className="w-full p-3 border-2 border-gray-300 rounded-lg focus:border-blue-500 focus:outline-none text-lg"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium mb-2 text-gray-700">Cintura (cm) - Opcional</label>
+                <input 
+                  type="number" 
+                  value={seguimientoCintura}
+                  onChange={(e) => setSeguimientoCintura(e.target.value)}
+                  step="0.1"
+                  placeholder="85.0" 
+                  className="w-full p-3 border-2 border-gray-300 rounded-lg focus:border-blue-500 focus:outline-none text-lg"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium mb-2 text-gray-700">Notas (opcional)</label>
+                <textarea 
+                  value={seguimientoNotas}
+                  onChange={(e) => setSeguimientoNotas(e.target.value)}
+                  placeholder="Sensaciones, cambios notados..." 
+                  rows={3}
+                  className="w-full p-3 border-2 border-gray-300 rounded-lg focus:border-blue-500 focus:outline-none resize-none"
+                />
+              </div>
+              <div className="flex gap-3 pt-4">
+                <button 
+                  onClick={closeModal} 
+                  className="flex-1 py-3 px-4 bg-gray-200 text-gray-800 rounded-lg hover:bg-gray-300 transition-colors font-medium"
+                >
+                  Cancelar
+                </button>
+                <button 
+                  onClick={saveSeguimiento} 
+                  className="flex-1 py-3 px-4 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors font-medium"
+                >
+                  📊 Guardar
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+      
       {activeModal === 'test-simple' && (
         <div 
           className="fixed top-0 left-0 w-full h-full bg-black bg-opacity-50 flex items-center justify-center z-[10000]" 
@@ -2783,10 +3094,37 @@ export default function Dashboard() {
         </button>
         <button 
           onClick={() => {
+            console.log('🔍 TEST: Opening neat modal');
+            openModal('neat');
+          }}
+          className="block w-full bg-purple-500 text-white p-2 rounded text-xs hover:bg-purple-600"
+        >
+          🚶 NEAT
+        </button>
+        <button 
+          onClick={() => {
+            console.log('🔍 TEST: Opening entreno-no-programado modal');
+            openModal('entreno-no-programado');
+          }}
+          className="block w-full bg-red-500 text-white p-2 rounded text-xs hover:bg-red-600"
+        >
+          ⚡ Extra
+        </button>
+        <button 
+          onClick={() => {
+            console.log('🔍 TEST: Opening seguimiento modal');
+            openModal('seguimiento');
+          }}
+          className="block w-full bg-indigo-500 text-white p-2 rounded text-xs hover:bg-indigo-600"
+        >
+          📊 Track
+        </button>
+        <button 
+          onClick={() => {
             console.log('🔍 TEST: Opening workout modal');
             openModal('workout');
           }}
-          className="block w-full bg-purple-500 text-white p-2 rounded text-xs hover:bg-purple-600"
+          className="block w-full bg-yellow-500 text-white p-2 rounded text-xs hover:bg-yellow-600"
         >
           🏋️ Workout
         </button>
