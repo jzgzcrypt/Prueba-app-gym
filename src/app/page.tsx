@@ -306,18 +306,26 @@ export default function Dashboard() {
   };
 
   const saveWeight = () => {
+    console.log('🔍 DEBUG: saveWeight called');
+    console.log('🔍 DEBUG: weightInput value:', weightInput);
+    
     const weight = parseFloat(weightInput);
+    console.log('🔍 DEBUG: parsed weight:', weight);
+    
     if (!weight || weight <= 0) {
+      console.log('🔍 DEBUG: Invalid weight, showing error');
       showToast('⚠️ Ingresa un peso válido', 'error');
       return;
     }
 
+    console.log('🔍 DEBUG: Saving weight...');
     const fecha = todayISO();
     const newEstado = estado.filter(e => e.fecha !== fecha);
     newEstado.push({ fecha, peso: weight, cintura: null });
     newEstado.sort((a, b) => new Date(a.fecha).getTime() - new Date(b.fecha).getTime());
     
     setEstado(newEstado);
+    console.log('🔍 DEBUG: Weight saved, showing toast');
     showToast(`✅ Peso guardado: ${weight} kg`);
     closeModal();
   };
