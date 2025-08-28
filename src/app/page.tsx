@@ -2457,13 +2457,45 @@ export default function Dashboard() {
         Active Modal: {activeModal || 'null'}
       </div>
       
-      {/* Modals - Moved to top for testing */}
+      {/* Modals - Fixed positioning and styling */}
       {activeModal === 'weight' && (
-        <div className="fixed inset-0 bg-black bg-opacity-80 flex items-center justify-center p-4 z-[9999]" onClick={closeModal}>
-          <div className="bg-white rounded-2xl max-w-md w-full p-6" onClick={(e) => e.stopPropagation()}>
+        <div 
+          className="fixed top-0 left-0 w-full h-full bg-black bg-opacity-50 flex items-center justify-center z-[10000]" 
+          onClick={closeModal}
+          style={{
+            position: 'fixed',
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            backgroundColor: 'rgba(0, 0, 0, 0.5)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            zIndex: 10000
+          }}
+        >
+          <div 
+            className="bg-white rounded-xl max-w-md w-full mx-4 p-6 shadow-2xl" 
+            onClick={(e) => e.stopPropagation()}
+            style={{
+              backgroundColor: 'white',
+              borderRadius: '12px',
+              padding: '24px',
+              maxWidth: '400px',
+              width: '90%',
+              margin: '0 16px',
+              boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.25)'
+            }}
+          >
             <div className="flex items-center justify-between mb-6">
               <h3 className="text-2xl font-bold text-gray-800">⚖️ Pesaje Diario</h3>
-              <button className="w-8 h-8 bg-gray-100 rounded-full flex items-center justify-center hover:bg-gray-200 transition-colors" onClick={closeModal}>×</button>
+              <button 
+                className="w-8 h-8 bg-gray-100 rounded-full flex items-center justify-center hover:bg-gray-200 transition-colors text-gray-600 font-bold text-lg" 
+                onClick={closeModal}
+              >
+                ×
+              </button>
             </div>
             <div className="space-y-4">
               <div>
@@ -2473,15 +2505,22 @@ export default function Dashboard() {
                   value={weightInput}
                   onChange={(e) => setWeightInput(e.target.value)}
                   step="0.1" 
-                  placeholder="85.0" 
-                  className="w-full p-3 border border-gray-300 rounded-lg"
+                  placeholder="75.0" 
+                  className="w-full p-3 border-2 border-gray-300 rounded-lg focus:border-blue-500 focus:outline-none text-lg"
+                  autoFocus
                 />
               </div>
               <div className="flex gap-3 pt-4">
-                <button onClick={closeModal} className="flex-1 py-3 px-4 bg-gray-200 text-gray-800 rounded-lg hover:bg-gray-300">
+                <button 
+                  onClick={closeModal} 
+                  className="flex-1 py-3 px-4 bg-gray-200 text-gray-800 rounded-lg hover:bg-gray-300 transition-colors font-medium"
+                >
                   Cancelar
                 </button>
-                <button onClick={saveWeight} className="flex-1 py-3 px-4 bg-blue-600 text-white rounded-lg hover:bg-blue-700">
+                <button 
+                  onClick={saveWeight} 
+                  className="flex-1 py-3 px-4 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium"
+                >
                   💾 Guardar
                 </button>
               </div>
@@ -2491,11 +2530,41 @@ export default function Dashboard() {
       )}
       
       {activeModal === 'test-simple' && (
-        <div className="fixed inset-0 bg-black bg-opacity-80 flex items-center justify-center p-4 z-[9999]" onClick={closeModal}>
-          <div className="bg-white rounded-2xl max-w-md w-full p-6" onClick={(e) => e.stopPropagation()}>
-            <h2 className="text-xl font-bold mb-4">Test Modal</h2>
-            <p className="mb-4">Este es un modal de prueba simple.</p>
-            <button onClick={closeModal} className="w-full py-3 px-4 bg-red-600 text-white rounded-lg hover:bg-red-700">
+        <div 
+          className="fixed top-0 left-0 w-full h-full bg-black bg-opacity-50 flex items-center justify-center z-[10000]" 
+          onClick={closeModal}
+          style={{
+            position: 'fixed',
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            backgroundColor: 'rgba(0, 0, 0, 0.5)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            zIndex: 10000
+          }}
+        >
+          <div 
+            className="bg-white rounded-xl max-w-md w-full mx-4 p-6 shadow-2xl" 
+            onClick={(e) => e.stopPropagation()}
+            style={{
+              backgroundColor: 'white',
+              borderRadius: '12px',
+              padding: '24px',
+              maxWidth: '400px',
+              width: '90%',
+              margin: '0 16px',
+              boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.25)'
+            }}
+          >
+            <h2 className="text-xl font-bold mb-4 text-gray-800">🧪 Test Modal</h2>
+            <p className="mb-6 text-gray-600">Este es un modal de prueba simple para verificar el funcionamiento básico.</p>
+            <button 
+              onClick={closeModal} 
+              className="w-full py-3 px-4 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors font-medium"
+            >
               Cerrar
             </button>
           </div>
