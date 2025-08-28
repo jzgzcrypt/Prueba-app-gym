@@ -881,47 +881,179 @@ export default function Dashboard() {
 
   const renderTodaySection = () => (
     <div className="min-h-screen pb-32 p-4">
-      {/* Header */}
-      <div className="glass-card mb-6">
-        <div className="flex items-center justify-between">
-          <div className="flex-1"></div>
-          <div className="text-center flex-1">
-                          <h1 className="text-3xl font-bold bg-gradient-to-r from-slate-700 to-blue-600 bg-clip-text text-transparent mb-2">
-                Mi Entrenamiento
-              </h1>
-            <p className="text-gray-600 text-lg">
-              Hoy es {new Date().toLocaleDateString('es-ES', { 
-                weekday: 'long', 
-                year: 'numeric', 
-                month: 'long', 
-                day: 'numeric' 
-              })}
-            </p>
+      {/* Stats Overview */}
+      <div className="stats-grid mb-8">
+        <div className="metric-card">
+          <div className="flex items-center justify-between mb-4">
+            <div>
+              <h3 className="text-lg font-semibold text-gray-900">Progreso Diario</h3>
+              <p className="text-gray-600 text-sm">Adherencia de hoy</p>
+            </div>
+            <div className="w-16 h-16 bg-gradient-to-r from-blue-500 to-blue-600 rounded-2xl flex items-center justify-center text-white font-bold text-xl">
+              {Math.round(calculateProgress())}%
+            </div>
           </div>
-          <div className="flex-1 flex justify-end">
+          <div className="flex justify-center">
+            <ProgressCircle progress={progress} />
+          </div>
+        </div>
+        
+        <div className="metric-card">
+          <div className="flex items-center justify-between">
+            <div>
+              <h3 className="text-lg font-semibold text-gray-900">Plan de Hoy</h3>
+              <p className="text-gray-600 text-sm">{getCurrentMesocicloDay()?.dia?.entrenamiento || 'Día de descanso'}</p>
+            </div>
             <button 
               onClick={() => openModal('calendar')}
-              className="w-14 h-14 bg-gradient-to-r from-blue-500 to-blue-600 rounded-full flex items-center justify-center hover:scale-110 transition-all text-white shadow-lg"
+              className="w-12 h-12 bg-gradient-to-r from-green-500 to-green-600 rounded-xl flex items-center justify-center hover:scale-105 transition-all text-white shadow-lg"
             >
-              <span className="text-xl">📅</span>
+              <span className="text-lg">📅</span>
             </button>
+          </div>
+          <div className="mt-4">
+            <div className="text-2xl font-bold text-gray-900">Día {getCurrentMesocicloDay()?.dia?.dia || 'N/A'}</div>
+            <div className="text-sm text-gray-500">Mesociclo {getCurrentMesocicloDay()?.microciclo?.nombre || 'N/A'}</div>
           </div>
         </div>
       </div>
       
-      {/* Progress Overview */}
-      <div className="glass-card text-center mb-6">
-        <div className="flex justify-center mb-4">
-          <ProgressCircle progress={progress} />
-        </div>
-        <p className="text-sm text-gray-600">Progreso del día</p>
+      {/* Today's Activities */}
+      <div className="section-header">
+        <h2 className="text-xl font-semibold text-gray-900 mb-2">🎯 Actividades de Hoy</h2>
+        <p className="text-gray-600 text-sm">Completa tu rutina diaria</p>
       </div>
       
-      {/* Today's Tasks */}
-      <div className="mb-6">
-        <h2 className="text-2xl font-bold mb-6 text-slate-700 text-center">🎯 Hoy toca</h2>
-        
-                {/* Current Day Info */}
+      <div className="activity-grid mb-8">
+        {/* Weight Entry */}
+        <div className="activity-card cursor-pointer" onClick={() => openModal('weight')}>
+          <div className="flex items-center justify-between">
+            <div className="flex items-center">
+              <div className="w-16 h-16 bg-gradient-to-r from-blue-500 to-blue-600 rounded-2xl flex items-center justify-center text-white text-2xl shadow-lg">
+                ⚖️
+              </div>
+              <div className="ml-4">
+                <h3 className="font-semibold text-lg text-gray-900">Pesaje Diario</h3>
+                <p className="text-sm text-gray-600">Registra tu peso de hoy</p>
+              </div>
+            </div>
+            <div className="text-right">
+              <div className={`text-sm font-semibold ${getStatus('weight') === 'Completado' ? 'text-green-600' : 'text-blue-600'}`}>
+                {getStatus('weight')}
+              </div>
+              <div className="w-3 h-3 rounded-full ${getStatus('weight') === 'Completado' ? 'bg-green-500' : 'bg-gray-300'} mt-1"></div>
+            </div>
+          </div>
+        </div>
+
+        {/* Workout Entry */}
+        <div className="activity-card cursor-pointer" onClick={() => openModal('workout')}>
+          <div className="flex items-center justify-between">
+            <div className="flex items-center">
+              <div className="w-16 h-16 bg-gradient-to-r from-green-500 to-green-600 rounded-2xl flex items-center justify-center text-white text-2xl shadow-lg">
+                🏋️
+              </div>
+              <div className="ml-4">
+                <h3 className="font-semibold text-lg text-gray-900">Entrenamiento</h3>
+                <p className="text-sm text-gray-600">Completa tu rutina de hoy</p>
+              </div>
+            </div>
+            <div className="text-right">
+              <div className={`text-sm font-semibold ${getStatus('workout') === 'Completado' ? 'text-green-600' : 'text-blue-600'}`}>
+                {getStatus('workout')}
+              </div>
+              <div className="w-3 h-3 rounded-full ${getStatus('workout') === 'Completado' ? 'bg-green-500' : 'bg-gray-300'} mt-1"></div>
+            </div>
+          </div>
+        </div>
+
+        {/* Cardio Entry */}
+        <div className="activity-card cursor-pointer" onClick={() => openModal('cardio')}>
+          <div className="flex items-center justify-between">
+            <div className="flex items-center">
+              <div className="w-16 h-16 bg-gradient-to-r from-red-500 to-red-600 rounded-2xl flex items-center justify-center text-white text-2xl shadow-lg">
+                🏃
+              </div>
+              <div className="ml-4">
+                <h3 className="font-semibold text-lg text-gray-900">Cardio</h3>
+                <p className="text-sm text-gray-600">Actividad cardiovascular</p>
+              </div>
+            </div>
+            <div className="text-right">
+              <div className={`text-sm font-semibold ${getStatus('cardio') === 'Completado' ? 'text-green-600' : 'text-blue-600'}`}>
+                {getStatus('cardio')}
+              </div>
+              <div className="w-3 h-3 rounded-full ${getStatus('cardio') === 'Completado' ? 'bg-green-500' : 'bg-gray-300'} mt-1"></div>
+            </div>
+          </div>
+        </div>
+
+        {/* Diet Entry */}
+        <div className="activity-card cursor-pointer" onClick={() => openModal('diet')}>
+          <div className="flex items-center justify-between">
+            <div className="flex items-center">
+              <div className="w-16 h-16 bg-gradient-to-r from-orange-500 to-orange-600 rounded-2xl flex items-center justify-center text-white text-2xl shadow-lg">
+                🍎
+              </div>
+              <div className="ml-4">
+                <h3 className="font-semibold text-lg text-gray-900">Dieta</h3>
+                <p className="text-sm text-gray-600">Registra tu alimentación</p>
+              </div>
+            </div>
+            <div className="text-right">
+              <div className={`text-sm font-semibold ${getStatus('diet') === 'Completado' ? 'text-green-600' : 'text-blue-600'}`}>
+                {getStatus('diet')}
+              </div>
+              <div className="w-3 h-3 rounded-full ${getStatus('diet') === 'Completado' ? 'bg-green-500' : 'bg-gray-300'} mt-1"></div>
+            </div>
+          </div>
+        </div>
+
+        {/* NEAT Entry */}
+        <div className="activity-card cursor-pointer" onClick={() => openModal('neat')}>
+          <div className="flex items-center justify-between">
+            <div className="flex items-center">
+              <div className="w-16 h-16 bg-gradient-to-r from-purple-500 to-purple-600 rounded-2xl flex items-center justify-center text-white text-2xl shadow-lg">
+                🚶
+              </div>
+              <div className="ml-4">
+                <h3 className="font-semibold text-lg text-gray-900">NEAT</h3>
+                <p className="text-sm text-gray-600">Actividad física adicional</p>
+              </div>
+            </div>
+            <div className="text-right">
+              <div className={`text-sm font-semibold ${getStatus('neat') === 'Completado' ? 'text-green-600' : 'text-blue-600'}`}>
+                {getStatus('neat')}
+              </div>
+              <div className="w-3 h-3 rounded-full ${getStatus('neat') === 'Completado' ? 'bg-green-500' : 'bg-gray-300'} mt-1"></div>
+            </div>
+          </div>
+        </div>
+
+        {/* Entreno No Programado Entry */}
+        <div className="activity-card cursor-pointer" onClick={() => openModal('entreno-no-programado')}>
+          <div className="flex items-center justify-between">
+            <div className="flex items-center">
+              <div className="w-16 h-16 bg-gradient-to-r from-yellow-500 to-yellow-600 rounded-2xl flex items-center justify-center text-white text-2xl shadow-lg">
+                ⚡
+              </div>
+              <div className="ml-4">
+                <h3 className="font-semibold text-lg text-gray-900">Actividad Extra</h3>
+                <p className="text-sm text-gray-600">Entrenamientos adicionales</p>
+              </div>
+            </div>
+            <div className="text-right">
+              <div className={`text-sm font-semibold ${getStatus('entrenoNoProgramado') === 'Completado' ? 'text-green-600' : 'text-blue-600'}`}>
+                {getStatus('entrenoNoProgramado')}
+              </div>
+              <div className="w-3 h-3 rounded-full ${getStatus('entrenoNoProgramado') === 'Completado' ? 'bg-green-500' : 'bg-gray-300'} mt-1"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      {/* Current Day Info */}
+      <div className="section-header">
         {(() => {
           let currentData;
           // let startDate = null; // Reservado para futuras funcionalidades
@@ -1063,29 +1195,7 @@ export default function Dashboard() {
           );
         })()}
         
-        {/* Weight Entry */}
-        <div className="activity-card cursor-pointer" onClick={() => {
 
-          openModal('weight');
-        }}>
-          <div className="flex items-center justify-between">
-            <div className="flex items-center">
-              <div className="w-14 h-14 bg-blue-100 rounded-full flex items-center justify-center mr-4 shadow-lg">
-                <span className="text-2xl">⚖️</span>
-              </div>
-              <div>
-                <h3 className="font-bold text-lg text-gray-800">Pesaje Diario</h3>
-                <p className="text-sm text-gray-600">Registra tu peso de hoy</p>
-              </div>
-            </div>
-            <div className="text-right">
-              <div className={`text-sm font-semibold ${getStatus('weight') === 'Completado' ? 'text-green-600' : 'text-orange-600'}`}>
-                {getStatus('weight')}
-              </div>
-              <div className="text-xs text-gray-500">Toca para registrar</div>
-            </div>
-          </div>
-        </div>
         
         {/* Workout Entry */}
         <div className="activity-card cursor-pointer" onClick={() => openModal('workout')}>
@@ -2342,7 +2452,7 @@ export default function Dashboard() {
                 <div className="text-xs text-gray-500">{getCurrentMesocicloDay()?.dia?.entrenamiento || 'Descanso'}</div>
               </div>
               <div className="w-12 h-12 bg-gradient-to-r from-blue-500 to-blue-600 rounded-full flex items-center justify-center text-white font-bold">
-                {Math.round(calculateTodayAdherence())}%
+                {Math.round(calculateProgress())}%
               </div>
             </div>
           </div>
