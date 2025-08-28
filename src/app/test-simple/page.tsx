@@ -13,6 +13,7 @@ export default function TestSimplePage() {
       const data = await response.json();
       setMessage(data.message);
     } catch (error) {
+      console.error('Database connection error:', error);
       setMessage('Error al conectar con la base de datos');
     } finally {
       setIsLoading(false);
