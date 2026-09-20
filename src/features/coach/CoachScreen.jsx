@@ -8,7 +8,7 @@ import { MOVILIDAD } from "@/domain/salud/movilidad";
 import { HitosContent, PaceComparisonChart, PhaseAdjustContent, PlanGlobalContent, WeeklyLogContent } from "@/features/coach/paneles";
 import { KpiBlock } from "@/features/semana/KpiBlock";
 import { SimpleLineChart } from "@/features/ui/charts";
-export function CoachScreen({ jumpToDay, setWeekIdx, checked, workoutWeights, ritmoReal, setScreen, weeklyLog, setWeeklyLog, phaseAdjustNote, setPhaseAdjustNote, currentWeekOverride, setCurrentWeekOverride, exportData, importData, ultimoBackup, painLog, medidas, bloquesHistorial, setBloquesHistorial, storageStatus, cuelloChecks, magiaLog, guerreroLog }) {
+export function CoachScreen({ jumpToDay, setWeekIdx, checked, workoutWeights, ritmoReal, setScreen, weeklyLog, setWeeklyLog, phaseAdjustNote, setPhaseAdjustNote, currentWeekOverride, setCurrentWeekOverride, exportData, importData, ultimoBackup, ultimoGuardado, painLog, medidas, bloquesHistorial, setBloquesHistorial, storageStatus, cuelloChecks, magiaLog, guerreroLog }) {
   const [subTab, setSubTab] = useState("resumen");
   const todayIso = todayLocalIso();
   let currentWeekN = WEEKS[0].n;
@@ -293,7 +293,7 @@ export function CoachScreen({ jumpToDay, setWeekIdx, checked, workoutWeights, ri
           setCurrentWeekOverride={setCurrentWeekOverride}
           phaseAdjustNote={phaseAdjustNote} setPhaseAdjustNote={setPhaseAdjustNote}
           exportData={exportData} importData={importData} storageStatus={storageStatus}
-          ultimoBackup={ultimoBackup} />
+          ultimoBackup={ultimoBackup} ultimoGuardado={ultimoGuardado} />
       )}
     </div>
   );

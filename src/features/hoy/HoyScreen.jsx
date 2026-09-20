@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import { C, CAT, R, SP, TAP_MIN, TYPE } from "@/design/tokens";
 import { ICON_FUERZA, ICON_MOVILIDAD, ICON_RUNNING, LOGO_7K } from "@/domain/assets/icons";
 import { parseSeries } from "@/domain/fuerza/series";
@@ -11,6 +12,7 @@ import { GuerreroBlock, HabitBlock, ListBlock, MagiaBlock, MoveDayBlock, PainBlo
 import { WeekDots } from "@/features/ui/WeekDots";
 export function HoyScreen(props) {
   const { day, dayKey, isToday, flatIdx, goDay, goToday, isFuerzaDay, isRunDay, isCompromisoDay, mov,
+          vaciarDia, cosasEnElDia,
     cuelloEj, cuelloChecks, toggleCuello, checked, toggleCheck, mainDone, workoutProgress, onStartWorkout,
     notes, noteInput, setNoteInput, editingNote, setEditingNote, saveNote, openCatalogo,
     expandedBlock, setExpandedBlock, magiaProgress, bloquesHistorial } = props;
@@ -21,6 +23,8 @@ export function HoyScreen(props) {
   const cuelloTotal = (cM?1:0)+(cT?1:0)+(cN?1:0);
   const totalSeries = isFuerzaDay ? day.ejercicios.reduce((s,e) => s + parseSeries(e.series), 0) : 0;
   const doneSeries = isFuerzaDay && workoutProgress ? Object.values(workoutProgress).reduce((s,v) => s+(v||0),0) : 0;
+
+  const [confirmandoVaciar, setConfirmandoVaciar] = useState(false);
 
   const startDate = new Date(FECHA_INICIO);
   const thisDate = new Date(day.isoDate || startDate);
@@ -304,6 +308,41 @@ export function HoyScreen(props) {
               fontSize: 13, fontWeight: 800, color: checked[dayKey+"-movenf"] ? "#FAFAF9" : "#787774",
             }}>{checked[dayKey+"-movenf"] ? "HECHO" : "MARCAR COMO HECHO"}</button>
           </ListBlock>
+        )}
+
+        {/* ═══ VACIAR EL DÍA — solo aparece si hay algo que vaciar ═══ */}
+        {cosasEnElDia > 0 && (
+          <div style={{ marginTop: 4 }}>
+            {confirmandoVaciar ? (
+              <div style={{ background: C.card, border: "1px solid " + CAT.running, borderRadius: 12, padding: "12px 14px" }}>
+                <div style={{ ...TYPE.bodyStrong, color: C.text }}>
+                  Se borra todo lo registrado este día
+                </div>
+                <div style={{ ...TYPE.body, color: C.textDim, marginTop: 2 }}>
+                  {cosasEnElDia} {cosasEnElDia === 1 ? "registro" : "registros"}: marcas, pesos, ritmo y sensaciones.
+                  Podrás deshacerlo durante unos segundos.
+                </div>
+                <div style={{ display: "flex", gap: 8, marginTop: 10 }}>
+                  <button className="btn" onClick={() => { vaciarDia(dayKey); setConfirmandoVaciar(false); }}
+                    style={{ flex: 1, padding: "11px", borderRadius: 10, minHeight: TAP_MIN,
+                             background: CAT.running, color: "#FAFAF9", fontSize: 12.5, fontWeight: 800 }}>
+                    VACIAR
+                  </button>
+                  <button className="btn" onClick={() => setConfirmandoVaciar(false)}
+                    style={{ flex: 1, padding: "11px", borderRadius: 10, minHeight: TAP_MIN,
+                             background: "#EDEDEB", color: C.textDim, fontSize: 12.5, fontWeight: 800 }}>
+                    CANCELAR
+                  </button>
+                </div>
+              </div>
+            ) : (
+              <button className="btn" onClick={() => setConfirmandoVaciar(true)}
+                style={{ width: "100%", padding: "10px", borderRadius: 10, minHeight: TAP_MIN,
+                         background: "transparent", color: C.textFaint, fontSize: 11.5, fontWeight: 700 }}>
+                Vaciar este día
+              </button>
+            )}
+          </div>
         )}
 
         {/* ═══ MOVER SESIÓN — colapsable, muy discreto ═══ */}

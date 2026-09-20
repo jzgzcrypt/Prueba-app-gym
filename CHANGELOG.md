@@ -22,6 +22,32 @@ Todo cambio que se haga en la app se anota aquí. Sin excepciones.
 ## [Sin publicar]
 
 ### Añadido
+- **Guardado a prueba de cierre.** Hasta ahora el guardado esperaba medio
+  segundo para agrupar cambios seguidos, y no había nada que guardase al
+  cerrar: marcar algo y cerrar la app de inmediato —un gesto normal con el
+  móvil en la mano— podía perder ese cambio. Ahora se guarda también cuando la
+  app pasa a segundo plano y cuando se descarga la página. Coach → Ajustes
+  muestra además **la hora del último guardado**, para no tener que fiarse.
+- **Vaciar un día.** Marcar el día equivocado era fácil y no tenía arreglo: el
+  deshacer general dura 6 segundos y va por acción suelta, así que un error
+  detectado al día siguiente se quedaba para siempre. Ahora, desde HOY, se
+  puede borrar de una vez todo lo registrado en ese día —marcas, pesos, ritmo
+  y sensaciones— con confirmación que dice cuántos registros se van, y con
+  deshacer. El botón solo aparece si hay algo que vaciar.
+- El borrado se escribe como función pura fuera de los componentes
+  (`lib/estado/limpiar-dia.js`) y con ocho tests propios: es lo más delicado
+  que hace la app, porque borra datos del usuario. Uno de esos tests cubre el
+  fallo que lo habría hecho peligroso — comparar claves por prefijo haría que
+  vaciar la semana 1 se llevase por delante la 11.
+
+---
+
+## [1.2.0] — 2026-09-20
+
+Copia de seguridad avisada, revisión semanal en tres preguntas, y los primeros
+tests del dominio, que encontraron un fallo de merge en producción.
+
+### Añadido
 - **Aviso de copia de seguridad.** Coach → Ajustes avisa cuando hace 7 días o
   más de la última copia, o cuando no hay ninguna. Los datos viven solo en este
   navegador: hasta que haya cuenta y base de datos, la copia es lo único que

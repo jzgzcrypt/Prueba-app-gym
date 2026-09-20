@@ -3,6 +3,7 @@
 import { useState, useEffect, useRef } from "react";
 import { C, R, SP, TAP_MIN } from "@/design/tokens";
 import { storage, CLAVE_DATOS, VERSION_ESQUEMA, migrar } from "@/lib/storage";
+import { cuantoHayEn, limpiarDia } from "@/lib/estado/limpiar-dia";
 import { ICON_CUELLO, ICON_MOVILIDAD, ICON_NUTRICION } from "@/domain/assets/icons";
 import { NUTRICION } from "@/domain/nutricion/nutricion";
 import { BLOQUE, FECHA_FIN, FECHA_INICIO, FLAT_DAYS, WEEKS, findTodayIndex, todayLocalIso } from "@/domain/plan/calendario";
@@ -60,6 +61,9 @@ export default function App() {
   // hace que los datos no salen del dispositivo, que es el unico riesgo
   // irreversible que tiene hoy la app.
   const [ultimoBackup, setUltimoBackup] = useState(null); // "YYYY-MM-DD" | null
+  // Hora del ultimo guardado confirmado, para poder enseñarla y no tener que
+  // fiarse de que "se habra guardado".
+  const [ultimoGuardado, setUltimoGuardado] = useState(null);
   const [expandedBlock, setExpandedBlock] = useState("main"); // que bloque esta abierto en HoyScreen
 
   // ─── Sistema global de deshacer (Undo) ─────────────────────────────────────
@@ -144,6 +148,41 @@ export default function App() {
     return () => { cancelled = true; };
   }, []);
 
+  // El ultimo estado conocido, listo para escribirse sin esperar.
+  const pendienteRef = useRef(null);
+
+  // Guarda ahora mismo, sin esperar. localStorage escribe de forma sincrona,
+  // asi que esto llega a completarse incluso cuando el navegador esta cerrando
+  // la pagina.
+  const guardarYa = () => {
+    const payload = pendienteRef.current;
+    if (!payload) return;
+    try {
+      const ok = storage.set(CLAVE_DATOS, JSON.stringify(payload));
+      Promise.resolve(ok).then(r => {
+        setStorageStatus(r ? "ok" : "error");
+        if (r) setUltimoGuardado(new Date().toISOString());
+      }).catch(() => setStorageStatus("error"));
+    } catch (err) {
+      setStorageStatus("error");
+    }
+  };
+
+  // Sin esto habia medio segundo en el que un cambio podia perderse: marcar
+  // algo y cerrar la app de inmediato es un gesto normal con el movil en la
+  // mano. Se guarda cuando la app pasa a segundo plano y cuando se descarga.
+  // visibilitychange es el evento fiable en movil; pagehide cubre el resto.
+  useEffect(() => {
+    if (!storageReady) return;
+    const alOcultarse = () => { if (document.visibilityState === "hidden") guardarYa(); };
+    document.addEventListener("visibilitychange", alOcultarse);
+    window.addEventListener("pagehide", guardarYa);
+    return () => {
+      document.removeEventListener("visibilitychange", alOcultarse);
+      window.removeEventListener("pagehide", guardarYa);
+    };
+  });
+
   // Guarda automaticamente cada vez que cambia cualquier dato real del usuario.
   // No guarda hasta que la carga inicial ha terminado, para no sobreescribir con valores vacios.
   useEffect(() => {
@@ -155,14 +194,10 @@ export default function App() {
       guerreroLog, workoutWeights, medidas, ritmoReal, ritmoTramos, sensaciones, postponed, phaseAdjustNote,
       currentWeekOverride, weeklyLog, bloquesHistorial, ultimoBackup,
     };
-    const t = setTimeout(async () => {
-      try {
-        const result = await storage.set(CLAVE_DATOS, JSON.stringify(payload));
-        setStorageStatus(result ? "ok" : "error");
-      } catch (err) {
-        setStorageStatus("error");
-      }
-    }, 500); // debounce - agrupa cambios rapidos seguidos en un solo guardado
+    // Se deja a mano el ultimo estado conocido para poder guardarlo de golpe
+    // si la app se cierra antes de que venza la espera de abajo.
+    pendienteRef.current = payload;
+    const t = setTimeout(() => { guardarYa(); }, 500); // agrupa cambios rapidos
     return () => clearTimeout(t);
   }, [checked, cuelloChecks, notes, youtubeLinks, customExercises, painLog,
       flaggedExercises, pausedRanges, workoutProgress, magiaProgress, magiaLog,
@@ -178,6 +213,29 @@ export default function App() {
   const cuelloEj = getCuelloEj(currentDay.weekN);
   const mainDone = currentDay.tipo === "libre" ? true : !!checked[dayKey];
   const isCompromisoDay = currentDay.tipo === "compromiso";
+
+  // Vaciar el dia que se esta viendo. Devuelve cuantas cosas se han borrado,
+  // para poder decirlo, y deja el deshacer preparado por si era un error.
+  const vaciarDia = (clave) => {
+    const actual = { checked, cuelloChecks, notes, painLog, magiaLog, guerreroLog,
+                     workoutWeights, ritmoReal, ritmoTramos, sensaciones, postponed };
+    const cuantas = cuantoHayEn(actual, clave);
+    if (!cuantas) return 0;
+    const { estado } = limpiarDia(actual, clave);
+    setChecked(estado.checked); setCuelloChecks(estado.cuelloChecks); setNotes(estado.notes);
+    setPainLog(estado.painLog); setMagiaLog(estado.magiaLog); setGuerreroLog(estado.guerreroLog);
+    setWorkoutWeights(estado.workoutWeights); setRitmoReal(estado.ritmoReal);
+    setRitmoTramos(estado.ritmoTramos); setSensaciones(estado.sensaciones);
+    setPostponed(estado.postponed);
+    pushUndo("Día vaciado", () => {
+      setChecked(actual.checked); setCuelloChecks(actual.cuelloChecks); setNotes(actual.notes);
+      setPainLog(actual.painLog); setMagiaLog(actual.magiaLog); setGuerreroLog(actual.guerreroLog);
+      setWorkoutWeights(actual.workoutWeights); setRitmoReal(actual.ritmoReal);
+      setRitmoTramos(actual.ritmoTramos); setSensaciones(actual.sensaciones);
+      setPostponed(actual.postponed);
+    });
+    return cuantas;
+  };
 
   const toggleCheck = (key) => setChecked(p => Object.assign({}, p, { [key]: !p[key] }));
   const toggleCuello = (m) => setCuelloChecks(p => Object.assign({}, p, { [dayKey + "-" + m]: !p[dayKey + "-" + m] }));
@@ -331,6 +389,7 @@ export default function App() {
           <HoyScreen day={currentDay} dayKey={dayKey} isToday={isToday} flatIdx={flatIdx}
             goDay={goDay} goToday={goToday} onJumpDay={jumpToDay}
             isFuerzaDay={isFuerzaDay} isRunDay={isRunDay} isCompromisoDay={isCompromisoDay} mov={mov}
+            vaciarDia={vaciarDia} cosasEnElDia={cuantoHayEn({ checked, cuelloChecks, notes, painLog, magiaLog, guerreroLog, workoutWeights, ritmoReal, ritmoTramos, sensaciones, postponed }, dayKey)}
             cuelloEj={cuelloEj} cuelloChecks={cuelloChecks} toggleCuello={toggleCuello}
             checked={checked} toggleCheck={toggleCheck} mainDone={mainDone}
             workoutProgress={workoutProgress[dayKey]} onStartWorkout={() => setActiveWorkout(dayKey)}
@@ -389,7 +448,7 @@ export default function App() {
             weeklyLog={weeklyLog} setWeeklyLog={setWeeklyLog}
             phaseAdjustNote={phaseAdjustNote} setPhaseAdjustNote={setPhaseAdjustNote}
             currentWeekOverride={currentWeekOverride} setCurrentWeekOverride={setCurrentWeekOverride}
-            exportData={exportData} importData={importData} ultimoBackup={ultimoBackup} painLog={painLog} medidas={medidas}
+            exportData={exportData} importData={importData} ultimoBackup={ultimoBackup} ultimoGuardado={ultimoGuardado} painLog={painLog} medidas={medidas}
             bloquesHistorial={bloquesHistorial} setBloquesHistorial={setBloquesHistorial}
             storageStatus={storageStatus}
             cuelloChecks={cuelloChecks} magiaLog={magiaLog} guerreroLog={guerreroLog} />
