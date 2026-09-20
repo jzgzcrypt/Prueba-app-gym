@@ -42,6 +42,8 @@ Todo cambio que se haga en la app se anota aquí. Sin excepciones.
   que se vea.
 - La app se puede instalar en el móvil: manifiesto, iconos propios generados a
   partir del logo, y apertura a pantalla completa sin barra de navegador.
+- `docs/MEJORAS.md`: mejoras propuestas, cada una con la pregunta concreta que
+  responde. Si una mejora no tiene su pregunta, no entra en la lista.
 
 ### Cambiado
 - **El bloque arranca el lunes 21 de septiembre de 2026** y termina el domingo

@@ -66,6 +66,7 @@ dispositivo.
 | [`docs/ARQUITECTURA.md`](docs/ARQUITECTURA.md) | Cómo está montada y por qué |
 | [`docs/ROADMAP.md`](docs/ROADMAP.md) | El plan por fases, hasta la app de vida |
 | [`docs/DECISIONES.md`](docs/DECISIONES.md) | Las decisiones tomadas y su coste |
+| [`docs/MEJORAS.md`](docs/MEJORAS.md) | Mejoras propuestas, cada una con la pregunta que responde |
 
 ## Hacia dónde va
 
