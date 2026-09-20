@@ -6,7 +6,7 @@ import { storage, CLAVE_DATOS, VERSION_ESQUEMA, migrar } from "@/lib/storage";
 import { cuantoHayEn, limpiarDia } from "@/lib/estado/limpiar-dia";
 import { ICON_CUELLO, ICON_MOVILIDAD, ICON_NUTRICION } from "@/domain/assets/icons";
 import { NUTRICION } from "@/domain/nutricion/nutricion";
-import { BLOQUE, FECHA_FIN, FECHA_INICIO, FLAT_DAYS, WEEKS, findTodayIndex, todayLocalIso } from "@/domain/plan/calendario";
+import { BLOQUE, FECHA_FIN, FECHA_INICIO, FLAT_DAYS, WEEKS, claveDia, findTodayIndex, todayLocalIso } from "@/domain/plan/calendario";
 import { getCuelloEj } from "@/domain/salud/cuello";
 import { getMovilidad } from "@/domain/salud/movilidad";
 import { CoachScreen } from "@/features/coach/CoachScreen";
@@ -206,7 +206,7 @@ export default function App() {
 
   const currentDay = FLAT_DAYS[flatIdx] || FLAT_DAYS[todayIdx] || FLAT_DAYS[0];
   const isToday = flatIdx === todayIdx;
-  const dayKey = currentDay.weekN + "-" + currentDay.dayIdx;
+  const dayKey = claveDia(currentDay);
   const isFuerzaDay = currentDay.tipo === "fuerza";
   const isRunDay = currentDay.tipo === "run" || currentDay.tipo === "test" || currentDay.tipo === "objetivo";
   const mov = getMovilidad(currentDay.cat, currentDay.weekN);
@@ -309,7 +309,7 @@ export default function App() {
   }
 
   if (activeWorkout) {
-    const wDay = FLAT_DAYS.find(d => (d.weekN + "-" + d.dayIdx) === activeWorkout);
+    const wDay = FLAT_DAYS.find(d => claveDia(d) === activeWorkout);
     const wMov = getMovilidad(wDay.cat, wDay.weekN);
 
     // Busca el ultimo registro de peso de un ejercicio por nombre, en dias anteriores al actual
@@ -318,7 +318,7 @@ export default function App() {
       WEEKS.forEach(wk => {
         wk.days.forEach((d, di) => {
           if (d.tipo !== "fuerza") return;
-          const dk = wk.n + "-" + di;
+          const dk = claveDia(wk.days[di]);
           if (dk === activeWorkout) return; // excluir el dia actual
           const dw = workoutWeights[dk];
           if (!dw) return;

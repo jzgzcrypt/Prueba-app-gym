@@ -1,5 +1,6 @@
 "use client";
 
+import { claveDia } from "@/domain/plan/calendario";
 import { useState } from "react";
 import { C, CAT } from "@/design/tokens";
 import { QuickFieldInput, SimpleLineChart } from "@/features/ui/charts";
@@ -64,7 +65,7 @@ export function ProgresoScreen({ medidas, setMedidas, ritmoReal, weeks, checked,
   weeks.forEach(wk => {
     wk.days.forEach((day, di) => {
       if (day.tipo !== "fuerza") return;
-      const dayKey = wk.n + "-" + di;
+      const dayKey = claveDia(wk.days[di]);
       const dw = workoutWeights[dayKey];
       if (!dw) return;
       day.ejercicios.forEach((ej, ei) => {

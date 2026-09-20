@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { C, R, SP, TAP_MIN, TYPE } from "@/design/tokens";
-import { DATE_MAP, WEEKS } from "@/domain/plan/calendario";
+import { DATE_MAP, WEEKS, claveDia } from "@/domain/plan/calendario";
 import { KpiBlock } from "@/features/semana/KpiBlock";
 export function SemanaScreen({ weekIdx, setWeekIdx, jumpToDay, checked, todayIso, workoutWeights, ritmoReal, pausedRanges, setPausedRanges }) {
   const week = WEEKS[weekIdx];
@@ -58,7 +58,7 @@ export function SemanaScreen({ weekIdx, setWeekIdx, jumpToDay, checked, todayIso
       </div>
       <div style={{ padding: "0 " + SP.lg + "px", display: "flex", flexDirection: "column", gap: SP.sm }}>
         {week.days.map((day, i) => {
-          const key = week.n + "-" + i;
+          const key = claveDia(day);
           const done = checked[key];
           const isT = DATE_MAP[day.date] === todayIso;
           const isFuerza = day.tipo === "fuerza";

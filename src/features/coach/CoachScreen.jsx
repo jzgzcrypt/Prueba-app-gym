@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { C, CAT, R, SP, TYPE } from "@/design/tokens";
-import { DATE_MAP, FLAT_DAYS, WEEKS, todayLocalIso } from "@/domain/plan/calendario";
+import { DATE_MAP, FLAT_DAYS, WEEKS, claveDia, todayLocalIso } from "@/domain/plan/calendario";
 import { RITMO_ESPERADO, parseRitmoToSeconds } from "@/domain/running/ritmo";
 import { MOVILIDAD } from "@/domain/salud/movilidad";
 import { HitosContent, PaceComparisonChart, PhaseAdjustContent, PlanGlobalContent, WeeklyLogContent } from "@/features/coach/paneles";
@@ -25,7 +25,7 @@ export function CoachScreen({ jumpToDay, setWeekIdx, checked, workoutWeights, ri
     wk.days.forEach((day, di) => {
       if (day.tipo === "libre") return; // dias de descanso no cuentan como tarea
       totalDiasPlan++;
-      const dayKey = wk.n + "-" + di;
+      const dayKey = claveDia(wk.days[di]);
       if (checked[dayKey]) totalDiasHechos++;
     });
   });
@@ -36,7 +36,7 @@ export function CoachScreen({ jumpToDay, setWeekIdx, checked, workoutWeights, ri
   let lastActivityDate = null;
   for (let i = pastDaysWithActivity.length - 1; i >= 0; i--) {
     const d = pastDaysWithActivity[i];
-    if (checked[d.weekN + "-" + d.dayIdx]) { lastActivityDate = d.isoDate; break; }
+    if (checked[claveDia(d)]) { lastActivityDate = d.isoDate; break; }
   }
   const daysSinceLastActivity = lastActivityDate ? Math.round((new Date(todayIso) - new Date(lastActivityDate)) / (1000*60*60*24)) : null;
 
@@ -45,7 +45,7 @@ export function CoachScreen({ jumpToDay, setWeekIdx, checked, workoutWeights, ri
   const totalPastDays = pastDays.length;
   let cuelloDiasCompletos = 0, magiaDiasCompletos = 0, guerreroDiasCompletos = 0;
   pastDays.forEach(d => {
-    const dk = d.weekN + "-" + d.dayIdx;
+    const dk = claveDia(d);
     const cM = !!(cuelloChecks || {})[dk + "-m"], cT = !!(cuelloChecks || {})[dk + "-t"], cN = !!(cuelloChecks || {})[dk + "-n"];
     if (cM && cT && cN) cuelloDiasCompletos++;
     if ((magiaLog || {})[dk]) magiaDiasCompletos++;
@@ -72,7 +72,7 @@ export function CoachScreen({ jumpToDay, setWeekIdx, checked, workoutWeights, ri
     let realSec = null, realStr = null;
     wk.days.forEach((day, di) => {
       if (!(day.esCalidad || day.tipo === "test" || day.tipo === "objetivo")) return;
-      const dayKey = wn + "-" + di;
+      const dayKey = claveDia(WEEKS[wn - 1].days[di]);
       const r = ritmoReal[dayKey];
       if (r) {
         const sec = parseRitmoToSeconds(r);
@@ -91,7 +91,7 @@ export function CoachScreen({ jumpToDay, setWeekIdx, checked, workoutWeights, ri
   let missedStreak = 0;
   for (let i = qualityDaysPast.length - 1; i >= 0; i--) {
     const d = qualityDaysPast[i];
-    const dk = d.weekN + "-" + d.dayIdx;
+    const dk = claveDia(d);
     if (checked[dk]) break;
     missedStreak++;
   }
@@ -105,7 +105,7 @@ export function CoachScreen({ jumpToDay, setWeekIdx, checked, workoutWeights, ri
   const painSummary = {}; // { zona: { avg, max, count } }
   painZonas.forEach(zona => {
     const vals = painDays.map(d => {
-      const dk = d.weekN + "-" + d.dayIdx;
+      const dk = claveDia(d);
       return painLog[dk] ? painLog[dk][zona] : null;
     }).filter(v => v != null);
     if (vals.length > 0) {
