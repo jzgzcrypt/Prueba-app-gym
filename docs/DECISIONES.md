@@ -137,3 +137,40 @@ ciegas: el mejor material para ese modelo es lo que se aprenda al cerrar este.
 **Cuándo se revisa:** al cerrar el Bloque 1. A partir de ahí el cableado deja de
 ser una decisión y pasa a ser el obstáculo, porque el Bloque 2 no puede exigir
 un despliegue.
+
+---
+
+## D-007 — Un área tiene un *papel* en cada bloque
+
+**20 sep 2026**
+
+Al preguntar qué viene después del Bloque 1, la respuesta fue: **consolidar el
+7K y virar a estética**. Running baja a mantenimiento, fuerza sube a objetivo.
+
+Eso descarta el modelo obvio para encadenar bloques, que sería "cada bloque
+tiene un objetivo". No es suficiente: lo que cambia entre el Bloque 1 y el 2 no
+es solo la meta, es **cuánta prioridad tiene cada área**. Las mismas siete áreas
+siguen ahí; lo que cambia es el papel de cada una.
+
+**Decisión:** un bloque no declara un objetivo, declara el papel de cada área.
+
+| Papel | Qué significa | Bloque 1 | Bloque 2 |
+|---|---|---|---|
+| `objetivo` | Dicta la estructura de la semana | Running | Fuerza |
+| `soporte` | Existe para servir al objetivo | Fuerza de pierna | Running |
+| `mantenimiento` | Se conserva con el mínimo | — | Running |
+| `salud` | No negociable, nunca baja de nivel | Cuello, movilidad | Cuello, movilidad |
+| `habilidad` | Progresa a su ritmo, al margen | Magia, guerrero | Magia, guerrero |
+| `compromiso` | Fijo, el plan se adapta a él | Tenis | Tenis |
+
+**Por qué importa más allá del Bloque 2:** este es justamente el modelo que hace
+falta para la app de vida. Dar de alta "Idiomas" no es añadir una pantalla: es
+declarar un área y decir qué papel tiene en el bloque en curso. Un área puede
+estar años en `mantenimiento` y subir a `objetivo` un trimestre.
+
+Y explica por qué el tenis necesitó su propia figura: `compromiso` no es un
+papel que se elige por bloque, es una restricción que el plan tiene que
+respetar siempre.
+
+**Cuándo se revisa:** al diseñar el encadenado, en noviembre. Si el Bloque 2 no
+se puede expresar con estos seis papeles, faltan papeles.

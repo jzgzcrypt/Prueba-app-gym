@@ -1,5 +1,5 @@
-import { compromisoDelDia } from "@/domain/compromisos";
-import { BLOQUE, FECHA_INICIO, WEEKS as PLAN } from "@/domain/plan/bloque-1-base-7k";
+import { compromisoDelDia } from "../compromisos.js";
+import { BLOQUE, FECHA_INICIO, WEEKS as PLAN } from "./bloque-1-base-7k.js";
 
 /**
  * El calendario ata el plan a fechas reales.
@@ -75,6 +75,9 @@ function aplicarCompromiso(dia, dayIdx) {
     what: c.what,
     reglas: c.reglas,
     compromiso: c.id,
+    // El compromiso decide QUE pasa ese dia; el plan puede anadir el contexto
+    // de la fase en la que cae (p. ej. "es taper, no te vacies").
+    notaPlan: dia.notaPlan || null,
   };
 }
 

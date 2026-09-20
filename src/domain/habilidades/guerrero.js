@@ -1,4 +1,4 @@
-import { semanaHabito } from "@/domain/salud/cuello";
+import { semanaHabito } from "../salud/cuello.js";
 // ─── GUERRERO — sistema de 4 pilares en paralelo ─────────────────────────────
 export const GUERRERO_PILARES = {
   calma: {

@@ -1,5 +1,5 @@
-import { CAT } from "@/design/tokens";
-import { semanaHabito } from "@/domain/salud/cuello";
+import { CAT } from "../../design/tokens.js";
+import { semanaHabito } from "./cuello.js";
 // ─── MOVILIDAD — sistema de 4 patrones en paralelo, cada uno con test propio ──
 export const MOVILIDAD_PATRONES = {
   hombro: {

@@ -56,6 +56,10 @@ export default function App() {
     { numero: BLOQUE.numero, nombre: BLOQUE.nombre, inicio: FECHA_INICIO, fin: FECHA_FIN,
       objetivoRunning: BLOQUE.objetivo, estado: "activo", revision: "" }
   ]); // historial de bloques de entrenamiento encadenados
+  // Fecha del ultimo backup descargado. Sin esto no hay forma de saber cuanto
+  // hace que los datos no salen del dispositivo, que es el unico riesgo
+  // irreversible que tiene hoy la app.
+  const [ultimoBackup, setUltimoBackup] = useState(null); // "YYYY-MM-DD" | null
   const [expandedBlock, setExpandedBlock] = useState("main"); // que bloque esta abierto en HoyScreen
 
   // ─── Sistema global de deshacer (Undo) ─────────────────────────────────────
@@ -114,6 +118,7 @@ export default function App() {
           if (d.currentWeekOverride !== undefined) setCurrentWeekOverride(d.currentWeekOverride);
           if (d.weeklyLog) setWeeklyLog(d.weeklyLog);
           if (d.bloquesHistorial) setBloquesHistorial(d.bloquesHistorial);
+          if (d.ultimoBackup) setUltimoBackup(d.ultimoBackup);
           loadedOk = true;
         }
       } catch (err) {
@@ -148,7 +153,7 @@ export default function App() {
       checked, cuelloChecks, notes, youtubeLinks, customExercises, painLog,
       flaggedExercises, pausedRanges, workoutProgress, magiaProgress, magiaLog,
       guerreroLog, workoutWeights, medidas, ritmoReal, ritmoTramos, sensaciones, postponed, phaseAdjustNote,
-      currentWeekOverride, weeklyLog, bloquesHistorial,
+      currentWeekOverride, weeklyLog, bloquesHistorial, ultimoBackup,
     };
     const t = setTimeout(async () => {
       try {
@@ -162,7 +167,7 @@ export default function App() {
   }, [checked, cuelloChecks, notes, youtubeLinks, customExercises, painLog,
       flaggedExercises, pausedRanges, workoutProgress, magiaProgress, magiaLog,
       guerreroLog, workoutWeights, medidas, ritmoReal, ritmoTramos, sensaciones, postponed, phaseAdjustNote,
-      currentWeekOverride, weeklyLog, bloquesHistorial, storageReady]);
+      currentWeekOverride, weeklyLog, bloquesHistorial, ultimoBackup, storageReady]);
 
   const currentDay = FLAT_DAYS[flatIdx] || FLAT_DAYS[todayIdx] || FLAT_DAYS[0];
   const isToday = flatIdx === todayIdx;
@@ -196,6 +201,7 @@ export default function App() {
     a.href = url; a.download = "programa-7k-backup-" + todayLocalIso() + ".json";
     document.body.appendChild(a); a.click(); document.body.removeChild(a);
     URL.revokeObjectURL(url);
+    setUltimoBackup(todayLocalIso());
   };
 
   const importData = (file) => {
@@ -383,7 +389,7 @@ export default function App() {
             weeklyLog={weeklyLog} setWeeklyLog={setWeeklyLog}
             phaseAdjustNote={phaseAdjustNote} setPhaseAdjustNote={setPhaseAdjustNote}
             currentWeekOverride={currentWeekOverride} setCurrentWeekOverride={setCurrentWeekOverride}
-            exportData={exportData} importData={importData} painLog={painLog} medidas={medidas}
+            exportData={exportData} importData={importData} ultimoBackup={ultimoBackup} painLog={painLog} medidas={medidas}
             bloquesHistorial={bloquesHistorial} setBloquesHistorial={setBloquesHistorial}
             storageStatus={storageStatus}
             cuelloChecks={cuelloChecks} magiaLog={magiaLog} guerreroLog={guerreroLog} />

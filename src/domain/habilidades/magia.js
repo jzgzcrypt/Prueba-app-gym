@@ -1,4 +1,4 @@
-import { semanaHabito } from "@/domain/salud/cuello";
+import { semanaHabito } from "../salud/cuello.js";
 // ─── HÁBITO APARTE — MAGIA CON CARTAS (memoria/matemática) ────────────────────
 // Un truco nuevo cada 1-2 semanas. Practica 10 min/dia. Progreso = dominio del truco, no velocidad.
 export const MAGIA_TRUCOS = [

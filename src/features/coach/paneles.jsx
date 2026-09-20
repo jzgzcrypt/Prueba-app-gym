@@ -1,10 +1,19 @@
 "use client";
 
 import { useState } from "react";
-import { C, CAT, R, SP, TYPE } from "@/design/tokens";
+import { C, CAT, R, SP, TAP_MIN, TYPE } from "@/design/tokens";
 import { BLOQUE, DATE_MAP, FECHA_FIN, RANGO_BLOQUE, WEEKS, todayLocalIso } from "@/domain/plan/calendario";
 import { SectionHeader } from "@/features/ui/headers";
-export function PhaseAdjustContent({ currentWeekN, currentWeekOverride, setCurrentWeekOverride, phaseAdjustNote, setPhaseAdjustNote, exportData, importData, storageStatus }) {
+/** Dias enteros transcurridos desde una fecha "YYYY-MM-DD" hasta hoy. */
+function diasDesde(iso) {
+  const [y, m, d] = iso.split("-").map(Number);
+  const then = Date.UTC(y, m - 1, d);
+  const hoy = todayLocalIso().split("-").map(Number);
+  const now = Date.UTC(hoy[0], hoy[1] - 1, hoy[2]);
+  return Math.max(0, Math.round((now - then) / 86400000));
+}
+
+export function PhaseAdjustContent({ currentWeekN, currentWeekOverride, setCurrentWeekOverride, phaseAdjustNote, setPhaseAdjustNote, exportData, importData, storageStatus, ultimoBackup }) {
   const [noteDraft, setNoteDraft] = useState(phaseAdjustNote);
   const autoWeek = (() => {
     const todayIso = todayLocalIso();
@@ -77,6 +86,35 @@ export function PhaseAdjustContent({ currentWeekN, currentWeekOverride, setCurre
         <div style={{ fontSize: 11.5, color: C.textDim, lineHeight: 1.45, marginBottom: SP.md }}>
           El guardado automático ya protege tus datos en este artifact publicado. Usa esto solo como copia extra, o para llevar tus datos a otra cuenta o dispositivo.
         </div>
+        {(() => {
+          // Los datos viven en este navegador y en ningun sitio mas. El aviso no
+          // es decorativo: hasta la Fase 2 (cuenta y base de datos) el backup es
+          // lo unico que separa "he perdido el movil" de "he perdido el bloque".
+          const dias = ultimoBackup ? diasDesde(ultimoBackup) : null;
+          const urge = dias == null || dias >= 7;
+          if (!urge) {
+            return (
+              <div style={{ ...TYPE.meta, color: C.textDim, marginBottom: 8 }}>
+                Última copia hace {dias === 0 ? "menos de un día" : dias === 1 ? "1 día" : dias + " días"}.
+              </div>
+            );
+          }
+          return (
+            <div style={{ display: "flex", gap: 10, alignItems: "flex-start", padding: "10px 12px", marginBottom: 10,
+                          background: C.card, border: "1px solid " + CAT.running, borderRadius: 10 }}>
+              <div style={{ width: 6, height: 6, borderRadius: 999, background: CAT.running, marginTop: 6, flexShrink: 0 }} />
+              <div>
+                <div style={{ ...TYPE.bodyStrong, color: C.text }}>
+                  {ultimoBackup ? "Hace " + dias + " días de la última copia" : "No has hecho ninguna copia todavía"}
+                </div>
+                <div style={{ ...TYPE.body, color: C.textDim, marginTop: 2 }}>
+                  Tus datos están solo en este navegador. Si pierdes el móvil o borras los
+                  datos del sitio, se va el bloque entero. Descarga la copia y guárdala donde quieras.
+                </div>
+              </div>
+            </div>
+          );
+        })()}
         <button className="btn" onClick={exportData} style={{
           width: "100%", padding: SP.sm + 2 + "px", borderRadius: R.md, background: C.accent, color: "#FAFAF9", fontWeight: 800, fontSize: 12.5, marginBottom: SP.sm,
         }}>DESCARGAR COPIA (.json)</button>
@@ -223,40 +261,84 @@ export function HitosContent({ bloquesHistorial, setBloquesHistorial, currentWee
   );
 }
 
-export function WeeklyLogContent({ weeklyLog, setWeeklyLog, currentWeekN }) {
+export function WeeklyLogContent({ weeklyLog, setWeeklyLog, currentWeekN, checked, ritmoReal, painLog, cuelloChecks, magiaLog, guerreroLog }) {
   const [editingWeek, setEditingWeek] = useState(null);
-  const [draft, setDraft] = useState("");
+  const [draft, setDraft] = useState({ paso: "", porque: "", ajuste: "" });
 
   const weeksWithData = WEEKS.filter(w => w.n <= currentWeekN).slice().reverse();
 
-  const startEdit = (n) => { setEditingWeek(n); setDraft(weeklyLog[n] || ""); };
+  const startEdit = (n) => {
+    const v = weeklyLog[n];
+    setEditingWeek(n);
+    setDraft(v && typeof v === "object" ? { paso: v.paso || "", porque: v.porque || "", ajuste: v.ajuste || "" }
+                                        : { paso: typeof v === "string" ? v : "", porque: "", ajuste: "" });
+  };
   const save = (n) => { setWeeklyLog(p => Object.assign({}, p, { [n]: draft })); setEditingWeek(null); };
+  const tieneAlgo = (v) => !!v && (typeof v === "string" ? !!v : !!(v.paso || v.porque || v.ajuste));
+
+  // Las tres preguntas salen de tu propia bitacora: las notas que de verdad
+  // sirvieron separaban que paso, por que, y que se ajusta. Preguntarlo por
+  // separado es lo que convierte el registro en una decision.
+  const CAMPOS = [
+    { k: "paso",   label: "QUÉ PASÓ",    ph: "Los hechos, sin interpretarlos. 3 de 3 salidas, 0 de fuerza..." },
+    { k: "porque", label: "POR QUÉ",     ph: "El motivo real, aunque no guste. Pereza en el momento, no falta de tiempo..." },
+    { k: "ajuste", label: "QUÉ AJUSTO",  ph: "Qué cambia a partir de ahora. Si no cambia nada, escríbelo también." },
+  ];
 
   return (
     <div style={{ padding: "0 16px 30px" }}>
       <div style={{ fontSize: 11.5, color: C.textDim, marginBottom: 14, lineHeight: 1.4 }}>
-        Una nota corta por semana, tu valoración general — distinta de las notas diarias.
+        Tres preguntas por semana. Separarlas es lo que hace que la revisión sirva
+        para decidir algo, y no solo para dejar constancia.
       </div>
       <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
         {weeksWithData.map(wk => {
           const isEditing = editingWeek === wk.n;
-          const hasLog = !!weeklyLog[wk.n];
+          const v = weeklyLog[wk.n];
+          const hasLog = tieneAlgo(v);
+          const datos = resumenSemana(wk, { checked, ritmoReal, painLog, cuelloChecks, magiaLog, guerreroLog });
           return (
             <div key={wk.n} style={{ background: C.card, border: "1px solid " + C.cardBorder, borderRadius: 12, padding: "12px 14px" }}>
               <div style={{ fontSize: 11.5, fontWeight: 800, color: C.text, marginBottom: 6 }}>SEMANA {wk.n} · {wk.dates}</div>
+
+              {/* Los datos de la semana, al lado de las preguntas: se responde
+                  mirando lo que pasó, no lo que uno recuerda. */}
+              <div style={{ display: "flex", flexWrap: "wrap", gap: 6, marginBottom: 10 }}>
+                {datos.map((d, i) => (
+                  <div key={i} style={{ fontSize: 10.5, fontWeight: 700, letterSpacing: 0.2, padding: "3px 8px",
+                                        borderRadius: 999, background: C.surfaceMuted, color: d.color || C.textDim }}>
+                    {d.label} {d.valor}
+                  </div>
+                ))}
+              </div>
+
               {isEditing ? (
                 <div>
-                  <textarea value={draft} onChange={e => setDraft(e.target.value)}
-                    placeholder="¿Cómo fue la semana en general?"
-                    style={{ width: "100%", minHeight: 60, fontSize: 13, padding: "8px 10px", borderRadius: 8, border: "1px solid #D4D4D1", color: "#171717", outline: "none", fontFamily: "inherit", resize: "vertical" }} />
-                  <button className="btn" onClick={() => save(wk.n)} style={{ marginTop: 6, fontSize: 11.5, fontWeight: 800, color: "#FAFAF9", background: C.accent, padding: "7px 14px", borderRadius: 8 }}>GUARDAR</button>
+                  {CAMPOS.map(c => (
+                    <div key={c.k} style={{ marginBottom: 8 }}>
+                      <div style={{ fontSize: 10, fontWeight: 800, letterSpacing: 0.5, color: C.textFaint, marginBottom: 3 }}>{c.label}</div>
+                      <textarea value={draft[c.k]} onChange={e => setDraft(p => Object.assign({}, p, { [c.k]: e.target.value }))}
+                        placeholder={c.ph}
+                        style={{ width: "100%", minHeight: 52, fontSize: 13, padding: "8px 10px", borderRadius: 8, border: "1px solid #D4D4D1", color: "#171717", outline: "none", fontFamily: "inherit", resize: "vertical" }} />
+                    </div>
+                  ))}
+                  <button className="btn" onClick={() => save(wk.n)} style={{ fontSize: 11.5, fontWeight: 800, color: "#FAFAF9", background: C.accent, padding: "8px 16px", borderRadius: 8, minHeight: TAP_MIN - 10 }}>GUARDAR REVISIÓN</button>
                 </div>
               ) : hasLog ? (
-                <div onClick={() => startEdit(wk.n)} style={{ fontSize: 13, color: "#4A4A47", background: "#F2F2F0", borderRadius: 8, padding: "8px 10px", cursor: "text" }}>
-                  {weeklyLog[wk.n]}
+                <div onClick={() => startEdit(wk.n)} style={{ cursor: "text" }}>
+                  {CAMPOS.map(c => {
+                    const texto = typeof v === "string" ? (c.k === "paso" ? v : "") : (v[c.k] || "");
+                    if (!texto) return null;
+                    return (
+                      <div key={c.k} style={{ marginBottom: 6 }}>
+                        <div style={{ fontSize: 9.5, fontWeight: 800, letterSpacing: 0.5, color: C.textFaint }}>{c.label}</div>
+                        <div style={{ fontSize: 13, color: "#4A4A47", background: C.surfaceMuted, borderRadius: 8, padding: "7px 10px", marginTop: 2 }}>{texto}</div>
+                      </div>
+                    );
+                  })}
                 </div>
               ) : (
-                <button className="btn" onClick={() => startEdit(wk.n)} style={{ fontSize: 11.5, color: "#8A8A87", fontWeight: 700 }}>+ Añadir nota de esta semana</button>
+                <button className="btn" onClick={() => startEdit(wk.n)} style={{ fontSize: 11.5, color: "#8A8A87", fontWeight: 700, minHeight: TAP_MIN - 14 }}>+ Revisar esta semana</button>
               )}
             </div>
           );
@@ -264,6 +346,35 @@ export function WeeklyLogContent({ weeklyLog, setWeeklyLog, currentWeekN }) {
       </div>
     </div>
   );
+}
+
+/** Lo que de verdad paso esa semana, sacado de los registros y no de la memoria.
+ *  Va al lado de las preguntas para que la revision se responda con datos. */
+function resumenSemana(wk, { checked, ritmoReal, painLog, cuelloChecks, magiaLog, guerreroLog }) {
+  const claves = wk.days.map((d, di) => wk.n + "-" + di);
+  const cuenta = (filtro) => wk.days.reduce((n, d, di) => n + (filtro(d) && checked[wk.n + "-" + di] ? 1 : 0), 0);
+  const total = (filtro) => wk.days.filter(filtro).length;
+
+  const esRun = (d) => d.tipo === "run" || d.tipo === "test" || d.tipo === "objetivo";
+  const esFuerza = (d) => d.tipo === "fuerza";
+  const esTenis = (d) => d.tipo === "compromiso";
+
+  const ritmos = claves.map(k => ritmoReal[k]).filter(Boolean);
+  const habitos = claves.reduce((n, k) =>
+    n + (magiaLog[k] ? 1 : 0) + (guerreroLog[k] ? 1 : 0) +
+    (["m","t","n"].some(m => cuelloChecks[k + "-" + m]) ? 1 : 0), 0);
+  const dolores = claves.map(k => painLog[k]).filter(Boolean)
+    .flatMap(p => Object.values(p)).filter(v => v >= 3).length;
+
+  const out = [];
+  const tRun = total(esRun), tFue = total(esFuerza), tTen = total(esTenis);
+  if (tRun) out.push({ label: "Running", valor: cuenta(esRun) + "/" + tRun, color: cuenta(esRun) === tRun ? C.ok : C.textDim });
+  if (tFue) out.push({ label: "Fuerza", valor: cuenta(esFuerza) + "/" + tFue, color: cuenta(esFuerza) === tFue ? C.ok : C.textDim });
+  if (tTen) out.push({ label: "Tenis", valor: cuenta(esTenis) + "/" + tTen, color: cuenta(esTenis) === tTen ? C.ok : C.textDim });
+  out.push({ label: "Hábitos", valor: String(habitos), color: habitos > 0 ? C.ok : C.amber });
+  if (ritmos.length) out.push({ label: "Ritmo", valor: ritmos.join(" · ") });
+  if (dolores) out.push({ label: "Dolor ≥3", valor: String(dolores), color: C.amber });
+  return out;
 }
 
 export function PlanGlobalContent({ jumpToDay, setWeekIdx, onJumpAway, checked }) {

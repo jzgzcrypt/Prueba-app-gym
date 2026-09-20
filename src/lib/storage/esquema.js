@@ -13,11 +13,24 @@
  * el objeto en la version siguiente. Son funciones puras y no lanzan.
  */
 
-export const VERSION_ESQUEMA = 1;
+export const VERSION_ESQUEMA = 2;
 
 const MIGRACIONES = {
-  // Ejemplo del contrato para el futuro:
-  // 2: (d) => ({ ...d, medidas: (d.medidas || []).map(m => ({ ...m, unidad: "kg" })) }),
+  // v2 — La bitacora semanal deja de ser un texto libre y pasa a tener las tres
+  // partes que de verdad sirven para decidir: que paso, por que, y que se
+  // ajusta. El texto que ya hubiera escrito se conserva entero en "paso":
+  // nunca se reparte a ojo entre los tres campos, porque eso seria inventar.
+  2: (d) => {
+    const log = d.weeklyLog || {};
+    const migrado = {};
+    for (const n of Object.keys(log)) {
+      const v = log[n];
+      migrado[n] = typeof v === "string"
+        ? { paso: v, porque: "", ajuste: "" }
+        : v; // ya tenia la forma nueva
+    }
+    return { ...d, weeklyLog: migrado };
+  },
 };
 
 /**
