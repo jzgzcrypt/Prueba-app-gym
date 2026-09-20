@@ -21,7 +21,44 @@ Todo cambio que se haga en la app se anota aquí. Sin excepciones.
 
 ## [Sin publicar]
 
-_Nada todavía._
+### Arreglado
+- **Los lunes son tenis, en las 11 semanas.** El plan solo lo recogía en las
+  semanas 3, 4 y 5: las semanas 1 y 2 se escribieron antes de que el tenis
+  fuera un compromiso fijo, y a las semanas 6 a 9 nunca se les aplicó el
+  ajuste, así que seguían poniendo sesión de Empuje el lunes por la tarde.
+
+### Añadido
+- **Compromisos fijos** (`src/domain/compromisos.js`), una figura nueva del
+  dominio: algo que ocurre siempre el mismo día de la semana, sea cual sea el
+  bloque. El tenis del lunes es el primero. Se escribe una vez y el calendario
+  lo superpone sobre todas las semanas, de este bloque y de los que vengan.
+- **Aviso de colisión**: si un plan programa una sesión encima de un compromiso
+  fijo, el calendario lo detecta y lo saca por consola en desarrollo. Es
+  exactamente el fallo que tenía el plan de origen, y ahora no puede pasar sin
+  que se vea.
+- La app se puede instalar en el móvil: manifiesto, iconos propios generados a
+  partir del logo, y apertura a pantalla completa sin barra de navegador.
+
+### Cambiado
+- **El bloque arranca el lunes 21 de septiembre de 2026** y termina el domingo
+  6 de diciembre. Antes empezaba el 31 de agosto.
+- **Las fechas dejan de estar escritas a mano.** El plan ya no contiene ni una
+  sola fecha: define 11 semanas de 7 días y el calendario las ata a fechas
+  reales a partir de `FECHA_INICIO`. Mover el bloque entero es cambiar una
+  constante, en vez de reescribir 77 días y 11 rangos.
+- Sesiones recolocadas para dejar el lunes libre:
+  - S1: el Empuje + Tirón del lunes pasa al miércoles, que estaba en descanso.
+  - S2: el Empuje del lunes pasa al viernes, que estaba en descanso.
+  - S6-S9: el Empuje del lunes se funde en el día de Tirón del miércoles, que
+    pasa a ser Tirón + Empuje. No había día libre donde moverlo.
+  - S10-S11: el lunes era descanso de taper; ahora lo ocupa el tenis.
+
+### Datos
+- **El historial arranca vacío.** Se quitan los datos semilla que traía el
+  sistema de las semanas ya vividas: sesiones marcadas, ritmos, sensaciones y
+  la bitácora de las semanas 1 y 2. El bloque empieza de cero.
+- El historial de bloques toma sus fechas del calendario, así que se mueve solo
+  si se mueve `FECHA_INICIO`.
 
 ---
 

@@ -2,8 +2,7 @@
 
 import { useState } from "react";
 import { C, CAT, R, SP, TYPE } from "@/design/tokens";
-import { WEEKS } from "@/domain/plan/bloque-1-base-7k";
-import { DATE_MAP, todayLocalIso } from "@/domain/plan/calendario";
+import { BLOQUE, DATE_MAP, FECHA_FIN, RANGO_BLOQUE, WEEKS, todayLocalIso } from "@/domain/plan/calendario";
 import { SectionHeader } from "@/features/ui/headers";
 export function PhaseAdjustContent({ currentWeekN, currentWeekOverride, setCurrentWeekOverride, phaseAdjustNote, setPhaseAdjustNote, exportData, importData, storageStatus }) {
   const [noteDraft, setNoteDraft] = useState(phaseAdjustNote);
@@ -278,20 +277,20 @@ export function PlanGlobalContent({ jumpToDay, setWeekIdx, onJumpAway, checked }
   ];
 
   const todayIso = todayLocalIso();
-  const objetivoDate = new Date("2026-11-15");
+  const objetivoDate = new Date(FECHA_FIN);
   const diasParaObjetivo = Math.round((objetivoDate - new Date(todayIso)) / (1000*60*60*24));
 
   return (
     <div>
       <div style={{ padding: "4px 16px 12px" }}>
-        <div style={{ fontSize: 11.5, color: C.textDim, fontWeight: 600 }}>11 semanas · 31 Ago - 15 Nov · 7km @ 4:45/km</div>
+        <div style={{ fontSize: 11.5, color: C.textDim, fontWeight: 600 }}>{BLOQUE.semanas} semanas · {RANGO_BLOQUE} · {BLOQUE.objetivo}</div>
       </div>
 
       <div style={{ padding: "0 16px 16px" }}>
         <div style={{ background: C.accent, borderRadius: 14, padding: "16px 18px", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
           <div>
             <div style={{ fontSize: 10, fontWeight: 800, color: "#B0B0AD", letterSpacing: 0.8 }}>DÍAS PARA EL OBJETIVO</div>
-            <div className="mono" style={{ fontSize: 13, fontWeight: 700, color: "#E5E5E3", marginTop: 4 }}>Domingo 8 nov · 7km @ 4:45/km</div>
+            <div className="mono" style={{ fontSize: 13, fontWeight: 700, color: "#E5E5E3", marginTop: 4 }}>{new Date(FECHA_FIN + "T12:00:00").toLocaleDateString("es-ES", { weekday: "long", day: "numeric", month: "short" })} · {BLOQUE.objetivo}</div>
           </div>
           <div className="mono" style={{ fontSize: 30, fontWeight: 800, color: "#FAFAF9" }}>
             {diasParaObjetivo > 0 ? diasParaObjetivo : diasParaObjetivo === 0 ? "HOY" : "—"}

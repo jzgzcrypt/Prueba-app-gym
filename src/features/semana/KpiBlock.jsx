@@ -1,10 +1,10 @@
 "use client";
 
+import { WEEKS } from "@/domain/plan/calendario";
 import { useState } from "react";
 import { C, CAT, GRUPO_COLOR, R, SP, TYPE } from "@/design/tokens";
 import { GRUPO_ENFOQUE } from "@/domain/fuerza/enfoque";
 import { parseSeries } from "@/domain/fuerza/series";
-import { WEEKS } from "@/domain/plan/bloque-1-base-7k";
 export function KpiBlock({ title, isOpen, onToggle, weeks, checked, workoutWeights, ritmoReal, isAcumulado, currentWeekN, noCollapse }) {
   const [selectedGrupo, setSelectedGrupo] = useState(null);
   const gruposPlan = {};

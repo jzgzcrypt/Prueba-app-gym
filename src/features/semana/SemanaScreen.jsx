@@ -2,8 +2,7 @@
 
 import { useState } from "react";
 import { C, R, SP, TAP_MIN, TYPE } from "@/design/tokens";
-import { WEEKS } from "@/domain/plan/bloque-1-base-7k";
-import { DATE_MAP } from "@/domain/plan/calendario";
+import { DATE_MAP, WEEKS } from "@/domain/plan/calendario";
 import { KpiBlock } from "@/features/semana/KpiBlock";
 export function SemanaScreen({ weekIdx, setWeekIdx, jumpToDay, checked, todayIso, workoutWeights, ritmoReal, pausedRanges, setPausedRanges }) {
   const week = WEEKS[weekIdx];

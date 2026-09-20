@@ -20,6 +20,7 @@ export const CAT = {
   cuello: "#2F5F8A",    // azul petroleo
   movilidad: "#8A5A2F", // ambar tierra
   nutricion: "#6B4C8A", // ciruela
+  tenis: "#1F6F6B",     // verde azulado — compromisos fijos
 };
 
 export const GRUPO_COLOR = {

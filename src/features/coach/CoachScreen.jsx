@@ -2,8 +2,7 @@
 
 import { useState } from "react";
 import { C, CAT, R, SP, TYPE } from "@/design/tokens";
-import { WEEKS } from "@/domain/plan/bloque-1-base-7k";
-import { DATE_MAP, FLAT_DAYS, todayLocalIso } from "@/domain/plan/calendario";
+import { DATE_MAP, FLAT_DAYS, WEEKS, todayLocalIso } from "@/domain/plan/calendario";
 import { RITMO_ESPERADO, parseRitmoToSeconds } from "@/domain/running/ritmo";
 import { MOVILIDAD } from "@/domain/salud/movilidad";
 import { HitosContent, PaceComparisonChart, PhaseAdjustContent, PlanGlobalContent, WeeklyLogContent } from "@/features/coach/paneles";

@@ -3,15 +3,14 @@
 import { C, CAT, R, SP, TAP_MIN, TYPE } from "@/design/tokens";
 import { ICON_FUERZA, ICON_MOVILIDAD, ICON_RUNNING, LOGO_7K } from "@/domain/assets/icons";
 import { parseSeries } from "@/domain/fuerza/series";
-import { WEEKS } from "@/domain/plan/bloque-1-base-7k";
-import { FLAT_DAYS, todayLocalIso } from "@/domain/plan/calendario";
+import { FECHA_INICIO, FLAT_DAYS, WEEKS, todayLocalIso } from "@/domain/plan/calendario";
 import { getFraseHoy } from "@/domain/running/frases";
 import { MOVILIDAD } from "@/domain/salud/movilidad";
 import { getTecnicaEj } from "@/domain/salud/tecnica";
 import { GuerreroBlock, HabitBlock, ListBlock, MagiaBlock, MoveDayBlock, PainBlock } from "@/features/hoy/bloques";
 import { WeekDots } from "@/features/ui/WeekDots";
 export function HoyScreen(props) {
-  const { day, dayKey, isToday, flatIdx, goDay, goToday, isFuerzaDay, isRunDay, mov,
+  const { day, dayKey, isToday, flatIdx, goDay, goToday, isFuerzaDay, isRunDay, isCompromisoDay, mov,
     cuelloEj, cuelloChecks, toggleCuello, checked, toggleCheck, mainDone, workoutProgress, onStartWorkout,
     notes, noteInput, setNoteInput, editingNote, setEditingNote, saveNote, openCatalogo,
     expandedBlock, setExpandedBlock, magiaProgress, bloquesHistorial } = props;
@@ -23,7 +22,7 @@ export function HoyScreen(props) {
   const totalSeries = isFuerzaDay ? day.ejercicios.reduce((s,e) => s + parseSeries(e.series), 0) : 0;
   const doneSeries = isFuerzaDay && workoutProgress ? Object.values(workoutProgress).reduce((s,v) => s+(v||0),0) : 0;
 
-  const startDate = new Date("2026-08-31");
+  const startDate = new Date(FECHA_INICIO);
   const thisDate = new Date(day.isoDate || startDate);
   const daysSinceStart = Math.round((thisDate - startDate) / (1000*60*60*24));
   const isMedicionDay = daysSinceStart >= 0 && daysSinceStart % 14 === 0;
@@ -247,6 +246,31 @@ export function HoyScreen(props) {
           </ListBlock>
         )}
 
+        {isCompromisoDay && (
+          <div style={{ background: C.card, border: "1px solid " + C.cardBorder, borderLeft: "3px solid " + CAT.tenis,
+                        borderRadius: 14, padding: "14px 16px" }}>
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline" }}>
+              <div style={{ fontSize: 15, fontWeight: 800, color: C.text }}>{day.titulo}</div>
+              <div style={{ ...TYPE.meta, color: CAT.tenis }}>{day.hora}</div>
+            </div>
+            <div style={{ ...TYPE.body, color: C.textDim, marginTop: 6 }}>{day.what}</div>
+            {day.reglas && (
+              <div style={{ marginTop: 10, paddingTop: 10, borderTop: "1px solid " + C.divider }}>
+                {day.reglas.map((r, i) => (
+                  <div key={i} style={{ ...TYPE.body, color: C.textDim, display: "flex", gap: 8, marginTop: i ? 4 : 0 }}>
+                    <span style={{ color: CAT.tenis }}>·</span><span>{r}</span>
+                  </div>
+                ))}
+              </div>
+            )}
+            <button className="btn" onClick={() => toggleCheck(dayKey)} style={{
+              width: "100%", marginTop: 12, padding: "12px", borderRadius: 10, minHeight: TAP_MIN,
+              background: checked[dayKey] ? C.ok : "#EDEDEB",
+              fontSize: 13, fontWeight: 800, color: checked[dayKey] ? "#FAFAF9" : "#787774",
+            }}>{checked[dayKey] ? "HECHO" : "MARCAR COMO HECHO"}</button>
+          </div>
+        )}
+
         {day.tipo === "libre" && (
           <div style={{ background: C.card, border: "1px solid " + C.cardBorder, borderRadius: 14, padding: "14px 16px" }}>
             <div style={{ fontSize: 14, fontWeight: 700, color: C.text }}>Descanso</div>
@@ -255,7 +279,7 @@ export function HoyScreen(props) {
         )}
 
         {/* ═══ MOVILIDAD (día libre) — colapsable ═══ */}
-        {day.tipo === "libre" && mov.enf.length > 0 && (
+        {(day.tipo === "libre" || isCompromisoDay) && mov.enf.length > 0 && (
           <ListBlock id="mov" expandedBlock={expandedBlock} toggleBlock={toggleBlock}
             icon={ICON_MOVILIDAD} accent={CAT.movilidad} title="Movilidad del día"
             statusText={mov.enf.length + " ej."} statusDone={!!checked[dayKey+"-movenf"]}>

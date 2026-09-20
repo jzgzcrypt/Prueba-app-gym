@@ -5,8 +5,7 @@ import { C, R, SP, TAP_MIN } from "@/design/tokens";
 import { storage, CLAVE_DATOS, VERSION_ESQUEMA, migrar } from "@/lib/storage";
 import { ICON_CUELLO, ICON_MOVILIDAD, ICON_NUTRICION } from "@/domain/assets/icons";
 import { NUTRICION } from "@/domain/nutricion/nutricion";
-import { WEEKS } from "@/domain/plan/bloque-1-base-7k";
-import { FLAT_DAYS, findTodayIndex, todayLocalIso } from "@/domain/plan/calendario";
+import { BLOQUE, FECHA_FIN, FECHA_INICIO, FLAT_DAYS, WEEKS, findTodayIndex, todayLocalIso } from "@/domain/plan/calendario";
 import { getCuelloEj } from "@/domain/salud/cuello";
 import { getMovilidad } from "@/domain/salud/movilidad";
 import { CoachScreen } from "@/features/coach/CoachScreen";
@@ -24,7 +23,7 @@ export default function App() {
   const [flatIdx, setFlatIdx] = useState(todayIdx);
   const [screen, setScreen] = useState("hoy");
   const [weekIdx, setWeekIdx] = useState(FLAT_DAYS[todayIdx].weekIdx);
-  const [checked, setChecked] = useState({ "1-1": true, "1-3": true, "1-6": true, "2-1": true });
+  const [checked, setChecked] = useState({});
   const [cuelloChecks, setCuelloChecks] = useState({});
   const [notes, setNotes] = useState({});
   const [noteInput, setNoteInput] = useState({});
@@ -42,24 +41,20 @@ export default function App() {
   const [workoutWeights, setWorkoutWeights] = useState({}); // { dayKey: { exerciseIdx: { serieIdx: "20" } } }
   const [activeWorkout, setActiveWorkout] = useState(null);
   const [medidas, setMedidas] = useState([]); // [{fecha, peso, cintura, cadera}]
-  const [ritmoReal, setRitmoReal] = useState({ "1-3": "8:38", "1-6": "7:46" }); // { dayKey: "5:12/km" }
-  const [ritmoTramos, setRitmoTramos] = useState({ "1-3": "6:00", "1-6": "6:00" }); // { dayKey: "6:00" } - ritmo en los tramos corriendo (fase correr/caminar)
-  const [sensaciones, setSensaciones] = useState({
-    "1-3": "Completé los 6 bloques. Km 2 más lento (9:09 vs 8:15 y 8:13).",
-    "1-6": "3ª salida de la semana, mejor que el jueves — menos tiempo caminando, primer km a 7:24. Sensaciones buenas.",
-  }); // { dayKey: "texto" } - como te sentiste en la sesion
+  const [ritmoReal, setRitmoReal] = useState({}); // { dayKey: "5:12/km" }
+  const [ritmoTramos, setRitmoTramos] = useState({}); // { dayKey: "6:00" } - ritmo en los tramos corriendo (fase correr/caminar)
+  const [sensaciones, setSensaciones] = useState({}); // { dayKey: "texto" } - como te sentiste en la sesion
   const [ritmoInput, setRitmoInput] = useState({});
   const [editingRitmo, setEditingRitmo] = useState({});
   const [postponed, setPostponed] = useState({}); // { dayKey: {destino, titulo} }
   const [phaseAdjustNote, setPhaseAdjustNote] = useState(""); // nota libre sobre desviacion de fases/calendario
   const [currentWeekOverride, setCurrentWeekOverride] = useState(null); // numero de semana manual, o null = automatico por fecha
-  const [weeklyLog, setWeeklyLog] = useState({
-    1: "Semana 1 (31 Ago - 6 Sep) — CERRADA. Running: 3/3 salidas completadas. Progresión real: martes 2,40km a 8:38/km medio (tramos ~6:00/km); domingo 2,52km a 7:46/km medio (tramos ~6:00/km) — casi 1 min más rápido de media en la misma semana, con más distancia. La mejora viene de menos tiempo caminando entre bloques, no de correr más rápido — es la adaptación esperada en esta fase. Magia solo puntualmente. Cuello, movilidad y guerrero no arrancaron — motivo real: pereza en el momento, no falta de tiempo. Diagnóstico: los hábitos sin momento fijo dependen de decidir cada vez, y esa decisión se pierde; el running funciona porque tiene día y hora claros. Ajuste aplicado: running intacto, los 4 hábitos reiniciados a nivel 1 desde semana 2 con anclaje fijo a un momento del día (cuello: levantarte/comer/acostarte; guerrero: al llegar a casa; magia: antes de dormir).",
-    2: "Nuevo compromiso fijo: tenis todos los lunes, 20:00-21:30, esfuerzo moderado (1:30 de intervalos — cardio real). Empezó el lunes 7 sep. El martes 8 sep no se corrió por cansancio del tenis. RESULTADO REAL de la semana: solo 1 de 3 salidas de running, 0 sesiones de fuerza, 0 de los 4 hábitos. DIAGNÓSTICO CORREGIDO: no es fatiga general — es fatiga de piernas y cardio por el tenis, que compite directamente con running y con fuerza de pierna. Guerrero, Magia y Movilidad NO generan esa fatiga y no había motivo real para pausarlos — se mantienen activos sin cambios. AJUSTE DE FONDO (semanas 3-5, fase ESTÉTICA): el tenis del lunes cuenta como sesión de calidad/cardio semanal — nada de running el lunes. El martes (día después del tenis) pasa a suave o descanso — el running de calidad que antes iba el martes se mueve al jueves, cuando las piernas ya han recuperado. Fuerza reorganizada por fatiga real de cada grupo, no de forma genérica: hombro y brazos (bíceps/tríceps) son casi gratis en fatiga sistémica y van a frecuencia alta sin recortar — es además la prioridad estética real. Pecho y espalda se mantienen pero moderando solo los movimientos pesados/compuestos (menos series de press y dominadas a fallo). Pierna es el único grupo realmente recortado (sin carga, solo patrón y salud de cadera) porque compite en directo con las mismas piernas del tenis. Se retoma volumen de pierna normal en semana 6 si el running lo pide por rendimiento.",
-  }); // { weekN: "texto de la bitacora" }
+  const [weeklyLog, setWeeklyLog] = useState({}); // { weekN: "texto de la bitacora" }
+  // El historial arranca con el bloque en curso, con sus fechas sacadas del
+  // calendario: si se mueve FECHA_INICIO, el historial se mueve con el.
   const [bloquesHistorial, setBloquesHistorial] = useState([
-    { numero: 1, nombre: "Bloque 1 — Base 7K", inicio: "2026-08-31", fin: "2026-11-15",
-      objetivoRunning: "7km @ 4:45/km", estado: "activo", revision: "" }
+    { numero: BLOQUE.numero, nombre: BLOQUE.nombre, inicio: FECHA_INICIO, fin: FECHA_FIN,
+      objetivoRunning: BLOQUE.objetivo, estado: "activo", revision: "" }
   ]); // historial de bloques de entrenamiento encadenados
   const [expandedBlock, setExpandedBlock] = useState("main"); // que bloque esta abierto en HoyScreen
 
@@ -177,6 +172,7 @@ export default function App() {
   const mov = getMovilidad(currentDay.cat, currentDay.weekN);
   const cuelloEj = getCuelloEj(currentDay.weekN);
   const mainDone = currentDay.tipo === "libre" ? true : !!checked[dayKey];
+  const isCompromisoDay = currentDay.tipo === "compromiso";
 
   const toggleCheck = (key) => setChecked(p => Object.assign({}, p, { [key]: !p[key] }));
   const toggleCuello = (m) => setCuelloChecks(p => Object.assign({}, p, { [dayKey + "-" + m]: !p[dayKey + "-" + m] }));
@@ -328,7 +324,7 @@ export default function App() {
         {screen === "hoy" && (
           <HoyScreen day={currentDay} dayKey={dayKey} isToday={isToday} flatIdx={flatIdx}
             goDay={goDay} goToday={goToday} onJumpDay={jumpToDay}
-            isFuerzaDay={isFuerzaDay} isRunDay={isRunDay} mov={mov}
+            isFuerzaDay={isFuerzaDay} isRunDay={isRunDay} isCompromisoDay={isCompromisoDay} mov={mov}
             cuelloEj={cuelloEj} cuelloChecks={cuelloChecks} toggleCuello={toggleCuello}
             checked={checked} toggleCheck={toggleCheck} mainDone={mainDone}
             workoutProgress={workoutProgress[dayKey]} onStartWorkout={() => setActiveWorkout(dayKey)}

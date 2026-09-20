@@ -1,8 +1,7 @@
 "use client";
 
 import { C, CAT, SP } from "@/design/tokens";
-import { WEEKS } from "@/domain/plan/bloque-1-base-7k";
-import { DATE_MAP, todayLocalIso } from "@/domain/plan/calendario";
+import { DATE_MAP, WEEKS, todayLocalIso } from "@/domain/plan/calendario";
 export function WeekDots({ day, checked, onJumpDay }) {
   const week = WEEKS[day.weekIdx];
   const todayIso = todayLocalIso();
