@@ -19,6 +19,13 @@ export const MOVILIDAD = {
     cal: [{ id: "circulos_tobillo_ktw", ex: "Tobillo mas knee-to-wall", t: "60s", reps: "10 reps/lado" }],
     enf: [{ id: "estiramiento_gemelo_soleo", ex: "Gemelo/soleo", t: "30s/lado", reps: "1 serie/lado" }],
   },
+  // El tenis carga hombro (saque), tobillo y cadera (cambios de direccion) y
+  // cintilla IT (frenadas laterales). No es un dia de descanso: tiene su propia
+  // movilidad.
+  tenis: {
+    cal: [{ id: "circulos_hombro_rotacion", ex: "Rotacion externa de hombro", t: "60s", reps: "12 reps/lado" }, { id: "circulos_tobillo_ktw", ex: "Tobillo mas knee-to-wall", t: "60s", reps: "10 reps/lado" }],
+    enf: [{ id: "estiramiento_cintilla_it", ex: "Cintilla IT", t: "30s/lado", reps: "1 serie/lado" }, { id: "estiramiento_gemelo_soleo", ex: "Gemelo/soleo", t: "30s/lado", reps: "1 serie/lado" }],
+  },
   descanso: {
     cal: [],
     enf: [{ id: "clavicula_circulos", ex: "Clavicula con banda", t: "90s", reps: "2 series" }, { id: "retraccion_escapular", ex: "Retraccion mas apertura pecho", t: "2 min", reps: "10 reps" }],

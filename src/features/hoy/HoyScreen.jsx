@@ -254,6 +254,10 @@ export function HoyScreen(props) {
               <div style={{ ...TYPE.meta, color: CAT.tenis }}>{day.hora}</div>
             </div>
             <div style={{ ...TYPE.body, color: C.textDim, marginTop: 6 }}>{day.what}</div>
+            {day.notaPlan && (
+              <div style={{ ...TYPE.bodyStrong, color: CAT.tenis, marginTop: 8, padding: "8px 10px",
+                            background: C.surfaceMuted, borderRadius: 8 }}>{day.notaPlan}</div>
+            )}
             {day.reglas && (
               <div style={{ marginTop: 10, paddingTop: 10, borderTop: "1px solid " + C.divider }}>
                 {day.reglas.map((r, i) => (

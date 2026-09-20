@@ -6,8 +6,8 @@ export const RITMO_ESPERADO = {
   4: 355,  // fartlek ~5:55/km (RPE7 en zona ~5:50-6:00)
   5: 350,  // fartlek progresando
   6: 327,  // ritmo especifico 5:20-5:35 -> ~5:27 promedio
-  7: 310,  // ritmo 4km 5:05-5:15 -> ~5:10
-  8: 297,  // 5km a 4:55-5:00 -> ~4:57
+  7: 305,  // ritmo 5km 5:00-5:10 -> ~5:05
+  8: 297,  // semana del test: el 7km manda, no hay sesion de ritmo
   9: 285,  // 3km exacto a 4:45
   10: 285, // taper, mantener
   11: 285, // objetivo: 4:45/km = 285s
