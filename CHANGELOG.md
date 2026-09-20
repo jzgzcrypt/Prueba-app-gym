@@ -22,6 +22,10 @@ Todo cambio que se haga en la app se anota aquí. Sin excepciones.
 ## [Sin publicar]
 
 ### Arreglado
+- **Next.js actualizado a 15.5.25.** Vercel rechazaba el despliegue con
+  `VULNERABLE_NEXTJS_VERSION` (CVE-2025-66478): la 15.4.6 está bloqueada en
+  la plataforma. Se sube al último parche de la línea 15.x, sin salto de
+  versión mayor.
 - **Los lunes son tenis, en las 11 semanas.** El plan solo lo recogía en las
   semanas 3, 4 y 5: las semanas 1 y 2 se escribieron antes de que el tenis
   fuera un compromiso fijo, y a las semanas 6 a 9 nunca se les aplicó el
