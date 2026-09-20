@@ -1,4 +1,4 @@
-import { C } from "@/design/tokens";
+import { C } from "../../design/tokens.js";
 
 export const NUTRICION = {
   reglas: [

@@ -39,15 +39,18 @@ capa de persistencia sustituible. Detalle en el `CHANGELOG.md`.
 
 ---
 
-## Fase 1 — Que el Bloque 1 llegue entero al 15 de noviembre
+## Fase 1 — Que el Bloque 1 llegue entero al 6 de diciembre
 
-**Hasta el 15 nov 2026. Objetivo: terminar 7K a 4:45/km sin perder un dato.**
+**Hasta el 6 dic 2026. Objetivo: terminar 7K a 4:45/km sin perder un dato.**
 
 Aquí no se cambia el modelo. Se cambia lo que hace daño ahora mismo.
 
-1. **Que los datos no se pierdan, pase lo que pase.** Es lo primero porque es
-   lo único irreversible. Backup automático a fichero cada semana, aviso visible
-   si un guardado falla, y probar el ciclo exportar → importar de punta a punta.
+1. ~~**Que los datos no se pierdan, pase lo que pase.**~~ ✅ *hecho*. Aviso en
+   Coach → Ajustes cuando hace 7 días o más de la última copia, o si no hay
+   ninguna. Queda pendiente probar el ciclo exportar → importar de punta a punta.
+1bis. ~~**Revisión semanal guiada.**~~ ✅ *hecho* — se adelanta desde la Fase 5
+   porque su materia prima se genera ahora, semana a semana. Construirla en
+   noviembre habría perdido ocho semanas de "qué funcionó y por qué".
 2. **Traer lo registrado en la versión artifact.** Exportar allí, importar aquí,
    y comprobar semana a semana que el historial cuadra.
 3. **Partir el estado de `App.jsx`.** Hoy son ~40 estados en un componente. Se
@@ -96,6 +99,10 @@ Hoy el Bloque 1 son 300 líneas escritas a mano. Cuando termine el 15 de
 noviembre, **crear el Bloque 2 exige editar código y desplegar**. Una app que
 necesita un programador para empezar un objetivo nuevo no dura años.
 
+0. **Cada área declara su papel en el bloque** (`objetivo`, `soporte`,
+   `mantenimiento`, `salud`, `habilidad`, `compromiso`). Es lo primero porque
+   el Bloque 2 ya está decidido —consolidar el 7K y virar a estética— y eso no
+   es cambiar de meta, es cambiar qué área manda. Ver `DECISIONES.md`, D-007.
 1. **El bloque pasa a ser un registro en la base de datos**, con el mismo
    formato que hoy tiene `WEEKS`. El actual se migra tal cual.
 2. **Editor de bloques dentro de la app**: crear semanas, días, sesiones y

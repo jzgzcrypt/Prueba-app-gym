@@ -21,6 +21,50 @@ Todo cambio que se haga en la app se anota aquí. Sin excepciones.
 
 ## [Sin publicar]
 
+### Añadido
+- **Aviso de copia de seguridad.** Coach → Ajustes avisa cuando hace 7 días o
+  más de la última copia, o cuando no hay ninguna. Los datos viven solo en este
+  navegador: hasta que haya cuenta y base de datos, la copia es lo único que
+  separa "he perdido el móvil" de "he perdido el bloque".
+- **Revisión semanal guiada.** La bitácora deja de ser un campo de texto libre
+  y pasa a tres preguntas separadas: qué pasó, por qué, y qué ajusto. Al lado
+  se muestran los datos reales de esa semana (running, fuerza, tenis, hábitos,
+  ritmos y dolores registrados), para responder mirando lo que pasó y no lo que
+  uno recuerda. Las tres preguntas salen de las dos entradas de bitácora que de
+  verdad sirvieron: separaban exactamente eso.
+
+### Arreglado
+- **Recuperada la reformulación del bloque**, que el merge de la PR #10 dejó
+  fuera: GitHub la mergeó con un head desactualizado. Producción tenía la
+  versión parcheada — el lunes era tenis en las 11 semanas, pero de S6 a S9 la
+  sesión de calidad seguía cayendo el martes, justo después del tenis. Lo
+  detectaron los tests del dominio al ejecutarse por primera vez.
+
+### Añadido (2)
+- **Tests del dominio** (`npm test`, sin dependencias nuevas). Cubren las
+  invariantes del bloque —11 semanas de lunes a domingo, ningún plan pisando un
+  compromiso, el día después del tenis sin intensidad, la calidad tres días
+  después, máximo un día de pierna— y la migración del esquema. No protegen
+  código: protegen años de historial.
+- El dominio pasa a usar imports relativos en vez del alias `@/`, así que es un
+  módulo ES corriente que puede cargar cualquier herramienta y no solo el
+  bundler de Next. Es lo que permite que los tests lo importen directamente.
+
+### Datos
+- **Versión de esquema 2.** `weeklyLog` pasa de `string` a
+  `{ paso, porque, ajuste }`. La migración conserva el texto anterior entero en
+  `paso`: no se reparte a ojo entre los tres campos, porque eso sería inventar
+  lo que no se escribió. Probada contra seis formas de datos guardados,
+  incluidas las que no llevaban versión.
+- Se guarda la fecha de la última copia descargada (`ultimoBackup`).
+
+---
+
+## [1.1.0] — 2026-09-20
+
+El Bloque 1 se reformula entero para arrancar el 21 de septiembre, con el tenis
+de los lunes dentro desde el día uno. Desplegado en producción.
+
 ### Arreglado
 - **Next.js actualizado a 15.5.25.** Vercel rechazaba el despliegue con
   `VULNERABLE_NEXTJS_VERSION` (CVE-2025-66478): la 15.4.6 está bloqueada en
