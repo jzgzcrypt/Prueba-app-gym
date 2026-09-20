@@ -1,204 +1,76 @@
-# 🏋️ Mi Entrenamiento — Zero Friction Dashboard
+# Sistema 7K
 
-Un dashboard de entrenamiento optimizado para móvil y desktop con experiencia de usuario de cero fricción.
+Sistema personal de entrenamiento, salud y habilidades. No es una app de
+gimnasio: es el sitio donde se decide qué toca hoy, se registra qué pasó de
+verdad y se ajusta el plan a la realidad, semana a semana.
 
-## ✨ Características
+**Bloque en curso:** Base 7K — 31 ago a 15 nov 2026 · objetivo 7 km a 4:45/km.
 
-### 📱 **Experiencia Móvil Optimizada**
-- **Detección automática** de dispositivo móvil
-- **Interfaz táctil** con tarjetas grandes y fáciles de tocar
-- **Modales simples** para entrada de datos
-- **Navegación inferior** intuitiva
-- **Progreso visual** con círculo animado
+## Qué cubre hoy
 
-### 💻 **Experiencia Desktop Simplificada**
-- **Quick entry form** prominente en la parte superior
-- **Gráficos interactivos** para seguimiento
-- **Vista completa** con todas las funcionalidades
+| Área | Qué hace |
+|---|---|
+| **Running** | Sesiones con intervalos y cronómetro, ritmo real contra ritmo esperado |
+| **Fuerza** | Sesiones guiadas, catálogo de ejercicios, pesos serie a serie con historial |
+| **Cuello** | Protocolo de fisio diario en tres fases |
+| **Movilidad** | Cuatro patrones en paralelo, cada uno con su test |
+| **Técnica** | Cadencia y apoyo, repetición deliberada en cada carrera |
+| **Magia** | Un truco de cartas nuevo cada una o dos semanas |
+| **Guerrero** | Cuatro pilares: calma, golpeo, mentalidad y aplicación |
+| **Nutrición** | Referencias del bloque |
+| **Coach** | Bitácora semanal, ajuste de fase, hitos, plan global, backup |
+| **Progreso** | Medidas, ritmos y KPIs a lo largo del bloque |
 
-### 🎯 **Funcionalidades Clave**
-- ✅ **Toast notifications** elegantes
-- ✅ **Validación en tiempo real** con feedback visual
-- ✅ **Persistencia local** con localStorage
-- ✅ **Estados visuales** claros (Completado/Pendiente)
-- ✅ **Animaciones fluidas** y transiciones suaves
-- ✅ **Detección automática** de dispositivo
-
-## 🚀 Tecnologías
-
-- **Next.js 15** - Framework React con App Router
-- **TypeScript** - Tipado estático
-- **Tailwind CSS** - Estilos utilitarios
-- **Chart.js** - Gráficos interactivos
-- **Lucide React** - Iconos modernos
-- **localStorage** - Persistencia de datos
-
-## 📦 Instalación
+## Arrancar
 
 ```bash
-# Clonar el repositorio
-git clone <repository-url>
-cd gym-dashboard
-
-# Instalar dependencias
 npm install
-
-# Ejecutar en desarrollo
-npm run dev
-
-# Construir para producción
-npm run build
-
-# Ejecutar en producción
-npm start
+npm run dev        # http://localhost:3000
 ```
 
-## 🎨 Estructura del Proyecto
+```bash
+npm run build      # build de producción
+npm run lint
+npm run typecheck
+```
+
+## Dónde está cada cosa
 
 ```
 src/
-├── app/
-│   ├── layout.tsx          # Layout principal
-│   ├── page.tsx            # Página del dashboard
-│   └── globals.css         # Estilos globales
-├── components/
-│   ├── ProgressCircle.tsx  # Componente de progreso
-│   └── ToastContainer.tsx  # Contenedor de notificaciones
-├── hooks/
-│   ├── useLocalStorage.ts  # Hook para localStorage
-│   └── useToast.ts         # Hook para notificaciones
-└── types/
-    └── index.ts            # Tipos TypeScript
+├── app/        Next.js App Router. Solo el envoltorio.
+├── design/     Tokens de estilo. Único sitio donde cambiar el aspecto.
+├── domain/     El plan y las reglas. Datos puros, sin React.
+├── lib/        Persistencia con adaptador intercambiable.
+└── features/   La UI, una carpeta por pantalla.
 ```
 
-## 📊 Funcionalidades
+Las dependencias van en un solo sentido: `features` → `domain`. El dominio no
+conoce la UI, y por eso sobrevive a los rediseños.
 
-### **Dashboard Principal**
-- **Progreso visual** con círculo animado
-- **4 tarjetas principales**: Pesaje, Entrenamiento, Cardio, Dieta
-- **Estados claros**: ✅ Completado / ⏳ Pendiente
-- **Resumen semanal** con estadísticas
+## Los datos
 
-### **Entrada de Datos**
-- **Modales optimizados** para cada tipo de dato
-- **Campos mínimos** - solo lo esencial
-- **Validación en tiempo real** con feedback visual
-- **Guardado con un clic**
+Se guardan hoy en el navegador (`localStorage`), a través de una capa que
+permite cambiar el backend sin tocar ninguna pantalla. Tienen versión y
+migración desde el primer día: un cambio de forma nunca puede perder historial.
 
-### **Persistencia**
-- **localStorage** para datos offline
-- **Sincronización automática** entre vistas
-- **Backup automático** de datos
+**Copia de seguridad:** Coach → Ajustes → Exportar. Hazla. La Fase 2 traerá
+cuenta y base de datos real; hasta entonces el historial vive en un solo
+dispositivo.
 
-## 🎯 Métricas de Éxito
+## Documentación
 
-- ✅ **Tiempo de entrada**: < 30 segundos
-- ✅ **Tasa de completado**: > 85%
-- ✅ **Experiencia móvil**: Nativa y fluida
-- ✅ **Carga cognitiva**: Mínima
-- ✅ **Feedback visual**: Inmediato
+| | |
+|---|---|
+| [`CHANGELOG.md`](CHANGELOG.md) | Cada cambio de la app, con su motivo |
+| [`docs/ARQUITECTURA.md`](docs/ARQUITECTURA.md) | Cómo está montada y por qué |
+| [`docs/ROADMAP.md`](docs/ROADMAP.md) | El plan por fases, hasta la app de vida |
+| [`docs/DECISIONES.md`](docs/DECISIONES.md) | Las decisiones tomadas y su coste |
 
-## 🔄 Última Actualización
+## Hacia dónde va
 
-- ✅ **Integración completa del mesociclo** con el dashboard
-- ✅ **Secciones colapsables** para mejor organización
-- ✅ **Seguimiento de entrenamiento en tiempo real** con datos del mesociclo
-- ✅ **Calendario semanal** conectado al plan de entrenamiento
-- ✅ **Modal de entrenamiento** con ejercicios específicos del mesociclo
-
-## 🚀 Deploy
-
-### Vercel (Recomendado)
-```bash
-# Instalar Vercel CLI
-npm i -g vercel
-
-# Deploy
-vercel --prod
-```
-
-### Netlify
-```bash
-# Construir
-npm run build
-
-# Deploy manual o con Netlify CLI
-```
-
-## 🔧 Configuración
-
-### Variables de Entorno
-```env
-# .env.local
-NEXT_PUBLIC_APP_NAME="Mi Entrenamiento"
-NEXT_PUBLIC_VERSION="1.0.0"
-```
-
-### Personalización
-- **Colores**: Editar `tailwind.config.js`
-- **Animaciones**: Modificar `globals.css`
-- **Datos**: Ajustar tipos en `types/index.ts`
-
-## 📱 Responsive Design
-
-- **Mobile First**: Optimizado para dispositivos móviles
-- **Breakpoints**: 768px para cambio de vista
-- **Touch Friendly**: Elementos táctiles grandes
-- **Gestos**: Navegación por toque
-
-## 🎨 Diseño
-
-### **Colores**
-- **Primario**: Azul (#3b82f6)
-- **Éxito**: Verde (#10b981)
-- **Advertencia**: Amarillo (#f59e0b)
-- **Error**: Rojo (#ef4444)
-
-### **Tipografía**
-- **Fuente**: Inter (Google Fonts)
-- **Tamaños**: Responsive y legible
-- **Pesos**: Variable según importancia
-
-## 🔄 Roadmap
-
-### **Fase 1: Optimización Inmediata** ✅
-- [x] Quick entry form
-- [x] Toast notifications
-- [x] Validación en tiempo real
-- [x] Estados de loading
-
-### **Fase 2: Experiencia Mejorada** 🚧
-- [ ] Modo entrenamiento
-- [ ] Insights automáticos
-- [ ] Backup mejorado
-- [ ] Temas personalizables
-
-### **Fase 3: Optimización Final** 📋
-- [ ] Analytics avanzados
-- [ ] Sincronización cloud
-- [ ] Testing completo
-- [ ] Documentación usuario
-
-## 🤝 Contribuir
-
-1. Fork el proyecto
-2. Crear una rama feature (`git checkout -b feature/AmazingFeature`)
-3. Commit los cambios (`git commit -m 'Add some AmazingFeature'`)
-4. Push a la rama (`git push origin feature/AmazingFeature`)
-5. Abrir un Pull Request
-
-## 📄 Licencia
-
-Este proyecto está bajo la Licencia MIT. Ver el archivo `LICENSE` para más detalles.
-
-## 🙏 Agradecimientos
-
-- **Next.js** por el framework increíble
-- **Tailwind CSS** por los estilos utilitarios
-- **Chart.js** por las visualizaciones
-- **Vercel** por el hosting y deployment
-
----
-
-**¡Disfruta entrenando con cero fricción! 💪**
-# Updated: Fri Aug 15 09:54:13 PM UTC 2025
+El entrenamiento es el área desarrollada, pero el motor —proponer, registrar,
+revisar, ajustar— no tiene nada de específico del deporte. El plan es
+generalizarlo para que valga igual para idiomas, lectura, sueño o finanzas, sin
+perder nada de lo registrado por el camino. Las fases están en el
+[ROADMAP](docs/ROADMAP.md).
