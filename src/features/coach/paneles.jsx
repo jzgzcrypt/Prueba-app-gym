@@ -13,7 +13,7 @@ function diasDesde(iso) {
   return Math.max(0, Math.round((now - then) / 86400000));
 }
 
-export function PhaseAdjustContent({ currentWeekN, currentWeekOverride, setCurrentWeekOverride, phaseAdjustNote, setPhaseAdjustNote, exportData, importData, storageStatus, ultimoBackup }) {
+export function PhaseAdjustContent({ currentWeekN, currentWeekOverride, setCurrentWeekOverride, phaseAdjustNote, setPhaseAdjustNote, exportData, importData, storageStatus, ultimoBackup, ultimoGuardado }) {
   const [noteDraft, setNoteDraft] = useState(phaseAdjustNote);
   const autoWeek = (() => {
     const todayIso = todayLocalIso();
@@ -74,8 +74,13 @@ export function PhaseAdjustContent({ currentWeekN, currentWeekOverride, setCurre
             background: storageStatus === "ok" ? C.ok : storageStatus === "error" ? CAT.running : "#D4D4D1",
           }} />
           <div style={{ fontSize: 12.5, color: "#4A4A47" }}>
-            {storageStatus === "ok" && "Guardado correctamente. Tus datos persisten aunque cierres esta pestaña."}
-            {storageStatus === "error" && "No se ha podido guardar. Si este artifact no está publicado, publícalo para activar el guardado automático."}
+            {storageStatus === "ok" && (
+              ultimoGuardado
+                ? "Guardado a las " + new Date(ultimoGuardado).toLocaleTimeString("es-ES", { hour: "2-digit", minute: "2-digit" }) +
+                  ". Se guarda también al cerrar la app, no solo mientras la usas."
+                : "Guardado correctamente. Se guarda también al cerrar la app."
+            )}
+            {storageStatus === "error" && "No se ha podido guardar. Puede ser que el navegador esté en modo privado o sin espacio: descarga una copia ahora mismo para no perder nada."}
             {storageStatus == null && "Esperando el primer cambio para confirmar el guardado..."}
           </div>
         </div>
