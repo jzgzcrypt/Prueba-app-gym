@@ -1,14 +1,14 @@
 "use client";
 
 import { C, CAT, SP } from "@/design/tokens";
-import { DATE_MAP, WEEKS, todayLocalIso } from "@/domain/plan/calendario";
+import { DATE_MAP, WEEKS, claveDia, todayLocalIso } from "@/domain/plan/calendario";
 export function WeekDots({ day, checked, onJumpDay }) {
   const week = WEEKS[day.weekIdx];
   const todayIso = todayLocalIso();
   return (
     <div style={{ display: "flex", justifyContent: "center", gap: 7, padding: "0 " + SP.lg + "px " + SP.lg + "px" }}>
       {week.days.map((d, i) => {
-        const dKey = week.n + "-" + i;
+        const dKey = claveDia(d);
         const done = !!checked[dKey];
         const isRest = d.tipo === "libre";
         const isCurrent = i === day.dayIdx;

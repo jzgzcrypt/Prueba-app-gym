@@ -1,6 +1,6 @@
 "use client";
 
-import { WEEKS } from "@/domain/plan/calendario";
+import { WEEKS, claveDia } from "@/domain/plan/calendario";
 import { useState } from "react";
 import { C, CAT, GRUPO_COLOR, R, SP, TYPE } from "@/design/tokens";
 import { GRUPO_ENFOQUE } from "@/domain/fuerza/enfoque";
@@ -15,7 +15,7 @@ export function KpiBlock({ title, isOpen, onToggle, weeks, checked, workoutWeigh
 
   weeks.forEach(wk => {
     wk.days.forEach((day, di) => {
-      const dayKey = wk.n + "-" + di;
+      const dayKey = claveDia(wk.days[di]);
       if (day.tipo === "fuerza") {
         day.ejercicios.forEach((ej, ei) => {
           const s = parseSeries(ej.series);
@@ -67,7 +67,7 @@ export function KpiBlock({ title, isOpen, onToggle, weeks, checked, workoutWeigh
       const planWkGrupo = {}, hechoWkGrupo = {};
       wk.days.forEach((day, di) => {
         if (day.tipo !== "fuerza") return;
-        const dayKey = wk.n + "-" + di;
+        const dayKey = claveDia(wk.days[di]);
         day.ejercicios.forEach((ej, ei) => {
           const s = parseSeries(ej.series);
           planWk += s;

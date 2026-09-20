@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { C, CAT, R, SP, TAP_MIN, TYPE } from "@/design/tokens";
-import { BLOQUE, DATE_MAP, FECHA_FIN, RANGO_BLOQUE, WEEKS, todayLocalIso } from "@/domain/plan/calendario";
+import { BLOQUE, DATE_MAP, FECHA_FIN, RANGO_BLOQUE, WEEKS, claveDia, claveSemana, todayLocalIso } from "@/domain/plan/calendario";
 import { SectionHeader } from "@/features/ui/headers";
 /** Dias enteros transcurridos desde una fecha "YYYY-MM-DD" hasta hoy. */
 function diasDesde(iso) {
@@ -183,7 +183,7 @@ export function HitosContent({ bloquesHistorial, setBloquesHistorial, currentWee
   WEEKS.forEach(wk => wk.days.forEach((d, di) => {
     if (d.tipo === "libre") return;
     diasTotales++;
-    if (checked[wk.n + "-" + di]) diasHechos++;
+    if (checked[claveDia(wk.days[di])]) diasHechos++;
   }));
   const adherenciaBloque = diasTotales > 0 ? Math.round((diasHechos / diasTotales) * 100) : 0;
 
@@ -272,13 +272,13 @@ export function WeeklyLogContent({ weeklyLog, setWeeklyLog, currentWeekN, checke
 
   const weeksWithData = WEEKS.filter(w => w.n <= currentWeekN).slice().reverse();
 
-  const startEdit = (n) => {
-    const v = weeklyLog[n];
-    setEditingWeek(n);
+  const startEdit = (clave) => {
+    const v = weeklyLog[clave];
+    setEditingWeek(clave);
     setDraft(v && typeof v === "object" ? { paso: v.paso || "", porque: v.porque || "", ajuste: v.ajuste || "" }
                                         : { paso: typeof v === "string" ? v : "", porque: "", ajuste: "" });
   };
-  const save = (n) => { setWeeklyLog(p => Object.assign({}, p, { [n]: draft })); setEditingWeek(null); };
+  const save = (clave) => { setWeeklyLog(p => Object.assign({}, p, { [clave]: draft })); setEditingWeek(null); };
   const tieneAlgo = (v) => !!v && (typeof v === "string" ? !!v : !!(v.paso || v.porque || v.ajuste));
 
   // Las tres preguntas salen de tu propia bitacora: las notas que de verdad
@@ -298,12 +298,13 @@ export function WeeklyLogContent({ weeklyLog, setWeeklyLog, currentWeekN, checke
       </div>
       <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
         {weeksWithData.map(wk => {
-          const isEditing = editingWeek === wk.n;
-          const v = weeklyLog[wk.n];
+          const clave = claveSemana(wk);
+          const isEditing = editingWeek === clave;
+          const v = weeklyLog[clave];
           const hasLog = tieneAlgo(v);
           const datos = resumenSemana(wk, { checked, ritmoReal, painLog, cuelloChecks, magiaLog, guerreroLog });
           return (
-            <div key={wk.n} style={{ background: C.card, border: "1px solid " + C.cardBorder, borderRadius: 12, padding: "12px 14px" }}>
+            <div key={clave} style={{ background: C.card, border: "1px solid " + C.cardBorder, borderRadius: 12, padding: "12px 14px" }}>
               <div style={{ fontSize: 11.5, fontWeight: 800, color: C.text, marginBottom: 6 }}>SEMANA {wk.n} · {wk.dates}</div>
 
               {/* Los datos de la semana, al lado de las preguntas: se responde
@@ -327,10 +328,10 @@ export function WeeklyLogContent({ weeklyLog, setWeeklyLog, currentWeekN, checke
                         style={{ width: "100%", minHeight: 52, fontSize: 13, padding: "8px 10px", borderRadius: 8, border: "1px solid #D4D4D1", color: "#171717", outline: "none", fontFamily: "inherit", resize: "vertical" }} />
                     </div>
                   ))}
-                  <button className="btn" onClick={() => save(wk.n)} style={{ fontSize: 11.5, fontWeight: 800, color: "#FAFAF9", background: C.accent, padding: "8px 16px", borderRadius: 8, minHeight: TAP_MIN - 10 }}>GUARDAR REVISIÓN</button>
+                  <button className="btn" onClick={() => save(clave)} style={{ fontSize: 11.5, fontWeight: 800, color: "#FAFAF9", background: C.accent, padding: "8px 16px", borderRadius: 8, minHeight: TAP_MIN - 10 }}>GUARDAR REVISIÓN</button>
                 </div>
               ) : hasLog ? (
-                <div onClick={() => startEdit(wk.n)} style={{ cursor: "text" }}>
+                <div onClick={() => startEdit(clave)} style={{ cursor: "text" }}>
                   {CAMPOS.map(c => {
                     const texto = typeof v === "string" ? (c.k === "paso" ? v : "") : (v[c.k] || "");
                     if (!texto) return null;
@@ -343,7 +344,7 @@ export function WeeklyLogContent({ weeklyLog, setWeeklyLog, currentWeekN, checke
                   })}
                 </div>
               ) : (
-                <button className="btn" onClick={() => startEdit(wk.n)} style={{ fontSize: 11.5, color: "#8A8A87", fontWeight: 700, minHeight: TAP_MIN - 14 }}>+ Revisar esta semana</button>
+                <button className="btn" onClick={() => startEdit(clave)} style={{ fontSize: 11.5, color: "#8A8A87", fontWeight: 700, minHeight: TAP_MIN - 14 }}>+ Revisar esta semana</button>
               )}
             </div>
           );
@@ -356,8 +357,8 @@ export function WeeklyLogContent({ weeklyLog, setWeeklyLog, currentWeekN, checke
 /** Lo que de verdad paso esa semana, sacado de los registros y no de la memoria.
  *  Va al lado de las preguntas para que la revision se responda con datos. */
 function resumenSemana(wk, { checked, ritmoReal, painLog, cuelloChecks, magiaLog, guerreroLog }) {
-  const claves = wk.days.map((d, di) => wk.n + "-" + di);
-  const cuenta = (filtro) => wk.days.reduce((n, d, di) => n + (filtro(d) && checked[wk.n + "-" + di] ? 1 : 0), 0);
+  const claves = wk.days.map(claveDia);
+  const cuenta = (filtro) => wk.days.reduce((n, d) => n + (filtro(d) && checked[claveDia(d)] ? 1 : 0), 0);
   const total = (filtro) => wk.days.filter(filtro).length;
 
   const esRun = (d) => d.tipo === "run" || d.tipo === "test" || d.tipo === "objetivo";
@@ -467,7 +468,7 @@ export function PlanGlobalContent({ jumpToDay, setWeekIdx, onJumpAway, checked }
             wk.days.forEach((d, di) => {
               if (d.tipo === "libre") return;
               weekTotal++;
-              if (checked[wk.n + "-" + di]) weekDone++;
+              if (checked[claveDia(wk.days[di])]) weekDone++;
             });
           }
 

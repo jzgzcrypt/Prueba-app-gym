@@ -4,12 +4,13 @@ import { useState } from "react";
 import { C, CAT, R, SP, TAP_MIN, TYPE } from "@/design/tokens";
 import { ICON_FUERZA, ICON_MOVILIDAD, ICON_RUNNING, LOGO_7K } from "@/domain/assets/icons";
 import { parseSeries } from "@/domain/fuerza/series";
-import { FECHA_INICIO, FLAT_DAYS, WEEKS, todayLocalIso } from "@/domain/plan/calendario";
+import { FECHA_INICIO, FLAT_DAYS, WEEKS, claveDia, todayLocalIso } from "@/domain/plan/calendario";
 import { getFraseHoy } from "@/domain/running/frases";
 import { MOVILIDAD } from "@/domain/salud/movilidad";
 import { getTecnicaEj } from "@/domain/salud/tecnica";
 import { GuerreroBlock, HabitBlock, ListBlock, MagiaBlock, MoveDayBlock, PainBlock } from "@/features/hoy/bloques";
 import { WeekDots } from "@/features/ui/WeekDots";
+import { destinoDe, llegadasA } from "@/lib/estado/mover-sesion";
 export function HoyScreen(props) {
   const { day, dayKey, isToday, flatIdx, goDay, goToday, isFuerzaDay, isRunDay, isCompromisoDay, mov,
           vaciarDia, cosasEnElDia,
@@ -26,6 +27,14 @@ export function HoyScreen(props) {
 
   const [confirmandoVaciar, setConfirmandoVaciar] = useState(false);
 
+  // Lo movido: si esta sesión se fue a otro día no se enseña aquí, y si han
+  // venido sesiones de otros días se enseñan. Esta segunda mitad es justo la
+  // que faltaba: antes el día de destino no se enteraba de nada.
+  const movidaA = destinoDe(props.postponed, dayKey);
+  const recibidas = llegadasA(props.postponed, dayKey)
+    .map(origen => FLAT_DAYS.find(d => d.isoDate === origen))
+    .filter(Boolean);
+
   const startDate = new Date(FECHA_INICIO);
   const thisDate = new Date(day.isoDate || startDate);
   const daysSinceStart = Math.round((thisDate - startDate) / (1000*60*60*24));
@@ -33,7 +42,7 @@ export function HoyScreen(props) {
 
   const prevDay = flatIdx > 0 ? FLAT_DAYS[flatIdx - 1] : null;
   const prevWasImportant = prevDay && (prevDay.tipo === "test" || prevDay.esCalidad);
-  const prevKey = prevDay ? prevDay.weekN + "-" + prevDay.dayIdx : null;
+  const prevKey = prevDay ? claveDia(prevDay) : null;
   const missedImportantDay = prevWasImportant && prevKey && !checked[prevKey];
 
   const toggleBlock = (id) => setExpandedBlock(prev => prev === id ? null : id);
@@ -147,7 +156,7 @@ export function HoyScreen(props) {
           expandedBlock={expandedBlock} toggleBlock={toggleBlock} />
 
         {/* ═══ RUNNING — colapsable ═══ */}
-        {isRunDay && (
+        {isRunDay && !movidaA && (
           <ListBlock id="main" expandedBlock={expandedBlock} toggleBlock={toggleBlock}
             icon={ICON_RUNNING} accent={CAT.running} title={day.titulo}
             statusText={day.dur} statusDone={mainDone}>
@@ -231,7 +240,7 @@ export function HoyScreen(props) {
         )}
 
         {/* ═══ FUERZA — colapsable ═══ */}
-        {isFuerzaDay && (
+        {isFuerzaDay && !movidaA && (
           <ListBlock id="main" expandedBlock={expandedBlock} toggleBlock={toggleBlock}
             icon={ICON_FUERZA} accent={CAT.fuerza} title={day.titulo}
             statusText={doneSeries>0 && !mainDone ? (doneSeries + "/" + totalSeries) : day.dur} statusDone={mainDone}>
@@ -344,6 +353,31 @@ export function HoyScreen(props) {
             )}
           </div>
         )}
+
+        {/* ═══ SESIONES QUE HAN VENIDO DE OTRO DÍA ═══ */}
+        {recibidas.map(origen => (
+          <div key={origen.isoDate} style={{ background: C.card, border: "1px solid " + C.cardBorder,
+                                             borderLeft: "3px solid " + CAT.running, borderRadius: 14, padding: "14px 16px" }}>
+            <div style={{ ...TYPE.sectionLabel, color: CAT.running }}>MOVIDA DESDE {origen.dow.toUpperCase()} {origen.date}</div>
+            <div style={{ ...TYPE.cardTitle, color: C.text, marginTop: 4 }}>{origen.titulo}</div>
+            {origen.dur && <div style={{ ...TYPE.meta, color: C.textDim, marginTop: 2 }}>{origen.dur}{origen.rpe ? " · RPE " + origen.rpe : ""}</div>}
+            {origen.what && <div style={{ ...TYPE.body, color: C.textDim, marginTop: 6 }}>{origen.what}</div>}
+            {origen.ejercicios && (
+              <div style={{ marginTop: 8, display: "flex", flexDirection: "column", gap: 4 }}>
+                {origen.ejercicios.map((e, i) => (
+                  <div key={i} style={{ display: "flex", justifyContent: "space-between", fontSize: 12.5, color: "#4A4A47" }}>
+                    <span>{e.nombre}</span><span className="mono" style={{ color: C.textFaint }}>{e.series}</span>
+                  </div>
+                ))}
+              </div>
+            )}
+            <button className="btn" onClick={() => toggleCheck(claveDia(origen))} style={{
+              width: "100%", marginTop: 12, padding: "12px", borderRadius: 10, minHeight: TAP_MIN,
+              background: checked[claveDia(origen)] ? C.ok : "#EDEDEB",
+              fontSize: 13, fontWeight: 800, color: checked[claveDia(origen)] ? "#FAFAF9" : "#787774",
+            }}>{checked[claveDia(origen)] ? "HECHA" : "MARCAR COMO HECHA"}</button>
+          </div>
+        ))}
 
         {/* ═══ MOVER SESIÓN — colapsable, muy discreto ═══ */}
         {(isRunDay || isFuerzaDay) && (

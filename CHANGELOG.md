@@ -21,6 +21,41 @@ Todo cambio que se haga en la app se anota aquí. Sin excepciones.
 
 ## [Sin publicar]
 
+### Cambiado
+- **El registro pasa a ir por fecha real, no por "semana-día del bloque".**
+  Antes la clave era `"1-3"` (semana 1, jueves). Eso tenía dos problemas
+  graves: el 20 de septiembre no existía —solo existía "semana 1, día 3", así
+  que un día fuera del bloque no tenía dónde vivir y no podía haber diario— y,
+  peor, al empezar el Bloque 2 la numeración vuelve a 1 y `"1-3"` habría
+  escrito **encima** del Bloque 1. Era pérdida de historial con fecha de
+  caducidad: el 7 de diciembre.
+- El formato de la clave lo decide ahora un único sitio (`claveDia` en el
+  calendario), para que no vuelva a estar repartido por veinte ficheros.
+
+### Arreglado
+- **Mover una sesión mueve la sesión.** Hasta ahora era un post-it: se
+  guardaba "movida al jueves" en el día de origen y nadie lo leía nunca. El
+  jueves no se enteraba, la sesión no aparecía en ninguna parte — y era la
+  única herramienta que había para reaccionar a un día fallado. Ahora el
+  traslado es real: el día de origen se queda vacío y el de destino muestra la
+  sesión, con su contenido y su botón de marcar.
+- El traslado no deja amontonar dos sesiones en un mismo día ni encadenar
+  traslados: juntar dos sesiones en un día es justo lo que hace que no se haga
+  ninguna.
+
+### Datos
+- **Versión de esquema 3.** Todas las claves de día pasan a fecha ISO
+  (`"2026-09-24"`), conservando los sufijos (`"2026-09-24-m"`). La bitácora
+  semanal pasa al lunes de su semana, y los rangos en pausa se reindexan
+  también.
+- La migración saca la fecha de inicio del propio historial guardado siempre
+  que puede, así que **una copia importada de la versión antigua cae en sus
+  fechas de verdad** —su bloque empezaba el 31 de agosto— y no tres semanas
+  desplazada.
+- La migración **no importa la fecha de inicio del plan a propósito**: una
+  migración es un documento histórico y tiene que dar siempre el mismo
+  resultado, aunque mañana se mueva el bloque de fecha.
+
 ### Añadido
 - **Guardado a prueba de cierre.** Hasta ahora el guardado esperaba medio
   segundo para agrupar cambios seguidos, y no había nada que guardase al

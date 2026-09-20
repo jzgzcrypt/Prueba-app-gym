@@ -124,4 +124,21 @@ export function findTodayIndex() {
   return idx;
 }
 
+/**
+ * La clave con la que se guarda TODO lo que pasa un dia.
+ *
+ * Es la fecha real, no "semana-dia del bloque". Es el unico sitio donde se
+ * decide este formato: si algun dia vuelve a cambiar, se cambia aqui y ya.
+ *
+ * Que sea la fecha es lo que permite que la app sea un diario —el 20 de
+ * septiembre existe aunque no haya bloque— y lo que evita que el Bloque 2,
+ * al volver a numerar desde 1, escriba encima del Bloque 1.
+ */
+export const claveDia = (dia) => dia.isoDate;
+
+/** La clave de una semana es la fecha de su lunes, por el mismo motivo: la
+ *  bitacora tiene que seguir siendo legible cuando el Bloque 2 vuelva a
+ *  numerar las semanas desde 1. */
+export const claveSemana = (semana) => semana.days[0].isoDate;
+
 export const TIPO_LABEL = { run: "RUNNING", fuerza: "FUERZA", test: "TEST", libre: "DESCANSO", objetivo: "OBJETIVO", compromiso: "COMPROMISO" };

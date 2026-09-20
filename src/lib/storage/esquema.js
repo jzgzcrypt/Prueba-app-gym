@@ -13,7 +13,54 @@
  * el objeto en la version siguiente. Son funciones puras y no lanzan.
  */
 
-export const VERSION_ESQUEMA = 2;
+export const VERSION_ESQUEMA = 3;
+
+// ─── v3: del numero de semana a la fecha real ────────────────────────────────
+//
+// Hasta la v2 todo el registro se indexaba por "semana-dia del bloque": la
+// clave "1-3" era el jueves de la semana 1. Eso tenia dos problemas graves:
+//
+//   1. No existia el dia 20 de septiembre, existia "semana 1, dia 3". Un dia
+//      fuera del bloque no tenia donde vivir, asi que no podia haber diario.
+//   2. Al empezar el Bloque 2 la numeracion vuelve a 1, y "1-3" del bloque 2
+//      habria escrito encima de "1-3" del bloque 1. Perdida de historial con
+//      fecha de caducidad.
+//
+// Desde la v3 la clave es la fecha ISO: "2026-09-24", y los sufijos se
+// conservan igual ("2026-09-24-m" para el cuello de la mañana).
+
+const MS_DIA = 86400000;
+
+/** Fecha de inicio del bloque con la que se escribieron esas claves.
+ *  NO se importa del plan a proposito: una migracion es un documento
+ *  historico y tiene que dar siempre el mismo resultado. Si mañana se mueve
+ *  FECHA_INICIO, los datos ya migrados no pueden cambiar de fecha. */
+const INICIO_POR_DEFECTO = "2026-09-21";
+
+function sumarDias(iso, n) {
+  const [y, m, d] = iso.split("-").map(Number);
+  const r = new Date(Date.UTC(y, m - 1, d, 12) + n * MS_DIA);
+  return r.getUTCFullYear() + "-" + String(r.getUTCMonth() + 1).padStart(2, "0") + "-" + String(r.getUTCDate()).padStart(2, "0");
+}
+
+const esFechaIso = (k) => /^\d{4}-\d{2}-\d{2}/.test(k);
+
+/** "1-3" -> "2026-09-24"  ·  "1-3-m" -> "2026-09-24-m" */
+function claveAFecha(clave, inicio) {
+  if (esFechaIso(clave)) return clave; // ya migrada
+  const m = /^(\d+)-(\d+)(-.*)?$/.exec(clave);
+  if (!m) return clave; // forma desconocida: se deja como esta antes que perderla
+  const semana = Number(m[1]), dia = Number(m[2]), sufijo = m[3] || "";
+  if (semana < 1 || dia < 0 || dia > 6) return clave;
+  return sumarDias(inicio, (semana - 1) * 7 + dia) + sufijo;
+}
+
+function reindexar(mapa, inicio) {
+  if (!mapa || typeof mapa !== "object") return mapa;
+  const fuera = {};
+  for (const k of Object.keys(mapa)) fuera[claveAFecha(k, inicio)] = mapa[k];
+  return fuera;
+}
 
 const MIGRACIONES = {
   // v2 — La bitacora semanal deja de ser un texto libre y pasa a tener las tres
@@ -30,6 +77,37 @@ const MIGRACIONES = {
         : v; // ya tenia la forma nueva
     }
     return { ...d, weeklyLog: migrado };
+  },
+  // v3 — Todo el registro pasa de "semana-dia" a fecha real. Ver arriba.
+  3: (d) => {
+    // La fecha de inicio se saca del propio historial guardado siempre que se
+    // pueda. Asi, una copia importada de la version antigua —cuyo bloque
+    // empezaba el 31 de agosto— cae en sus fechas de verdad y no tres semanas
+    // desplazada.
+    const inicio = d.bloquesHistorial?.[0]?.inicio || INICIO_POR_DEFECTO;
+
+    const porDia = ["checked", "cuelloChecks", "notes", "painLog", "magiaLog", "guerreroLog",
+                    "workoutWeights", "ritmoReal", "ritmoTramos", "sensaciones", "postponed"];
+    const salida = { ...d };
+    for (const k of porDia) salida[k] = reindexar(d[k], inicio);
+
+    // La bitacora iba por numero de semana: pasa al lunes de esa semana.
+    if (d.weeklyLog && typeof d.weeklyLog === "object") {
+      const log = {};
+      for (const k of Object.keys(d.weeklyLog)) {
+        const n = Number(k);
+        log[esFechaIso(k) || !Number.isFinite(n) ? k : sumarDias(inicio, (n - 1) * 7)] = d.weeklyLog[k];
+      }
+      salida.weeklyLog = log;
+    }
+
+    // Los rangos en pausa guardan listas de claves de dia.
+    if (Array.isArray(d.pausedRanges)) {
+      salida.pausedRanges = d.pausedRanges.map(r =>
+        Array.isArray(r?.days) ? { ...r, days: r.days.map(k => claveAFecha(k, inicio)) } : r);
+    }
+
+    return salida;
   },
 };
 
