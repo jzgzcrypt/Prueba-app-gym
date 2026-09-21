@@ -106,3 +106,38 @@ export function cantidadLegible(id, gramos) {
   const plural = redondo === 1 ? a.unidad.nombre : a.unidad.nombre + "s";
   return String(redondo).replace(".5", ",5") + " " + plural;
 }
+
+// ─── INTERCAMBIAR ─────────────────────────────────────────────────────────
+//
+// Lo que de verdad hace que una dieta se sostenga: si hoy no hay pollo, hay
+// pavo, y la cantidad se ajusta sola para que el plato siga sumando lo mismo.
+// Es la tabla de equivalencias del dietista, pero calculada en vez de
+// aproximada.
+
+/** El macro que define a cada grupo, y por el que se iguala al cambiar. */
+const MACRO_DEL_GRUPO = { proteina: "prot", carbo: "hc", grasa: "grasa" };
+
+/** Por que se puede cambiar un alimento: lo de su mismo grupo. */
+export function equivalentesDe(id) {
+  const a = ALIMENTO[id];
+  if (!a) return [];
+  return ALIMENTOS.filter(o => o.grupo === a.grupo && o.id !== id);
+}
+
+/**
+ * Cuantos gramos del alimento nuevo equivalen a estos del viejo.
+ *
+ * Se iguala el macro que define al grupo —la proteina en la carne, el
+ * carbohidrato en el arroz, la grasa en el aceite— porque es a lo que va ese
+ * alimento en el plato. Habra algo de dispersion de calorias, y es asumible:
+ * antes la adherencia que la exactitud.
+ */
+export function cambiarPor(id, gramos, nuevoId) {
+  const viejo = ALIMENTO[id], nuevo = ALIMENTO[nuevoId];
+  if (!viejo || !nuevo) return gramos;
+  const macro = MACRO_DEL_GRUPO[nuevo.grupo];
+  if (!macro || !nuevo[macro]) return gramos; // verdura y fruta: a igualdad de gramos
+  const objetivo = (viejo[macro] / 100) * gramos;
+  const paso = nuevo.paso || 5;
+  return Math.max(paso, Math.round((objetivo / (nuevo[macro] / 100)) / paso) * paso);
+}

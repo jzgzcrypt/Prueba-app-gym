@@ -70,7 +70,10 @@ export const PLATOS_CANTINA = [
   { id: "p_natillas", nombre: "Natillas, flan o arroz con leche", seccion: "Pan y postre", kcal: 220, prot: 5, hc: 32, grasa: 8 },
   { id: "p_dulce", nombre: "Dulce o bollería", seccion: "Pan y postre", kcal: 320, prot: 4, hc: 42, grasa: 15 },
   { id: "p_refresco", nombre: "Refresco con azúcar", seccion: "Pan y postre", kcal: 140, prot: 0, hc: 35, grasa: 0 },
-  { id: "p_cerveza", nombre: "Caña o cerveza", seccion: "Pan y postre", kcal: 130, prot: 1, hc: 11, grasa: 0 },
+  // El alcohol no es proteina, ni hidrato, ni grasa, pero sus calorias cuentan
+  // igual. Se anotan como hidrato —que es lo que hace cualquier contador de
+  // macros— para que el dia cuadre en vez de descuadrarse en silencio.
+  { id: "p_cerveza", nombre: "Caña o cerveza", seccion: "Pan y postre", kcal: 130, prot: 1, hc: 31, grasa: 0 },
 ];
 
 /** @type {Record<string, PlatoCantina>} */

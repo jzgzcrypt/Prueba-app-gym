@@ -7,7 +7,8 @@ import { CHEAT_MEAL, EQUIVALENCIAS, MENUS, NEAT, TIPS_NUTRICION } from "@/domain
 import { ScreenHeader, SectionHeader } from "@/features/ui/headers";
 import { DiaDeComida } from "@/features/nutricion/DiaDeComida";
 
-export function NutricionScreen({ comida, apuntes = [], apuntarComida, borrarComida, esHoy }) {
+export function NutricionScreen({ comida, apuntes = [], cambios, apuntarComida, apuntarVarias,
+                                  deshacerComida, cambiarAlimento, esHoy }) {
   const [menuAbierto, setMenuAbierto] = useState(MENUS[0].id);
   const [diaAbierto, setDiaAbierto] = useState("entreno");
   const [verTips, setVerTips] = useState(false);
@@ -22,8 +23,9 @@ export function NutricionScreen({ comida, apuntes = [], apuntarComida, borrarCom
 
       {/* ═══ HOY — lo único que se toca a diario: apuntar y que la cena cuadre ═══ */}
       {comida && apuntarComida && (
-        <DiaDeComida comida={comida} apuntes={apuntes} apuntarComida={apuntarComida}
-                     borrarComida={borrarComida} esHoy={esHoy} />
+        <DiaDeComida comida={comida} apuntes={apuntes} cambios={cambios}
+                     apuntarComida={apuntarComida} apuntarVarias={apuntarVarias}
+                     deshacerComida={deshacerComida} cambiarAlimento={cambiarAlimento} esHoy={esHoy} />
       )}
 
       {/* ═══ LOS MENÚS REALES ═══ */}

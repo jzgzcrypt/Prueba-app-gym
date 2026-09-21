@@ -57,6 +57,9 @@ export default function App() {
   // "casa" lleva gramos, "cantina" lleva racion, "rapida" no lleva nada porque
   // ya es una comida entera. Ver src/domain/nutricion/iifym.js.
   const [comidasLog, setComidasLog] = useState({}); // { dayKey: [apunte] }
+  // Los cambios de alimento sobre el menu del dia: "hoy no hay salmon, hay
+  // merluza". { dayKey: { "cena:salmon": "merluza" } }
+  const [cambiosMenu, setCambiosMenu] = useState({});
   // El historial arranca con el bloque en curso, con sus fechas sacadas del
   // calendario: si se mueve FECHA_INICIO, el historial se mueve con el.
   const [bloquesHistorial, setBloquesHistorial] = useState([
@@ -130,6 +133,7 @@ export default function App() {
           if (d.currentWeekOverride !== undefined) setCurrentWeekOverride(d.currentWeekOverride);
           if (d.weeklyLog) setWeeklyLog(d.weeklyLog);
           if (d.comidasLog) setComidasLog(d.comidasLog);
+          if (d.cambiosMenu) setCambiosMenu(d.cambiosMenu);
           if (d.bloquesHistorial) setBloquesHistorial(d.bloquesHistorial);
           if (d.ultimoBackup) setUltimoBackup(d.ultimoBackup);
           if (d.cuelloFaseManual) setCuelloFaseManual(d.cuelloFaseManual);
@@ -202,7 +206,7 @@ export default function App() {
       checked, cuelloChecks, notes, youtubeLinks, customExercises, painLog,
       flaggedExercises, pausedRanges, workoutProgress, magiaProgress, magiaLog,
       guerreroLog, workoutWeights, medidas, ritmoReal, ritmoTramos, sensaciones, postponed, phaseAdjustNote,
-      currentWeekOverride, weeklyLog, comidasLog, bloquesHistorial, ultimoBackup, cuelloFaseManual,
+      currentWeekOverride, weeklyLog, comidasLog, cambiosMenu, bloquesHistorial, ultimoBackup, cuelloFaseManual,
     };
     // Se deja a mano el ultimo estado conocido para poder guardarlo de golpe
     // si la app se cierra antes de que venza la espera de abajo.
@@ -212,7 +216,7 @@ export default function App() {
   }, [checked, cuelloChecks, notes, youtubeLinks, customExercises, painLog,
       flaggedExercises, pausedRanges, workoutProgress, magiaProgress, magiaLog,
       guerreroLog, workoutWeights, medidas, ritmoReal, ritmoTramos, sensaciones, postponed, phaseAdjustNote,
-      currentWeekOverride, weeklyLog, comidasLog, bloquesHistorial, ultimoBackup, cuelloFaseManual, storageReady]);
+      currentWeekOverride, weeklyLog, comidasLog, cambiosMenu, bloquesHistorial, ultimoBackup, cuelloFaseManual, storageReady]);
 
   const currentDay = FLAT_DAYS[flatIdx] || FLAT_DAYS[todayIdx] || FLAT_DAYS[0];
   const isToday = flatIdx === todayIdx;
@@ -230,7 +234,7 @@ export default function App() {
   // para poder decirlo, y deja el deshacer preparado por si era un error.
   const vaciarDia = (clave) => {
     const actual = { checked, cuelloChecks, notes, painLog, magiaLog, guerreroLog,
-                     workoutWeights, ritmoReal, ritmoTramos, sensaciones, postponed, comidasLog };
+                     workoutWeights, ritmoReal, ritmoTramos, sensaciones, postponed, comidasLog, cambiosMenu };
     const cuantas = cuantoHayEn(actual, clave);
     if (!cuantas) return 0;
     const { estado } = limpiarDia(actual, clave);
@@ -238,23 +242,34 @@ export default function App() {
     setPainLog(estado.painLog); setMagiaLog(estado.magiaLog); setGuerreroLog(estado.guerreroLog);
     setWorkoutWeights(estado.workoutWeights); setRitmoReal(estado.ritmoReal);
     setRitmoTramos(estado.ritmoTramos); setSensaciones(estado.sensaciones);
-    setPostponed(estado.postponed); setComidasLog(estado.comidasLog);
+    setPostponed(estado.postponed); setComidasLog(estado.comidasLog); setCambiosMenu(estado.cambiosMenu);
     pushUndo("Día vaciado", () => {
       setChecked(actual.checked); setCuelloChecks(actual.cuelloChecks); setNotes(actual.notes);
       setPainLog(actual.painLog); setMagiaLog(actual.magiaLog); setGuerreroLog(actual.guerreroLog);
       setWorkoutWeights(actual.workoutWeights); setRitmoReal(actual.ritmoReal);
       setRitmoTramos(actual.ritmoTramos); setSensaciones(actual.sensaciones);
-      setPostponed(actual.postponed); setComidasLog(actual.comidasLog);
+      setPostponed(actual.postponed); setComidasLog(actual.comidasLog); setCambiosMenu(actual.cambiosMenu);
     });
     return cuantas;
   };
 
   // Apuntar y desapuntar comida del dia que se esta viendo. Se anade al final
   // porque el orden en que comes es el orden en que lo apuntas.
-  const apuntarComida = (apunte) => setComidasLog(p =>
-    Object.assign({}, p, { [dayKey]: (p[dayKey] || []).concat([apunte]) }));
-  const borrarComida = (i) => setComidasLog(p =>
-    Object.assign({}, p, { [dayKey]: (p[dayKey] || []).filter((_, j) => j !== i) }));
+  const apuntarComida = (apunte) => apuntarVarias([apunte]);
+  const apuntarVarias = (nuevos) => setComidasLog(p =>
+    Object.assign({}, p, { [dayKey]: (p[dayKey] || []).concat(nuevos) }));
+
+  // Deshacer una comida entera del menu, o un apunte suelto por su posicion.
+  const deshacerComida = (comidaId, indice) => setComidasLog(p =>
+    Object.assign({}, p, { [dayKey]: (p[dayKey] || []).filter((ap, j) =>
+      comidaId ? ap.comida !== comidaId : j !== indice) }));
+
+  // Cambiar un alimento del menu por un equivalente, o volver al original.
+  const cambiarAlimento = (clave, nuevoId) => setCambiosMenu(p => {
+    const delDia = Object.assign({}, p[dayKey]);
+    if (nuevoId) delDia[clave] = nuevoId; else delete delDia[clave];
+    return Object.assign({}, p, { [dayKey]: delDia });
+  });
 
   const toggleCheck = (key) => setChecked(p => Object.assign({}, p, { [key]: !p[key] }));
   const toggleCuello = (m) => setCuelloChecks(p => Object.assign({}, p, { [dayKey + "-" + m]: !p[dayKey + "-" + m] }));
@@ -270,7 +285,7 @@ export default function App() {
       checked, cuelloChecks, notes, youtubeLinks, customExercises, painLog,
       flaggedExercises, pausedRanges, workoutProgress, workoutWeights, medidas,
       ritmoReal, ritmoTramos, sensaciones, postponed, phaseAdjustNote, currentWeekOverride, weeklyLog,
-      comidasLog, magiaProgress, magiaLog, guerreroLog, bloquesHistorial,
+      comidasLog, cambiosMenu, magiaProgress, magiaLog, guerreroLog, bloquesHistorial,
     };
     const blob = new Blob([JSON.stringify(payload, null, 2)], { type: "application/json" });
     const url = URL.createObjectURL(blob);
@@ -307,6 +322,7 @@ export default function App() {
         if (data.currentWeekOverride !== undefined) setCurrentWeekOverride(data.currentWeekOverride);
         if (data.weeklyLog) setWeeklyLog(data.weeklyLog);
         if (data.comidasLog) setComidasLog(data.comidasLog);
+        if (data.cambiosMenu) setCambiosMenu(data.cambiosMenu);
         if (data.magiaProgress) setMagiaProgress(data.magiaProgress);
         if (data.magiaLog) setMagiaLog(data.magiaLog);
         if (data.guerreroLog) setGuerreroLog(data.guerreroLog);
@@ -411,7 +427,7 @@ export default function App() {
             isFuerzaDay={isFuerzaDay} isRunDay={isRunDay} isCompromisoDay={isCompromisoDay} mov={mov}
             comida={comida} vaciarDia={vaciarDia}
             apuntesComida={comidasLog[dayKey] || []} irANutricion={() => setScreen("nutricion")}
-            cosasEnElDia={cuantoHayEn({ checked, cuelloChecks, notes, painLog, magiaLog, guerreroLog, workoutWeights, ritmoReal, ritmoTramos, sensaciones, postponed, comidasLog }, dayKey)}
+            cosasEnElDia={cuantoHayEn({ checked, cuelloChecks, notes, painLog, magiaLog, guerreroLog, workoutWeights, ritmoReal, ritmoTramos, sensaciones, postponed, comidasLog, cambiosMenu }, dayKey)}
             cuelloEj={cuelloEj} cuelloChecks={cuelloChecks} toggleCuello={toggleCuello}
             checked={checked} toggleCheck={toggleCheck} mainDone={mainDone}
             workoutProgress={workoutProgress[dayKey]} onStartWorkout={() => setActiveWorkout(dayKey)}
@@ -459,7 +475,8 @@ export default function App() {
 
         {screen === "nutricion" && (
           <NutricionScreen comida={comida} apuntes={comidasLog[dayKey] || []}
-            apuntarComida={apuntarComida} borrarComida={borrarComida} esHoy={isToday} />
+            cambios={cambiosMenu[dayKey]} apuntarComida={apuntarComida} apuntarVarias={apuntarVarias}
+            deshacerComida={deshacerComida} cambiarAlimento={cambiarAlimento} esHoy={isToday} />
         )}
 
         {screen === "progreso" && (
