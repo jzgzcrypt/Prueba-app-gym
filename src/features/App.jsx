@@ -53,6 +53,10 @@ export default function App() {
   const [phaseAdjustNote, setPhaseAdjustNote] = useState(""); // nota libre sobre desviacion de fases/calendario
   const [currentWeekOverride, setCurrentWeekOverride] = useState(null); // numero de semana manual, o null = automatico por fecha
   const [weeklyLog, setWeeklyLog] = useState({}); // { weekN: "texto de la bitacora" }
+  // Lo que has comido, por dia. Cada apunte es {origen, id, gramos|racion}:
+  // "casa" lleva gramos, "cantina" lleva racion, "rapida" no lleva nada porque
+  // ya es una comida entera. Ver src/domain/nutricion/iifym.js.
+  const [comidasLog, setComidasLog] = useState({}); // { dayKey: [apunte] }
   // El historial arranca con el bloque en curso, con sus fechas sacadas del
   // calendario: si se mueve FECHA_INICIO, el historial se mueve con el.
   const [bloquesHistorial, setBloquesHistorial] = useState([
@@ -125,6 +129,7 @@ export default function App() {
           if (d.phaseAdjustNote != null) setPhaseAdjustNote(d.phaseAdjustNote);
           if (d.currentWeekOverride !== undefined) setCurrentWeekOverride(d.currentWeekOverride);
           if (d.weeklyLog) setWeeklyLog(d.weeklyLog);
+          if (d.comidasLog) setComidasLog(d.comidasLog);
           if (d.bloquesHistorial) setBloquesHistorial(d.bloquesHistorial);
           if (d.ultimoBackup) setUltimoBackup(d.ultimoBackup);
           if (d.cuelloFaseManual) setCuelloFaseManual(d.cuelloFaseManual);
@@ -197,7 +202,7 @@ export default function App() {
       checked, cuelloChecks, notes, youtubeLinks, customExercises, painLog,
       flaggedExercises, pausedRanges, workoutProgress, magiaProgress, magiaLog,
       guerreroLog, workoutWeights, medidas, ritmoReal, ritmoTramos, sensaciones, postponed, phaseAdjustNote,
-      currentWeekOverride, weeklyLog, bloquesHistorial, ultimoBackup, cuelloFaseManual,
+      currentWeekOverride, weeklyLog, comidasLog, bloquesHistorial, ultimoBackup, cuelloFaseManual,
     };
     // Se deja a mano el ultimo estado conocido para poder guardarlo de golpe
     // si la app se cierra antes de que venza la espera de abajo.
@@ -207,7 +212,7 @@ export default function App() {
   }, [checked, cuelloChecks, notes, youtubeLinks, customExercises, painLog,
       flaggedExercises, pausedRanges, workoutProgress, magiaProgress, magiaLog,
       guerreroLog, workoutWeights, medidas, ritmoReal, ritmoTramos, sensaciones, postponed, phaseAdjustNote,
-      currentWeekOverride, weeklyLog, bloquesHistorial, ultimoBackup, cuelloFaseManual, storageReady]);
+      currentWeekOverride, weeklyLog, comidasLog, bloquesHistorial, ultimoBackup, cuelloFaseManual, storageReady]);
 
   const currentDay = FLAT_DAYS[flatIdx] || FLAT_DAYS[todayIdx] || FLAT_DAYS[0];
   const isToday = flatIdx === todayIdx;
@@ -225,7 +230,7 @@ export default function App() {
   // para poder decirlo, y deja el deshacer preparado por si era un error.
   const vaciarDia = (clave) => {
     const actual = { checked, cuelloChecks, notes, painLog, magiaLog, guerreroLog,
-                     workoutWeights, ritmoReal, ritmoTramos, sensaciones, postponed };
+                     workoutWeights, ritmoReal, ritmoTramos, sensaciones, postponed, comidasLog };
     const cuantas = cuantoHayEn(actual, clave);
     if (!cuantas) return 0;
     const { estado } = limpiarDia(actual, clave);
@@ -233,16 +238,23 @@ export default function App() {
     setPainLog(estado.painLog); setMagiaLog(estado.magiaLog); setGuerreroLog(estado.guerreroLog);
     setWorkoutWeights(estado.workoutWeights); setRitmoReal(estado.ritmoReal);
     setRitmoTramos(estado.ritmoTramos); setSensaciones(estado.sensaciones);
-    setPostponed(estado.postponed);
+    setPostponed(estado.postponed); setComidasLog(estado.comidasLog);
     pushUndo("Día vaciado", () => {
       setChecked(actual.checked); setCuelloChecks(actual.cuelloChecks); setNotes(actual.notes);
       setPainLog(actual.painLog); setMagiaLog(actual.magiaLog); setGuerreroLog(actual.guerreroLog);
       setWorkoutWeights(actual.workoutWeights); setRitmoReal(actual.ritmoReal);
       setRitmoTramos(actual.ritmoTramos); setSensaciones(actual.sensaciones);
-      setPostponed(actual.postponed);
+      setPostponed(actual.postponed); setComidasLog(actual.comidasLog);
     });
     return cuantas;
   };
+
+  // Apuntar y desapuntar comida del dia que se esta viendo. Se anade al final
+  // porque el orden en que comes es el orden en que lo apuntas.
+  const apuntarComida = (apunte) => setComidasLog(p =>
+    Object.assign({}, p, { [dayKey]: (p[dayKey] || []).concat([apunte]) }));
+  const borrarComida = (i) => setComidasLog(p =>
+    Object.assign({}, p, { [dayKey]: (p[dayKey] || []).filter((_, j) => j !== i) }));
 
   const toggleCheck = (key) => setChecked(p => Object.assign({}, p, { [key]: !p[key] }));
   const toggleCuello = (m) => setCuelloChecks(p => Object.assign({}, p, { [dayKey + "-" + m]: !p[dayKey + "-" + m] }));
@@ -258,7 +270,7 @@ export default function App() {
       checked, cuelloChecks, notes, youtubeLinks, customExercises, painLog,
       flaggedExercises, pausedRanges, workoutProgress, workoutWeights, medidas,
       ritmoReal, ritmoTramos, sensaciones, postponed, phaseAdjustNote, currentWeekOverride, weeklyLog,
-      magiaProgress, magiaLog, guerreroLog, bloquesHistorial,
+      comidasLog, magiaProgress, magiaLog, guerreroLog, bloquesHistorial,
     };
     const blob = new Blob([JSON.stringify(payload, null, 2)], { type: "application/json" });
     const url = URL.createObjectURL(blob);
@@ -294,6 +306,7 @@ export default function App() {
         if (data.phaseAdjustNote != null) setPhaseAdjustNote(data.phaseAdjustNote);
         if (data.currentWeekOverride !== undefined) setCurrentWeekOverride(data.currentWeekOverride);
         if (data.weeklyLog) setWeeklyLog(data.weeklyLog);
+        if (data.comidasLog) setComidasLog(data.comidasLog);
         if (data.magiaProgress) setMagiaProgress(data.magiaProgress);
         if (data.magiaLog) setMagiaLog(data.magiaLog);
         if (data.guerreroLog) setGuerreroLog(data.guerreroLog);
@@ -396,7 +409,9 @@ export default function App() {
           <HoyScreen day={currentDay} dayKey={dayKey} isToday={isToday} flatIdx={flatIdx}
             goDay={goDay} goToday={goToday} onJumpDay={jumpToDay}
             isFuerzaDay={isFuerzaDay} isRunDay={isRunDay} isCompromisoDay={isCompromisoDay} mov={mov}
-            comida={comida} vaciarDia={vaciarDia} cosasEnElDia={cuantoHayEn({ checked, cuelloChecks, notes, painLog, magiaLog, guerreroLog, workoutWeights, ritmoReal, ritmoTramos, sensaciones, postponed }, dayKey)}
+            comida={comida} vaciarDia={vaciarDia}
+            apuntesComida={comidasLog[dayKey] || []} irANutricion={() => setScreen("nutricion")}
+            cosasEnElDia={cuantoHayEn({ checked, cuelloChecks, notes, painLog, magiaLog, guerreroLog, workoutWeights, ritmoReal, ritmoTramos, sensaciones, postponed, comidasLog }, dayKey)}
             cuelloEj={cuelloEj} cuelloChecks={cuelloChecks} toggleCuello={toggleCuello}
             checked={checked} toggleCheck={toggleCheck} mainDone={mainDone}
             workoutProgress={workoutProgress[dayKey]} onStartWorkout={() => setActiveWorkout(dayKey)}
@@ -442,7 +457,10 @@ export default function App() {
             flaggedExercises={flaggedExercises} setFlaggedExercises={setFlaggedExercises} pushUndo={pushUndo} />
         )}
 
-        {screen === "nutricion" && <NutricionScreen comida={comida} />}
+        {screen === "nutricion" && (
+          <NutricionScreen comida={comida} apuntes={comidasLog[dayKey] || []}
+            apuntarComida={apuntarComida} borrarComida={borrarComida} esHoy={isToday} />
+        )}
 
         {screen === "progreso" && (
           <ProgresoScreen medidas={medidas} setMedidas={setMedidas}

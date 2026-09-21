@@ -21,6 +21,50 @@ Todo cambio que se haga en la app se anota aquí. Sin excepciones.
 
 ## [Sin publicar]
 
+### Añadido — La comida deja de ser un menú que cumplir y pasa a ser un objetivo que cuadrar
+- **IIFYM: el día suma, no la comida.** No importa QUÉ comes, importa lo que
+  suma el día. Dos cenas distintas con las mismas calorías y los mismos macros
+  hacen lo mismo con tu cuerpo. Por eso ya no hay un menú que seguir: hay un
+  objetivo de día y muchas formas de llegar.
+- **La cantina, sin pesar nada.** 36 platos de comedor —primeros, segundos,
+  guarniciones, pan y postre— que se señalan con el dedo y se marcan como
+  poco / normal / mucho. Cualquier sistema que pida gramos a mediodía es un
+  sistema que se abandona el martes.
+- **Tres cenas que encajan en lo que queda**, con los gramos ya calculados y
+  hechas solo con lo que hay en casa. Las tres suman lo mismo: se elige por
+  apetito, no por cálculo. Y hay botón para pedir otras tres.
+- **La despensa como datos** (45 alimentos) sacada de los propios menús de
+  2022: pesos en crudo o cocido según como se pesa de verdad en una cocina.
+- **Comidas de un toque** para lo que comes siempre igual —el porridge, el
+  batido post-entreno, el yogur con fruta—. Apuntarlo tiene que costar un
+  gesto o no se apunta. Incluye "picoteo sin controlar": mejor apuntarlo que
+  fingir que no pasó.
+- **La cena se topa en 900 kcal.** Un día en el que has comido poco proponía
+  una cena de 1.300 kcal —260 g de gambas y 215 g de arroz—. Nadie cena eso.
+  Lo que sobra se aparta para la merienda y la recena, y se dice en pantalla.
+- **La tira de comida de HOY está viva.** En cuanto apuntas algo deja de
+  repetir la regla y pasa a decir lo que llevas y lo que queda, y se toca para
+  ir directo a la cena.
+
+### Cambiado — las calorías del día, con las cuentas a la vista
+- Había dos cifras que no cuadraban: las **2.081 / 1.814 kcal** del dietista de
+  2022 (un cuerpo que levantaba pesas y no corría) y las **2.800 / 2.350** que
+  estimé yo (que no dejaban déficit). Ahora son **2.500 los días de COMER y
+  2.100 los de RECORTAR**, y el porqué está escrito entero en
+  `src/domain/nutricion/dias.js` para que se pueda discutir en vez de creerse:
+  media semanal ~2.220 kcal, unas 400 por debajo del gasto, ~0,4 kg de grasa
+  por semana sin tocar el rendimiento del 7K.
+- La proteína es la misma los dos días (165 g) porque no se negocia: es lo
+  único que protege el hombro mientras se pierde grasa. **El carbohidrato es
+  la palanca**, y por eso sube justo los días que hay que correr rápido.
+
+### Datos
+- Nuevo campo `comidasLog` (`{ fecha: [apunte] }`), donde cada apunte es
+  `{origen, id, gramos|ración}`. **No sube la versión de esquema**: es un campo
+  nuevo y opcional que por defecto es `{}`, no un cambio de forma de nada ya
+  guardado, así que no hay migración que escribir. Entra en el guardado
+  automático, en exportar/importar y en "vaciar este día".
+
 ### Añadido — Nutrición deja de ser una página muerta
 - **Los dos programas nutricionales de 2022**, con sus menús completos por
   tipo de día, macros, equivalencias, protocolo de comida libre, trucos del

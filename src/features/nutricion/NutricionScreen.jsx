@@ -3,12 +3,11 @@
 import { useState } from "react";
 import { C, CAT, R, SP, TAP_MIN, TYPE } from "@/design/tokens";
 import { ICON_NUTRICION } from "@/domain/assets/icons";
-import { NUTRICION } from "@/domain/nutricion/nutricion";
-import { COMIDA, PROTEINA_DIARIA } from "@/domain/nutricion/dias";
 import { CHEAT_MEAL, EQUIVALENCIAS, MENUS, NEAT, TIPS_NUTRICION } from "@/domain/nutricion/menus";
 import { ScreenHeader, SectionHeader } from "@/features/ui/headers";
+import { DiaDeComida } from "@/features/nutricion/DiaDeComida";
 
-export function NutricionScreen({ comida }) {
+export function NutricionScreen({ comida, apuntes = [], apuntarComida, borrarComida, esHoy }) {
   const [menuAbierto, setMenuAbierto] = useState(MENUS[0].id);
   const [diaAbierto, setDiaAbierto] = useState("entreno");
   const [verTips, setVerTips] = useState(false);
@@ -21,24 +20,10 @@ export function NutricionScreen({ comida }) {
     <div>
       <ScreenHeader icon={ICON_NUTRICION} title="NUTRICIÓN" />
 
-      {/* ═══ HOY — la regla del día, que es lo único accionable ═══ */}
-      {comida && (
-        <div style={{ padding: "0 " + SP.xl + "px " + SP.lg + "px" }}>
-          <div style={{ background: C.accent, borderRadius: R.xl, padding: "16px 18px" }}>
-            <div style={{ ...TYPE.micro, color: "#8A8A87" }}>HOY TOCA</div>
-            <div style={{ fontSize: 26, fontWeight: 800, color: "#FAFAF9", letterSpacing: -0.5, marginTop: 4 }}>
-              {comida.etiqueta}
-            </div>
-            <div className="mono" style={{ fontSize: 14, fontWeight: 600, color: "#D4D4D1", marginTop: 6 }}>
-              {comida.kcal} · proteína {PROTEINA_DIARIA}
-            </div>
-            <div style={{ ...TYPE.body, color: "#A8A8A5", marginTop: 8 }}>{comida.detalle}</div>
-          </div>
-          <div style={{ ...TYPE.body, color: C.textDim, marginTop: 10, lineHeight: 1.5 }}>
-            La grasa alimenta el trote suave, pero no {NUTRICION.macros ? "4:45/km" : "el ritmo objetivo"} — eso tira de
-            glucógeno, que viene de lo que comes. Por eso las sesiones que construyen el objetivo van con el depósito lleno.
-          </div>
-        </div>
+      {/* ═══ HOY — lo único que se toca a diario: apuntar y que la cena cuadre ═══ */}
+      {comida && apuntarComida && (
+        <DiaDeComida comida={comida} apuntes={apuntes} apuntarComida={apuntarComida}
+                     borrarComida={borrarComida} esHoy={esHoy} />
       )}
 
       {/* ═══ LOS MENÚS REALES ═══ */}

@@ -12,12 +12,17 @@ import { GuerreroBlock, HabitBlock, ListBlock, MagiaBlock, MoveDayBlock, PainBlo
 import { WeekDots } from "@/features/ui/WeekDots";
 import { destinoDe, llegadasA } from "@/lib/estado/mover-sesion";
 import { PROTEINA_DIARIA } from "@/domain/nutricion/dias";
+import { macrosDelDia } from "@/domain/nutricion/iifym";
 export function HoyScreen(props) {
   const { day, dayKey, isToday, flatIdx, goDay, goToday, isFuerzaDay, isRunDay, isCompromisoDay, mov,
-          comida, vaciarDia, cosasEnElDia,
+          comida, vaciarDia, cosasEnElDia, apuntesComida,
     cuelloEj, cuelloChecks, toggleCuello, checked, toggleCheck, mainDone, workoutProgress, onStartWorkout,
     notes, noteInput, setNoteInput, editingNote, setEditingNote, saveNote, openCatalogo,
     expandedBlock, setExpandedBlock, magiaProgress, bloquesHistorial } = props;
+
+  // Lo que llevas comido hoy, para que la tira de comida diga algo util en
+  // vez de repetir siempre el mismo numero.
+  const llevaComido = Math.round(macrosDelDia(apuntesComida).kcal);
 
   const frase = getFraseHoy(flatIdx);
   // Cuanto falta para el dia del objetivo. Es el dato que de verdad empuja.
@@ -121,20 +126,37 @@ export function HoyScreen(props) {
 
       <WeekDots day={day} checked={checked} onJumpDay={props.onJumpDay} />
 
+      {/* La comida del dia. En cuanto apuntas algo deja de decir la regla y
+          pasa a decir lo que te queda, que es lo unico que necesitas saber a
+          las nueve de la noche. Se toca y lleva a NUTRICION. */}
       {comida && (
         <div style={{ padding: "0 16px 10px" }}>
-          <div style={{ display: "flex", alignItems: "center", gap: 10, padding: "10px 13px", borderRadius: 11,
-                        background: C.card, border: "1px solid " + C.cardBorder,
-                        borderLeft: "3px solid " + (comida.id === "comer" ? CAT.fuerza : C.textFaint) }}>
+          <button className="btn" onClick={props.irANutricion} style={{
+            width: "100%", textAlign: "left",
+            display: "flex", alignItems: "center", gap: 10, padding: "10px 13px", borderRadius: 11,
+            background: C.card, border: "1px solid " + C.cardBorder,
+            borderLeft: "3px solid " + (comida.id === "comer" ? CAT.fuerza : C.textFaint) }}>
             <div style={{ ...TYPE.micro, color: comida.id === "comer" ? CAT.fuerza : C.textDim,
                           background: C.card, padding: "4px 8px", borderRadius: 999, flexShrink: 0 }}>
               {comida.etiqueta}
             </div>
             <div style={{ flexGrow: 1, minWidth: 0 }}>
-              <div style={{ ...TYPE.bodyStrong, color: C.text }}>{comida.kcal} · proteína {PROTEINA_DIARIA}</div>
-              <div style={{ fontSize: 11.5, color: C.textDim, marginTop: 1 }}>{comida.detalle}</div>
+              {llevaComido > 0 ? (
+                <>
+                  <div style={{ ...TYPE.bodyStrong, color: C.text }}>
+                    {llevaComido} de {comida.macros.kcal} kcal · quedan {comida.macros.kcal - llevaComido}
+                  </div>
+                  <div style={{ fontSize: 11.5, color: C.textDim, marginTop: 1 }}>Toca para ver qué cenar</div>
+                </>
+              ) : (
+                <>
+                  <div style={{ ...TYPE.bodyStrong, color: C.text }}>{comida.kcal} · proteína {PROTEINA_DIARIA}</div>
+                  <div style={{ fontSize: 11.5, color: C.textDim, marginTop: 1 }}>{comida.detalle}</div>
+                </>
+              )}
             </div>
-          </div>
+            <span style={{ color: C.textFaint, fontSize: 16, flexShrink: 0 }}>›</span>
+          </button>
         </div>
       )}
 
