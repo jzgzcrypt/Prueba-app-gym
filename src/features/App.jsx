@@ -441,7 +441,7 @@ export default function App() {
             flaggedExercises={flaggedExercises} setFlaggedExercises={setFlaggedExercises} pushUndo={pushUndo} />
         )}
 
-        {screen === "nutricion" && <NutricionScreen />}
+        {screen === "nutricion" && <NutricionScreen comida={comida} />}
 
         {screen === "progreso" && (
           <ProgresoScreen medidas={medidas} setMedidas={setMedidas}
