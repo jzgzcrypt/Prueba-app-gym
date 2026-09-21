@@ -6,7 +6,7 @@ import { C, CAT } from "@/design/tokens";
 import { QuickFieldInput, SimpleLineChart } from "@/features/ui/charts";
 export function ProgresoScreen({ medidas, setMedidas, ritmoReal, weeks, checked, workoutWeights }) {
   const [showForm, setShowForm] = useState(false);
-  const [form, setForm] = useState({ peso: "", cintura: "", cadera: "", hombro: "", cadenaPosterior: "", columna: "", caderaMov: "", foto: null });
+  const [form, setForm] = useState({ peso: "", cintura: "", anchoHombro: "", cadera: "", hombro: "", cadenaPosterior: "", columna: "", caderaMov: "", foto: null });
   const [quickField, setQuickField] = useState(null); // "peso" | "cintura" | "cadera" | "hombro" | "cadenaPosterior" | "columna" | "caderaMov" | null (menu)
   const [showExport, setShowExport] = useState(false);
   const [selectedExercise, setSelectedExercise] = useState(null);
@@ -21,12 +21,13 @@ export function ProgresoScreen({ medidas, setMedidas, ritmoReal, weeks, checked,
   };
 
   const addMedida = () => {
-    const tieneAlgo = form.peso || form.cintura || form.cadera || form.hombro || form.cadenaPosterior || form.columna || form.caderaMov;
+    const tieneAlgo = form.peso || form.cintura || form.anchoHombro || form.cadera || form.hombro || form.cadenaPosterior || form.columna || form.caderaMov;
     if (!tieneAlgo) return;
     const fecha = new Date().toLocaleDateString("es-ES", { day: "2-digit", month: "short" });
     setMedidas(prev => [...prev, {
       fecha, peso: form.peso ? parseFloat(form.peso) : null,
       cintura: form.cintura ? parseFloat(form.cintura) : null,
+      anchoHombro: form.anchoHombro ? parseFloat(form.anchoHombro) : null,
       cadera: form.cadera ? parseFloat(form.cadera) : null,
       hombro: form.hombro ? parseFloat(form.hombro) : null,
       cadenaPosterior: form.cadenaPosterior ? parseFloat(form.cadenaPosterior) : null,
@@ -34,7 +35,7 @@ export function ProgresoScreen({ medidas, setMedidas, ritmoReal, weeks, checked,
       caderaMov: form.caderaMov ? parseFloat(form.caderaMov) : null,
       foto: form.foto || null,
     }]);
-    setForm({ peso: "", cintura: "", cadera: "", hombro: "", cadenaPosterior: "", columna: "", caderaMov: "", foto: null });
+    setForm({ peso: "", cintura: "", anchoHombro: "", cadera: "", hombro: "", cadenaPosterior: "", columna: "", caderaMov: "", foto: null });
     setShowForm(false);
   };
 
@@ -52,6 +53,12 @@ export function ProgresoScreen({ medidas, setMedidas, ritmoReal, weeks, checked,
   const cinturaData = medidas.filter(m => m.cintura != null).map(m => ({ fecha: m.fecha, v: m.cintura }));
   const caderaData = medidas.filter(m => m.cadera != null).map(m => ({ fecha: m.fecha, v: m.cadera }));
   const hombroData = medidas.filter(m => m.hombro != null).map(m => ({ fecha: m.fecha, v: m.hombro }));
+  // El ratio hombro/cintura: sube si el hombro crece o si la cintura baja, asi
+  // que recoge las dos mitades de la estetica en un solo numero. Es el
+  // indicador bueno cuando hay recomposicion, porque el peso apenas se mueve.
+  const ratioData = medidas
+    .filter(m => m.anchoHombro != null && m.cintura != null && m.cintura > 0)
+    .map(m => ({ fecha: m.fecha, v: Math.round((m.anchoHombro / m.cintura) * 100) / 100 }));
   const cadenaPosteriorData = medidas.filter(m => m.cadenaPosterior != null).map(m => ({ fecha: m.fecha, v: m.cadenaPosterior }));
   const columnaData = medidas.filter(m => m.columna != null).map(m => ({ fecha: m.fecha, v: m.columna }));
   const caderaMovData = medidas.filter(m => m.caderaMov != null).map(m => ({ fecha: m.fecha, v: m.caderaMov }));
@@ -122,6 +129,16 @@ export function ProgresoScreen({ medidas, setMedidas, ritmoReal, weeks, checked,
       <div style={{ fontSize: 12, color: C.textDim, marginBottom: 18, fontWeight: 600 }}>Datos objetivos. Sin rachas, sin porcentajes.</div>
 
       <div style={{ background: C.card, border: "1px solid " + C.cardBorder, borderRadius: 14, padding: "16px 18px", marginBottom: 12 }}>
+        {ratioData.length > 1 && (
+          <div style={{ marginBottom: 16 }}>
+            <SimpleLineChart data={ratioData} label="Hombro ÷ cintura — tu estética en un número" unit="" color={CAT.fuerza} />
+            <div style={{ fontSize: 11.5, color: C.textDim, marginTop: 6, lineHeight: 1.4 }}>
+              Sube por los dos lados a la vez: hombro más ancho o cintura más estrecha.
+              Es mejor indicador que el peso, que con recomposición engaña.
+            </div>
+          </div>
+        )}
+
         <SimpleLineChart data={pesoData} label="Peso" unit="kg" color={C.accent} onAddData={() => { setQuickField("peso"); setShowForm(false); }} />
       </div>
 
@@ -193,6 +210,7 @@ export function ProgresoScreen({ medidas, setMedidas, ritmoReal, weeks, checked,
             {[
               ["peso", "Peso", "kg", "#171717"],
               ["cintura", "Cintura", "cm", "#3A6EA5"],
+              ["anchoHombro", "Ancho de hombro", "cm", CAT.fuerza],
               ["cadera", "Cadera", "cm", "#946800"],
               ["hombro", "Mov. Hombro", "cm", CAT.cuello],
               ["cadenaPosterior", "Mov. Tocar suelo", "cm", "#3A6EA5"],
@@ -222,7 +240,7 @@ export function ProgresoScreen({ medidas, setMedidas, ritmoReal, weeks, checked,
         <div style={{ background: C.card, border: "1px solid " + C.cardBorder, borderRadius: 14, padding: "16px 18px", marginBottom: 12 }}>
           <button className="btn" onClick={() => setShowForm(false)} style={{ fontSize: 11.5, color: "#787774", fontWeight: 700, marginBottom: 10 }}>&lsaquo; Volver a anotar solo un dato</button>
           <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
-            {[["peso","Peso (kg) — opcional"],["cintura","Cintura (cm) — opcional"],["cadera","Cadera (cm) — opcional"],["hombro","Hombro — test manos espalda (cm) — opcional"]].map(([key,label]) => (
+            {[["peso","Peso (kg) — opcional"],["cintura","Cintura (cm) — opcional"],["anchoHombro","Ancho de hombro (cm) — opcional"],["cadera","Cadera (cm) — opcional"],["hombro","Hombro — test manos espalda (cm) — opcional"]].map(([key,label]) => (
               <div key={key}>
                 <div style={{ fontSize: 10.5, fontWeight: 700, color: "#787774", marginBottom: 3 }}>{label}</div>
                 <input value={form[key]} onChange={e => setForm(p => Object.assign({}, p, { [key]: e.target.value }))}

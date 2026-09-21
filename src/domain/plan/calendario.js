@@ -54,7 +54,7 @@ function etiquetaRango(isoIni, isoFin) {
 export const WEEKS = PLAN.map((wk, wi) => {
   const days = wk.days.map((d, di) => {
     const isoDate = sumarDias(FECHA_INICIO, wi * 7 + di);
-    const dia = { ...d, isoDate, date: etiquetaCorta(isoDate) };
+    const dia = { ...d, isoDate, date: etiquetaCorta(isoDate), dayIdx: di, weekN: wk.n };
     return aplicarCompromiso(dia, di);
   });
   return { ...wk, days, dates: etiquetaRango(days[0].isoDate, days[days.length - 1].isoDate) };

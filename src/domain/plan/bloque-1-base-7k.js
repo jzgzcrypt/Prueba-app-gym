@@ -37,8 +37,17 @@
  *
  * ─── DONDE LA PLANTILLA SE ROMPE, Y POR QUE ────────────────────────────────
  *
- *   S1-S2 (RAMPA)  El jueves no lleva calidad sino la segunda salida: en una
+ *   S1 (RAMPA)     El jueves no lleva calidad sino la segunda salida: en una
  *                  rampa de entrada no se mete intensidad, se mete costumbre.
+ *                  La rampa es UNA semana, no dos: se vuelve de un paron, no se
+ *                  empieza de cero, y dos semanas identicas de correr/caminar
+ *                  no aportan carga y si desmotivan. Sube algo el riesgo de
+ *                  lesion —la forma vuelve antes que los tendones— y se asume
+ *                  a proposito, porque la semana liberada paga el puente de S10.
+ *   S10 (PUENTE)   6 km a 4:50-4:55. Es el escalon que faltaba: sin el, el dia
+ *                  del objetivo pide 7 km a un ritmo solo sostenido 3 km, y un
+ *                  40% mas largo que el mayor esfuerzo a ritmo. El taper se
+ *                  queda en una semana, que para 33 minutos es suficiente.
  *   S8 (TEST)      El domingo es el primer 7km. Esa semana el test ES la
  *                  sesion de calidad: no se hace un esfuerzo fuerte tres dias
  *                  antes de medirse. Jueves y sabado pasan a activacion.
@@ -92,41 +101,9 @@ export const WEEKS = [
         intervalos: [{r:5,s:[["correr",120],["caminar",120]]}] },
     ]},
 
-  // ══ S2 · RAMPA ══ Los bloques de carrera se alargan, la caminata se acorta.
-  { n: 2, fase: "RAMPA",
-    days: [
-      LUNES_TENIS,
-      { dow: "Martes", tipo: "run", cat: "runZ2", titulo: "Correr/Caminar — suelta piernas", dur: "28 min", rpe: "3/10",
-        what: "5x[3min correr / 90s caminar]. Suave: vienes del tenis.",
-        intervalos: [{r:5,s:[["correr",180],["caminar",90]]}] },
-      { dow: "Miercoles", tipo: "fuerza", cat: "empuje", titulo: "Empuje (rampa)", dur: "40 min",
-        ejercicios: [
-          { grupo: "Pecho", nombre: "Aperturas con mancuernas en banco", series: "3x12" },
-          { grupo: "Hombro", nombre: "Elevaciones laterales mancuerna", series: "4xfallo" },
-          { grupo: "Triceps", nombre: "Extension polea alta agarre en V", series: "3x10-12" },
-        ]},
-      { dow: "Jueves", tipo: "run", cat: "runZ2", titulo: "Intervalos 3 min", dur: "30 min", rpe: "4/10",
-        what: "5x[3min correr / 90s caminar]. Hoy sí puedes apretar un poco.",
-        intervalos: [{r:5,s:[["correr",180],["caminar",90]]}] },
-      { dow: "Viernes", tipo: "fuerza", cat: "tiron", titulo: "Tirón + Hombro (rampa)", dur: "40 min",
-        ejercicios: [
-          { grupo: "Espalda", nombre: "Remo unilateral en polea", series: "3x10" },
-          { grupo: "Hombro", nombre: "Elevaciones laterales polea muñequera cruzadas", series: "3x12" },
-          { grupo: "Biceps", nombre: "Curl bayesian en polea", series: "3x10" },
-        ]},
-      { dow: "Sabado", tipo: "fuerza", cat: "pierna", titulo: "Pierna + Core (rampa)", dur: "35 min",
-        ejercicios: [
-          { grupo: "Pierna", nombre: "Sentadilla ATG sin peso", series: "3x10" },
-          { grupo: "Core", nombre: "Plancha frontal", series: "3x35s" },
-          { grupo: "Cadera", nombre: "Clamshells con banda", series: "3x15/lado" },
-        ]},
-      { dow: "Domingo", tipo: "run", cat: "runZ2", titulo: "4 min continuos", dur: "32 min", rpe: "4/10",
-        what: "4x[4min correr / 1min caminar]. Primera vez con más carrera que caminata.",
-        intervalos: [{r:4,s:[["correr",240],["caminar",60]]}] },
-    ]},
 
-  // ══ S3 · ESTETICA ══ Entra la calidad (fartlek) y el hombro a alta frecuencia.
-  { n: 3, fase: "ESTETICA",
+  // ══ S2 · ESTETICA ══ Entra la calidad (fartlek) y el hombro a alta frecuencia.
+  { n: 2, fase: "ESTETICA",
     days: [
       LUNES_TENIS,
       { dow: "Martes", tipo: "run", cat: "runZ2", titulo: "Suave — día después del tenis", dur: "20 min", rpe: "3/10",
@@ -158,8 +135,8 @@ export const WEEKS = [
         what: "20 min corriendo suave continuo. Primera tirada sin caminar." },
     ]},
 
-  // ══ S4 · ESTETICA ══
-  { n: 4, fase: "ESTETICA",
+  // ══ S3 · ESTETICA ══
+  { n: 3, fase: "ESTETICA",
     days: [
       LUNES_TENIS,
       { dow: "Martes", tipo: "run", cat: "runZ2", titulo: "Suave — día después del tenis", dur: "22 min", rpe: "3/10",
@@ -191,8 +168,8 @@ export const WEEKS = [
         what: "22 min corriendo suave continuo." },
     ]},
 
-  // ══ S5 · ESTETICA ══ Cierre de la fase estetica.
-  { n: 5, fase: "ESTETICA",
+  // ══ S4 · ESTETICA ══ Cierre de la fase estetica.
+  { n: 4, fase: "ESTETICA",
     days: [
       LUNES_TENIS,
       { dow: "Martes", tipo: "run", cat: "runZ2", titulo: "Suave — día después del tenis", dur: "22 min", rpe: "3/10",
@@ -226,8 +203,8 @@ export const WEEKS = [
         what: "26 min corriendo suave continuo." },
     ]},
 
-  // ══ S6 · CALIDAD ══ Primera sesion a ritmo objetivo. Pico de volumen de fuerza.
-  { n: 6, fase: "CALIDAD",
+  // ══ S5 · CALIDAD ══ Primera sesion a ritmo objetivo. Pico de volumen de fuerza.
+  { n: 5, fase: "CALIDAD",
     days: [
       LUNES_TENIS,
       { dow: "Martes", tipo: "run", cat: "runZ2", titulo: "Z2 de asimilación — suave", dur: "25 min", rpe: "3-4/10",
@@ -264,6 +241,38 @@ export const WEEKS = [
         ]},
       { dow: "Domingo", tipo: "run", cat: "runZ2", titulo: "Long run 40 min", dur: "50 min", rpe: "5/10",
         what: "40 min Z2 (~6km). Primera tirada larga de verdad." },
+    ]},
+
+  // ══ S6 · CALIDAD ══ Segundo escalón de ritmo: 4 km.
+  { n: 6, fase: "ESPECIFICIDAD",
+    days: [
+      LUNES_TENIS,
+      { dow: "Martes", tipo: "run", cat: "runZ2", titulo: "Z2 de asimilación — suave", dur: "25 min", rpe: "3-4/10",
+        what: "20 min Z2 muy suave." },
+      { dow: "Miercoles", tipo: "fuerza", cat: "empuje", titulo: "Empuje", dur: "50 min",
+        ejercicios: [
+          { grupo: "Pecho", nombre: "Press inclinado con mancuernas", series: "4x8" },
+          { grupo: "Hombro", nombre: "Elevaciones laterales polea muñequera cruzadas", series: "4xfallo" },
+          { grupo: "Triceps", nombre: "Extension katana en polea baja", series: "3x10" },
+          { grupo: "Triceps", nombre: "Extension polea alta agarre en V", series: "3x12" },
+        ]},
+      { dow: "Jueves", tipo: "run", cat: "runQ", titulo: "Ritmo 4km", dur: "40 min", rpe: "7/10", esCalidad: true,
+        what: "4km a 5:05-5:15/km. Un escalón más: misma sensación que la semana pasada, un kilómetro más." },
+      { dow: "Viernes", tipo: "fuerza", cat: "tiron", titulo: "Tirón + Hombro", dur: "50 min",
+        ejercicios: [
+          { grupo: "Espalda", nombre: "Dominadas", series: "1xmax" },
+          { grupo: "Espalda", nombre: "Jalon al pecho unilateral", series: "3x10" },
+          { grupo: "Hombro", nombre: "Elevaciones frontales unilateral", series: "3x12" },
+          { grupo: "Biceps", nombre: "Curl bilateral con mancuernas", series: "3x10" },
+          { grupo: "Biceps", nombre: "Curl concentrado con mancuerna", series: "3x12" },
+        ]},
+      { dow: "Sabado", tipo: "fuerza", cat: "pierna", titulo: "Pierna ligera", dur: "25 min",
+        ejercicios: [
+          { grupo: "Pierna", nombre: "Sentadilla ATG sin peso", series: "2x12" },
+          { grupo: "Core", nombre: "Plancha frontal", series: "2x40s" },
+        ]},
+      { dow: "Domingo", tipo: "run", cat: "runZ2", titulo: "Long run 45 min", dur: "55 min", rpe: "5/10",
+        what: "45 min Z2 (~6km)." },
     ]},
 
   // ══ S7 · ESPECIFICIDAD ══ El ritmo se acerca al objetivo. La fuerza empieza a ceder.
@@ -338,8 +347,8 @@ export const WEEKS = [
         what: "6km a Z2-Z3. Última tirada con volumen antes del taper." },
     ]},
 
-  // ══ S10 · TAPER ══ El volumen baja a proposito. Se llega descansado, no mas fuerte.
-  { n: 10, fase: "TAPER",
+  // ══ S10 · PUENTE ══ El escalon que faltaba: 6 km casi a ritmo, a una semana del dia.
+  { n: 10, fase: "PUENTE",
     days: [
       { ...LUNES_TENIS, notaPlan: "Taper: juega, pero no te vacíes. Nada de ir a por todas hoy." },
       { dow: "Martes", tipo: "run", cat: "runZ2", titulo: "Activación suave", dur: "25 min", rpe: "3/10",
@@ -349,13 +358,13 @@ export const WEEKS = [
           { grupo: "Pecho", nombre: "Press inclinado con mancuernas", series: "2x10" },
           { grupo: "Hombro", nombre: "Elevaciones laterales polea muñequera cruzadas", series: "2xfallo" },
         ]},
-      { dow: "Jueves", tipo: "run", cat: "runQ", titulo: "Progresivos", dur: "20 min", rpe: "3-4/10",
-        what: "10 min trote suave + 4x100m progresivos. Recordarle a las piernas qué es ir rápido." },
+      { dow: "Jueves", tipo: "run", cat: "runQ", titulo: "6km a 4:50-4:55", dur: "50 min", rpe: "8/10", esCalidad: true,
+        what: "6km a 4:50-4:55/km. El 85% de la distancia del objetivo, casi a su ritmo. Si esto sale, el domingo 11 sale." },
       { dow: "Viernes", tipo: "libre", cat: "descanso", titulo: "Descanso total" },
       { dow: "Sabado", tipo: "run", cat: "runZ2", titulo: "Activación", dur: "20 min", rpe: "2-3/10",
         what: "15 min trote suave." },
       { dow: "Domingo", tipo: "run", cat: "runZ2", titulo: "Último ensayo largo suave", dur: "35 min", rpe: "4/10",
-        what: "5km a ritmo cómodo, sin forzar." },
+        what: "5km muy suave. Ya está todo hecho: a partir de aquí solo se descansa." },
     ]},
 
   // ══ S11 · OBJETIVO ══ Taper final. Solo se llega fresco.
