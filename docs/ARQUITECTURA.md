@@ -30,7 +30,13 @@ domain/
 ├── fuerza/      Catálogo de ejercicios, enfoque por grupo, parseo de series.
 ├── salud/       Cuello (protocolo de fisio), movilidad, patrones, técnica.
 ├── habilidades/ Magia (trucos) y Guerrero (pilares).
-├── nutricion/   Referencias de nutrición.
+├── nutricion/
+│   ├── dias.js       La regla del día (COMER / RECORTAR) y los macros objetivo.
+│   ├── menu-dia.js   Tu menú, editable: comidas, ingredientes y gramos.
+│   ├── alimentos.js  La despensa e intercambiar un alimento por otro.
+│   ├── cantina.js    Platos de comedor, para apuntar sin pesar.
+│   ├── cuadrar.js    El recálculo: ajusta lo que queda a lo que has comido.
+│   └── menus.js      Los programas del dietista de 2022, como referencia.
 └── assets/      Iconos embebidos.
 ```
 

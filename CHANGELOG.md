@@ -52,6 +52,21 @@ Todo cambio que se haga en la app se anota aquí. Sin excepciones.
   repetir la regla y dice lo que llevas y lo que queda, y se toca para ir
   directo al menú.
 
+### Añadido — La dieta la editas tú
+- **El menú de partida es mío; el que usas es tuyo.** Cada comida tiene
+  *Editar*: cambias los gramos de cada alimento, quitas lo que no comes,
+  añades lo que sí, o quitas la comida entera del menú. Si no desayunas, no
+  desayunas — y el resto del día carga con esas calorías solo.
+- Se puede **añadir una comida que no estaba** en ese tipo de día (un
+  post-entreno en un día de recortar, por ejemplo) y cae en su sitio del día,
+  no al final.
+- Las ediciones son **por tipo de día, no por fecha**: quitar el desayuno lo
+  quita de todos los días de COMER, que es lo que significa cambiar la dieta.
+  Saltárselo hoy es otra cosa y se hace apuntando el día. La pantalla lo dice.
+- **Nada se borra.** Una edición es una capa encima del menú de partida, así
+  que *Volver al original* y *Volver al menú de partida* siempre funcionan, y
+  lo que has quitado aparece abajo con un botón para devolverlo.
+
 ### Cambiado — las calorías del día, con las cuentas a la vista
 - Había dos cifras que no cuadraban: las **2.081 / 1.814 kcal** del dietista de
   2022 (un cuerpo que levantaba pesas y no corría) y las **2.800 / 2.350** que
@@ -72,12 +87,15 @@ Todo cambio que se haga en la app se anota aquí. Sin excepciones.
 
 ### Datos
 - Nuevos campos `comidasLog` (`{ fecha: [apunte] }`, donde cada apunte es
-  `{comida, origen, id, gramos|ración}`) y `cambiosMenu`
-  (`{ fecha: { "cena:salmon": "merluza" } }`). **No suben la versión de
+  `{comida, origen, id, gramos|ración}`), `cambiosMenu`
+  (`{ fecha: { "cena:salmon": "merluza" } }`) y `menuEditado`
+  (`{ tipoDía: { comidaId: ingredientes | null } }` — tu dieta editada, donde
+  `null` es una comida que has quitado). **No suben la versión de
   esquema**: son campos nuevos y opcionales que por defecto son `{}`, no un
   cambio de forma de nada ya guardado, así que no hay migración que escribir.
-  Entran en el guardado automático, en exportar/importar y en "vaciar este
-  día".
+  Entran en el guardado automático y en exportar/importar. `comidasLog` y
+  `cambiosMenu` entran además en "vaciar este día"; `menuEditado` no, porque
+  es tu dieta y no un registro del día.
 
 ### Añadido — Nutrición deja de ser una página muerta
 - **Los dos programas nutricionales de 2022**, con sus menús completos por

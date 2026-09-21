@@ -8,7 +8,7 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import { ALIMENTO, macrosDe } from "../src/domain/nutricion/alimentos.js";
-import { COMIDAS_DEL_DIA, MENU_DIA, menuDe } from "../src/domain/nutricion/menu-dia.js";
+import { COMIDAS_DEL_DIA, MENU_DIA, comidasQuitadas, menuDe } from "../src/domain/nutricion/menu-dia.js";
 import { OBJETIVO_MACROS } from "../src/domain/nutricion/dias.js";
 import { apuntesDe, claveCambio, cuadrarDia, factoresPara } from "../src/domain/nutricion/cuadrar.js";
 import { macrosDelDia } from "../src/domain/nutricion/iifym.js";
@@ -264,4 +264,77 @@ test("un día normal no salta ninguna comida", () => {
     const d = cuadrarDia({ tipoDia: tipo, objetivo: OBJETIVO_MACROS[tipo], apuntes: [] });
     assert.deepEqual(d.saltadas, [], tipo);
   }
+});
+
+// ─── EDITAR LA DIETA ───────────────────────────────────────────────────────
+// El menú de partida es mío; el que se usa cada día tiene que ser suyo.
+
+test("si quitas el desayuno, el resto del día carga con sus calorías", () => {
+  const objetivo = OBJETIVO_MACROS.comer;
+  const edits = { comer: { desayuno: null } };
+  const d = cuadrarDia({ tipoDia: "comer", objetivo, apuntes: [], edits });
+
+  assert.ok(!d.comidas.some(c => c.id === "desayuno"), "el desayuno sigue ahí");
+  assert.ok(Math.abs(d.previsto.kcal - objetivo.kcal) < objetivo.kcal * 0.08,
+    `el día cierra en ${d.previsto.kcal} con un objetivo de ${objetivo.kcal}`);
+  assert.ok(d.previsto.prot > objetivo.prot * 0.85, `${d.previsto.prot} g de proteína`);
+});
+
+test("si desayunas menos, se nota en el desayuno y no en otro sitio", () => {
+  const objetivo = OBJETIVO_MACROS.comer;
+  const original = menuDe("comer").find(c => c.id === "desayuno");
+  const mitad = original.ingredientes.map(i => ({ id: i.id, g: Math.round(i.g / 2) }));
+  const d = cuadrarDia({ tipoDia: "comer", objetivo, apuntes: [], edits: { comer: { desayuno: mitad } } });
+
+  const desayuno = d.pendientes.find(c => c.id === "desayuno");
+  assert.ok(desayuno.editada, "no se marcó como tuya");
+  const normal = cuadrarDia({ tipoDia: "comer", objetivo, apuntes: [] }).pendientes.find(c => c.id === "desayuno");
+  assert.ok(desayuno.macros.kcal < normal.macros.kcal * 0.7,
+    `${desayuno.macros.kcal} vs ${normal.macros.kcal}`);
+  assert.ok(Math.abs(d.previsto.kcal - objetivo.kcal) < objetivo.kcal * 0.08);
+});
+
+test("se puede añadir un alimento al menú y una comida que no estaba", () => {
+  const edits = { recortar: {
+    postentreno: [{ id: "whey", g: 30 }, { id: "platano", g: 120 }],
+    cena: menuDe("recortar").find(c => c.id === "cena").ingredientes.concat([{ id: "aguacate", g: 50 }]),
+  } };
+  const menu = menuDe("recortar", edits);
+  assert.ok(menu.some(c => c.id === "postentreno"), "no se añadió el post-entreno");
+  assert.ok(menu.find(c => c.id === "cena").ingredientes.some(i => i.id === "aguacate"));
+  // Y cae en su sitio del día, no al final.
+  const orden = menu.map(c => c.id);
+  assert.ok(orden.indexOf("postentreno") < orden.indexOf("cena"), orden.join(" → "));
+});
+
+test("volver al original siempre es posible: la edición es una capa encima", () => {
+  const edits = { comer: { desayuno: null, cena: [{ id: "pollo", g: 50 }] } };
+  assert.equal(menuDe("comer", edits).length, MENU_DIA.comer.length - 1);
+  // Quitar la capa devuelve el menú exacto de partida.
+  assert.deepEqual(menuDe("comer", { comer: {} }).map(c => c.id), MENU_DIA.comer.map(c => c.id));
+  assert.deepEqual(menuDe("comer", {}).map(c => c.id), MENU_DIA.comer.map(c => c.id));
+});
+
+test("las comidas quitadas se pueden listar para devolverlas", () => {
+  const quitadas = comidasQuitadas("comer", { comer: { desayuno: null, precama: [] } });
+  assert.deepEqual(quitadas.map(c => c.id), ["desayuno", "precama"]);
+  assert.deepEqual(comidasQuitadas("comer", {}), []);
+  assert.deepEqual(comidasQuitadas("comer", undefined), []);
+});
+
+test("una edición sin sentido no rompe el día", () => {
+  for (const edits of [
+    { comer: { inventada: [{ id: "pollo", g: 100 }] } },   // comida que no existe
+    { comer: { cena: [{ id: "unicornio", g: 100 }] } },    // alimento que no existe
+    { comer: null },
+  ]) {
+    const d = cuadrarDia({ tipoDia: "comer", objetivo: OBJETIVO_MACROS.comer, apuntes: [], edits });
+    assert.ok(d.comidas.length > 0);
+    assert.ok(Number.isFinite(d.previsto.kcal), JSON.stringify(edits));
+  }
+});
+
+test("editar el menú de COMER no toca el de RECORTAR", () => {
+  const edits = { comer: { desayuno: null } };
+  assert.deepEqual(menuDe("recortar", edits).map(c => c.id), MENU_DIA.recortar.map(c => c.id));
 });

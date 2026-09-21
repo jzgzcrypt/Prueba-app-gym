@@ -79,8 +79,58 @@ export const MENU_DIA = {
   ],
 };
 
-/** El menu del dia con el nombre y el cuando ya puestos. */
-export function menuDe(tipoDia) {
+/** Orden en el que se come, para que una comida añadida caiga en su sitio. */
+const ORDEN = Object.fromEntries(COMIDAS_DEL_DIA.map((c, i) => [c.id, i]));
+
+/**
+ * EL MENU ES TUYO Y SE EDITA.
+ *
+ * Lo de arriba es el punto de partida, no una prescripcion. Si no desayunas, o
+ * desayunas menos, o cambias el pollo por lo que tengas, eso se guarda y pasa
+ * a ser TU menu: la app recalcula sobre el tuyo, no sobre el mio.
+ *
+ * Las ediciones son por tipo de dia, no por fecha. Si quitas el desayuno lo
+ * quitas de todos los dias de COMER, que es lo que significa cambiar la dieta;
+ * saltarselo hoy es otra cosa y se hace apuntando el dia.
+ *
+ * La forma de `edits` es { tipoDia: { comidaId: Ingrediente[] | null } }:
+ *   · una lista  → esa comida queda asi
+ *   · null o []  → esa comida sale del menu
+ *   · no estar   → se usa la de arriba, sin tocar
+ *
+ * Nada se borra del plan original: una edicion es una capa encima, asi que
+ * "volver al menu original" es siempre posible y es solo quitar la capa.
+ *
+ * @param {string} tipoDia "comer" | "recortar"
+ * @param {object} [edits] las ediciones guardadas del usuario
+ */
+export function menuDe(tipoDia, edits) {
   const plan = MENU_DIA[tipoDia] || MENU_DIA.recortar;
-  return plan.map(c => Object.assign({}, COMIDA_DEL_DIA[c.id], c));
+  const mias = (edits && edits[tipoDia]) || {};
+  const tiene = (id) => Object.prototype.hasOwnProperty.call(mias, id);
+  const viva = (v) => Array.isArray(v) && v.length > 0;
+
+  const salida = [];
+  for (const c of plan) {
+    if (!tiene(c.id)) { salida.push(Object.assign({}, COMIDA_DEL_DIA[c.id], c)); continue; }
+    if (!viva(mias[c.id])) continue; // quitada del menu a proposito
+    salida.push(Object.assign({}, COMIDA_DEL_DIA[c.id], c, { ingredientes: mias[c.id], editada: true }));
+  }
+
+  // Y las que no estaban en el plan de ese dia pero has añadido tu.
+  for (const id of Object.keys(mias)) {
+    if (plan.some(c => c.id === id) || !viva(mias[id]) || !COMIDA_DEL_DIA[id]) continue;
+    salida.push(Object.assign({}, COMIDA_DEL_DIA[id], { id, ingredientes: mias[id], editada: true }));
+  }
+
+  return salida.sort((a, b) => ORDEN[a.id] - ORDEN[b.id]);
+}
+
+/** Las comidas que has quitado del menu, para poder devolverlas. */
+export function comidasQuitadas(tipoDia, edits) {
+  const mias = (edits && edits[tipoDia]) || {};
+  return Object.keys(mias)
+    .filter(id => COMIDA_DEL_DIA[id] && !(Array.isArray(mias[id]) && mias[id].length))
+    .map(id => COMIDA_DEL_DIA[id])
+    .sort((a, b) => ORDEN[a.id] - ORDEN[b.id]);
 }

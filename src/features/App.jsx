@@ -60,6 +60,10 @@ export default function App() {
   // Los cambios de alimento sobre el menu del dia: "hoy no hay salmon, hay
   // merluza". { dayKey: { "cena:salmon": "merluza" } }
   const [cambiosMenu, setCambiosMenu] = useState({});
+  // Tu dieta, editada por ti. Es por tipo de dia, no por fecha: si quitas el
+  // desayuno, lo quitas de todos los dias de COMER.
+  // { comer: { desayuno: [{id,g}] | null }, recortar: {...} }
+  const [menuEditado, setMenuEditado] = useState({});
   // El historial arranca con el bloque en curso, con sus fechas sacadas del
   // calendario: si se mueve FECHA_INICIO, el historial se mueve con el.
   const [bloquesHistorial, setBloquesHistorial] = useState([
@@ -134,6 +138,7 @@ export default function App() {
           if (d.weeklyLog) setWeeklyLog(d.weeklyLog);
           if (d.comidasLog) setComidasLog(d.comidasLog);
           if (d.cambiosMenu) setCambiosMenu(d.cambiosMenu);
+          if (d.menuEditado) setMenuEditado(d.menuEditado);
           if (d.bloquesHistorial) setBloquesHistorial(d.bloquesHistorial);
           if (d.ultimoBackup) setUltimoBackup(d.ultimoBackup);
           if (d.cuelloFaseManual) setCuelloFaseManual(d.cuelloFaseManual);
@@ -206,7 +211,8 @@ export default function App() {
       checked, cuelloChecks, notes, youtubeLinks, customExercises, painLog,
       flaggedExercises, pausedRanges, workoutProgress, magiaProgress, magiaLog,
       guerreroLog, workoutWeights, medidas, ritmoReal, ritmoTramos, sensaciones, postponed, phaseAdjustNote,
-      currentWeekOverride, weeklyLog, comidasLog, cambiosMenu, bloquesHistorial, ultimoBackup, cuelloFaseManual,
+      currentWeekOverride, weeklyLog, comidasLog, cambiosMenu, menuEditado,
+      bloquesHistorial, ultimoBackup, cuelloFaseManual,
     };
     // Se deja a mano el ultimo estado conocido para poder guardarlo de golpe
     // si la app se cierra antes de que venza la espera de abajo.
@@ -216,7 +222,8 @@ export default function App() {
   }, [checked, cuelloChecks, notes, youtubeLinks, customExercises, painLog,
       flaggedExercises, pausedRanges, workoutProgress, magiaProgress, magiaLog,
       guerreroLog, workoutWeights, medidas, ritmoReal, ritmoTramos, sensaciones, postponed, phaseAdjustNote,
-      currentWeekOverride, weeklyLog, comidasLog, cambiosMenu, bloquesHistorial, ultimoBackup, cuelloFaseManual, storageReady]);
+      currentWeekOverride, weeklyLog, comidasLog, cambiosMenu, menuEditado,
+      bloquesHistorial, ultimoBackup, cuelloFaseManual, storageReady]);
 
   const currentDay = FLAT_DAYS[flatIdx] || FLAT_DAYS[todayIdx] || FLAT_DAYS[0];
   const isToday = flatIdx === todayIdx;
@@ -264,6 +271,22 @@ export default function App() {
     Object.assign({}, p, { [dayKey]: (p[dayKey] || []).filter((ap, j) =>
       comidaId ? ap.comida !== comidaId : j !== indice) }));
 
+  // ─── Editar la dieta ───────────────────────────────────────────────────
+  //
+  // Una sola accion para las tres cosas que se pueden hacer con una comida:
+  // dejarla con otros ingredientes (una lista), quitarla del menu (null) y
+  // devolverla a como estaba (undefined). Menos superficie, menos que romper.
+  const guardarComidaDelMenu = (tipoDia, comidaId, ingredientes) => setMenuEditado(p => {
+    const delTipo = Object.assign({}, p[tipoDia]);
+    if (ingredientes === undefined) delete delTipo[comidaId];
+    else delTipo[comidaId] = ingredientes;
+    return Object.assign({}, p, { [tipoDia]: delTipo });
+  });
+
+  /** Volver al menu de partida entero, para ese tipo de dia. */
+  const restaurarMenu = (tipoDia) => setMenuEditado(p =>
+    Object.assign({}, p, { [tipoDia]: {} }));
+
   // Cambiar un alimento del menu por un equivalente, o volver al original.
   const cambiarAlimento = (clave, nuevoId) => setCambiosMenu(p => {
     const delDia = Object.assign({}, p[dayKey]);
@@ -285,7 +308,7 @@ export default function App() {
       checked, cuelloChecks, notes, youtubeLinks, customExercises, painLog,
       flaggedExercises, pausedRanges, workoutProgress, workoutWeights, medidas,
       ritmoReal, ritmoTramos, sensaciones, postponed, phaseAdjustNote, currentWeekOverride, weeklyLog,
-      comidasLog, cambiosMenu, magiaProgress, magiaLog, guerreroLog, bloquesHistorial,
+      comidasLog, cambiosMenu, menuEditado, magiaProgress, magiaLog, guerreroLog, bloquesHistorial,
     };
     const blob = new Blob([JSON.stringify(payload, null, 2)], { type: "application/json" });
     const url = URL.createObjectURL(blob);
@@ -323,6 +346,7 @@ export default function App() {
         if (data.weeklyLog) setWeeklyLog(data.weeklyLog);
         if (data.comidasLog) setComidasLog(data.comidasLog);
         if (data.cambiosMenu) setCambiosMenu(data.cambiosMenu);
+        if (data.menuEditado) setMenuEditado(data.menuEditado);
         if (data.magiaProgress) setMagiaProgress(data.magiaProgress);
         if (data.magiaLog) setMagiaLog(data.magiaLog);
         if (data.guerreroLog) setGuerreroLog(data.guerreroLog);
@@ -476,7 +500,9 @@ export default function App() {
         {screen === "nutricion" && (
           <NutricionScreen comida={comida} apuntes={comidasLog[dayKey] || []}
             cambios={cambiosMenu[dayKey]} apuntarComida={apuntarComida} apuntarVarias={apuntarVarias}
-            deshacerComida={deshacerComida} cambiarAlimento={cambiarAlimento} esHoy={isToday} />
+            deshacerComida={deshacerComida} cambiarAlimento={cambiarAlimento}
+            edits={menuEditado} guardarComidaDelMenu={guardarComidaDelMenu} restaurarMenu={restaurarMenu}
+            esHoy={isToday} />
         )}
 
         {screen === "progreso" && (

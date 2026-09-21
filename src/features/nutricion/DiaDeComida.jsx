@@ -22,6 +22,7 @@ import { ALIMENTO, ALIMENTOS, cantidadLegible, equivalentesDe } from "@/domain/n
 import { PLATO_CANTINA, RACIONES, SECCIONES_CANTINA, platosDe } from "@/domain/nutricion/cantina";
 import { COMIDAS_RAPIDAS, macrosDelDia } from "@/domain/nutricion/iifym";
 import { apuntesDe, claveCambio, cuadrarDia } from "@/domain/nutricion/cuadrar";
+import { comidasQuitadas, menuDe } from "@/domain/nutricion/menu-dia";
 import { SectionHeader } from "@/features/ui/headers";
 
 const MACROS = [
@@ -85,7 +86,8 @@ function Cambio({ g }) {
 }
 
 export function DiaDeComida({ comida, apuntes, cambios, apuntarComida, apuntarVarias,
-                              deshacerComida, cambiarAlimento, esHoy }) {
+                              deshacerComida, cambiarAlimento, edits,
+                              guardarComidaDelMenu, restaurarMenu, esHoy }) {
   const [abierta, setAbierta] = useState(null);   // comida cuyo "otra cosa" esta abierto
   const [panel, setPanel] = useState("cantina");  // rapida | cantina | casa
   const [racion, setRacion] = useState("normal");
@@ -93,11 +95,22 @@ export function DiaDeComida({ comida, apuntes, cambios, apuntarComida, apuntarVa
   const [grupo, setGrupo] = useState("proteina");
   const [gramos, setGramos] = useState({});
   const [cambiando, setCambiando] = useState(null); // "comidaId:alimentoId"
+  const [editando, setEditando] = useState(null);   // comida cuyo menu se esta editando
+  const [anadiendo, setAnadiendo] = useState(false);
+  const [grupoMenu, setGrupoMenu] = useState("proteina");
 
   const objetivo = (comida && comida.macros) || null;
   if (!objetivo) return null;
 
-  const dia = cuadrarDia({ tipoDia: comida.id, objetivo, apuntes, cambios });
+  const dia = cuadrarDia({ tipoDia: comida.id, objetivo, apuntes, cambios, edits });
+  const quitadas = comidasQuitadas(comida.id, edits);
+  const hayEdiciones = quitadas.length > 0 || dia.comidas.some(c => c.editada);
+
+  // El menu de partida, sin recalcular, que es sobre lo que se edita: aqui se
+  // cambia la DIETA, no la cantidad de hoy.
+  const base = menuDe(comida.id, edits);
+  const baseDe = (id) => base.find(c => c.id === id);
+  const guardar = (id, ingredientes) => guardarComidaDelMenu(comida.id, id, ingredientes);
   // Cuando ni encogiendo ni quitando se llega, se dice el numero de verdad en
   // vez de enseñar un total que no cuadra y callarse.
   const pasadoDeLargo = dia.previsto.kcal > objetivo.kcal * 1.06;
@@ -123,6 +136,76 @@ export function DiaDeComida({ comida, apuntes, cambios, apuntarComida, apuntarVa
 
   /** El panel de apuntar, el mismo para una comida hecha y para una pendiente.
    *  No se cierra solo al marcar algo: en la cantina caen tres cosas. */
+  /**
+   * El editor de la dieta. Cambia TU MENU, no la cantidad de hoy: lo que se
+   * toca aqui vale para todos los dias de este tipo. Por eso lo dice arriba.
+   */
+  const Editor = ({ comidaId }) => {
+    const c = baseDe(comidaId);
+    if (!c) return null;
+    const poner = (ings) => guardar(comidaId, ings);
+    return (
+      <div style={{ marginTop: SP.md, paddingTop: SP.md, borderTop: "1px solid " + C.divider }}>
+        <div style={{ ...TYPE.body, color: C.textDim, marginBottom: SP.sm }}>
+          Esto cambia <strong style={{ color: C.text }}>tu menú</strong>, no solo hoy: vale para
+          todos los días de {comida.etiqueta}. Las cantidades siguen recalculándose encima.
+        </div>
+
+        {c.ingredientes.map((i, idx) => (
+          <div key={i.id + idx} style={{ display: "flex", alignItems: "center", gap: SP.sm, padding: "5px 0" }}>
+            <span style={{ ...TYPE.body, color: "#4A4A47", flex: 1, minWidth: 0 }}>
+              {ALIMENTO[i.id] ? ALIMENTO[i.id].nombre : i.id}
+            </span>
+            <input inputMode="numeric" value={i.g}
+              onChange={e => {
+                const g = Number(e.target.value.replace(/\D/g, "")) || 0;
+                poner(c.ingredientes.map((o, j) => (j === idx ? { id: o.id, g } : o)));
+              }}
+              style={{ width: 56, padding: "7px 6px", borderRadius: R.md, textAlign: "center",
+                       border: "1px solid " + C.cardBorder, background: C.bg, color: C.text,
+                       fontSize: 13, fontWeight: 700, fontFamily: "inherit" }} />
+            <span style={{ ...TYPE.micro, color: C.textFaint, width: 12 }}>g</span>
+            <button className="btn" aria-label="Quitar"
+              onClick={() => poner(c.ingredientes.filter((_, j) => j !== idx))}
+              style={{ background: "transparent", border: "none", color: C.textFaint,
+                       fontSize: 17, lineHeight: 1, padding: "4px 6px" }}>×</button>
+          </div>
+        ))}
+
+        <button className="btn" onClick={() => setAnadiendo(!anadiendo)} style={{
+          marginTop: SP.sm, padding: "6px 0", background: "transparent", border: "none",
+          color: C.textDim, fontSize: 12, fontWeight: 700, textAlign: "left",
+        }}>{anadiendo ? "Cerrar" : "+ Añadir alimento"}</button>
+
+        {anadiendo && (
+          <>
+            <div style={{ display: "flex", gap: 6, margin: SP.sm + "px 0", overflowX: "auto", paddingBottom: 2 }}>
+              {GRUPOS_CASA.map(g => (
+                <button key={g.id} className="btn" onClick={() => setGrupoMenu(g.id)} style={pastilla(grupoMenu === g.id)}>{g.n}</button>
+              ))}
+            </div>
+            <div style={{ display: "flex", gap: 5, flexWrap: "wrap" }}>
+              {ALIMENTOS.filter(a => a.grupo === grupoMenu).map(a => (
+                <button key={a.id} className="btn"
+                  onClick={() => { poner(c.ingredientes.concat([{ id: a.id, g: a.unidad ? a.unidad.g : 100 }])); setAnadiendo(false); }}
+                  style={pastilla(false)}>{a.nombre}</button>
+              ))}
+            </div>
+          </>
+        )}
+
+        <div style={{ display: "flex", gap: SP.sm, marginTop: SP.md }}>
+          <button className="btn" onClick={() => { guardar(comidaId, null); setEditando(null); }}
+            style={{ ...botonComida(false), color: C.amber }}>Quitar del menú</button>
+          {c.editada && (
+            <button className="btn" onClick={() => { guardar(comidaId, undefined); setEditando(null); }}
+              style={botonComida(false)}>Volver al original</button>
+          )}
+        </div>
+      </div>
+    );
+  };
+
   const Apuntador = ({ comidaId }) => (
     <>
       <div style={{ display: "flex", gap: SP.sm, marginBottom: SP.sm }}>
@@ -315,7 +398,18 @@ export function DiaDeComida({ comida, apuntes, cambios, apuntarComida, apuntarVa
                   {c.macros.kcal} kcal
                 </span>
               </div>
-              <div style={{ ...TYPE.micro, color: C.textFaint, marginTop: 2 }}>{c.cuando.toUpperCase()}</div>
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: SP.sm, marginTop: 2 }}>
+                <span style={{ ...TYPE.micro, color: C.textFaint }}>
+                  {c.cuando.toUpperCase()}{c.editada && " · TUYA"}
+                </span>
+                <button className="btn" onClick={() => { setEditando(editando === c.id ? null : c.id); setAnadiendo(false); }}
+                  style={{ background: "transparent", border: "none", color: C.textDim,
+                           fontSize: 11.5, fontWeight: 700, padding: "2px 0", flexShrink: 0 }}>
+                  {editando === c.id ? "Cerrar" : "Editar"}
+                </button>
+              </div>
+
+              {editando === c.id && <Editor comidaId={c.id} />}
 
               <div style={{ marginTop: SP.sm, display: "flex", flexDirection: "column", gap: 2 }}>
                 {c.ingredientes.map(i => {
@@ -392,6 +486,28 @@ export function DiaDeComida({ comida, apuntes, cambios, apuntarComida, apuntarVa
               </div>
             ))}
           </div>
+        )}
+
+        {quitadas.length > 0 && (
+          <div style={{ ...tarjeta, padding: "11px 14px", background: "transparent", borderStyle: "dashed" }}>
+            <div style={{ ...TYPE.micro, color: C.textFaint }}>FUERA DE TU MENÚ</div>
+            <div style={{ ...TYPE.body, color: C.textDim, marginTop: 3 }}>
+              Las quitaste tú. El resto del día se reparte sin ellas.
+            </div>
+            <div style={{ display: "flex", gap: 5, flexWrap: "wrap", marginTop: SP.sm }}>
+              {quitadas.map(q => (
+                <button key={q.id} className="btn" onClick={() => guardar(q.id, undefined)}
+                  style={pastilla(false)}>Devolver {q.nombre.toLowerCase()}</button>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {hayEdiciones && (
+          <button className="btn" onClick={() => restaurarMenu(comida.id)} style={{
+            padding: "8px 0", background: "transparent", border: "none",
+            color: C.textFaint, fontSize: 12, fontWeight: 600,
+          }}>Volver al menú de partida</button>
         )}
 
         <button className="btn" onClick={() => setAbierta(abierta === "suelto" ? null : "suelto")} style={{

@@ -8,7 +8,8 @@ import { ScreenHeader, SectionHeader } from "@/features/ui/headers";
 import { DiaDeComida } from "@/features/nutricion/DiaDeComida";
 
 export function NutricionScreen({ comida, apuntes = [], cambios, apuntarComida, apuntarVarias,
-                                  deshacerComida, cambiarAlimento, esHoy }) {
+                                  deshacerComida, cambiarAlimento, edits,
+                                  guardarComidaDelMenu, restaurarMenu, esHoy }) {
   const [menuAbierto, setMenuAbierto] = useState(MENUS[0].id);
   const [diaAbierto, setDiaAbierto] = useState("entreno");
   const [verTips, setVerTips] = useState(false);
@@ -25,7 +26,9 @@ export function NutricionScreen({ comida, apuntes = [], cambios, apuntarComida, 
       {comida && apuntarComida && (
         <DiaDeComida comida={comida} apuntes={apuntes} cambios={cambios}
                      apuntarComida={apuntarComida} apuntarVarias={apuntarVarias}
-                     deshacerComida={deshacerComida} cambiarAlimento={cambiarAlimento} esHoy={esHoy} />
+                     deshacerComida={deshacerComida} cambiarAlimento={cambiarAlimento}
+                     edits={edits} guardarComidaDelMenu={guardarComidaDelMenu}
+                     restaurarMenu={restaurarMenu} esHoy={esHoy} />
       )}
 
       {/* ═══ LOS MENÚS REALES ═══ */}

@@ -157,10 +157,10 @@ function resolver(pendientes, restante) {
 /**
  * El dia entero: lo comido, lo que falta, y el menu pendiente ya recalculado.
  *
- * @param {{tipoDia:string, objetivo:object, apuntes:Array, cambios?:object}} entrada
+ * @param {{tipoDia:string, objetivo:object, apuntes:Array, cambios?:object, edits?:object}} entrada
  */
-export function cuadrarDia({ tipoDia, objetivo, apuntes, cambios }) {
-  const menu = aplicarCambios(menuDe(tipoDia), cambios);
+export function cuadrarDia({ tipoDia, objetivo, apuntes, cambios, edits }) {
+  const menu = aplicarCambios(menuDe(tipoDia, edits), cambios);
   const lista = Array.isArray(apuntes) ? apuntes : [];
 
   // Una comida esta hecha cuando hay algun apunte que la nombra. Los apuntes
