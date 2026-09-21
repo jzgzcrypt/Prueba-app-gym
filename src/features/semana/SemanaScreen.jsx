@@ -1,8 +1,9 @@
 "use client";
 
 import { useState } from "react";
-import { C, R, SP, TAP_MIN, TYPE } from "@/design/tokens";
+import { C, CAT, R, SP, TAP_MIN, TYPE } from "@/design/tokens";
 import { DATE_MAP, WEEKS, claveDia } from "@/domain/plan/calendario";
+import { comidaDelDia } from "@/domain/nutricion/dias";
 import { KpiBlock } from "@/features/semana/KpiBlock";
 export function SemanaScreen({ weekIdx, setWeekIdx, jumpToDay, checked, todayIso, workoutWeights, ritmoReal, pausedRanges, setPausedRanges }) {
   const week = WEEKS[weekIdx];
@@ -75,6 +76,12 @@ export function SemanaScreen({ weekIdx, setWeekIdx, jumpToDay, checked, todayIso
                 <div>
                   <div style={{ ...TYPE.micro, fontSize: 10, color: C.textDim }}>
                     {day.dow.toUpperCase()} {day.date} {isT && "· HOY"} {paused && "· PAUSA"}
+                    {day.tipo !== "libre" && (
+                      <span style={{ marginLeft: 6, fontSize: 9.5, fontWeight: 800, letterSpacing: 0.3,
+                                     color: comidaDelDia(day).id === "comer" ? CAT.fuerza : C.textFaint }}>
+                        · {comidaDelDia(day).etiqueta}
+                      </span>
+                    )}
                   </div>
                   <div style={{ ...TYPE.cardTitle, fontSize: 14, color: paused ? C.textDim : C.text, marginTop: 3, textDecoration: paused ? "line-through" : "none" }}>{day.titulo}</div>
                   {isFuerza && !paused && <div style={{ fontSize: 11, color: C.textDim, marginTop: 2 }}>{day.ejercicios.length} ejercicios · {day.dur}</div>}

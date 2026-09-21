@@ -15,6 +15,7 @@ import { EjerciciosScreen } from "@/features/ejercicios/EjerciciosScreen";
 import { MagiaCatalogoScreen } from "@/features/habilidades/MagiaCatalogoScreen";
 import { HoyScreen } from "@/features/hoy/HoyScreen";
 import { NutricionScreen } from "@/features/nutricion/NutricionScreen";
+import { IconoNav } from "@/features/ui/iconos-nav";
 import { OnboardingScreen } from "@/features/onboarding/OnboardingScreen";
 import { ProgresoScreen } from "@/features/progreso/ProgresoScreen";
 import { SemanaScreen } from "@/features/semana/SemanaScreen";
@@ -441,7 +442,7 @@ export default function App() {
             flaggedExercises={flaggedExercises} setFlaggedExercises={setFlaggedExercises} pushUndo={pushUndo} />
         )}
 
-        {screen === "nutricion" && <NutricionScreen />}
+        {screen === "nutricion" && <NutricionScreen comida={comida} />}
 
         {screen === "progreso" && (
           <ProgresoScreen medidas={medidas} setMedidas={setMedidas}
@@ -477,12 +478,12 @@ export default function App() {
       <div style={{ position: "fixed", bottom: 0, left: 0, right: 0, background: "#FFFFFF", borderTop: "1px solid " + C.divider, paddingBottom: "max(8px, env(safe-area-inset-bottom))" }}>
         <div style={{ maxWidth: 480, margin: "0 auto", display: "flex" }}>
           {[
-            { k: "hoy", label: "HOY", icon: null },
-            { k: "semana", label: "SEMANA", icon: null },
-            { k: "ejercicios", label: "EJERCICIOS", icon: ICON_MOVILIDAD },
-            { k: "nutricion", label: "NUTRICION", icon: ICON_NUTRICION },
-            { k: "progreso", label: "PROGRESO", icon: ICON_CUELLO },
-            { k: "coach", label: "COACH", icon: null },
+            { k: "hoy", label: "HOY" },
+            { k: "semana", label: "SEMANA" },
+            { k: "ejercicios", label: "EJERCICIOS" },
+            { k: "nutricion", label: "NUTRICIÓN" },
+            { k: "progreso", label: "PROGRESO" },
+            { k: "coach", label: "COACH" },
           ].map(t => {
             const active = screen === t.k;
             return (
@@ -492,11 +493,9 @@ export default function App() {
                   gap: 3, minHeight: TAP_MIN, padding: "8px 2px 6px", position: "relative",
                 }}>
                 {active && <div style={{ position: "absolute", top: 0, left: "30%", right: "30%", height: 2, background: C.accent, borderRadius: 1 }} />}
-                {t.icon ? (
-                  <img src={t.icon} alt="" style={{ width: 19, height: 19, objectFit: "contain", opacity: active ? 1 : 0.38 }} />
-                ) : (
-                  <div style={{ width: 19, height: 19, borderRadius: 5, border: "1.8px solid " + (active ? C.accent : C.textFaint), opacity: active ? 1 : 0.5 }} />
-                )}
+                <span style={{ color: active ? C.accent : C.textFaint, display: "flex" }}>
+                  <IconoNav nombre={t.k} activo={active} />
+                </span>
                 <span style={{ fontSize: 9, fontWeight: 800, letterSpacing: 0.2, color: active ? C.accent : C.textFaint }}>{t.label}</span>
               </button>
             );

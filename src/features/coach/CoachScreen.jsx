@@ -10,6 +10,10 @@ import { KpiBlock } from "@/features/semana/KpiBlock";
 import { SimpleLineChart } from "@/features/ui/charts";
 export function CoachScreen({ jumpToDay, setWeekIdx, checked, workoutWeights, ritmoReal, setScreen, weeklyLog, setWeeklyLog, phaseAdjustNote, setPhaseAdjustNote, currentWeekOverride, setCurrentWeekOverride, exportData, importData, ultimoBackup, ultimoGuardado, painLog, medidas, bloquesHistorial, setBloquesHistorial, storageStatus, cuelloChecks, magiaLog, guerreroLog }) {
   const [subTab, setSubTab] = useState("resumen");
+  // Hace falta algo de recorrido para que un porcentaje quiera decir algo.
+  // Por debajo de eso se enseña un guion, no un cero: un cero en el dia 1 no
+  // es informacion, es un reproche.
+  const DIAS_MINIMOS_PARA_PORCENTAJE = 3;
   const todayIso = todayLocalIso();
   let currentWeekN = WEEKS[0].n;
   for (const wk of WEEKS) {
@@ -30,6 +34,10 @@ export function CoachScreen({ jumpToDay, setWeekIdx, checked, workoutWeights, ri
     });
   });
   const adherenciaPct = totalDiasPlan > 0 ? Math.round((totalDiasHechos / totalDiasPlan) * 100) : 0;
+  // Dias del bloque ya transcurridos: es lo que decide si el porcentaje tiene
+  // algo que medir.
+  const diasTranscurridos = FLAT_DAYS.filter(d => d.isoDate <= todayIso).length;
+  const hayDatos = diasTranscurridos >= DIAS_MINIMOS_PARA_PORCENTAJE;
 
   // Ultima actividad completada (cualquier tipo), y dias transcurridos desde entonces
   const pastDaysWithActivity = FLAT_DAYS.filter(d => d.tipo !== "libre" && d.isoDate <= todayIso);
@@ -138,13 +146,17 @@ export function CoachScreen({ jumpToDay, setWeekIdx, checked, workoutWeights, ri
           <div style={{ background: C.card, border: "1px solid " + C.cardBorder, borderRadius: R.xl, padding: SP.lg + "px " + SP.xl + "px" }}>
             <div style={{ ...TYPE.sectionLabel, fontSize: 10, color: C.textDim, marginBottom: SP.md }}>ADHERENCIA GLOBAL — HASTA SEMANA {currentWeekN}</div>
             <div style={{ display: "flex", alignItems: "baseline", gap: SP.sm, marginBottom: SP.sm }}>
-              <span className="mono" style={{ fontSize: 34, fontWeight: 800, letterSpacing: -0.5, color: adherenciaPct >= 80 ? C.ok : adherenciaPct >= 60 ? C.amber : CAT.running }}>{adherenciaPct}%</span>
+              <span className="mono" style={{ fontSize: 34, fontWeight: 800, letterSpacing: -0.5,
+                color: !hayDatos ? C.textFaint : adherenciaPct >= 80 ? C.ok : adherenciaPct >= 60 ? C.amber : CAT.running }}>
+                {hayDatos ? adherenciaPct + "%" : "—"}</span>
               <span style={{ fontSize: 12, color: C.textDim, fontWeight: 600 }}>{totalDiasHechos}/{totalDiasPlan} días completados</span>
             </div>
             <div style={{ height: 7, background: C.divider, borderRadius: 4, overflow: "hidden" }}>
-              <div style={{ width: adherenciaPct + "%", height: "100%", background: adherenciaPct >= 80 ? C.ok : adherenciaPct >= 60 ? C.amber : CAT.running, borderRadius: 4, transition: "width 0.3s ease" }} />
+              <div style={{ width: (hayDatos ? adherenciaPct : 0) + "%", height: "100%", background: adherenciaPct >= 80 ? C.ok : adherenciaPct >= 60 ? C.amber : CAT.running, borderRadius: 4, transition: "width 0.3s ease" }} />
             </div>
-            <div style={{ fontSize: 10.5, color: C.textDim, marginTop: SP.sm, lineHeight: 1.4 }}>Incluye running, fuerza, cuello y movilidad. No cuenta días de descanso.</div>
+            <div style={{ fontSize: 10.5, color: C.textDim, marginTop: SP.sm, lineHeight: 1.4 }}>{hayDatos
+              ? "Incluye running, fuerza, cuello y movilidad. No cuenta días de descanso."
+              : "Todavía no hay días suficientes para que el porcentaje signifique algo. Vuelve el domingo."}</div>
             {daysSinceLastActivity != null && (
               <div style={{ display: "flex", alignItems: "center", gap: 6, marginTop: SP.md, paddingTop: SP.md, borderTop: "1px solid " + C.divider }}>
                 <span style={{ fontSize: 11, color: daysSinceLastActivity >= 3 ? CAT.running : C.textDim, fontWeight: 700 }}>
@@ -156,21 +168,22 @@ export function CoachScreen({ jumpToDay, setWeekIdx, checked, workoutWeights, ri
 
           {/* ADHERENCIA POR HÁBITO */}
           <div style={{ background: C.card, border: "1px solid " + C.cardBorder, borderRadius: R.xl, padding: SP.lg + "px " + SP.xl + "px" }}>
-            <div style={{ ...TYPE.sectionLabel, fontSize: 10, color: C.textDim, marginBottom: SP.md }}>ADHERENCIA POR HÁBITO — DESDE EL INICIO</div>
+            <div style={{ ...TYPE.sectionLabel, fontSize: 10, color: C.textDim, marginBottom: SP.md }}>{hayDatos ? "ADHERENCIA POR HÁBITO — DESDE EL INICIO" : "TUS HÁBITOS — EMPIEZAN HOY"}</div>
             <div style={{ display: "flex", flexDirection: "column", gap: SP.sm + 2 }}>
               {habitosAdherencia.map(h => (
                 <div key={h.nombre}>
                   <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 4 }}>
                     <span style={{ fontSize: 12.5, fontWeight: 700, color: C.text }}>{h.nombre}</span>
-                    <span className="mono" style={{ fontSize: 12.5, fontWeight: 800, color: h.pct >= 80 ? C.ok : h.pct >= 50 ? C.amber : h.color }}>{h.pct}%</span>
+                    <span className="mono" style={{ fontSize: 12.5, fontWeight: 800,
+                      color: !hayDatos ? C.textFaint : h.pct >= 80 ? C.ok : h.pct >= 50 ? C.amber : h.color }}>{hayDatos ? h.pct + "%" : "—"}</span>
                   </div>
                   <div style={{ height: 6, background: C.divider, borderRadius: 3, overflow: "hidden" }}>
-                    <div style={{ width: h.pct + "%", height: "100%", background: h.color, borderRadius: 3, transition: "width 0.3s ease" }} />
+                    <div style={{ width: (hayDatos ? h.pct : 0) + "%", height: "100%", background: h.color, borderRadius: 3, transition: "width 0.3s ease" }} />
                   </div>
                 </div>
               ))}
             </div>
-            <div style={{ fontSize: 10.5, color: C.textDim, marginTop: SP.md, lineHeight: 1.4 }}>Movilidad se registra dentro del entreno, así que usa la adherencia general como referencia.</div>
+            <div style={{ fontSize: 10.5, color: C.textDim, marginTop: SP.md, lineHeight: 1.4 }}>{hayDatos ? "Movilidad se registra dentro del entreno, así que usa la adherencia general como referencia." : "Cuatro hábitos, todos desde hoy. Los porcentajes aparecen cuando haya semana de la que hablar."}</div>
           </div>
 
           {/* MOLESTIAS — resumen ultimos 14 dias */}

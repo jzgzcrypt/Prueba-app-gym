@@ -21,6 +21,28 @@ Todo cambio que se haga en la app se anota aquí. Sin excepciones.
 
 ## [Sin publicar]
 
+### Añadido — Nutrición deja de ser una página muerta
+- **Los dos programas nutricionales de 2022**, con sus menús completos por
+  tipo de día, macros, equivalencias, protocolo de comida libre, trucos del
+  día a día y el objetivo de pasos. Antes la pantalla eran 41 líneas estáticas
+  que decían "proteína 150-170 g" y nada más.
+- Están como **referencia, no como prescripción**, y la pantalla lo dice: los
+  escribió un dietista para el cuerpo de 2022.
+- Y lo relevante: **esos programas ya separaban día de entreno y día de
+  descanso**, que es exactamente la regla de este bloque. La idea no es nueva.
+
+### Cambiado — el resto de pestañas
+- **Barra de navegación coherente.** Tres pestañas pintaban un cuadrado vacío
+  y tres usaban ilustraciones de otra parte de la app — dos de ellas,
+  Progreso y Cuello, eran literalmente el mismo dibujo de una columna
+  vertebral. Ahora son seis iconos de trazo hechos para leerse a 21 px.
+- **Coach deja de abrir con ceros en rojo.** El día 1 mostraba un `0%` enorme
+  de adherencia global y cuatro barras de hábito a `0%`. Eso no mide nada: solo
+  confirma que no has empezado. Por debajo de 3 días se enseña un guion y una
+  línea que explica cuándo tendrá sentido el número.
+- **Semana enseña qué toca comer cada día.** Es el dato que hace falta para
+  planificar la compra, y estaba solo en HOY, un día cada vez.
+
 ### Cambiado — la pantalla de HOY, reordenada
 - **El botón de empezar la sesión estaba en la posición 11.** Antes de llegar
   a él había logo, barra de progreso, una frase, tres contadores, el navegador
