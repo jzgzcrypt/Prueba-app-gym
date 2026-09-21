@@ -19,8 +19,11 @@
 import { useState } from "react";
 import { C, CAT, R, SP, TAP_MIN, TYPE } from "@/design/tokens";
 import { ALIMENTO, ALIMENTOS, cantidadLegible, equivalentesDe } from "@/domain/nutricion/alimentos";
-import { PLATO_CANTINA, RACIONES, SECCIONES_CANTINA, platosDe } from "@/domain/nutricion/cantina";
+// Se siguen leyendo para los apuntes de antes de que esto se escribiera a
+// mano: un registro viejo tiene que seguir diciendo lo mismo.
+import { PLATO_CANTINA, RACIONES } from "@/domain/nutricion/cantina";
 import { COMIDAS_RAPIDAS, macrosDelDia } from "@/domain/nutricion/iifym";
+import { interpretar, totalDe } from "@/domain/nutricion/escribir";
 import { apuntesDe, claveCambio, cuadrarDia } from "@/domain/nutricion/cuadrar";
 import { comidasQuitadas, menuDe } from "@/domain/nutricion/menu-dia";
 import { SectionHeader } from "@/features/ui/headers";
@@ -36,6 +39,26 @@ const GRUPOS_CASA = [
   { id: "verdura", n: "Verdura" }, { id: "fruta", n: "Fruta" },
   { id: "grasa", n: "Grasa" }, { id: "extra", n: "Otros" },
 ];
+
+/** De dónde sale cada número, dicho sin tecnicismos. */
+const ETIQUETA_CONFIANZA = {
+  escrito: "Tus números",
+  tabla: "Calculado",
+  estimado: "Estimado con tus calorías",
+  "sin-entender": "No sé qué es — escribe las calorías",
+};
+
+/** Corregir las kcal a mano mantiene la proporción de macros. */
+function escalarLinea(linea, kcal) {
+  if (!Number.isFinite(kcal) || kcal <= 0) return linea.macros;
+  if (!linea.macros.kcal) {
+    return { kcal, prot: Math.round((kcal * 0.22) / 4), hc: Math.round((kcal * 0.45) / 4),
+             grasa: Math.round((kcal * 0.33) / 9) };
+  }
+  const f = kcal / linea.macros.kcal;
+  return { kcal, prot: Math.round(linea.macros.prot * f), hc: Math.round(linea.macros.hc * f),
+           grasa: Math.round(linea.macros.grasa * f) };
+}
 
 const tarjeta = {
   background: C.card, border: "1px solid " + C.cardBorder, borderRadius: R.xl, padding: "14px 16px",
@@ -85,15 +108,12 @@ function Cambio({ g }) {
   );
 }
 
-export function DiaDeComida({ comida, apuntes, cambios, apuntarComida, apuntarVarias,
+export function DiaDeComida({ comida, apuntes, cambios, apuntarVarias,
                               deshacerComida, cambiarAlimento, edits,
                               guardarComidaDelMenu, restaurarMenu, esHoy }) {
   const [abierta, setAbierta] = useState(null);   // comida cuyo "otra cosa" esta abierto
-  const [panel, setPanel] = useState("cantina");  // rapida | cantina | casa
-  const [racion, setRacion] = useState("normal");
-  const [seccion, setSeccion] = useState(SECCIONES_CANTINA[0]);
-  const [grupo, setGrupo] = useState("proteina");
-  const [gramos, setGramos] = useState({});
+  const [texto, setTexto] = useState("");            // lo que escribes que has comido
+  const [correcciones, setCorrecciones] = useState({}); // kcal corregidas a mano, por linea
   const [cambiando, setCambiando] = useState(null); // "comidaId:alimentoId"
   const [editando, setEditando] = useState(null);   // comida cuyo menu se esta editando
   const [anadiendo, setAnadiendo] = useState(false);
@@ -121,6 +141,7 @@ export function DiaDeComida({ comida, apuntes, cambios, apuntarComida, apuntarVa
   const sueltos = apuntes.filter(ap => ap && !ap.comida);
 
   const textoApunte = (ap) => {
+    if (ap.origen === "texto") return ap.texto + " · " + Math.round(ap.kcal) + " kcal";
     if (ap.origen === "cantina") {
       const p = PLATO_CANTINA[ap.id];
       const r = RACIONES.find(x => x.id === ap.racion);
@@ -134,8 +155,6 @@ export function DiaDeComida({ comida, apuntes, cambios, apuntarComida, apuntarVa
     return (a ? a.nombre : ap.id) + " · " + cantidadLegible(ap.id, ap.gramos);
   };
 
-  /** El panel de apuntar, el mismo para una comida hecha y para una pendiente.
-   *  No se cierra solo al marcar algo: en la cantina caen tres cosas. */
   /**
    * El editor de la dieta. Cambia TU MENU, no la cantidad de hoy: lo que se
    * toca aqui vale para todos los dias de este tipo. Por eso lo dice arriba.
@@ -206,98 +225,84 @@ export function DiaDeComida({ comida, apuntes, cambios, apuntarComida, apuntarVa
     );
   };
 
-  const Apuntador = ({ comidaId }) => (
-    <>
-      <div style={{ display: "flex", gap: SP.sm, marginBottom: SP.sm }}>
-        {[["cantina", "Cantina"], ["rapida", "De siempre"], ["casa", "En casa"]].map(([id, n]) => (
-          <button key={id} className="btn" onClick={() => setPanel(id)}
-            style={{ ...pastilla(panel === id), flex: 1, justifyContent: "center" }}>{n}</button>
-        ))}
-      </div>
+  /**
+   * APUNTAR: escribes lo que has comido y ya esta.
+   *
+   * Nada de elegir de una lista. La lista nunca tiene lo que has comido, y
+   * buscar en ella cuesta mas que escribirlo. Si ya usas una app que hace una
+   * foto y te da las calorias, esto es donde copias ese numero.
+   *
+   * Lo que se entiende se enseña ANTES de apuntarlo, con el numero editable y
+   * de donde sale. Un contador en el que no puedes ver ni corregir lo que ha
+   * entendido es un contador en el que dejas de creer a la semana.
+   */
+  const Apuntador = ({ comidaId }) => {
+    const lineas = interpretar(texto);
+    const conCorreccion = lineas.map((l, i) => correcciones[i] !== undefined && correcciones[i] !== ""
+      ? Object.assign({}, l, { macros: escalarLinea(l, Number(correcciones[i])), confianza: "escrito" })
+      : l);
+    const total = totalDe(conCorreccion);
 
-      {panel === "cantina" && (
-        <>
-          <div style={{ ...TYPE.body, color: C.textDim, marginBottom: SP.sm }}>
-            No peses nada: señala lo que ha caído y di si fue poco, normal o mucho. Puedes marcar varias cosas.
-          </div>
-          <div style={{ display: "flex", gap: SP.sm, marginBottom: SP.sm }}>
-            {RACIONES.map(r => (
-              <button key={r.id} className="btn" onClick={() => setRacion(r.id)}
-                style={{ ...pastilla(racion === r.id), flex: 1, justifyContent: "center" }}>{r.etiqueta}</button>
-            ))}
-          </div>
-          <div style={{ display: "flex", gap: 6, marginBottom: SP.sm, overflowX: "auto", paddingBottom: 2 }}>
-            {SECCIONES_CANTINA.map(sec => (
-              <button key={sec} className="btn" onClick={() => setSeccion(sec)} style={pastilla(seccion === sec)}>{sec}</button>
-            ))}
-          </div>
-          <div style={{ display: "flex", flexDirection: "column", gap: 5 }}>
-            {platosDe(seccion).map(p => (
-              <button key={p.id} className="btn"
-                onClick={() => apuntarComida({ comida: comidaId, origen: "cantina", id: p.id, racion })}
-                style={{ ...tarjeta, padding: "10px 14px", textAlign: "left", minHeight: TAP_MIN,
-                         width: "100%", display: "flex", justifyContent: "space-between",
-                         alignItems: "center", gap: SP.sm }}>
-                <span style={{ ...TYPE.body, color: C.text }}>{p.nombre}</span>
-                <span className="mono" style={{ fontSize: 12, fontWeight: 700, color: C.textDim, flexShrink: 0 }}>
-                  {Math.round(p.kcal * (RACIONES.find(r => r.id === racion) || RACIONES[1]).factor)} kcal
-                </span>
-              </button>
-            ))}
-          </div>
-        </>
-      )}
+    const apuntar = () => {
+      const buenas = conCorreccion.filter(l => l.macros.kcal > 0);
+      if (!buenas.length) return;
+      apuntarVarias(buenas.map(l => ({
+        comida: comidaId || undefined, origen: "texto", texto: l.nombre,
+        kcal: l.macros.kcal, prot: l.macros.prot, hc: l.macros.hc, grasa: l.macros.grasa,
+      })));
+      setTexto(""); setCorrecciones({}); setAbierta(null);
+    };
 
-      {panel === "rapida" && (
-        <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
-          {COMIDAS_RAPIDAS.map(r => (
-            <button key={r.id} className="btn" onClick={() => apuntarComida({ comida: comidaId, origen: "rapida", id: r.id })}
-              style={{ ...tarjeta, padding: "11px 14px", textAlign: "left", minHeight: TAP_MIN, width: "100%" }}>
-              <div style={{ display: "flex", justifyContent: "space-between", gap: SP.sm }}>
-                <span style={{ ...TYPE.bodyStrong, color: C.text }}>{r.nombre}</span>
-                <span className="mono" style={{ fontSize: 12, fontWeight: 700, color: C.textDim, flexShrink: 0 }}>{r.kcal} kcal</span>
-              </div>
-              <div style={{ ...TYPE.body, color: C.textFaint, marginTop: 2 }}>{r.detalle}</div>
-            </button>
-          ))}
+    return (
+      <>
+        <textarea value={texto} onChange={e => { setTexto(e.target.value); setCorrecciones({}); }}
+          rows={3} autoFocus
+          placeholder={"Macarrones con tomate 450 kcal\nFilete de ternera\nUn panecillo"}
+          style={{ width: "100%", padding: "11px 13px", borderRadius: R.lg, resize: "vertical",
+                   border: "1px solid " + C.cardBorder, background: C.bg, color: C.text,
+                   fontSize: 14, lineHeight: 1.5, fontFamily: "inherit" }} />
+        <div style={{ ...TYPE.body, color: C.textFaint, marginTop: 5, lineHeight: 1.45 }}>
+          Una cosa por línea. Si sabes las calorías, escríbelas y mandan ellas.
         </div>
-      )}
 
-      {panel === "casa" && (
-        <>
-          <div style={{ display: "flex", gap: 6, marginBottom: SP.sm, overflowX: "auto", paddingBottom: 2 }}>
-            {GRUPOS_CASA.map(g => (
-              <button key={g.id} className="btn" onClick={() => setGrupo(g.id)} style={pastilla(grupo === g.id)}>{g.n}</button>
-            ))}
-          </div>
-          <div style={{ display: "flex", flexDirection: "column", gap: 5 }}>
-            {ALIMENTOS.filter(a => a.grupo === grupo).map(a => (
-              <div key={a.id} style={{ ...tarjeta, padding: "9px 12px", display: "flex", alignItems: "center", gap: SP.sm }}>
-                <div style={{ flex: 1, minWidth: 0 }}>
-                  <div style={{ ...TYPE.body, color: C.text }}>{a.nombre}</div>
-                  <div className="mono" style={{ fontSize: 10.5, color: C.textFaint }}>
-                    {a.kcal} kcal · {a.prot} P / {a.hc} C / {a.grasa} G por 100 g
-                  </div>
+        {conCorreccion.length > 0 && (
+          <div style={{ marginTop: SP.sm, display: "flex", flexDirection: "column", gap: 4 }}>
+            {conCorreccion.map((l, i) => (
+              <div key={i} style={{ background: C.surfaceMuted, borderRadius: R.lg, padding: "9px 12px" }}>
+                <div style={{ display: "flex", alignItems: "center", gap: SP.sm }}>
+                  <span style={{ ...TYPE.body, color: l.confianza === "sin-entender" ? C.amber : "#4A4A47",
+                                 flex: 1, minWidth: 0 }}>
+                    {l.nombre}{l.gramos ? " · " + Math.round(l.gramos) + " g" : ""}
+                  </span>
+                  <input inputMode="numeric" placeholder={String(l.macros.kcal)}
+                    value={correcciones[i] || ""}
+                    onChange={e => setCorrecciones(Object.assign({}, correcciones,
+                      { [i]: e.target.value.replace(/\D/g, "") }))}
+                    style={{ width: 58, padding: "5px 6px", borderRadius: R.md, textAlign: "center",
+                             border: "1px solid " + C.cardBorder, background: C.card, color: C.text,
+                             fontSize: 13, fontWeight: 700, fontFamily: "inherit" }} />
+                  <span style={{ ...TYPE.micro, color: C.textFaint }}>KCAL</span>
                 </div>
-                <input inputMode="numeric" placeholder="g" value={gramos[a.id] || ""}
-                  onChange={e => setGramos(Object.assign({}, gramos, { [a.id]: e.target.value.replace(/\D/g, "") }))}
-                  style={{ width: 52, padding: "7px 6px", borderRadius: R.md, textAlign: "center",
-                           border: "1px solid " + C.cardBorder, background: C.bg, color: C.text,
-                           fontSize: 13, fontWeight: 700, fontFamily: "inherit" }} />
-                <button className="btn" disabled={!gramos[a.id]}
-                  onClick={() => { apuntarComida({ comida: comidaId, origen: "casa", id: a.id, gramos: Number(gramos[a.id]) });
-                                   setGramos(Object.assign({}, gramos, { [a.id]: "" })); }}
-                  style={{ minHeight: 36, padding: "0 12px", borderRadius: R.md, flexShrink: 0,
-                           background: gramos[a.id] ? C.accent : C.surfaceMuted,
-                           border: "1px solid " + (gramos[a.id] ? C.accent : C.cardBorder),
-                           color: gramos[a.id] ? "#FAFAF9" : C.textFaint, fontSize: 18, fontWeight: 700 }}>+</button>
+                <div className="mono" style={{ fontSize: 10.5, color: C.textFaint, marginTop: 3 }}>
+                  {ETIQUETA_CONFIANZA[l.confianza]}
+                  {l.macros.kcal > 0 && " · " + l.macros.prot + " P / " + l.macros.hc + " C / " + l.macros.grasa + " G"}
+                </div>
               </div>
             ))}
           </div>
-        </>
-      )}
-    </>
-  );
+        )}
+
+        <button className="btn" onClick={apuntar} disabled={total.kcal <= 0} style={{
+          marginTop: SP.sm, width: "100%", minHeight: TAP_MIN, borderRadius: R.lg,
+          background: total.kcal > 0 ? C.accent : C.surfaceMuted,
+          border: "1px solid " + (total.kcal > 0 ? C.accent : C.cardBorder),
+          color: total.kcal > 0 ? "#FAFAF9" : C.textFaint, fontSize: 13.5, fontWeight: 700,
+        }}>
+          {total.kcal > 0 ? "Apuntar " + Math.round(total.kcal) + " kcal" : "Escribe lo que has comido"}
+        </button>
+      </>
+    );
+  };
 
   return (
     <div>
@@ -515,26 +520,9 @@ export function DiaDeComida({ comida, apuntes, cambios, apuntarComida, apuntarVa
           border: "1px dashed " + C.cardBorder, color: C.textDim, fontSize: 13, fontWeight: 700,
         }}>Apuntar algo fuera de horas</button>
 
+        {/* Una caña, un picoteo: lo mismo, pero sin colgarlo de ninguna comida. */}
         {abierta === "suelto" && (
-          <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
-            {COMIDAS_RAPIDAS.map(r => (
-              <button key={r.id} className="btn"
-                onClick={() => { apuntarComida({ origen: "rapida", id: r.id }); setAbierta(null); }}
-                style={{ ...tarjeta, padding: "11px 14px", textAlign: "left", minHeight: TAP_MIN, width: "100%" }}>
-                <div style={{ display: "flex", justifyContent: "space-between", gap: SP.sm }}>
-                  <span style={{ ...TYPE.bodyStrong, color: C.text }}>{r.nombre}</span>
-                  <span className="mono" style={{ fontSize: 12, fontWeight: 700, color: C.textDim, flexShrink: 0 }}>{r.kcal} kcal</span>
-                </div>
-              </button>
-            ))}
-            {[["p_cerveza", "Caña o cerveza"], ["p_refresco", "Refresco con azúcar"], ["p_dulce", "Dulce o bollería"]].map(([id, n]) => (
-              <button key={id} className="btn"
-                onClick={() => { apuntarComida({ origen: "cantina", id, racion: "normal" }); setAbierta(null); }}
-                style={{ ...tarjeta, padding: "11px 14px", textAlign: "left", minHeight: TAP_MIN, width: "100%" }}>
-                <span style={{ ...TYPE.bodyStrong, color: C.text }}>{n}</span>
-              </button>
-            ))}
-          </div>
+          <div style={{ ...tarjeta, padding: "13px 15px" }}><Apuntador comidaId={null} /></div>
         )}
       </div>
 

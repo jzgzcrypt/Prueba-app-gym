@@ -34,7 +34,8 @@ domain/
 │   ├── dias.js       La regla del día (COMER / RECORTAR) y los macros objetivo.
 │   ├── menu-dia.js   Tu menú, editable: comidas, ingredientes y gramos.
 │   ├── alimentos.js  La despensa e intercambiar un alimento por otro.
-│   ├── cantina.js    Platos de comedor, para apuntar sin pesar.
+│   ├── escribir.js   Entiende lo que escribes que has comido.
+│   ├── cantina.js    Platos de comedor: vocabulario para reconocerlos.
 │   ├── cuadrar.js    El recálculo: ajusta lo que queda a lo que has comido.
 │   └── menus.js      Los programas del dietista de 2022, como referencia.
 └── assets/      Iconos embebidos.

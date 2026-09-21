@@ -47,9 +47,16 @@ export const redondearMacros = (m) => ({
 export function macrosDelDia(apuntes) {
   if (!Array.isArray(apuntes)) return Object.assign({}, CERO);
   return apuntes.reduce((total, ap) => {
-    if (!ap || !ap.id) return total;
+    if (!ap) return total;
+    if (ap.origen !== "texto" && !ap.id) return total;
     if (ap.origen === "cantina") return sumarMacros(total, macrosPlato(ap.id, ap.racion));
     if (ap.origen === "rapida") return sumarMacros(total, macrosRapida(ap.id));
+    // Lo escrito a mano ya trae sus macros: se guardaron tal y como se
+    // entendieron, para que un cambio futuro del interprete no reescriba el
+    // pasado. Lo que apuntaste en marzo tiene que seguir diciendo lo mismo.
+    if (ap.origen === "texto") return sumarMacros(total, {
+      kcal: ap.kcal || 0, prot: ap.prot || 0, hc: ap.hc || 0, grasa: ap.grasa || 0,
+    });
     return sumarMacros(total, macrosDe(ap.id, ap.gramos));
   }, Object.assign({}, CERO));
 }

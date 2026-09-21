@@ -31,9 +31,23 @@ Todo cambio que se haga en la app se anota aquí. Sin excepciones.
   En cuanto apuntas, los gramos de las comidas que faltan se ajustan para que
   el día siga sumando lo que tiene que sumar, y se marca en verde o en ámbar
   lo que ha subido o bajado respecto al plan.
-- **La cantina, sin pesar nada.** 36 platos de comedor que se señalan con el
-  dedo y se marcan como poco / normal / mucho. Puedes apuntar varios: en la
-  cantina caen tres cosas, no una.
+- **Escribes lo que has comido y ya está.** Nada de elegir de una lista: la
+  lista nunca tiene lo que has comido, y buscar en ella cuesta más que
+  escribirlo. Escribes *«macarrones con tomate 450 kcal / filete de ternera /
+  un panecillo»* y se apunta. Si usas una app que hace una foto y te da las
+  calorías, esto es donde copias ese número.
+- **Manda lo que escribes.** Si pones calorías, ese es el número y no se
+  discute. Las tablas de alimentos y de cantina dejan de ser pantallas y pasan
+  a ser vocabulario: sirven para reconocer «pollo» o «lentejas» y poner los
+  macros cuando tú no los das.
+- **Se enseña lo entendido antes de apuntarlo**, con el número editable y de
+  dónde sale: *tus números*, *calculado* o *estimado con tus calorías*. Un
+  contador en el que no puedes ver ni corregir lo que ha entendido es un
+  contador en el que dejas de creer a la semana.
+- Entiende gramos y unidades (*200 g de pollo*, *2 huevos*, *1 yogur*), varias
+  cosas en una frase (*merluza con patatas* cuenta las dos), y macros sueltos
+  (*30 p, 90 c, 35 g de grasa*). Y **si no entiende algo, lo dice** en vez de
+  colar un cero.
 - **La verdura y la fruta no se tocan nunca.** Son volumen y saciedad;
   moverlas no arregla el día y quita justo lo que sacia. Se mueve el
   carbohidrato, que es la palanca, y la proteína solo lo justo para llegar.
