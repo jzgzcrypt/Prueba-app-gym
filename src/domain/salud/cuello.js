@@ -41,15 +41,56 @@ export const CUELLO_PARTE_3 = {
   sensacion: "Trabajo muscular notorio pero sin tensión en hombros ni mandíbula. Si aparece dolor agudo (distinto a la fatiga muscular normal), vuelve a la Parte 2 esa sesión.",
   aplicacion: "Este es el nivel de cuello fuerte y funcional que necesitas para correr sin fatiga cervical al final de una sesión larga, y para que el trabajo de hombro (dominadas, press) no te resienta el cuello.",
 };
-// Los habitos arrancan de verdad en la semana 2 del plan (la semana 1 solo se sostuvo el running).
-// Este desfase hace que la semana 2 se comporte como "semana 1" para la progresion de niveles.
-export const HABITOS_INICIO_SEMANA = 2;
-export function semanaHabito(weekN) { return Math.max(1, weekN - (HABITOS_INICIO_SEMANA - 1)); }
-// Hoy ningun habito se pausa: solo se ajusta lo que genera fatiga real (pierna,
-// running), nunca las habilidades ni la salud. Se mantiene como funcion, y no
-// como constante, porque la decision de pausar depende de la semana en cuanto
-// haya reglas de descarga reales.
+/**
+ * La fase del cuello avanza por DIAS PRACTICADOS, no por semana del bloque.
+ *
+ * Antes se derivaba del numero de semana, asi que reiniciar el bloque reiniciaba
+ * la rehabilitacion: tres meses despues del accidente tocaba otra vez la fase
+ * aguda. Y habria vuelto a pasar en diciembre con el Bloque 2.
+ *
+ * La rehabilitacion va en tu linea temporal, no en la del gimnasio. El protocolo
+ * (NSE, Peterson/Peolsson) progresa HACIENDOLO: fallar una semana no te adelanta
+ * de fase, y ser constante si. Los umbrales son los mismos que tenia — 2 semanas
+ * y 6 semanas — pero contando dias de verdad.
+ */
+export const UMBRALES_CUELLO = [
+  { hasta: 14, fase: 1 },   // 1-14 dias practicados
+  { hasta: 42, fase: 2 },   // 15-42
+  { hasta: Infinity, fase: 3 },
+];
+
+export const FASES_CUELLO = [null, CUELLO_PARTE_1, CUELLO_PARTE_2, CUELLO_PARTE_3];
+
+/** Cuantos dias distintos se ha practicado el cuello, mirando los checks. */
+export function diasDeCuello(cuelloChecks) {
+  if (!cuelloChecks) return 0;
+  const dias = new Set();
+  for (const clave of Object.keys(cuelloChecks)) {
+    if (!cuelloChecks[clave]) continue;
+    const m = /^(\d{4}-\d{2}-\d{2})/.exec(clave);
+    if (m) dias.add(m[1]);
+  }
+  return dias.size;
+}
+
+/**
+ * El ejercicio que toca.
+ * @param cuelloChecks  los checks guardados, para contar dias practicados
+ * @param faseManual    fase 1-3 fijada a mano (lo que diga el fisio), o null
+ */
+export function getCuelloEj(cuelloChecks, faseManual) {
+  if (faseManual) return FASES_CUELLO[faseManual] || CUELLO_PARTE_1;
+  const dias = diasDeCuello(cuelloChecks);
+  const u = UMBRALES_CUELLO.find(x => dias <= x.hasta) || UMBRALES_CUELLO[2];
+  return FASES_CUELLO[u.fase];
+}
+
+// Ningun habito se pausa: solo se ajusta lo que genera fatiga real (pierna,
+// running), nunca las habilidades ni la salud.
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 export function habitoEnPausa(weekN) { return false; }
 
-export function getCuelloEj(weekN) { const w = semanaHabito(weekN); return w <= 2 ? CUELLO_PARTE_1 : w <= 6 ? CUELLO_PARTE_2 : CUELLO_PARTE_3; }
+// Los habitos de habilidad (magia, guerrero) si van por semana del bloque:
+// son contenido del bloque, no rehabilitacion.
+export const HABITOS_INICIO_SEMANA = 1;
+export function semanaHabito(weekN) { return Math.max(1, weekN - (HABITOS_INICIO_SEMANA - 1)); }

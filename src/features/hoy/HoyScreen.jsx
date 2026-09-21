@@ -11,9 +11,10 @@ import { getTecnicaEj } from "@/domain/salud/tecnica";
 import { GuerreroBlock, HabitBlock, ListBlock, MagiaBlock, MoveDayBlock, PainBlock } from "@/features/hoy/bloques";
 import { WeekDots } from "@/features/ui/WeekDots";
 import { destinoDe, llegadasA } from "@/lib/estado/mover-sesion";
+import { PROTEINA_DIARIA } from "@/domain/nutricion/dias";
 export function HoyScreen(props) {
   const { day, dayKey, isToday, flatIdx, goDay, goToday, isFuerzaDay, isRunDay, isCompromisoDay, mov,
-          vaciarDia, cosasEnElDia,
+          comida, vaciarDia, cosasEnElDia,
     cuelloEj, cuelloChecks, toggleCuello, checked, toggleCheck, mainDone, workoutProgress, onStartWorkout,
     notes, noteInput, setNoteInput, editingNote, setEditingNote, saveNote, openCatalogo,
     expandedBlock, setExpandedBlock, magiaProgress, bloquesHistorial } = props;
@@ -125,6 +126,23 @@ export function HoyScreen(props) {
       </div>
 
       <WeekDots day={day} checked={checked} onJumpDay={props.onJumpDay} />
+
+      {comida && (
+        <div style={{ padding: "0 16px 10px" }}>
+          <div style={{ display: "flex", alignItems: "center", gap: 10, padding: "10px 13px", borderRadius: 11,
+                        background: comida.id === "comer" ? "#F0F5F2" : C.surfaceMuted,
+                        border: "1px solid " + (comida.id === "comer" ? "#CFE0D6" : C.divider) }}>
+            <div style={{ ...TYPE.micro, color: comida.id === "comer" ? CAT.fuerza : C.textDim,
+                          background: C.card, padding: "4px 8px", borderRadius: 999, flexShrink: 0 }}>
+              {comida.etiqueta}
+            </div>
+            <div style={{ flexGrow: 1, minWidth: 0 }}>
+              <div style={{ ...TYPE.bodyStrong, color: C.text }}>{comida.kcal} · proteína {PROTEINA_DIARIA}</div>
+              <div style={{ fontSize: 11.5, color: C.textDim, marginTop: 1 }}>{comida.detalle}</div>
+            </div>
+          </div>
+        </div>
+      )}
 
       <div style={{ padding: "0 16px", display: "flex", flexDirection: "column", gap: 8 }}>
 

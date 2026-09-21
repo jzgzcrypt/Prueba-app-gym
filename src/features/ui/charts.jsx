@@ -64,6 +64,7 @@ export function QuickFieldInput({ fieldKey, onSave, onBack }) {
   const meta = {
     peso: { label: "Peso", unit: "kg", color: "#171717" },
     cintura: { label: "Cintura", unit: "cm", color: "#3A6EA5" },
+    anchoHombro: { label: "Ancho de hombro", unit: "cm", color: "#2F6B4F" },
     cadera: { label: "Cadera", unit: "cm", color: "#946800" },
     hombro: { label: "Hombro (test manos espalda)", unit: "cm", color: CAT.cuello },
     cadenaPosterior: { label: "Tocar suelo (distancia dedos-suelo)", unit: "cm", color: "#3A6EA5" },

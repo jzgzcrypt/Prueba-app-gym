@@ -8,6 +8,7 @@ import { ICON_CUELLO, ICON_MOVILIDAD, ICON_NUTRICION } from "@/domain/assets/ico
 import { NUTRICION } from "@/domain/nutricion/nutricion";
 import { BLOQUE, FECHA_FIN, FECHA_INICIO, FLAT_DAYS, WEEKS, claveDia, findTodayIndex, todayLocalIso } from "@/domain/plan/calendario";
 import { getCuelloEj } from "@/domain/salud/cuello";
+import { comidaDelDia } from "@/domain/nutricion/dias";
 import { getMovilidad } from "@/domain/salud/movilidad";
 import { CoachScreen } from "@/features/coach/CoachScreen";
 import { EjerciciosScreen } from "@/features/ejercicios/EjerciciosScreen";
@@ -64,6 +65,8 @@ export default function App() {
   // Hora del ultimo guardado confirmado, para poder enseñarla y no tener que
   // fiarse de que "se habra guardado".
   const [ultimoGuardado, setUltimoGuardado] = useState(null);
+  // Fase del cuello fijada a mano (lo que diga el fisio). null = automatica.
+  const [cuelloFaseManual, setCuelloFaseManual] = useState(null);
   const [expandedBlock, setExpandedBlock] = useState("main"); // que bloque esta abierto en HoyScreen
 
   // ─── Sistema global de deshacer (Undo) ─────────────────────────────────────
@@ -123,6 +126,7 @@ export default function App() {
           if (d.weeklyLog) setWeeklyLog(d.weeklyLog);
           if (d.bloquesHistorial) setBloquesHistorial(d.bloquesHistorial);
           if (d.ultimoBackup) setUltimoBackup(d.ultimoBackup);
+          if (d.cuelloFaseManual) setCuelloFaseManual(d.cuelloFaseManual);
           loadedOk = true;
         }
       } catch (err) {
@@ -192,7 +196,7 @@ export default function App() {
       checked, cuelloChecks, notes, youtubeLinks, customExercises, painLog,
       flaggedExercises, pausedRanges, workoutProgress, magiaProgress, magiaLog,
       guerreroLog, workoutWeights, medidas, ritmoReal, ritmoTramos, sensaciones, postponed, phaseAdjustNote,
-      currentWeekOverride, weeklyLog, bloquesHistorial, ultimoBackup,
+      currentWeekOverride, weeklyLog, bloquesHistorial, ultimoBackup, cuelloFaseManual,
     };
     // Se deja a mano el ultimo estado conocido para poder guardarlo de golpe
     // si la app se cierra antes de que venza la espera de abajo.
@@ -202,7 +206,7 @@ export default function App() {
   }, [checked, cuelloChecks, notes, youtubeLinks, customExercises, painLog,
       flaggedExercises, pausedRanges, workoutProgress, magiaProgress, magiaLog,
       guerreroLog, workoutWeights, medidas, ritmoReal, ritmoTramos, sensaciones, postponed, phaseAdjustNote,
-      currentWeekOverride, weeklyLog, bloquesHistorial, ultimoBackup, storageReady]);
+      currentWeekOverride, weeklyLog, bloquesHistorial, ultimoBackup, cuelloFaseManual, storageReady]);
 
   const currentDay = FLAT_DAYS[flatIdx] || FLAT_DAYS[todayIdx] || FLAT_DAYS[0];
   const isToday = flatIdx === todayIdx;
@@ -210,7 +214,9 @@ export default function App() {
   const isFuerzaDay = currentDay.tipo === "fuerza";
   const isRunDay = currentDay.tipo === "run" || currentDay.tipo === "test" || currentDay.tipo === "objetivo";
   const mov = getMovilidad(currentDay.cat, currentDay.weekN);
-  const cuelloEj = getCuelloEj(currentDay.weekN);
+  // La fase del cuello sale de los dias practicados, no de la semana del bloque.
+  const cuelloEj = getCuelloEj(cuelloChecks, cuelloFaseManual);
+  const comida = comidaDelDia(currentDay);
   const mainDone = currentDay.tipo === "libre" ? true : !!checked[dayKey];
   const isCompromisoDay = currentDay.tipo === "compromiso";
 
@@ -389,7 +395,7 @@ export default function App() {
           <HoyScreen day={currentDay} dayKey={dayKey} isToday={isToday} flatIdx={flatIdx}
             goDay={goDay} goToday={goToday} onJumpDay={jumpToDay}
             isFuerzaDay={isFuerzaDay} isRunDay={isRunDay} isCompromisoDay={isCompromisoDay} mov={mov}
-            vaciarDia={vaciarDia} cosasEnElDia={cuantoHayEn({ checked, cuelloChecks, notes, painLog, magiaLog, guerreroLog, workoutWeights, ritmoReal, ritmoTramos, sensaciones, postponed }, dayKey)}
+            comida={comida} vaciarDia={vaciarDia} cosasEnElDia={cuantoHayEn({ checked, cuelloChecks, notes, painLog, magiaLog, guerreroLog, workoutWeights, ritmoReal, ritmoTramos, sensaciones, postponed }, dayKey)}
             cuelloEj={cuelloEj} cuelloChecks={cuelloChecks} toggleCuello={toggleCuello}
             checked={checked} toggleCheck={toggleCheck} mainDone={mainDone}
             workoutProgress={workoutProgress[dayKey]} onStartWorkout={() => setActiveWorkout(dayKey)}

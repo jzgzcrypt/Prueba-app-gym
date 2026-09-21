@@ -101,3 +101,37 @@ test("el lector de RPE toma el esfuerzo, no el denominador", () => {
   assert.equal(rpeMaximo("2-3/10"), 3);
   assert.equal(rpeMaximo(undefined), 0);
 });
+
+// ─── El bloque aprobado el 21 de septiembre ─────────────────────────────────
+
+test("la rampa es UNA semana, no dos", () => {
+  const rampa = WEEKS.filter(w => w.fase === "RAMPA");
+  assert.equal(rampa.length, 1, "la rampa vuelve a ocupar dos semanas");
+  assert.equal(rampa[0].n, 1);
+});
+
+test("existe el puente: 6 km casi a ritmo, la semana antes del objetivo", () => {
+  // Sin el, el dia del objetivo pide 7 km a un ritmo solo sostenido 3 km.
+  const puente = WEEKS.find(w => w.fase === "PUENTE");
+  assert.ok(puente, "no hay semana puente");
+  assert.equal(puente.n, 10);
+  const sesion = puente.days.find(d => d.esCalidad);
+  assert.match(sesion.titulo, /6km/);
+  assert.match(sesion.what, /4:5[05]/);
+});
+
+test("la progresion de ritmo sube escalon a escalon, sin saltos", () => {
+  // 3 km -> 4 km -> 5 km -> test -> 3 km a ritmo -> 6 km -> el dia.
+  const distancias = WEEKS
+    .map(w => w.days.find(d => d.esCalidad))
+    .filter(Boolean)
+    .map(d => Number((d.titulo.match(/(\d+)\s*km/i) || [])[1]))
+    .filter(Number.isFinite);
+  assert.deepEqual(distancias, [3, 4, 5, 3, 6]);
+});
+
+test("el taper es una sola semana", () => {
+  // Dos semanas de taper para un objetivo de 33 minutos es desentrenar.
+  const taper = WEEKS.filter(w => /TAPER|OBJETIVO/.test(w.fase));
+  assert.ok(taper.length <= 2, "demasiadas semanas sin carga al final");
+});
