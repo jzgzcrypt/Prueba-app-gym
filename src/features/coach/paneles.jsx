@@ -33,7 +33,7 @@ export function PhaseAdjustContent({ currentWeekN, currentWeekOverride, setCurre
   return (
     <div style={{ padding: "0 " + SP.lg + "px 30px", display: "flex", flexDirection: "column", gap: SP.md }}>
       <div style={{ fontSize: 11.5, color: C.textDim, lineHeight: 1.45 }}>
-        Si la vida real se desvía del calendario (te pusiste enfermo, un viaje largo, etc), puedes indicar manualmente en qué semana del plan estás realmente. Esto no cambia fechas ni el calendario — solo ajusta qué semana ve Coach como "actual" para las alertas y el acumulado.
+        Si la vida real se desvía del calendario (te pusiste enfermo, un viaje largo, etc), puedes indicar manualmente en qué semana del plan estás realmente. Esto no cambia fechas ni el calendario — solo ajusta qué semana ve Coach como &laquo;actual&raquo; para las alertas y el acumulado.
       </div>
 
       <div style={{ background: C.card, border: "1px solid " + C.cardBorder, borderRadius: R.xl, padding: SP.lg + "px" }}>
