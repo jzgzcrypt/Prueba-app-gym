@@ -21,6 +21,40 @@ Todo cambio que se haga en la app se anota aquí. Sin excepciones.
 
 ## [Sin publicar]
 
+### Cambiado — el plan, revisado y aprobado el 21 de septiembre
+- **La rampa baja de 2 semanas a 1.** Vuelve de un parón, no empieza de cero:
+  dos semanas idénticas de correr/caminar no aportan carga y desmotivan justo
+  cuando más falta hace engancharse. Sube algo el riesgo de lesión —la forma
+  vuelve antes que los tendones— y se asume a propósito.
+- **Aparece el puente que faltaba: S10, 6 km a 4:50-4:55.** El plan anterior
+  pedía 7 km a un ritmo sostenido solo 3 km, y un 40% más largo que el mayor
+  esfuerzo a ritmo. La semana que libera la rampa lo paga. La progresión queda
+  3 → 4 → 5 km → test → 3 km a ritmo → 6 km → el día.
+- **El taper se queda en una semana.** Dos, para un objetivo de 33 minutos,
+  es desentrenar.
+
+### Añadido — la comida y la estética, que no existían
+- **La regla de comida, por día.** *Los días que corres fuerte, comes; los días
+  que no, recortas.* Sale en HOY con las kcal y la proteína del día. No es
+  fuerza de voluntad: la grasa alimenta el trote suave pero no 4:45/km, que
+  tira de glucógeno — así que las sesiones que construyen el objetivo van con
+  el depósito lleno y el déficit se concentra donde no hace falta.
+- **Ancho de hombro** como medida, y **el ratio hombro ÷ cintura** como
+  indicador de estética. Sube por los dos lados a la vez y no miente con
+  recomposición, que es el caso: se puede perder grasa y ganar músculo con la
+  báscula casi quieta. (El "hombro" que ya existía es el test de movilidad.)
+
+### Arreglado — la rehabilitación del cuello se reiniciaba sola
+- **El cuello deja de depender del número de semana del bloque.** Reiniciar el
+  bloque reiniciaba la rehabilitación: tres meses después del accidente tocaba
+  otra vez la fase aguda, y habría vuelto a pasar en diciembre con el Bloque 2.
+  Ahora avanza por **días practicados de verdad** —1-14, 15-42, 43+— con ajuste
+  manual por encima para lo que diga el fisio. Fallar una semana ya no adelanta
+  de fase.
+- La tirada larga del domingo salía como día de recorte: la regla miraba un
+  índice que solo existía en la lista plana, no en los días del plan. Lo
+  encontraron los tests nuevos.
+
 ### Cambiado
 - **El registro pasa a ir por fecha real, no por "semana-día del bloque".**
   Antes la clave era `"1-3"` (semana 1, jueves). Eso tenía dos problemas
