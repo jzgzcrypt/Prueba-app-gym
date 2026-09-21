@@ -21,6 +21,26 @@ Todo cambio que se haga en la app se anota aquí. Sin excepciones.
 
 ## [Sin publicar]
 
+### Cambiado — la pantalla de HOY, reordenada
+- **El botón de empezar la sesión estaba en la posición 11.** Antes de llegar
+  a él había logo, barra de progreso, una frase, tres contadores, el navegador
+  de día, los puntos de la semana, la comida y tres hábitos: **dos pantallas de
+  scroll** hasta lo único que hay que hacer. A las 16:00, decidiendo si te
+  tumbas, eso juega en contra. Ahora la sesión va justo debajo de la fecha.
+- **Arriba va el objetivo, no un reproche.** Donde había una frase que regañaba
+  —"Hoy toca. No hay debate."— y tres contadores que en el día 1 marcaban
+  4 / 0 / 0, ahora está lo que de verdad empuja: **7km @ 4:45/km, domingo 6 de
+  diciembre, 76 días**. Lo primero que veías al abrir la app era que no habías
+  hecho nada; ahora es por qué lo estás haciendo.
+- La frase se queda, pero como línea discreta bajo la sesión en vez de ser el
+  bloque tipográfico más grande de la pantalla.
+- **Los hábitos bajan debajo de la sesión** y dejan de competir con ella.
+- **Fuera los fondos de color de las tarjetas.** El propio sistema de diseño lo
+  dice: *"el color de categoría va en bordes e iconos, nunca en el fondo de la
+  tarjeta"*. Había cuatro tarjetas de colores pastel, y el resultado era que
+  magia (10 min) pesaba visualmente igual que la sesión (35 min). Ahora todas
+  son blancas con un filo de color a la izquierda.
+
 ### Arreglado
 - **La app reventaba al pasar de día.** `bloques.jsx` usaba `claveDia` sin
   importarlo: *"claveDia is not defined"*, pantalla en blanco en cuanto tocabas

@@ -4,7 +4,7 @@ import { useState } from "react";
 import { C, CAT, R, SP, TAP_MIN, TYPE } from "@/design/tokens";
 import { ICON_FUERZA, ICON_MOVILIDAD, ICON_RUNNING, LOGO_7K } from "@/domain/assets/icons";
 import { parseSeries } from "@/domain/fuerza/series";
-import { FECHA_INICIO, FLAT_DAYS, WEEKS, claveDia, todayLocalIso } from "@/domain/plan/calendario";
+import { BLOQUE, FECHA_FIN, FECHA_INICIO, FLAT_DAYS, WEEKS, claveDia, todayLocalIso } from "@/domain/plan/calendario";
 import { getFraseHoy } from "@/domain/running/frases";
 import { MOVILIDAD } from "@/domain/salud/movilidad";
 import { getTecnicaEj } from "@/domain/salud/tecnica";
@@ -20,6 +20,11 @@ export function HoyScreen(props) {
     expandedBlock, setExpandedBlock, magiaProgress, bloquesHistorial } = props;
 
   const frase = getFraseHoy(flatIdx);
+  // Cuanto falta para el dia del objetivo. Es el dato que de verdad empuja.
+  const diasParaObjetivo = Math.max(0, Math.round(
+    (new Date(FECHA_FIN + "T12:00:00") - new Date(todayLocalIso() + "T12:00:00")) / 86400000));
+  const fechaObjetivoLarga = new Date(FECHA_FIN + "T12:00:00")
+    .toLocaleDateString("es-ES", { weekday: "long", day: "numeric", month: "long" });
   const tecnicaEj = getTecnicaEj(day.weekN);
   const cM = !!cuelloChecks[dayKey + "-m"], cT = !!cuelloChecks[dayKey + "-t"], cN = !!cuelloChecks[dayKey + "-n"];
   const cuelloTotal = (cM?1:0)+(cT?1:0)+(cN?1:0);
@@ -63,46 +68,35 @@ export function HoyScreen(props) {
 
   return (
     <div>
-      <div style={{ padding: SP.xxl + "px " + SP.xl + "px " + SP.lg + "px" }}>
-        <div style={{ display: "flex", alignItems: "center", gap: SP.sm }}>
-          <img src={LOGO_7K} alt="7K" style={{ width: 22, height: 16, objectFit: "contain" }} />
-          <div style={{ ...TYPE.micro, color: C.accent, letterSpacing: 1.5 }}>PROGRAMA 7K</div>
-        </div>
-      </div>
-
-      {/* ── Barra de progreso del bloque ── */}
-      {bloqueActivo && (
-        <div style={{ padding: "0 " + SP.xl + "px " + SP.md + "px" }}>
-          <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 4 }}>
-            <span style={{ fontSize: 10.5, fontWeight: 700, color: C.textFaint, letterSpacing: 0.4 }}>DÍA {diaActualBloque} DE {totalDiasBloque}</span>
-            <span style={{ fontSize: 10.5, fontWeight: 700, color: C.textFaint }}>{bloqueActivo.nombre.toUpperCase()}</span>
+      {/* ═══ EL OBJETIVO — lo primero que ves, porque es por lo que haces esto ═══
+           Antes aqui habia: logo, barra de progreso, una frase que regañaba y
+           tres contadores que en el dia 1 marcaban 4 / 0 / 0. Lo primero que
+           veias al abrir la app era que no habias hecho nada. ═══ */}
+      <div style={{ padding: SP.lg + "px " + SP.xl + "px " + SP.md + "px" }}>
+        <div style={{ background: C.accent, borderRadius: R.xl, padding: "16px 18px 14px" }}>
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline" }}>
+            <span style={{ ...TYPE.micro, color: "#8A8A87" }}>{bloqueActivo ? bloqueActivo.nombre.toUpperCase() : "BLOQUE 1"}</span>
+            <span style={{ ...TYPE.micro, color: "#8A8A87" }}>DÍA {diaActualBloque} DE {totalDiasBloque}</span>
           </div>
-          <div style={{ height: 7, background: C.surfaceMuted, borderRadius: 4, overflow: "hidden" }}>
-            <div style={{ width: pctBloque + "%", height: "100%", background: C.accent, borderRadius: 4, transition: "width 0.3s ease" }} />
+
+          <div style={{ display: "flex", alignItems: "flex-end", justifyContent: "space-between", gap: SP.md, marginTop: 10 }}>
+            <div style={{ minWidth: 0 }}>
+              <div style={{ fontSize: 23, fontWeight: 800, color: "#FAFAF9", letterSpacing: -0.5, lineHeight: 1.1 }}>
+                {BLOQUE.objetivo}
+              </div>
+              <div style={{ ...TYPE.meta, color: "#A8A8A5", marginTop: 4 }}>{fechaObjetivoLarga}</div>
+            </div>
+            <div style={{ textAlign: "right", flexShrink: 0 }}>
+              <div className="mono" style={{ fontSize: 34, fontWeight: 700, color: "#FAFAF9", lineHeight: 1, letterSpacing: -1 }}>
+                {diasParaObjetivo}
+              </div>
+              <div style={{ ...TYPE.micro, color: "#8A8A87", marginTop: 3 }}>DÍAS</div>
+            </div>
           </div>
-        </div>
-      )}
 
-      {/* ── Frase con gancho del dia ── */}
-      <div style={{ padding: "0 " + SP.xl + "px " + SP.lg + "px" }}>
-        <div style={{ fontSize: 19, fontWeight: 800, color: C.text, lineHeight: 1.32, letterSpacing: -0.3 }}>
-          {frase}
-        </div>
-      </div>
-
-      {/* ── Insignias de identidad ── */}
-      <div style={{ display: "flex", gap: SP.sm, padding: "0 " + SP.xl + "px " + SP.lg + "px" }}>
-        <div style={{ flex: 1, background: C.surfaceMuted, borderRadius: R.lg, padding: SP.sm + "px " + SP.md + "px", textAlign: "center" }}>
-          <div style={{ fontSize: 18, fontWeight: 800, color: C.text }}>{patronesTotales}</div>
-          <div style={{ fontSize: 9, color: C.textDim, marginTop: 2 }}>Patrones activos</div>
-        </div>
-        <div style={{ flex: 1, background: C.surfaceMuted, borderRadius: R.lg, padding: SP.sm + "px " + SP.md + "px", textAlign: "center" }}>
-          <div style={{ fontSize: 18, fontWeight: 800, color: C.text }}>{trucosDominados}</div>
-          <div style={{ fontSize: 9, color: C.textDim, marginTop: 2 }}>Trucos aprendidos</div>
-        </div>
-        <div style={{ flex: 1, background: C.surfaceMuted, borderRadius: R.lg, padding: SP.sm + "px " + SP.md + "px", textAlign: "center" }}>
-          <div style={{ fontSize: 18, fontWeight: 800, color: C.text }}>{fasesSuperadas}</div>
-          <div style={{ fontSize: 9, color: C.textDim, marginTop: 2 }}>Fases superadas</div>
+          <div style={{ height: 4, background: "#3A3A38", borderRadius: 3, overflow: "hidden", marginTop: 14 }}>
+            <div style={{ width: pctBloque + "%", height: "100%", background: "#FAFAF9", borderRadius: 3, transition: "width .3s ease" }} />
+          </div>
         </div>
       </div>
 
@@ -130,8 +124,8 @@ export function HoyScreen(props) {
       {comida && (
         <div style={{ padding: "0 16px 10px" }}>
           <div style={{ display: "flex", alignItems: "center", gap: 10, padding: "10px 13px", borderRadius: 11,
-                        background: comida.id === "comer" ? "#F0F5F2" : C.surfaceMuted,
-                        border: "1px solid " + (comida.id === "comer" ? "#CFE0D6" : C.divider) }}>
+                        background: C.card, border: "1px solid " + C.cardBorder,
+                        borderLeft: "3px solid " + (comida.id === "comer" ? CAT.fuerza : C.textFaint) }}>
             <div style={{ ...TYPE.micro, color: comida.id === "comer" ? CAT.fuerza : C.textDim,
                           background: C.card, padding: "4px 8px", borderRadius: 999, flexShrink: 0 }}>
               {comida.etiqueta}
@@ -158,20 +152,6 @@ export function HoyScreen(props) {
             <div style={{ fontSize: 12, fontWeight: 700, color: "#171717" }}>Toca medición — ve a PROGRESO</div>
           </div>
         )}
-
-        {/* ═══ CUELLO — habito minimo, espacio propio ═══ */}
-        <HabitBlock cuelloEj={cuelloEj} cM={cM} cT={cT} cN={cN} cuelloTotal={cuelloTotal} toggleCuello={toggleCuello}
-          expandedBlock={expandedBlock} toggleBlock={toggleBlock} />
-
-        {/* ═══ MAGIA — habilidad aparte, espacio propio ═══ */}
-        <MagiaBlock day={day} dayKey={dayKey} magiaProgress={props.magiaProgress} setMagiaProgress={props.setMagiaProgress}
-          magiaLog={props.magiaLog} setMagiaLog={props.setMagiaLog}
-          expandedBlock={expandedBlock} toggleBlock={toggleBlock}
-          onOpenCatalogo={props.onOpenMagiaCatalogo} />
-
-        {/* ═══ GUERRERO — habilidad aparte, control bajo presion ═══ */}
-        <GuerreroBlock day={day} dayKey={dayKey} guerreroLog={props.guerreroLog} setGuerreroLog={props.setGuerreroLog}
-          expandedBlock={expandedBlock} toggleBlock={toggleBlock} />
 
         {/* ═══ RUNNING — colapsable ═══ */}
         {isRunDay && !movidaA && (
@@ -305,6 +285,23 @@ export function HoyScreen(props) {
             }}>{checked[dayKey] ? "HECHO" : "MARCAR COMO HECHO"}</button>
           </div>
         )}
+
+        {/* ═══ LO DE CADA DÍA — debajo de la sesión, que es lo que manda ═══ */}
+        {/* ═══ CUELLO — habito minimo, espacio propio ═══ */}
+        <HabitBlock cuelloEj={cuelloEj} cM={cM} cT={cT} cN={cN} cuelloTotal={cuelloTotal} toggleCuello={toggleCuello}
+          expandedBlock={expandedBlock} toggleBlock={toggleBlock} />
+
+        {/* ═══ MAGIA — habilidad aparte, espacio propio ═══ */}
+        <MagiaBlock day={day} dayKey={dayKey} magiaProgress={props.magiaProgress} setMagiaProgress={props.setMagiaProgress}
+          magiaLog={props.magiaLog} setMagiaLog={props.setMagiaLog}
+          expandedBlock={expandedBlock} toggleBlock={toggleBlock}
+          onOpenCatalogo={props.onOpenMagiaCatalogo} />
+
+        {/* ═══ GUERRERO — habilidad aparte, control bajo presion ═══ */}
+        <GuerreroBlock day={day} dayKey={dayKey} guerreroLog={props.guerreroLog} setGuerreroLog={props.setGuerreroLog}
+          expandedBlock={expandedBlock} toggleBlock={toggleBlock} />
+
+        <div style={{ ...TYPE.body, color: C.textFaint, textAlign: "center", padding: "2px 8px 4px" }}>{frase}</div>
 
         {day.tipo === "libre" && (
           <div style={{ background: C.card, border: "1px solid " + C.cardBorder, borderRadius: 14, padding: "14px 16px" }}>

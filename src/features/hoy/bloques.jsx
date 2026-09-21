@@ -68,7 +68,7 @@ export function HabitBlock({ cuelloEj, cM, cT, cN, cuelloTotal, toggleCuello, ex
   const allDone = cuelloTotal === 3;
   return (
     <div style={{
-      background: "#F0F5F8", border: "1px solid #D8E5EC", borderRadius: R.xl, overflow: "hidden",
+      background: C.card, border: "1px solid " + C.cardBorder, borderLeft: "3px solid " + CAT.cuello, borderRadius: R.xl, overflow: "hidden",
     }}>
       <div onClick={() => toggleBlock("cuello")} className="block" style={{
         display: "flex", alignItems: "center", gap: SP.md, padding: "13px " + SP.lg + "px", minHeight: TAP_MIN, cursor: "pointer",
@@ -142,7 +142,7 @@ export function GuerreroBlock({ day, dayKey, guerreroLog, setGuerreroLog, expand
   const colorGuerrero = "#3A3A38"; // gris carbon — serio, distinto de todo lo demas
 
   return (
-    <div style={{ background: "#F2F1EF", border: "1px solid #DCDAD6", borderRadius: R.xl, overflow: "hidden", opacity: enPausa ? 0.6 : 1 }}>
+    <div style={{ background: C.card, border: "1px solid " + C.cardBorder, borderLeft: "3px solid " + C.textDim, borderRadius: R.xl, overflow: "hidden", opacity: enPausa ? 0.6 : 1 }}>
       <div onClick={() => toggleBlock("guerrero")} className="block" style={{
         display: "flex", alignItems: "center", gap: SP.md, padding: "13px " + SP.lg + "px", minHeight: TAP_MIN, cursor: "pointer",
       }}>
@@ -221,7 +221,7 @@ export function MagiaBlock({ day, dayKey, magiaProgress, setMagiaProgress, magia
   if (!truco) return null;
 
   return (
-    <div style={{ background: "#F5F1F8", border: "1px solid #E2D5EC", borderRadius: R.xl, overflow: "hidden", opacity: enPausa ? 0.6 : 1 }}>
+    <div style={{ background: C.card, border: "1px solid " + C.cardBorder, borderLeft: "3px solid #6B4C8A", borderRadius: R.xl, overflow: "hidden", opacity: enPausa ? 0.6 : 1 }}>
       <div onClick={() => toggleBlock("magia")} className="block" style={{
         display: "flex", alignItems: "center", gap: SP.md, padding: "13px " + SP.lg + "px", minHeight: TAP_MIN, cursor: "pointer",
       }}>
