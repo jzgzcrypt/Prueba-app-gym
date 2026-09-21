@@ -1,5 +1,6 @@
 "use client";
 
+import { claveDia } from "@/domain/plan/calendario";
 import { destinoDe, llegadasA, moverSesion } from "@/lib/estado/mover-sesion";
 
 import { useState } from "react";

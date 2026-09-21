@@ -21,6 +21,22 @@ Todo cambio que se haga en la app se anota aquí. Sin excepciones.
 
 ## [Sin publicar]
 
+### Arreglado
+- **La app reventaba al pasar de día.** `bloques.jsx` usaba `claveDia` sin
+  importarlo: *"claveDia is not defined"*, pantalla en blanco en cuanto tocabas
+  la flecha de siguiente día. Se coló al reescribir el bloque de mover sesión.
+- **Y lo que importa: ahora ese fallo no puede volver a desplegarse.** Un
+  import que falta **no rompe el build** —webpack lo deja pasar y revienta en
+  el navegador, en el momento en que el usuario toca ese componente— y los
+  tests tampoco lo ven, porque no montan componentes. Se activa la regla
+  `no-undef` en ESLint, que es lo único que lo detecta antes de subirlo.
+- Verificado recorriendo los 14 primeros días del bloque en un navegador de
+  verdad: cero errores.
+
+---
+
+## [Sin publicar — plan]
+
 ### Cambiado — el plan, revisado y aprobado el 21 de septiembre
 - **La rampa baja de 2 semanas a 1.** Vuelve de un parón, no empieza de cero:
   dos semanas idénticas de correr/caminar no aportan carga y desmotivan justo
