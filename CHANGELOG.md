@@ -21,6 +21,14 @@ Todo cambio que se haga en la app se anota aquí. Sin excepciones.
 
 ## [Sin publicar]
 
+### Arreglado — Una sesión marcada sin querer se puede desmarcar
+- **Antes, marcar un running o una fuerza como hecha no tenía vuelta atrás:**
+  el botón desaparecía y solo quedaba "SESIÓN COMPLETADA". Un toque sin querer
+  y ese día ya no se podía repetir ni registrar bien.
+- **Ahora, debajo del completado, sale "Me equivoqué — desmarcar para
+  repetirla".** Quita solo el check: el ritmo, las sensaciones y las series
+  apuntadas se quedan, porque nada se borra.
+
 ### Añadido — La lista de la compra de la semana, sacada de tu menú
 - **No es una lista escrita a mano: sale del menú.** Se cuentan los días de
   COMER y RECORTAR que tiene la semana, se multiplica por lo que lleva cada

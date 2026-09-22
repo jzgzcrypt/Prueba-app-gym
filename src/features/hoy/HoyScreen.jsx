@@ -203,6 +203,7 @@ export function HoyScreen(props) {
                 SESIÓN COMPLETADA
               </div>
             )}
+            {mainDone && <BotonDesmarcar onClick={() => toggleCheck(dayKey)} />}
             {!mainDone && (
               <button className="btn" onClick={() => toggleCheck(dayKey)} style={{
                 width: "100%", marginTop: 8, padding: "10px", fontSize: 11.5, fontWeight: 700, color: "#8A8A87",
@@ -277,6 +278,7 @@ export function HoyScreen(props) {
                 ENTRENO COMPLETADO
               </div>
             )}
+            {mainDone && <BotonDesmarcar onClick={() => toggleCheck(dayKey)} />}
           </ListBlock>
         )}
 
@@ -452,5 +454,17 @@ export function HoyScreen(props) {
 
       </div>
     </div>
+  );
+}
+
+/** Deshace el "hecho" de la sesion principal. Marcarla es un toque y se hace
+ *  sin querer; sin esto no habia forma de volver atras ni de repetirla. Solo
+ *  quita el check: el ritmo, las sensaciones y las series se quedan. */
+function BotonDesmarcar({ onClick }) {
+  return (
+    <button className="btn" onClick={onClick} style={{
+      width: "100%", marginTop: 8, padding: "10px", minHeight: TAP_MIN,
+      fontSize: 11.5, fontWeight: 700, color: "#8A8A87",
+    }}>Me equivoqué — desmarcar para repetirla</button>
   );
 }
