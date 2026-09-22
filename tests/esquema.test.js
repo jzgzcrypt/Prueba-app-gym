@@ -114,11 +114,13 @@ test("una copia de la version antigua cae en SUS fechas, no en las de ahora", ()
   assert.deepEqual(datos.weeklyLog["2026-08-31"], { paso: "la primera semana", porque: "", ajuste: "" });
 });
 
-test("migrar de v1 a v3 de una vez aplica los dos pasos", () => {
+test("migrar de la v1 a la actual aplica todos los pasos de una vez", () => {
   const { datos } = migrar({ version: 1, weeklyLog: { 1: "texto libre" }, checked: { "1-3": true } });
   assert.deepEqual(datos.weeklyLog["2026-09-21"], { paso: "texto libre", porque: "", ajuste: "" });
   assert.equal(datos.checked["2026-09-24"], true);
-  assert.equal(datos.version, 3);
+  // Se comprueba contra la constante, no contra un número escrito a mano: si
+  // no, cada versión nueva rompe esta prueba sin que nada esté mal.
+  assert.equal(datos.version, VERSION_ESQUEMA);
 });
 
 test("una clave que ya es fecha no se vuelve a convertir", () => {

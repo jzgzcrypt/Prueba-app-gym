@@ -4,7 +4,9 @@ Sistema personal de entrenamiento, salud y habilidades. No es una app de
 gimnasio: es el sitio donde se decide qué toca hoy, se registra qué pasó de
 verdad y se ajusta el plan a la realidad, semana a semana.
 
-**Bloque en curso:** Base 7K — 31 ago a 15 nov 2026 · objetivo 7 km a 4:45/km.
+**Bloque en curso:** Base 7K — 21 sep a 6 dic 2026 · objetivo 7 km a 4:45/km.
+
+**Para saber a dónde va esto y cómo seguir:** [`docs/EL-OBJETIVO.md`](docs/EL-OBJETIVO.md).
 
 ## Qué cubre hoy
 
@@ -15,9 +17,9 @@ verdad y se ajusta el plan a la realidad, semana a semana.
 | **Cuello** | Protocolo de fisio diario en tres fases |
 | **Movilidad** | Cuatro patrones en paralelo, cada uno con su test |
 | **Técnica** | Cadencia y apoyo, repetición deliberada en cada carrera |
-| **Magia** | Un truco de cartas nuevo cada una o dos semanas |
+| **Magia** | Trucos de cartas con repaso espaciado: avanzas dominando |
 | **Guerrero** | Cuatro pilares: calma, golpeo, mentalidad y aplicación |
-| **Nutrición** | Referencias del bloque |
+| **Nutrición** | Tu menú, apuntar lo comido escribiéndolo, recálculo del día y la compra de la semana |
 | **Coach** | Bitácora semanal, ajuste de fase, hitos, plan global, backup |
 | **Progreso** | Medidas, ritmos y KPIs a lo largo del bloque |
 

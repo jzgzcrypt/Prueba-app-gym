@@ -13,7 +13,7 @@
 
 /** Claves que guardan UN valor por dia, indexadas por dayKey exacto. */
 const POR_DIA = ["notes", "painLog", "magiaLog", "guerreroLog", "workoutWeights",
-                 "ritmoReal", "ritmoTramos", "sensaciones", "postponed"];
+                 "ritmoReal", "ritmoTramos", "sensaciones", "postponed", "comidasLog", "cambiosMenu"];
 
 /** Claves donde un dia puede tener varias entradas: el propio dayKey y
  *  ademas sufijos como "1-3-m" (cuello manana) o "1-3-movenf" (movilidad). */

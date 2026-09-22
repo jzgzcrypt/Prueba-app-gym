@@ -13,6 +13,8 @@ import { getMovilidad } from "@/domain/salud/movilidad";
 import { CoachScreen } from "@/features/coach/CoachScreen";
 import { EjerciciosScreen } from "@/features/ejercicios/EjerciciosScreen";
 import { MagiaCatalogoScreen } from "@/features/habilidades/MagiaCatalogoScreen";
+import { dominar, responder } from "@/domain/habilidades/repaso";
+import { FUERA_POR_DEFECTO } from "@/domain/nutricion/compra";
 import { HoyScreen } from "@/features/hoy/HoyScreen";
 import { NutricionScreen } from "@/features/nutricion/NutricionScreen";
 import { IconoNav } from "@/features/ui/iconos-nav";
@@ -38,7 +40,13 @@ export default function App() {
   const [flaggedExercises, setFlaggedExercises] = useState({}); // { nombreEjercicio: "nota de por que molesta" }
   const [pausedRanges, setPausedRanges] = useState([]); // [{ from: dayKey, to: dayKey, label }]
   const [workoutProgress, setWorkoutProgress] = useState({});
-  const [magiaProgress, setMagiaProgress] = useState({}); // { truco_id: true } - trucos marcados como dominados
+  const [magiaProgress, setMagiaProgress] = useState({}); // { truco_id: true } - historico, anterior al repaso espaciado
+  // El repaso espaciado de la magia: por truco, en que escalon esta y cuando
+  // vuelve. { truco_id: { escalon, proximo, ultimo, aciertos, fallos } }
+  const [magiaRepaso, setMagiaRepaso] = useState({});
+  // Se conserva en cada guardado: si no, el primer autoguardado despues del
+  // onboarding se llevaba la marca por delante.
+  const [onboardingVisto, setOnboardingVisto] = useState(false);
   const [magiaLog, setMagiaLog] = useState({}); // { dayKey: true } - dias que has practicado magia
   const [guerreroLog, setGuerreroLog] = useState({}); // { dayKey: true } - dias que has practicado guerrero
   const [workoutWeights, setWorkoutWeights] = useState({}); // { dayKey: { exerciseIdx: { serieIdx: "20" } } }
@@ -53,6 +61,23 @@ export default function App() {
   const [phaseAdjustNote, setPhaseAdjustNote] = useState(""); // nota libre sobre desviacion de fases/calendario
   const [currentWeekOverride, setCurrentWeekOverride] = useState(null); // numero de semana manual, o null = automatico por fecha
   const [weeklyLog, setWeeklyLog] = useState({}); // { weekN: "texto de la bitacora" }
+  // Lo que has comido, por dia. Cada apunte es {origen, id, gramos|racion}:
+  // "casa" lleva gramos, "cantina" lleva racion, "rapida" no lleva nada porque
+  // ya es una comida entera. Ver src/domain/nutricion/iifym.js.
+  const [comidasLog, setComidasLog] = useState({}); // { dayKey: [apunte] }
+  // Los cambios de alimento sobre el menu del dia: "hoy no hay salmon, hay
+  // merluza". { dayKey: { "cena:salmon": "merluza" } }
+  const [cambiosMenu, setCambiosMenu] = useState({});
+  // Tu dieta, editada por ti. Es por tipo de dia, no por fecha: si quitas el
+  // desayuno, lo quitas de todos los dias de COMER.
+  // { comer: { desayuno: [{id,g}] | null }, recortar: {...} }
+  const [menuEditado, setMenuEditado] = useState({});
+  // Lo ya tachado de la compra, por semana: { "2026-09-21:pollo": true }. Va
+  // por semana a proposito — el lunes la lista vuelve a estar entera.
+  const [compraMarcada, setCompraMarcada] = useState({});
+  // Que comidas haces fuera de casa, por dia de la semana (0 = lunes). No
+  // entran en la compra, pero SI cuentan para los macros del dia.
+  const [comidasFuera, setComidasFuera] = useState(FUERA_POR_DEFECTO);
   // El historial arranca con el bloque en curso, con sus fechas sacadas del
   // calendario: si se mueve FECHA_INICIO, el historial se mueve con el.
   const [bloquesHistorial, setBloquesHistorial] = useState([
@@ -114,6 +139,8 @@ export default function App() {
           if (d.pausedRanges) setPausedRanges(d.pausedRanges);
           if (d.workoutProgress) setWorkoutProgress(d.workoutProgress);
           if (d.magiaProgress) setMagiaProgress(d.magiaProgress);
+          if (d.magiaRepaso) setMagiaRepaso(d.magiaRepaso);
+          if (d.onboardingVisto) setOnboardingVisto(true);
           if (d.magiaLog) setMagiaLog(d.magiaLog);
           if (d.guerreroLog) setGuerreroLog(d.guerreroLog);
           if (d.workoutWeights) setWorkoutWeights(d.workoutWeights);
@@ -125,6 +152,11 @@ export default function App() {
           if (d.phaseAdjustNote != null) setPhaseAdjustNote(d.phaseAdjustNote);
           if (d.currentWeekOverride !== undefined) setCurrentWeekOverride(d.currentWeekOverride);
           if (d.weeklyLog) setWeeklyLog(d.weeklyLog);
+          if (d.comidasLog) setComidasLog(d.comidasLog);
+          if (d.cambiosMenu) setCambiosMenu(d.cambiosMenu);
+          if (d.menuEditado) setMenuEditado(d.menuEditado);
+          if (d.compraMarcada) setCompraMarcada(d.compraMarcada);
+          if (d.comidasFuera) setComidasFuera(d.comidasFuera);
           if (d.bloquesHistorial) setBloquesHistorial(d.bloquesHistorial);
           if (d.ultimoBackup) setUltimoBackup(d.ultimoBackup);
           if (d.cuelloFaseManual) setCuelloFaseManual(d.cuelloFaseManual);
@@ -195,9 +227,10 @@ export default function App() {
     const payload = {
       version: VERSION_ESQUEMA,
       checked, cuelloChecks, notes, youtubeLinks, customExercises, painLog,
-      flaggedExercises, pausedRanges, workoutProgress, magiaProgress, magiaLog,
+      flaggedExercises, pausedRanges, workoutProgress, magiaProgress, magiaRepaso, magiaLog,
       guerreroLog, workoutWeights, medidas, ritmoReal, ritmoTramos, sensaciones, postponed, phaseAdjustNote,
-      currentWeekOverride, weeklyLog, bloquesHistorial, ultimoBackup, cuelloFaseManual,
+      currentWeekOverride, weeklyLog, comidasLog, cambiosMenu, menuEditado, compraMarcada, comidasFuera,
+      bloquesHistorial, ultimoBackup, cuelloFaseManual, onboardingVisto,
     };
     // Se deja a mano el ultimo estado conocido para poder guardarlo de golpe
     // si la app se cierra antes de que venza la espera de abajo.
@@ -205,9 +238,10 @@ export default function App() {
     const t = setTimeout(() => { guardarYa(); }, 500); // agrupa cambios rapidos
     return () => clearTimeout(t);
   }, [checked, cuelloChecks, notes, youtubeLinks, customExercises, painLog,
-      flaggedExercises, pausedRanges, workoutProgress, magiaProgress, magiaLog,
+      flaggedExercises, pausedRanges, workoutProgress, magiaProgress, magiaRepaso, magiaLog,
       guerreroLog, workoutWeights, medidas, ritmoReal, ritmoTramos, sensaciones, postponed, phaseAdjustNote,
-      currentWeekOverride, weeklyLog, bloquesHistorial, ultimoBackup, cuelloFaseManual, storageReady]);
+      currentWeekOverride, weeklyLog, comidasLog, cambiosMenu, menuEditado, compraMarcada, comidasFuera,
+      bloquesHistorial, ultimoBackup, cuelloFaseManual, onboardingVisto, storageReady]);
 
   const currentDay = FLAT_DAYS[flatIdx] || FLAT_DAYS[todayIdx] || FLAT_DAYS[0];
   const isToday = flatIdx === todayIdx;
@@ -225,7 +259,7 @@ export default function App() {
   // para poder decirlo, y deja el deshacer preparado por si era un error.
   const vaciarDia = (clave) => {
     const actual = { checked, cuelloChecks, notes, painLog, magiaLog, guerreroLog,
-                     workoutWeights, ritmoReal, ritmoTramos, sensaciones, postponed };
+                     workoutWeights, ritmoReal, ritmoTramos, sensaciones, postponed, comidasLog, cambiosMenu };
     const cuantas = cuantoHayEn(actual, clave);
     if (!cuantas) return 0;
     const { estado } = limpiarDia(actual, clave);
@@ -233,16 +267,73 @@ export default function App() {
     setPainLog(estado.painLog); setMagiaLog(estado.magiaLog); setGuerreroLog(estado.guerreroLog);
     setWorkoutWeights(estado.workoutWeights); setRitmoReal(estado.ritmoReal);
     setRitmoTramos(estado.ritmoTramos); setSensaciones(estado.sensaciones);
-    setPostponed(estado.postponed);
+    setPostponed(estado.postponed); setComidasLog(estado.comidasLog); setCambiosMenu(estado.cambiosMenu);
     pushUndo("Día vaciado", () => {
       setChecked(actual.checked); setCuelloChecks(actual.cuelloChecks); setNotes(actual.notes);
       setPainLog(actual.painLog); setMagiaLog(actual.magiaLog); setGuerreroLog(actual.guerreroLog);
       setWorkoutWeights(actual.workoutWeights); setRitmoReal(actual.ritmoReal);
       setRitmoTramos(actual.ritmoTramos); setSensaciones(actual.sensaciones);
-      setPostponed(actual.postponed);
+      setPostponed(actual.postponed); setComidasLog(actual.comidasLog); setCambiosMenu(actual.cambiosMenu);
     });
     return cuantas;
   };
+
+  // Apuntar y desapuntar comida del dia que se esta viendo. Se anade al final
+  // porque el orden en que comes es el orden en que lo apuntas.
+  const apuntarComida = (apunte) => apuntarVarias([apunte]);
+  const apuntarVarias = (nuevos) => setComidasLog(p =>
+    Object.assign({}, p, { [dayKey]: (p[dayKey] || []).concat(nuevos) }));
+
+  // Deshacer una comida entera del menu, o un apunte suelto por su posicion.
+  const deshacerComida = (comidaId, indice) => setComidasLog(p =>
+    Object.assign({}, p, { [dayKey]: (p[dayKey] || []).filter((ap, j) =>
+      comidaId ? ap.comida !== comidaId : j !== indice) }));
+
+  /** Marcar que una comida de un dia de la semana la haces fuera. */
+  const marcarFuera = (comidaId, dayIdx) => setComidasFuera(p => {
+    const actuales = (p && p[comidaId]) || [];
+    const nuevos = actuales.includes(dayIdx)
+      ? actuales.filter(d => d !== dayIdx)
+      : actuales.concat([dayIdx]).sort((a, b) => a - b);
+    return Object.assign({}, p, { [comidaId]: nuevos });
+  });
+
+  /** Tachar y destachar de la lista de la compra. */
+  const marcarCompra = (clave) => setCompraMarcada(p =>
+    Object.assign({}, p, { [clave]: !p[clave] }));
+
+  // ─── Magia: repaso espaciado ───────────────────────────────────────────
+  //
+  // Dominar un truco no lo archiva: lo mete en la cola de repaso y deja libre
+  // el sitio para el siguiente. Responder a un repaso mueve su escalera.
+  const dominarTruco = (id) => setMagiaRepaso(p =>
+    Object.assign({}, p, { [id]: dominar(todayLocalIso()) }));
+
+  const responderRepaso = (id, respuesta) => setMagiaRepaso(p =>
+    Object.assign({}, p, { [id]: responder(p[id], respuesta, todayLocalIso()) }));
+
+  // ─── Editar la dieta ───────────────────────────────────────────────────
+  //
+  // Una sola accion para las tres cosas que se pueden hacer con una comida:
+  // dejarla con otros ingredientes (una lista), quitarla del menu (null) y
+  // devolverla a como estaba (undefined). Menos superficie, menos que romper.
+  const guardarComidaDelMenu = (tipoDia, comidaId, ingredientes) => setMenuEditado(p => {
+    const delTipo = Object.assign({}, p[tipoDia]);
+    if (ingredientes === undefined) delete delTipo[comidaId];
+    else delTipo[comidaId] = ingredientes;
+    return Object.assign({}, p, { [tipoDia]: delTipo });
+  });
+
+  /** Volver al menu de partida entero, para ese tipo de dia. */
+  const restaurarMenu = (tipoDia) => setMenuEditado(p =>
+    Object.assign({}, p, { [tipoDia]: {} }));
+
+  // Cambiar un alimento del menu por un equivalente, o volver al original.
+  const cambiarAlimento = (clave, nuevoId) => setCambiosMenu(p => {
+    const delDia = Object.assign({}, p[dayKey]);
+    if (nuevoId) delDia[clave] = nuevoId; else delete delDia[clave];
+    return Object.assign({}, p, { [dayKey]: delDia });
+  });
 
   const toggleCheck = (key) => setChecked(p => Object.assign({}, p, { [key]: !p[key] }));
   const toggleCuello = (m) => setCuelloChecks(p => Object.assign({}, p, { [dayKey + "-" + m]: !p[dayKey + "-" + m] }));
@@ -258,7 +349,8 @@ export default function App() {
       checked, cuelloChecks, notes, youtubeLinks, customExercises, painLog,
       flaggedExercises, pausedRanges, workoutProgress, workoutWeights, medidas,
       ritmoReal, ritmoTramos, sensaciones, postponed, phaseAdjustNote, currentWeekOverride, weeklyLog,
-      magiaProgress, magiaLog, guerreroLog, bloquesHistorial,
+      comidasLog, cambiosMenu, menuEditado, compraMarcada, comidasFuera, magiaProgress, magiaRepaso,
+      magiaLog, guerreroLog, bloquesHistorial,
     };
     const blob = new Blob([JSON.stringify(payload, null, 2)], { type: "application/json" });
     const url = URL.createObjectURL(blob);
@@ -294,7 +386,13 @@ export default function App() {
         if (data.phaseAdjustNote != null) setPhaseAdjustNote(data.phaseAdjustNote);
         if (data.currentWeekOverride !== undefined) setCurrentWeekOverride(data.currentWeekOverride);
         if (data.weeklyLog) setWeeklyLog(data.weeklyLog);
+        if (data.comidasLog) setComidasLog(data.comidasLog);
+        if (data.cambiosMenu) setCambiosMenu(data.cambiosMenu);
+        if (data.menuEditado) setMenuEditado(data.menuEditado);
+        if (data.compraMarcada) setCompraMarcada(data.compraMarcada);
+        if (data.comidasFuera) setComidasFuera(data.comidasFuera);
         if (data.magiaProgress) setMagiaProgress(data.magiaProgress);
+        if (data.magiaRepaso) setMagiaRepaso(data.magiaRepaso);
         if (data.magiaLog) setMagiaLog(data.magiaLog);
         if (data.guerreroLog) setGuerreroLog(data.guerreroLog);
         if (data.bloquesHistorial) setBloquesHistorial(data.bloquesHistorial);
@@ -309,9 +407,20 @@ export default function App() {
   if (showOnboarding) {
     return <OnboardingScreen onFinish={() => {
       setShowOnboarding(false);
-      // Guarda de inmediato un dato minimo para que list() detecte que la clave ya existe,
-      // aunque el usuario cierre sin haber marcado nada todavia
-      storage.set(CLAVE_DATOS, JSON.stringify({ version: VERSION_ESQUEMA, onboardingVisto: true })).catch(() => {});
+      setOnboardingVisto(true);
+      // Se escribe ya, sin esperar al autoguardado, para que list() vea que la
+      // clave existe aunque cierres sin marcar nada.
+      //
+      // Y se escribe SOBRE lo que hubiera, no en su lugar. Antes esto guardaba
+      // un objeto minimo con solo la version y la marca, y se llevaba por
+      // delante todo lo demas: si el onboarding volvia a salir por cualquier
+      // motivo —una lectura fallida, un storage que tarda— terminarlo borraba
+      // meses de registro. Un guardado nunca puede tener menos datos que el
+      // que ya habia.
+      const actual = pendienteRef.current || {};
+      storage.set(CLAVE_DATOS, JSON.stringify(
+        Object.assign({}, actual, { version: VERSION_ESQUEMA, onboardingVisto: true })
+      )).catch(() => {});
     }} />;
   }
 
@@ -396,7 +505,9 @@ export default function App() {
           <HoyScreen day={currentDay} dayKey={dayKey} isToday={isToday} flatIdx={flatIdx}
             goDay={goDay} goToday={goToday} onJumpDay={jumpToDay}
             isFuerzaDay={isFuerzaDay} isRunDay={isRunDay} isCompromisoDay={isCompromisoDay} mov={mov}
-            comida={comida} vaciarDia={vaciarDia} cosasEnElDia={cuantoHayEn({ checked, cuelloChecks, notes, painLog, magiaLog, guerreroLog, workoutWeights, ritmoReal, ritmoTramos, sensaciones, postponed }, dayKey)}
+            comida={comida} vaciarDia={vaciarDia}
+            apuntesComida={comidasLog[dayKey] || []} irANutricion={() => setScreen("nutricion")}
+            cosasEnElDia={cuantoHayEn({ checked, cuelloChecks, notes, painLog, magiaLog, guerreroLog, workoutWeights, ritmoReal, ritmoTramos, sensaciones, postponed, comidasLog, cambiosMenu }, dayKey)}
             cuelloEj={cuelloEj} cuelloChecks={cuelloChecks} toggleCuello={toggleCuello}
             checked={checked} toggleCheck={toggleCheck} mainDone={mainDone}
             workoutProgress={workoutProgress[dayKey]} onStartWorkout={() => setActiveWorkout(dayKey)}
@@ -416,7 +527,7 @@ export default function App() {
             postponed={postponed} setPostponed={setPostponed}
             expandedBlock={expandedBlock} setExpandedBlock={setExpandedBlock}
             painLog={painLog} setPainLog={setPainLog}
-            magiaProgress={magiaProgress} setMagiaProgress={setMagiaProgress}
+            magiaRepaso={magiaRepaso} dominarTruco={dominarTruco} responderRepaso={responderRepaso}
             magiaLog={magiaLog} setMagiaLog={setMagiaLog}
             onOpenMagiaCatalogo={() => setScreen("magia-catalogo")}
             guerreroLog={guerreroLog} setGuerreroLog={setGuerreroLog}
@@ -424,8 +535,8 @@ export default function App() {
         )}
 
         {screen === "magia-catalogo" && (
-          <MagiaCatalogoScreen onBack={() => setScreen("hoy")} currentWeekN={currentDay ? currentDay.weekN : 1}
-            magiaProgress={magiaProgress} setMagiaProgress={setMagiaProgress} magiaLog={magiaLog} />
+          <MagiaCatalogoScreen onBack={() => setScreen("hoy")}
+            magiaRepaso={magiaRepaso} dominarTruco={dominarTruco} responderRepaso={responderRepaso} />
         )}
 
         {screen === "semana" && (
@@ -442,7 +553,17 @@ export default function App() {
             flaggedExercises={flaggedExercises} setFlaggedExercises={setFlaggedExercises} pushUndo={pushUndo} />
         )}
 
-        {screen === "nutricion" && <NutricionScreen comida={comida} />}
+        {screen === "nutricion" && (
+          <NutricionScreen comida={comida} apuntes={comidasLog[dayKey] || []}
+            cambios={cambiosMenu[dayKey]} apuntarComida={apuntarComida} apuntarVarias={apuntarVarias}
+            deshacerComida={deshacerComida} cambiarAlimento={cambiarAlimento}
+            edits={menuEditado} guardarComidaDelMenu={guardarComidaDelMenu} restaurarMenu={restaurarMenu}
+            esHoy={isToday}
+            diasSemana={WEEKS[currentDay.weekIdx] ? WEEKS[currentDay.weekIdx].days : null}
+            inicioSemana={WEEKS[currentDay.weekIdx] ? claveDia(WEEKS[currentDay.weekIdx].days[0]) : ""}
+            compraMarcada={compraMarcada} marcarCompra={marcarCompra}
+            comidasFuera={comidasFuera} marcarFuera={marcarFuera} />
+        )}
 
         {screen === "progreso" && (
           <ProgresoScreen medidas={medidas} setMedidas={setMedidas}

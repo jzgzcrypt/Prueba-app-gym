@@ -13,7 +13,7 @@
  * el objeto en la version siguiente. Son funciones puras y no lanzan.
  */
 
-export const VERSION_ESQUEMA = 3;
+export const VERSION_ESQUEMA = 4;
 
 // ─── v3: del numero de semana a la fecha real ────────────────────────────────
 //
@@ -108,6 +108,28 @@ const MIGRACIONES = {
     }
 
     return salida;
+  },
+
+  // v4 — La magia deja de ir por semanas y pasa a repaso espaciado.
+  //
+  // Antes un truco solo podia estar "dominado" o no, y cual tocaba lo decidia
+  // el numero de semana del bloque. Ahora cada truco dominado lleva su propia
+  // escalera de repaso. Lo que ya habia marcado como dominado NO se pierde:
+  // entra en la cola, y para no soltarle de golpe diez repasos el primer dia,
+  // se reparten a lo largo de los siguientes dias, uno por dia.
+  //
+  // magiaProgress se conserva tal cual: una migracion no borra lo que habia.
+  4: (d) => {
+    if (d.magiaRepaso) return d; // ya migrado
+    const dominados = Object.keys(d.magiaProgress || {}).filter(id => d.magiaProgress[id]);
+    if (!dominados.length) return { ...d, magiaRepaso: {} };
+
+    const desde = d.bloquesHistorial?.[0]?.inicio || INICIO_POR_DEFECTO;
+    const repaso = {};
+    dominados.forEach((id, i) => {
+      repaso[id] = { escalon: 0, proximo: sumarDias(desde, i + 1), ultimo: desde, aciertos: 0, fallos: 0 };
+    });
+    return { ...d, magiaRepaso: repaso };
   },
 };
 

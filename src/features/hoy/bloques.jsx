@@ -1,13 +1,14 @@
 "use client";
 
-import { claveDia } from "@/domain/plan/calendario";
+import { claveDia, todayLocalIso } from "@/domain/plan/calendario";
 import { destinoDe, llegadasA, moverSesion } from "@/lib/estado/mover-sesion";
 
 import { useState } from "react";
 import { C, CAT, R, SP, TAP_MIN, TYPE } from "@/design/tokens";
 import { ICON_CUELLO, ICON_GUERRERO, ICON_MAGIA } from "@/domain/assets/icons";
 import { getPilarGuerreroDelDia } from "@/domain/habilidades/guerrero";
-import { getTrucoSemana } from "@/domain/habilidades/magia";
+import { magiaDeHoy, progresoMagia } from "@/domain/habilidades/magia";
+import { ESCALERA } from "@/domain/habilidades/repaso";
 import { habitoEnPausa } from "@/domain/salud/cuello";
 // Fila de lista colapsable: cerrada muestra icono + titulo + estado. Abierta muestra children.
 export function PainBlock({ dayKey, expandedBlock, toggleBlock, painLog, setPainLog }) {
@@ -209,16 +210,21 @@ export function GuerreroBlock({ day, dayKey, guerreroLog, setGuerreroLog, expand
   );
 }
 
-export function MagiaBlock({ day, dayKey, magiaProgress, setMagiaProgress, magiaLog, setMagiaLog, expandedBlock, toggleBlock, onOpenCatalogo }) {
+export function MagiaBlock({ day, magiaRepaso, dominarTruco, responderRepaso,
+                             expandedBlock, toggleBlock, onOpenCatalogo }) {
   if (!day) return null;
   const isOpen = expandedBlock === "magia";
-  const truco = getTrucoSemana(day.weekN);
-  const practicadoHoy = !!magiaLog[dayKey];
-  const dominado = truco && !!magiaProgress[truco.id];
+  const hoy = todayLocalIso();
+  const { actual, repasos } = magiaDeHoy(magiaRepaso, hoy);
+  const progreso = progresoMagia(magiaRepaso);
   const enPausa = habitoEnPausa(day.weekN);
   const colorMagia = "#6B4C8A"; // ciruela — distinto de todo lo demas
 
-  if (!truco) return null;
+  if (!actual && !repasos.length) return null;
+
+  const resumen = repasos.length
+    ? repasos.length + (repasos.length === 1 ? " repaso" : " repasos") + " y un truco nuevo"
+    : actual ? "Le das caña a " + actual.nombre : "Todo al día";
 
   return (
     <div style={{ background: C.card, border: "1px solid " + C.cardBorder, borderLeft: "3px solid #6B4C8A", borderRadius: R.xl, overflow: "hidden", opacity: enPausa ? 0.6 : 1 }}>
@@ -226,71 +232,117 @@ export function MagiaBlock({ day, dayKey, magiaProgress, setMagiaProgress, magia
         display: "flex", alignItems: "center", gap: SP.md, padding: "13px " + SP.lg + "px", minHeight: TAP_MIN, cursor: "pointer",
       }}>
         <img src={ICON_MAGIA} alt="" style={{ width: 19, height: 19, objectFit: "contain", flexShrink: 0 }} />
-        <div style={{ flex: 1 }}>
+        <div style={{ flex: 1, minWidth: 0 }}>
           <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
             <span style={{ ...TYPE.cardTitle, color: C.text }}>Magia</span>
-            <span style={{ fontSize: 8.5, fontWeight: 800, color: colorMagia, background: colorMagia + "16", padding: "2px 6px", borderRadius: R.sm, letterSpacing: 0.3 }}>{enPausa ? "EN PAUSA" : "HABILIDAD"}</span>
+            <span style={{ fontSize: 8.5, fontWeight: 800, color: colorMagia, background: colorMagia + "16", padding: "2px 6px", borderRadius: R.sm, letterSpacing: 0.3 }}>
+              {progreso.dominados}/{progreso.total}
+            </span>
           </div>
-          <div style={{ fontSize: 10, color: C.textDim, marginTop: 2 }}>{enPausa ? "En pausa hasta semana 6 — sin exigencia estas semanas" : "Últimos 10 min antes de dormir"}</div>
+          <div style={{ fontSize: 10, color: C.textDim, marginTop: 2 }}>
+            {enPausa ? "En pausa hasta semana 6 — sin exigencia estas semanas" : resumen}
+          </div>
         </div>
-        {practicadoHoy && <span style={{ fontSize: 13, color: colorMagia }}>✓</span>}
+        {repasos.length > 0 && (
+          <span className="mono" style={{ fontSize: 11, fontWeight: 800, color: colorMagia,
+                                          background: colorMagia + "14", borderRadius: R.pill, padding: "2px 7px" }}>
+            {repasos.length}
+          </span>
+        )}
         <span style={{ fontSize: 14, color: C.textFaint, transform: isOpen ? "rotate(90deg)" : "none", transition: "transform 0.2s ease" }}>&rsaquo;</span>
       </div>
+
       {isOpen && (
         <div className="expand-in" style={{ padding: "0 " + SP.lg + "px " + SP.lg + "px", borderTop: "1px solid #E2D5EC", paddingTop: SP.md }}>
-          <div style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 4 }}>
-            <span style={{ fontSize: 9.5, fontWeight: 800, color: colorMagia, letterSpacing: 0.5 }}>TRUCO ACTUAL</span>
-            <span style={{ fontSize: 8.5, fontWeight: 700, color: "#787774", background: "#FFFFFF", padding: "1px 6px", borderRadius: 5 }}>{truco.dificultad}</span>
-          </div>
-          <div style={{ fontSize: 15, fontWeight: 800, color: C.text, marginBottom: 6 }}>{truco.nombre}</div>
-          <div style={{ fontSize: 12.5, color: "#4A4A47", lineHeight: 1.5, marginBottom: 12 }}>{truco.descripcion}</div>
 
-          <div style={{ background: "#FFFFFF", borderRadius: 10, padding: "10px 12px", marginBottom: 10 }}>
-            <div style={{ fontSize: 9.5, fontWeight: 800, color: "#787774", letterSpacing: 0.5, marginBottom: 3 }}>QUÉ NECESITAS</div>
-            <div style={{ fontSize: 12, color: "#4A4A47", lineHeight: 1.4 }}>{truco.necesitas}</div>
-          </div>
-
-          <div style={{ background: "#FFFFFF", borderRadius: 10, padding: "10px 12px", marginBottom: 10 }}>
-            <div style={{ fontSize: 9.5, fontWeight: 800, color: colorMagia, letterSpacing: 0.5, marginBottom: 6 }}>MÉTODO</div>
-            {truco.metodo.map((paso, i) => (
-              <div key={i} style={{ display: "flex", gap: 8, marginBottom: 6 }}>
-                <span className="mono" style={{ fontSize: 11, fontWeight: 800, color: colorMagia, flexShrink: 0 }}>{i+1}.</span>
-                <span style={{ fontSize: 12, color: "#4A4A47", lineHeight: 1.45 }}>{paso}</span>
+          {/* ─── LOS REPASOS: primero, que son treinta segundos cada uno ─── */}
+          {repasos.length > 0 && (
+            <div style={{ marginBottom: SP.lg }}>
+              <div style={{ fontSize: 9.5, fontWeight: 800, color: colorMagia, letterSpacing: 0.5, marginBottom: 6 }}>
+                REPASO DE HOY
               </div>
-            ))}
-          </div>
+              <div style={{ fontSize: 11.5, color: C.textDim, lineHeight: 1.45, marginBottom: 8 }}>
+                Sácalo una vez. Si te sale, tarda más en volver; si no, vuelve pronto.
+              </div>
+              {repasos.map(t => (
+                <div key={t.id} style={{ background: "#FFFFFF", border: "1px solid #E2D5EC", borderRadius: 10,
+                                         padding: "10px 12px", marginBottom: 6 }}>
+                  <div style={{ fontSize: 13.5, fontWeight: 700, color: C.text }}>{t.nombre}</div>
+                  <div style={{ fontSize: 11.5, color: "#4A4A47", lineHeight: 1.4, marginTop: 3 }}>{t.dominio}</div>
+                  <div style={{ display: "flex", gap: 6, marginTop: 9 }}>
+                    {[["bien", "Sale", "#2F7D4F"], ["regular", "A medias", "#946800"], ["mal", "No sale", "#B8462F"]].map(([r, etiqueta, color]) => (
+                      <button key={r} className="block" onClick={() => responderRepaso(t.id, r)} style={{
+                        flex: 1, padding: "9px 4px", borderRadius: 9, textAlign: "center",
+                        background: "#FFFFFF", border: "1px solid " + color + "44",
+                        fontSize: 11, fontWeight: 800, color,
+                      }}>{etiqueta}</button>
+                    ))}
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
 
-          <div style={{ background: "#FFFFFF", borderRadius: 10, padding: "10px 12px", marginBottom: 10 }}>
-            <div style={{ fontSize: 9.5, fontWeight: 800, color: "#787774", letterSpacing: 0.5, marginBottom: 3 }}>CÓMO PRESENTARLO</div>
-            <div style={{ fontSize: 12, color: "#4A4A47", lineHeight: 1.4 }}>{truco.presentacion}</div>
-          </div>
+          {/* ─── EL ACTUAL: donde va la caña ─── */}
+          {actual && (
+            <>
+              <div style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 4 }}>
+                <span style={{ fontSize: 9.5, fontWeight: 800, color: colorMagia, letterSpacing: 0.5 }}>
+                  {magiaRepaso && magiaRepaso[actual.id] ? "VOLVIENDO A ÉL" : "AL QUE LE DAS CAÑA"}
+                </span>
+                <span style={{ fontSize: 8.5, fontWeight: 700, color: "#787774", background: "#FFFFFF", padding: "1px 6px", borderRadius: 5 }}>{actual.dificultad}</span>
+              </div>
+              <div style={{ fontSize: 15, fontWeight: 800, color: C.text, marginBottom: 6 }}>{actual.nombre}</div>
+              <div style={{ fontSize: 12.5, color: "#4A4A47", lineHeight: 1.5, marginBottom: 12 }}>{actual.descripcion}</div>
 
-          <div style={{ background: colorMagia + "10", border: "1px solid " + colorMagia + "30", borderRadius: 10, padding: "10px 12px", marginBottom: 12 }}>
-            <div style={{ fontSize: 9.5, fontWeight: 800, color: colorMagia, letterSpacing: 0.5, marginBottom: 3 }}>CUÁNDO LO DOMINAS</div>
-            <div style={{ fontSize: 12, color: "#4A4A47", lineHeight: 1.4 }}>{truco.dominio}</div>
-          </div>
+              <div style={{ background: "#FFFFFF", borderRadius: 10, padding: "10px 12px", marginBottom: 10 }}>
+                <div style={{ fontSize: 9.5, fontWeight: 800, color: "#787774", letterSpacing: 0.5, marginBottom: 3 }}>QUÉ NECESITAS</div>
+                <div style={{ fontSize: 12, color: "#4A4A47", lineHeight: 1.4 }}>{actual.necesitas}</div>
+              </div>
 
-          <div style={{ display: "flex", gap: 8 }}>
-            <button className="block" onClick={() => setMagiaLog(p => Object.assign({}, p, { [dayKey]: !p[dayKey] }))} style={{
-              flex: 1, padding: "12px 6px", borderRadius: 10, textAlign: "center",
-              background: practicadoHoy ? colorMagia : "#FFFFFF", border: practicadoHoy ? "none" : "1px solid #E2D5EC",
-            }}>
-              <div style={{ fontSize: 15, marginBottom: 2, color: practicadoHoy ? "#FAFAF9" : "#D8C5E2" }}>{practicadoHoy ? "✓" : "○"}</div>
-              <div style={{ fontSize: 9, fontWeight: 800, color: practicadoHoy ? "#FAFAF9" : "#787774" }}>PRACTICADO HOY</div>
-            </button>
-            <button className="block" onClick={() => setMagiaProgress(p => Object.assign({}, p, { [truco.id]: !p[truco.id] }))} style={{
-              flex: 1, padding: "12px 6px", borderRadius: 10, textAlign: "center",
-              background: dominado ? "#2F7D4F" : "#FFFFFF", border: dominado ? "none" : "1px solid #E2D5EC",
-            }}>
-              <div style={{ fontSize: 15, marginBottom: 2, color: dominado ? "#FAFAF9" : "#D8C5E2" }}>{dominado ? "✓" : "○"}</div>
-              <div style={{ fontSize: 9, fontWeight: 800, color: dominado ? "#FAFAF9" : "#787774" }}>YA LO DOMINO</div>
-            </button>
-          </div>
+              <div style={{ background: "#FFFFFF", borderRadius: 10, padding: "10px 12px", marginBottom: 10 }}>
+                <div style={{ fontSize: 9.5, fontWeight: 800, color: colorMagia, letterSpacing: 0.5, marginBottom: 6 }}>MÉTODO</div>
+                {actual.metodo.map((paso, i) => (
+                  <div key={i} style={{ display: "flex", gap: 8, marginBottom: 6 }}>
+                    <span className="mono" style={{ fontSize: 11, fontWeight: 800, color: colorMagia, flexShrink: 0 }}>{i + 1}.</span>
+                    <span style={{ fontSize: 12, color: "#4A4A47", lineHeight: 1.45 }}>{paso}</span>
+                  </div>
+                ))}
+              </div>
+
+              <div style={{ background: "#FFFFFF", borderRadius: 10, padding: "10px 12px", marginBottom: 10 }}>
+                <div style={{ fontSize: 9.5, fontWeight: 800, color: "#787774", letterSpacing: 0.5, marginBottom: 3 }}>CÓMO PRESENTARLO</div>
+                <div style={{ fontSize: 12, color: "#4A4A47", lineHeight: 1.4 }}>{actual.presentacion}</div>
+              </div>
+
+              <div style={{ background: colorMagia + "10", border: "1px solid " + colorMagia + "30", borderRadius: 10, padding: "10px 12px", marginBottom: 12 }}>
+                <div style={{ fontSize: 9.5, fontWeight: 800, color: colorMagia, letterSpacing: 0.5, marginBottom: 3 }}>CUÁNDO LO DOMINAS</div>
+                <div style={{ fontSize: 12, color: "#4A4A47", lineHeight: 1.4 }}>{actual.dominio}</div>
+              </div>
+
+              <button className="block" onClick={() => dominarTruco(actual.id)} style={{
+                width: "100%", padding: "13px 6px", borderRadius: 10, textAlign: "center",
+                background: colorMagia, border: "none",
+              }}>
+                <div style={{ fontSize: 12.5, fontWeight: 800, color: "#FAFAF9" }}>YA LO DOMINO — AL SIGUIENTE</div>
+                <div style={{ fontSize: 10, color: "#FFFFFFAA", marginTop: 2 }}>Volverá dentro de {ESCALERA[0]} días para no perderlo</div>
+              </button>
+            </>
+          )}
+
+          {!actual && (
+            <div style={{ background: "#FFFFFF", borderRadius: 10, padding: "12px 14px" }}>
+              <div style={{ fontSize: 13, fontWeight: 700, color: C.text }}>Los {progreso.total} trucos, dominados</div>
+              <div style={{ fontSize: 12, color: "#4A4A47", lineHeight: 1.45, marginTop: 3 }}>
+                Ya solo quedan los repasos, que es exactamente donde querías llegar.
+              </div>
+            </div>
+          )}
 
           {onOpenCatalogo && (
             <button className="btn" onClick={onOpenCatalogo} style={{
               width: "100%", marginTop: 10, padding: "10px", fontSize: 11.5, fontWeight: 700, color: colorMagia, textAlign: "center",
-            }}>Ver todos los trucos (pasados y futuros) →</button>
+            }}>Ver todos los trucos y cuándo vuelven →</button>
           )}
         </div>
       )}

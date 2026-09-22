@@ -29,8 +29,16 @@ domain/
 ├── running/     Curva de ritmo esperado, conversión de ritmos, frases.
 ├── fuerza/      Catálogo de ejercicios, enfoque por grupo, parseo de series.
 ├── salud/       Cuello (protocolo de fisio), movilidad, patrones, técnica.
-├── habilidades/ Magia (trucos) y Guerrero (pilares).
-├── nutricion/   Referencias de nutrición.
+├── habilidades/ Magia (trucos), Guerrero (pilares) y repaso.js (repaso espaciado).
+├── nutricion/
+│   ├── dias.js       La regla del día (COMER / RECORTAR) y los macros objetivo.
+│   ├── menu-dia.js   Tu menú, editable: comidas, ingredientes y gramos.
+│   ├── alimentos.js  La despensa e intercambiar un alimento por otro.
+│   ├── escribir.js   Entiende lo que escribes que has comido.
+│   ├── cantina.js    Platos de comedor: vocabulario para reconocerlos.
+│   ├── cuadrar.js    El recálculo: ajusta lo que queda a lo que has comido.
+│   ├── compra.js     La lista de la compra de la semana, sacada del menú.
+│   └── menus.js      Los programas del dietista de 2022, como referencia.
 └── assets/      Iconos embebidos.
 ```
 

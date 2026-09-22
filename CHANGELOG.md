@@ -21,6 +21,167 @@ Todo cambio que se haga en la app se anota aquí. Sin excepciones.
 
 ## [Sin publicar]
 
+### Añadido — La lista de la compra de la semana, sacada de tu menú
+- **No es una lista escrita a mano: sale del menú.** Se cuentan los días de
+  COMER y RECORTAR que tiene la semana, se multiplica por lo que lleva cada
+  comida y se suma. Si editaste tu menú —quitaste el desayuno, bajaste la
+  avena—, la lista lo sabe.
+- **Dice dos cosas distintas, porque en el supermercado hay dos preguntas
+  distintas:** lo que sí o sí, y lo que depende. Si no hay salmón hay merluza,
+  y entonces no son 800 g sino 1,8 kg — con **su** cantidad ya calculada, para
+  no hacer la cuenta delante del mostrador.
+- **Y un tercer bloque, «mirar en casa»:** sal, café, especias, vinagre,
+  creatina, bebidas sin azúcar. Cosas que igual hacen falta y igual no. Salen
+  siempre y **sin cantidad a propósito** — solo tú sabes si se te ha acabado
+  la sal.
+- Las cantidades se dicen **como se piden en la tienda**: 1,2 kg, 1 docena,
+  3 botes, 3 yogures, 4 l. Nadie pide 173 g de pollo. Se redondea siempre
+  hacia arriba y con un 10% de margen: quedarse corto un jueves cuesta más que
+  el gramo de más.
+- Ordenada por **secciones del supermercado**, en el orden en que se recorre.
+  Se tacha tocando, y lo tachado se guarda por semana: el lunes la lista vuelve
+  a estar entera. Y hay un botón para **copiarla en texto** y mandársela a
+  quien haga la compra.
+- **Lo que comes fuera no se compra.** De lunes a viernes comes en la cantina,
+  así que esa comida no entra en el carro — pero **sigue contando para tus
+  macros**, por eso la apuntas. Son dos cosas distintas: confundirlas rompería
+  una de las dos (o comprarías de más todas las semanas, o el día dejaría de
+  cuadrar). Se marca por día de la semana, no por tipo de día, porque el lunes
+  es día de COMER igual que el domingo y el domingo sí comes en casa.
+- No se ofrecen cambios que nadie haría: la whey del batido no se sustituye
+  por pollo, ni los 2 kg de queso batido de la precama. Llenar la lista de
+  alternativas de relleno hace desconfiar de las que sí son buenas.
+
+### Cambiado — La magia pasa a funcionar como las cartas de estudio
+- **Se avanza dominando, no esperando.** Antes el truco que tocaba lo decidía
+  el número de semana del bloque de running: si dominabas *The Glide* el
+  martes, te lo seguía poniendo seis días más, y si no lo dominabas te pasaba
+  al siguiente igual. El calendario mandaba sobre ti, que es justo al revés de
+  como se aprende algo. Ahora le das caña a **uno**, y cuando lo dominas el
+  siguiente ocupa su sitio ese mismo día.
+- **Lo dominado vuelve cada X días para que no se caiga**, y cada vez tarda
+  más: 2 → 5 → 12 → 30 → 60 → 90. Repasar algo justo cuando estás a punto de
+  olvidarlo fija mucho más que repasarlo cuando aún lo tienes fresco; por eso
+  los intervalos crecen. Tu atención sigue en el nuevo.
+- **Cada repaso se responde en un toque**: *Sale* (sube un escalón), *A
+  medias* (se queda) o *No sale* (vuelve al principio). Tres fallos seguidos y
+  deja de ser un repaso: vuelve a ser el truco al que darle caña, porque
+  repasar algo que no te sale no es repasar.
+- Un repaso atrasado **no se pierde**: si no abres la app en tres días, sigue
+  ahí esperándote.
+- El catálogo deja de tener trucos «bloqueados por semana»: dice en qué estás,
+  qué tienes en la cola y **cuándo vuelve cada uno**.
+
+### Arreglado — Terminar el onboarding borraba todo lo guardado
+- Al terminar la pantalla de bienvenida se escribía un objeto mínimo —solo la
+  versión y una marca— **en lugar de** lo que hubiera guardado, no encima. Si
+  el onboarding volvía a salir por cualquier motivo (una lectura fallida, un
+  almacenamiento que tarda en responder), terminarlo se llevaba por delante
+  meses de registro. Ahora ese guardado conserva todo lo anterior: **un
+  guardado nunca puede tener menos datos que el que ya había.**
+- Y la marca de onboarding entra en el guardado normal, que hasta ahora se la
+  llevaba por delante en el primer autoguardado.
+
+### Datos
+- Nuevo campo `compraMarcada` (`{ "2026-09-21:pollo": true }` — lo tachado de
+  la compra, con la semana en la clave para que cada lunes empiece limpia).
+  No sube la versión de esquema: es un campo nuevo y opcional.
+- Nuevo campo `magiaRepaso` (`{ truco_id: { escalon, proximo, ultimo, aciertos,
+  fallos } }`) y **versión de esquema 4**, con su migración: lo que tuvieras
+  marcado como dominado en `magiaProgress` entra en la cola de repaso, repartido
+  a razón de uno por día para no soltarte diez repasos de golpe el primer día.
+  `magiaProgress` se conserva intacto — una migración no borra lo que había.
+
+### Añadido — Sigues tu menú, apuntas lo que has comido, y las cantidades se recalculan
+- **El día es tu menú, no una lista de sugerencias.** Desayuno, almuerzo,
+  comida, post-entreno, cena y precama, con la misma forma que los programas
+  de 2022 y los alimentos que tienes en casa. Hay dos menús porque hay dos
+  tipos de día, igual que entonces.
+- **Apuntas lo que has comido y lo que queda se recalcula.** Cada comida se
+  marca de dos formas: *me lo he comido* tal cual, o *he comido otra cosa*.
+  En cuanto apuntas, los gramos de las comidas que faltan se ajustan para que
+  el día siga sumando lo que tiene que sumar, y se marca en verde o en ámbar
+  lo que ha subido o bajado respecto al plan.
+- **Escribes lo que has comido y ya está.** Nada de elegir de una lista: la
+  lista nunca tiene lo que has comido, y buscar en ella cuesta más que
+  escribirlo. Escribes *«macarrones con tomate 450 kcal / filete de ternera /
+  un panecillo»* y se apunta. Si usas una app que hace una foto y te da las
+  calorías, esto es donde copias ese número.
+- **Manda lo que escribes.** Si pones calorías, ese es el número y no se
+  discute. Las tablas de alimentos y de cantina dejan de ser pantallas y pasan
+  a ser vocabulario: sirven para reconocer «pollo» o «lentejas» y poner los
+  macros cuando tú no los das.
+- **Se enseña lo entendido antes de apuntarlo**, con el número editable y de
+  dónde sale: *tus números*, *calculado* o *estimado con tus calorías*. Un
+  contador en el que no puedes ver ni corregir lo que ha entendido es un
+  contador en el que dejas de creer a la semana.
+- Entiende gramos y unidades (*200 g de pollo*, *2 huevos*, *1 yogur*), varias
+  cosas en una frase (*merluza con patatas* cuenta las dos), y macros sueltos
+  (*30 p, 90 c, 35 g de grasa*). Y **si no entiende algo, lo dice** en vez de
+  colar un cero.
+- **La verdura y la fruta no se tocan nunca.** Son volumen y saciedad;
+  moverlas no arregla el día y quita justo lo que sacia. Se mueve el
+  carbohidrato, que es la palanca, y la proteína solo lo justo para llegar.
+- **Si no cabe el menú entero, se quita lo prescindible en vez de encoger
+  todo.** Es lo que harías tú: antes saltarse el almuerzo que cenar 20 g de
+  pasta. Se quita lo que peor proteína da por caloría —el queso batido de la
+  precama son 20 g por 118 kcal, así que es lo último que se toca— y nunca el
+  desayuno, la comida ni la cena.
+- **Intercambiar alimentos, calculado en vez de a ojo.** "Hoy no hay salmón,
+  hay merluza": se toca el ingrediente, se elige el cambio y la cantidad se
+  recalcula igualando el macro que define a ese grupo. Es la tabla de
+  equivalencias del dietista, con una calculadora detrás.
+- **La despensa como datos** (45 alimentos) sacada de tus propios menús de
+  2022, con los pesos en crudo o cocido según se pesa de verdad en una cocina.
+- **La tira de comida de HOY está viva:** en cuanto apuntas algo deja de
+  repetir la regla y dice lo que llevas y lo que queda, y se toca para ir
+  directo al menú.
+
+### Añadido — La dieta la editas tú
+- **El menú de partida es mío; el que usas es tuyo.** Cada comida tiene
+  *Editar*: cambias los gramos de cada alimento, quitas lo que no comes,
+  añades lo que sí, o quitas la comida entera del menú. Si no desayunas, no
+  desayunas — y el resto del día carga con esas calorías solo.
+- Se puede **añadir una comida que no estaba** en ese tipo de día (un
+  post-entreno en un día de recortar, por ejemplo) y cae en su sitio del día,
+  no al final.
+- Las ediciones son **por tipo de día, no por fecha**: quitar el desayuno lo
+  quita de todos los días de COMER, que es lo que significa cambiar la dieta.
+  Saltárselo hoy es otra cosa y se hace apuntando el día. La pantalla lo dice.
+- **Nada se borra.** Una edición es una capa encima del menú de partida, así
+  que *Volver al original* y *Volver al menú de partida* siempre funcionan, y
+  lo que has quitado aparece abajo con un botón para devolverlo.
+
+### Cambiado — las calorías del día, con las cuentas a la vista
+- Había dos cifras que no cuadraban: las **2.081 / 1.814 kcal** del dietista de
+  2022 (un cuerpo que levantaba pesas y no corría) y las **2.800 / 2.350** que
+  estimé yo (que no dejaban déficit). Ahora son **2.500 los días de COMER y
+  2.100 los de RECORTAR**, y el porqué está escrito entero en
+  `src/domain/nutricion/dias.js` para que se pueda discutir en vez de creerse:
+  media semanal ~2.220 kcal, unas 400 por debajo del gasto, ~0,4 kg de grasa
+  por semana sin tocar el rendimiento del 7K.
+- La proteína es la misma los dos días (165 g) porque no se negocia: es lo
+  único que protege el hombro mientras se pierde grasa.
+
+### Arreglado
+- **La caña descuadraba el día en silencio.** Declaraba 130 kcal y sus macros
+  sumaban 48: el alcohol no es proteína, ni hidrato, ni grasa, pero sus
+  calorías cuentan igual. Ahora se anotan como hidrato —lo que hace cualquier
+  contador de macros— y hay una prueba que comprueba que las calorías de cada
+  plato cuadran con sus macros.
+
+### Datos
+- Nuevos campos `comidasLog` (`{ fecha: [apunte] }`, donde cada apunte es
+  `{comida, origen, id, gramos|ración}`), `cambiosMenu`
+  (`{ fecha: { "cena:salmon": "merluza" } }`) y `menuEditado`
+  (`{ tipoDía: { comidaId: ingredientes | null } }` — tu dieta editada, donde
+  `null` es una comida que has quitado). **No suben la versión de
+  esquema**: son campos nuevos y opcionales que por defecto son `{}`, no un
+  cambio de forma de nada ya guardado, así que no hay migración que escribir.
+  Entran en el guardado automático y en exportar/importar. `comidasLog` y
+  `cambiosMenu` entran además en "vaciar este día"; `menuEditado` no, porque
+  es tu dieta y no un registro del día.
+
 ### Añadido — Nutrición deja de ser una página muerta
 - **Los dos programas nutricionales de 2022**, con sus menús completos por
   tipo de día, macros, equivalencias, protocolo de comida libre, trucos del
