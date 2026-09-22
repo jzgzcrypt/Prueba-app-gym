@@ -71,6 +71,9 @@ export default function App() {
   // desayuno, lo quitas de todos los dias de COMER.
   // { comer: { desayuno: [{id,g}] | null }, recortar: {...} }
   const [menuEditado, setMenuEditado] = useState({});
+  // Lo ya tachado de la compra, por semana: { "2026-09-21:pollo": true }. Va
+  // por semana a proposito — el lunes la lista vuelve a estar entera.
+  const [compraMarcada, setCompraMarcada] = useState({});
   // El historial arranca con el bloque en curso, con sus fechas sacadas del
   // calendario: si se mueve FECHA_INICIO, el historial se mueve con el.
   const [bloquesHistorial, setBloquesHistorial] = useState([
@@ -148,6 +151,7 @@ export default function App() {
           if (d.comidasLog) setComidasLog(d.comidasLog);
           if (d.cambiosMenu) setCambiosMenu(d.cambiosMenu);
           if (d.menuEditado) setMenuEditado(d.menuEditado);
+          if (d.compraMarcada) setCompraMarcada(d.compraMarcada);
           if (d.bloquesHistorial) setBloquesHistorial(d.bloquesHistorial);
           if (d.ultimoBackup) setUltimoBackup(d.ultimoBackup);
           if (d.cuelloFaseManual) setCuelloFaseManual(d.cuelloFaseManual);
@@ -220,7 +224,7 @@ export default function App() {
       checked, cuelloChecks, notes, youtubeLinks, customExercises, painLog,
       flaggedExercises, pausedRanges, workoutProgress, magiaProgress, magiaRepaso, magiaLog,
       guerreroLog, workoutWeights, medidas, ritmoReal, ritmoTramos, sensaciones, postponed, phaseAdjustNote,
-      currentWeekOverride, weeklyLog, comidasLog, cambiosMenu, menuEditado,
+      currentWeekOverride, weeklyLog, comidasLog, cambiosMenu, menuEditado, compraMarcada,
       bloquesHistorial, ultimoBackup, cuelloFaseManual, onboardingVisto,
     };
     // Se deja a mano el ultimo estado conocido para poder guardarlo de golpe
@@ -231,7 +235,7 @@ export default function App() {
   }, [checked, cuelloChecks, notes, youtubeLinks, customExercises, painLog,
       flaggedExercises, pausedRanges, workoutProgress, magiaProgress, magiaRepaso, magiaLog,
       guerreroLog, workoutWeights, medidas, ritmoReal, ritmoTramos, sensaciones, postponed, phaseAdjustNote,
-      currentWeekOverride, weeklyLog, comidasLog, cambiosMenu, menuEditado,
+      currentWeekOverride, weeklyLog, comidasLog, cambiosMenu, menuEditado, compraMarcada,
       bloquesHistorial, ultimoBackup, cuelloFaseManual, onboardingVisto, storageReady]);
 
   const currentDay = FLAT_DAYS[flatIdx] || FLAT_DAYS[todayIdx] || FLAT_DAYS[0];
@@ -280,6 +284,10 @@ export default function App() {
     Object.assign({}, p, { [dayKey]: (p[dayKey] || []).filter((ap, j) =>
       comidaId ? ap.comida !== comidaId : j !== indice) }));
 
+  /** Tachar y destachar de la lista de la compra. */
+  const marcarCompra = (clave) => setCompraMarcada(p =>
+    Object.assign({}, p, { [clave]: !p[clave] }));
+
   // ─── Magia: repaso espaciado ───────────────────────────────────────────
   //
   // Dominar un truco no lo archiva: lo mete en la cola de repaso y deja libre
@@ -327,7 +335,8 @@ export default function App() {
       checked, cuelloChecks, notes, youtubeLinks, customExercises, painLog,
       flaggedExercises, pausedRanges, workoutProgress, workoutWeights, medidas,
       ritmoReal, ritmoTramos, sensaciones, postponed, phaseAdjustNote, currentWeekOverride, weeklyLog,
-      comidasLog, cambiosMenu, menuEditado, magiaProgress, magiaRepaso, magiaLog, guerreroLog, bloquesHistorial,
+      comidasLog, cambiosMenu, menuEditado, compraMarcada, magiaProgress, magiaRepaso,
+      magiaLog, guerreroLog, bloquesHistorial,
     };
     const blob = new Blob([JSON.stringify(payload, null, 2)], { type: "application/json" });
     const url = URL.createObjectURL(blob);
@@ -366,6 +375,7 @@ export default function App() {
         if (data.comidasLog) setComidasLog(data.comidasLog);
         if (data.cambiosMenu) setCambiosMenu(data.cambiosMenu);
         if (data.menuEditado) setMenuEditado(data.menuEditado);
+        if (data.compraMarcada) setCompraMarcada(data.compraMarcada);
         if (data.magiaProgress) setMagiaProgress(data.magiaProgress);
         if (data.magiaRepaso) setMagiaRepaso(data.magiaRepaso);
         if (data.magiaLog) setMagiaLog(data.magiaLog);
@@ -533,7 +543,10 @@ export default function App() {
             cambios={cambiosMenu[dayKey]} apuntarComida={apuntarComida} apuntarVarias={apuntarVarias}
             deshacerComida={deshacerComida} cambiarAlimento={cambiarAlimento}
             edits={menuEditado} guardarComidaDelMenu={guardarComidaDelMenu} restaurarMenu={restaurarMenu}
-            esHoy={isToday} />
+            esHoy={isToday}
+            diasSemana={WEEKS[currentDay.weekIdx] ? WEEKS[currentDay.weekIdx].days : null}
+            inicioSemana={WEEKS[currentDay.weekIdx] ? claveDia(WEEKS[currentDay.weekIdx].days[0]) : ""}
+            compraMarcada={compraMarcada} marcarCompra={marcarCompra} />
         )}
 
         {screen === "progreso" && (

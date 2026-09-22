@@ -37,6 +37,7 @@ domain/
 │   ├── escribir.js   Entiende lo que escribes que has comido.
 │   ├── cantina.js    Platos de comedor: vocabulario para reconocerlos.
 │   ├── cuadrar.js    El recálculo: ajusta lo que queda a lo que has comido.
+│   ├── compra.js     La lista de la compra de la semana, sacada del menú.
 │   └── menus.js      Los programas del dietista de 2022, como referencia.
 └── assets/      Iconos embebidos.
 ```

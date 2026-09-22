@@ -21,6 +21,31 @@ Todo cambio que se haga en la app se anota aquí. Sin excepciones.
 
 ## [Sin publicar]
 
+### Añadido — La lista de la compra de la semana, sacada de tu menú
+- **No es una lista escrita a mano: sale del menú.** Se cuentan los días de
+  COMER y RECORTAR que tiene la semana, se multiplica por lo que lleva cada
+  comida y se suma. Si editaste tu menú —quitaste el desayuno, bajaste la
+  avena—, la lista lo sabe.
+- **Dice dos cosas distintas, porque en el supermercado hay dos preguntas
+  distintas:** lo que sí o sí, y lo que depende. Si no hay salmón hay merluza,
+  y entonces no son 800 g sino 1,8 kg — con **su** cantidad ya calculada, para
+  no hacer la cuenta delante del mostrador.
+- **Y un tercer bloque, «mirar en casa»:** sal, café, especias, vinagre,
+  creatina, bebidas sin azúcar. Cosas que igual hacen falta y igual no. Salen
+  siempre y **sin cantidad a propósito** — solo tú sabes si se te ha acabado
+  la sal.
+- Las cantidades se dicen **como se piden en la tienda**: 1,2 kg, 1 docena,
+  3 botes, 3 yogures, 4 l. Nadie pide 173 g de pollo. Se redondea siempre
+  hacia arriba y con un 10% de margen: quedarse corto un jueves cuesta más que
+  el gramo de más.
+- Ordenada por **secciones del supermercado**, en el orden en que se recorre.
+  Se tacha tocando, y lo tachado se guarda por semana: el lunes la lista vuelve
+  a estar entera. Y hay un botón para **copiarla en texto** y mandársela a
+  quien haga la compra.
+- No se ofrecen cambios que nadie haría: la whey del batido no se sustituye
+  por pollo, ni los 2 kg de queso batido de la precama. Llenar la lista de
+  alternativas de relleno hace desconfiar de las que sí son buenas.
+
 ### Cambiado — La magia pasa a funcionar como las cartas de estudio
 - **Se avanza dominando, no esperando.** Antes el truco que tocaba lo decidía
   el número de semana del bloque de running: si dominabas *The Glide* el
@@ -52,6 +77,9 @@ Todo cambio que se haga en la app se anota aquí. Sin excepciones.
   llevaba por delante en el primer autoguardado.
 
 ### Datos
+- Nuevo campo `compraMarcada` (`{ "2026-09-21:pollo": true }` — lo tachado de
+  la compra, con la semana en la clave para que cada lunes empiece limpia).
+  No sube la versión de esquema: es un campo nuevo y opcional.
 - Nuevo campo `magiaRepaso` (`{ truco_id: { escalon, proximo, ultimo, aciertos,
   fallos } }`) y **versión de esquema 4**, con su migración: lo que tuvieras
   marcado como dominado en `magiaProgress` entra en la cola de repaso, repartido
