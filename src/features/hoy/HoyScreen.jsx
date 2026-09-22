@@ -9,6 +9,7 @@ import { getFraseHoy } from "@/domain/running/frases";
 import { MOVILIDAD } from "@/domain/salud/movilidad";
 import { getTecnicaEj } from "@/domain/salud/tecnica";
 import { GuerreroBlock, HabitBlock, ListBlock, MagiaBlock, MoveDayBlock, PainBlock } from "@/features/hoy/bloques";
+import { progresoMagia } from "@/domain/habilidades/magia";
 import { WeekDots } from "@/features/ui/WeekDots";
 import { destinoDe, llegadasA } from "@/lib/estado/mover-sesion";
 import { PROTEINA_DIARIA } from "@/domain/nutricion/dias";
@@ -18,7 +19,7 @@ export function HoyScreen(props) {
           comida, vaciarDia, cosasEnElDia, apuntesComida,
     cuelloEj, cuelloChecks, toggleCuello, checked, toggleCheck, mainDone, workoutProgress, onStartWorkout,
     notes, noteInput, setNoteInput, editingNote, setEditingNote, saveNote, openCatalogo,
-    expandedBlock, setExpandedBlock, magiaProgress, bloquesHistorial } = props;
+    expandedBlock, setExpandedBlock, magiaRepaso, bloquesHistorial } = props;
 
   // Lo que llevas comido hoy, para que la tira de comida diga algo util en
   // vez de repetir siempre el mismo numero.
@@ -65,7 +66,7 @@ export function HoyScreen(props) {
   const pctBloque = Math.min(100, Math.round((diaActualBloque / totalDiasBloque) * 100));
 
   // ── Insignias de identidad: patrones dominados, trucos aprendidos, fases superadas ──
-  const trucosDominados = Object.keys(magiaProgress || {}).filter(k => magiaProgress[k]).length;
+  const trucosDominados = progresoMagia(magiaRepaso).dominados;
   const guerreroNivel = day.weekN <= 3 ? 1 : day.weekN <= 7 ? 2 : 3;
   const movilidadNivel = day.weekN <= 4 ? 1 : day.weekN <= 8 ? 2 : 3;
   const fasesSuperadas = (guerreroNivel - 1) + (movilidadNivel - 1) + (day.weekN > 2 ? 1 : 0); // cuello parte1->2 en semana 3
@@ -314,8 +315,8 @@ export function HoyScreen(props) {
           expandedBlock={expandedBlock} toggleBlock={toggleBlock} />
 
         {/* ═══ MAGIA — habilidad aparte, espacio propio ═══ */}
-        <MagiaBlock day={day} dayKey={dayKey} magiaProgress={props.magiaProgress} setMagiaProgress={props.setMagiaProgress}
-          magiaLog={props.magiaLog} setMagiaLog={props.setMagiaLog}
+        <MagiaBlock day={day} magiaRepaso={props.magiaRepaso}
+          dominarTruco={props.dominarTruco} responderRepaso={props.responderRepaso}
           expandedBlock={expandedBlock} toggleBlock={toggleBlock}
           onOpenCatalogo={props.onOpenMagiaCatalogo} />
 

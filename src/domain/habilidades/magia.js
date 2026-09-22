@@ -1,4 +1,5 @@
 import { semanaHabito } from "../salud/cuello.js";
+import { colaDeHoy, progresoDe } from "./repaso.js";
 // ─── HÁBITO APARTE — MAGIA CON CARTAS (memoria/matemática) ────────────────────
 // Un truco nuevo cada 1-2 semanas. Practica 10 min/dia. Progreso = dominio del truco, no velocidad.
 export const MAGIA_TRUCOS = [
@@ -141,11 +142,21 @@ export const MAGIA_TRUCOS = [
     presentacion: "El objetivo de esta semana es la autocrítica constructiva — no busques la perfección, busca ver con claridad qué necesitas seguir practicando en el próximo bloque.",
     dominio: "Lo dominas cuando puedes ejecutar una rutina de 2-3 efectos encadenados sin pausas técnicas visibles, con narrativa consistente y contacto visual con quien te mira." },
 ];
-export function getTrucoSemana(weekN) {
-  const w = semanaHabito(weekN);
-  const disponibles = MAGIA_TRUCOS.filter(t => t.semana <= w);
-  return disponibles.length > 0 ? disponibles[disponibles.length - 1] : null;
+/**
+ * El dia de magia: en cual le das caña y cuales toca repasar.
+ *
+ * El campo `semana` de cada truco ya no es un calendario: es el ORDEN en que
+ * se aprenden, que es lo unico que significaba de verdad. Se avanza
+ * dominando, no esperando a que pase la semana — si dominas The Glide el
+ * martes, el miercoles ya estas con The Control.
+ */
+export function magiaDeHoy(magiaRepaso, hoy) {
+  return colaDeHoy(MAGIA_TRUCOS, magiaRepaso, hoy);
 }
+
+export const progresoMagia = (magiaRepaso) => progresoDe(MAGIA_TRUCOS, magiaRepaso);
+
+export const getTruco = (id) => MAGIA_TRUCOS.find(t => t.id === id) || null;
 
 // ─── HÁBITO APARTE — GUERRERO: respiración táctica y control bajo presión ─────
 // Progresión de 3 fases a lo largo de las 11 semanas. Practica diaria, 5-10 min.

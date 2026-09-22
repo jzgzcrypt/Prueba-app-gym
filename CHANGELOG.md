@@ -21,6 +21,43 @@ Todo cambio que se haga en la app se anota aquí. Sin excepciones.
 
 ## [Sin publicar]
 
+### Cambiado — La magia pasa a funcionar como las cartas de estudio
+- **Se avanza dominando, no esperando.** Antes el truco que tocaba lo decidía
+  el número de semana del bloque de running: si dominabas *The Glide* el
+  martes, te lo seguía poniendo seis días más, y si no lo dominabas te pasaba
+  al siguiente igual. El calendario mandaba sobre ti, que es justo al revés de
+  como se aprende algo. Ahora le das caña a **uno**, y cuando lo dominas el
+  siguiente ocupa su sitio ese mismo día.
+- **Lo dominado vuelve cada X días para que no se caiga**, y cada vez tarda
+  más: 2 → 5 → 12 → 30 → 60 → 90. Repasar algo justo cuando estás a punto de
+  olvidarlo fija mucho más que repasarlo cuando aún lo tienes fresco; por eso
+  los intervalos crecen. Tu atención sigue en el nuevo.
+- **Cada repaso se responde en un toque**: *Sale* (sube un escalón), *A
+  medias* (se queda) o *No sale* (vuelve al principio). Tres fallos seguidos y
+  deja de ser un repaso: vuelve a ser el truco al que darle caña, porque
+  repasar algo que no te sale no es repasar.
+- Un repaso atrasado **no se pierde**: si no abres la app en tres días, sigue
+  ahí esperándote.
+- El catálogo deja de tener trucos «bloqueados por semana»: dice en qué estás,
+  qué tienes en la cola y **cuándo vuelve cada uno**.
+
+### Arreglado — Terminar el onboarding borraba todo lo guardado
+- Al terminar la pantalla de bienvenida se escribía un objeto mínimo —solo la
+  versión y una marca— **en lugar de** lo que hubiera guardado, no encima. Si
+  el onboarding volvía a salir por cualquier motivo (una lectura fallida, un
+  almacenamiento que tarda en responder), terminarlo se llevaba por delante
+  meses de registro. Ahora ese guardado conserva todo lo anterior: **un
+  guardado nunca puede tener menos datos que el que ya había.**
+- Y la marca de onboarding entra en el guardado normal, que hasta ahora se la
+  llevaba por delante en el primer autoguardado.
+
+### Datos
+- Nuevo campo `magiaRepaso` (`{ truco_id: { escalon, proximo, ultimo, aciertos,
+  fallos } }`) y **versión de esquema 4**, con su migración: lo que tuvieras
+  marcado como dominado en `magiaProgress` entra en la cola de repaso, repartido
+  a razón de uno por día para no soltarte diez repasos de golpe el primer día.
+  `magiaProgress` se conserva intacto — una migración no borra lo que había.
+
 ### Añadido — Sigues tu menú, apuntas lo que has comido, y las cantidades se recalculan
 - **El día es tu menú, no una lista de sugerencias.** Desayuno, almuerzo,
   comida, post-entreno, cena y precama, con la misma forma que los programas

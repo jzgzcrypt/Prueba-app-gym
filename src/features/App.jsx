@@ -13,6 +13,7 @@ import { getMovilidad } from "@/domain/salud/movilidad";
 import { CoachScreen } from "@/features/coach/CoachScreen";
 import { EjerciciosScreen } from "@/features/ejercicios/EjerciciosScreen";
 import { MagiaCatalogoScreen } from "@/features/habilidades/MagiaCatalogoScreen";
+import { dominar, responder } from "@/domain/habilidades/repaso";
 import { HoyScreen } from "@/features/hoy/HoyScreen";
 import { NutricionScreen } from "@/features/nutricion/NutricionScreen";
 import { IconoNav } from "@/features/ui/iconos-nav";
@@ -38,7 +39,13 @@ export default function App() {
   const [flaggedExercises, setFlaggedExercises] = useState({}); // { nombreEjercicio: "nota de por que molesta" }
   const [pausedRanges, setPausedRanges] = useState([]); // [{ from: dayKey, to: dayKey, label }]
   const [workoutProgress, setWorkoutProgress] = useState({});
-  const [magiaProgress, setMagiaProgress] = useState({}); // { truco_id: true } - trucos marcados como dominados
+  const [magiaProgress, setMagiaProgress] = useState({}); // { truco_id: true } - historico, anterior al repaso espaciado
+  // El repaso espaciado de la magia: por truco, en que escalon esta y cuando
+  // vuelve. { truco_id: { escalon, proximo, ultimo, aciertos, fallos } }
+  const [magiaRepaso, setMagiaRepaso] = useState({});
+  // Se conserva en cada guardado: si no, el primer autoguardado despues del
+  // onboarding se llevaba la marca por delante.
+  const [onboardingVisto, setOnboardingVisto] = useState(false);
   const [magiaLog, setMagiaLog] = useState({}); // { dayKey: true } - dias que has practicado magia
   const [guerreroLog, setGuerreroLog] = useState({}); // { dayKey: true } - dias que has practicado guerrero
   const [workoutWeights, setWorkoutWeights] = useState({}); // { dayKey: { exerciseIdx: { serieIdx: "20" } } }
@@ -125,6 +132,8 @@ export default function App() {
           if (d.pausedRanges) setPausedRanges(d.pausedRanges);
           if (d.workoutProgress) setWorkoutProgress(d.workoutProgress);
           if (d.magiaProgress) setMagiaProgress(d.magiaProgress);
+          if (d.magiaRepaso) setMagiaRepaso(d.magiaRepaso);
+          if (d.onboardingVisto) setOnboardingVisto(true);
           if (d.magiaLog) setMagiaLog(d.magiaLog);
           if (d.guerreroLog) setGuerreroLog(d.guerreroLog);
           if (d.workoutWeights) setWorkoutWeights(d.workoutWeights);
@@ -209,10 +218,10 @@ export default function App() {
     const payload = {
       version: VERSION_ESQUEMA,
       checked, cuelloChecks, notes, youtubeLinks, customExercises, painLog,
-      flaggedExercises, pausedRanges, workoutProgress, magiaProgress, magiaLog,
+      flaggedExercises, pausedRanges, workoutProgress, magiaProgress, magiaRepaso, magiaLog,
       guerreroLog, workoutWeights, medidas, ritmoReal, ritmoTramos, sensaciones, postponed, phaseAdjustNote,
       currentWeekOverride, weeklyLog, comidasLog, cambiosMenu, menuEditado,
-      bloquesHistorial, ultimoBackup, cuelloFaseManual,
+      bloquesHistorial, ultimoBackup, cuelloFaseManual, onboardingVisto,
     };
     // Se deja a mano el ultimo estado conocido para poder guardarlo de golpe
     // si la app se cierra antes de que venza la espera de abajo.
@@ -220,10 +229,10 @@ export default function App() {
     const t = setTimeout(() => { guardarYa(); }, 500); // agrupa cambios rapidos
     return () => clearTimeout(t);
   }, [checked, cuelloChecks, notes, youtubeLinks, customExercises, painLog,
-      flaggedExercises, pausedRanges, workoutProgress, magiaProgress, magiaLog,
+      flaggedExercises, pausedRanges, workoutProgress, magiaProgress, magiaRepaso, magiaLog,
       guerreroLog, workoutWeights, medidas, ritmoReal, ritmoTramos, sensaciones, postponed, phaseAdjustNote,
       currentWeekOverride, weeklyLog, comidasLog, cambiosMenu, menuEditado,
-      bloquesHistorial, ultimoBackup, cuelloFaseManual, storageReady]);
+      bloquesHistorial, ultimoBackup, cuelloFaseManual, onboardingVisto, storageReady]);
 
   const currentDay = FLAT_DAYS[flatIdx] || FLAT_DAYS[todayIdx] || FLAT_DAYS[0];
   const isToday = flatIdx === todayIdx;
@@ -271,6 +280,16 @@ export default function App() {
     Object.assign({}, p, { [dayKey]: (p[dayKey] || []).filter((ap, j) =>
       comidaId ? ap.comida !== comidaId : j !== indice) }));
 
+  // ─── Magia: repaso espaciado ───────────────────────────────────────────
+  //
+  // Dominar un truco no lo archiva: lo mete en la cola de repaso y deja libre
+  // el sitio para el siguiente. Responder a un repaso mueve su escalera.
+  const dominarTruco = (id) => setMagiaRepaso(p =>
+    Object.assign({}, p, { [id]: dominar(todayLocalIso()) }));
+
+  const responderRepaso = (id, respuesta) => setMagiaRepaso(p =>
+    Object.assign({}, p, { [id]: responder(p[id], respuesta, todayLocalIso()) }));
+
   // ─── Editar la dieta ───────────────────────────────────────────────────
   //
   // Una sola accion para las tres cosas que se pueden hacer con una comida:
@@ -308,7 +327,7 @@ export default function App() {
       checked, cuelloChecks, notes, youtubeLinks, customExercises, painLog,
       flaggedExercises, pausedRanges, workoutProgress, workoutWeights, medidas,
       ritmoReal, ritmoTramos, sensaciones, postponed, phaseAdjustNote, currentWeekOverride, weeklyLog,
-      comidasLog, cambiosMenu, menuEditado, magiaProgress, magiaLog, guerreroLog, bloquesHistorial,
+      comidasLog, cambiosMenu, menuEditado, magiaProgress, magiaRepaso, magiaLog, guerreroLog, bloquesHistorial,
     };
     const blob = new Blob([JSON.stringify(payload, null, 2)], { type: "application/json" });
     const url = URL.createObjectURL(blob);
@@ -348,6 +367,7 @@ export default function App() {
         if (data.cambiosMenu) setCambiosMenu(data.cambiosMenu);
         if (data.menuEditado) setMenuEditado(data.menuEditado);
         if (data.magiaProgress) setMagiaProgress(data.magiaProgress);
+        if (data.magiaRepaso) setMagiaRepaso(data.magiaRepaso);
         if (data.magiaLog) setMagiaLog(data.magiaLog);
         if (data.guerreroLog) setGuerreroLog(data.guerreroLog);
         if (data.bloquesHistorial) setBloquesHistorial(data.bloquesHistorial);
@@ -362,9 +382,20 @@ export default function App() {
   if (showOnboarding) {
     return <OnboardingScreen onFinish={() => {
       setShowOnboarding(false);
-      // Guarda de inmediato un dato minimo para que list() detecte que la clave ya existe,
-      // aunque el usuario cierre sin haber marcado nada todavia
-      storage.set(CLAVE_DATOS, JSON.stringify({ version: VERSION_ESQUEMA, onboardingVisto: true })).catch(() => {});
+      setOnboardingVisto(true);
+      // Se escribe ya, sin esperar al autoguardado, para que list() vea que la
+      // clave existe aunque cierres sin marcar nada.
+      //
+      // Y se escribe SOBRE lo que hubiera, no en su lugar. Antes esto guardaba
+      // un objeto minimo con solo la version y la marca, y se llevaba por
+      // delante todo lo demas: si el onboarding volvia a salir por cualquier
+      // motivo —una lectura fallida, un storage que tarda— terminarlo borraba
+      // meses de registro. Un guardado nunca puede tener menos datos que el
+      // que ya habia.
+      const actual = pendienteRef.current || {};
+      storage.set(CLAVE_DATOS, JSON.stringify(
+        Object.assign({}, actual, { version: VERSION_ESQUEMA, onboardingVisto: true })
+      )).catch(() => {});
     }} />;
   }
 
@@ -471,7 +502,7 @@ export default function App() {
             postponed={postponed} setPostponed={setPostponed}
             expandedBlock={expandedBlock} setExpandedBlock={setExpandedBlock}
             painLog={painLog} setPainLog={setPainLog}
-            magiaProgress={magiaProgress} setMagiaProgress={setMagiaProgress}
+            magiaRepaso={magiaRepaso} dominarTruco={dominarTruco} responderRepaso={responderRepaso}
             magiaLog={magiaLog} setMagiaLog={setMagiaLog}
             onOpenMagiaCatalogo={() => setScreen("magia-catalogo")}
             guerreroLog={guerreroLog} setGuerreroLog={setGuerreroLog}
@@ -479,8 +510,8 @@ export default function App() {
         )}
 
         {screen === "magia-catalogo" && (
-          <MagiaCatalogoScreen onBack={() => setScreen("hoy")} currentWeekN={currentDay ? currentDay.weekN : 1}
-            magiaProgress={magiaProgress} setMagiaProgress={setMagiaProgress} magiaLog={magiaLog} />
+          <MagiaCatalogoScreen onBack={() => setScreen("hoy")}
+            magiaRepaso={magiaRepaso} dominarTruco={dominarTruco} responderRepaso={responderRepaso} />
         )}
 
         {screen === "semana" && (
