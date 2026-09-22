@@ -14,6 +14,7 @@ import { CoachScreen } from "@/features/coach/CoachScreen";
 import { EjerciciosScreen } from "@/features/ejercicios/EjerciciosScreen";
 import { MagiaCatalogoScreen } from "@/features/habilidades/MagiaCatalogoScreen";
 import { dominar, responder } from "@/domain/habilidades/repaso";
+import { FUERA_POR_DEFECTO } from "@/domain/nutricion/compra";
 import { HoyScreen } from "@/features/hoy/HoyScreen";
 import { NutricionScreen } from "@/features/nutricion/NutricionScreen";
 import { IconoNav } from "@/features/ui/iconos-nav";
@@ -74,6 +75,9 @@ export default function App() {
   // Lo ya tachado de la compra, por semana: { "2026-09-21:pollo": true }. Va
   // por semana a proposito — el lunes la lista vuelve a estar entera.
   const [compraMarcada, setCompraMarcada] = useState({});
+  // Que comidas haces fuera de casa, por dia de la semana (0 = lunes). No
+  // entran en la compra, pero SI cuentan para los macros del dia.
+  const [comidasFuera, setComidasFuera] = useState(FUERA_POR_DEFECTO);
   // El historial arranca con el bloque en curso, con sus fechas sacadas del
   // calendario: si se mueve FECHA_INICIO, el historial se mueve con el.
   const [bloquesHistorial, setBloquesHistorial] = useState([
@@ -152,6 +156,7 @@ export default function App() {
           if (d.cambiosMenu) setCambiosMenu(d.cambiosMenu);
           if (d.menuEditado) setMenuEditado(d.menuEditado);
           if (d.compraMarcada) setCompraMarcada(d.compraMarcada);
+          if (d.comidasFuera) setComidasFuera(d.comidasFuera);
           if (d.bloquesHistorial) setBloquesHistorial(d.bloquesHistorial);
           if (d.ultimoBackup) setUltimoBackup(d.ultimoBackup);
           if (d.cuelloFaseManual) setCuelloFaseManual(d.cuelloFaseManual);
@@ -224,7 +229,7 @@ export default function App() {
       checked, cuelloChecks, notes, youtubeLinks, customExercises, painLog,
       flaggedExercises, pausedRanges, workoutProgress, magiaProgress, magiaRepaso, magiaLog,
       guerreroLog, workoutWeights, medidas, ritmoReal, ritmoTramos, sensaciones, postponed, phaseAdjustNote,
-      currentWeekOverride, weeklyLog, comidasLog, cambiosMenu, menuEditado, compraMarcada,
+      currentWeekOverride, weeklyLog, comidasLog, cambiosMenu, menuEditado, compraMarcada, comidasFuera,
       bloquesHistorial, ultimoBackup, cuelloFaseManual, onboardingVisto,
     };
     // Se deja a mano el ultimo estado conocido para poder guardarlo de golpe
@@ -235,7 +240,7 @@ export default function App() {
   }, [checked, cuelloChecks, notes, youtubeLinks, customExercises, painLog,
       flaggedExercises, pausedRanges, workoutProgress, magiaProgress, magiaRepaso, magiaLog,
       guerreroLog, workoutWeights, medidas, ritmoReal, ritmoTramos, sensaciones, postponed, phaseAdjustNote,
-      currentWeekOverride, weeklyLog, comidasLog, cambiosMenu, menuEditado, compraMarcada,
+      currentWeekOverride, weeklyLog, comidasLog, cambiosMenu, menuEditado, compraMarcada, comidasFuera,
       bloquesHistorial, ultimoBackup, cuelloFaseManual, onboardingVisto, storageReady]);
 
   const currentDay = FLAT_DAYS[flatIdx] || FLAT_DAYS[todayIdx] || FLAT_DAYS[0];
@@ -283,6 +288,15 @@ export default function App() {
   const deshacerComida = (comidaId, indice) => setComidasLog(p =>
     Object.assign({}, p, { [dayKey]: (p[dayKey] || []).filter((ap, j) =>
       comidaId ? ap.comida !== comidaId : j !== indice) }));
+
+  /** Marcar que una comida de un dia de la semana la haces fuera. */
+  const marcarFuera = (comidaId, dayIdx) => setComidasFuera(p => {
+    const actuales = (p && p[comidaId]) || [];
+    const nuevos = actuales.includes(dayIdx)
+      ? actuales.filter(d => d !== dayIdx)
+      : actuales.concat([dayIdx]).sort((a, b) => a - b);
+    return Object.assign({}, p, { [comidaId]: nuevos });
+  });
 
   /** Tachar y destachar de la lista de la compra. */
   const marcarCompra = (clave) => setCompraMarcada(p =>
@@ -335,7 +349,7 @@ export default function App() {
       checked, cuelloChecks, notes, youtubeLinks, customExercises, painLog,
       flaggedExercises, pausedRanges, workoutProgress, workoutWeights, medidas,
       ritmoReal, ritmoTramos, sensaciones, postponed, phaseAdjustNote, currentWeekOverride, weeklyLog,
-      comidasLog, cambiosMenu, menuEditado, compraMarcada, magiaProgress, magiaRepaso,
+      comidasLog, cambiosMenu, menuEditado, compraMarcada, comidasFuera, magiaProgress, magiaRepaso,
       magiaLog, guerreroLog, bloquesHistorial,
     };
     const blob = new Blob([JSON.stringify(payload, null, 2)], { type: "application/json" });
@@ -376,6 +390,7 @@ export default function App() {
         if (data.cambiosMenu) setCambiosMenu(data.cambiosMenu);
         if (data.menuEditado) setMenuEditado(data.menuEditado);
         if (data.compraMarcada) setCompraMarcada(data.compraMarcada);
+        if (data.comidasFuera) setComidasFuera(data.comidasFuera);
         if (data.magiaProgress) setMagiaProgress(data.magiaProgress);
         if (data.magiaRepaso) setMagiaRepaso(data.magiaRepaso);
         if (data.magiaLog) setMagiaLog(data.magiaLog);
@@ -546,7 +561,8 @@ export default function App() {
             esHoy={isToday}
             diasSemana={WEEKS[currentDay.weekIdx] ? WEEKS[currentDay.weekIdx].days : null}
             inicioSemana={WEEKS[currentDay.weekIdx] ? claveDia(WEEKS[currentDay.weekIdx].days[0]) : ""}
-            compraMarcada={compraMarcada} marcarCompra={marcarCompra} />
+            compraMarcada={compraMarcada} marcarCompra={marcarCompra}
+            comidasFuera={comidasFuera} marcarFuera={marcarFuera} />
         )}
 
         {screen === "progreso" && (

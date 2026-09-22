@@ -128,18 +128,51 @@ export function tiposDeSemana(dias, comidaDelDia) {
   return cuenta;
 }
 
-/** Los gramos de cada alimento que pide la semana entera. */
-function gramosDeLaSemana(cuenta, edits) {
+/**
+ * LO QUE COMES FUERA NO SE COMPRA.
+ *
+ * Y no es lo mismo que quitarlo del menu: la comida de la cantina SIGUE
+ * contando para los macros del dia —por eso se apunta— pero no entra en el
+ * carro. Confundir las dos cosas romperia una de las dos: o comprarias comida
+ * de mas todas las semanas, o el dia dejaria de cuadrar.
+ *
+ * Se guarda por dia de la semana y no por tipo de dia, porque asi es como
+ * pasa de verdad: de lunes a viernes comes en la cantina, el fin de semana en
+ * casa. Y el lunes es dia de COMER igual que el domingo.
+ *
+ * 0 = lunes ... 6 = domingo.
+ */
+export const FUERA_POR_DEFECTO = { comida: [0, 1, 2, 3, 4] };
+
+const seComeFuera = (fuera, comidaId, dayIdx) =>
+  !!(fuera && Array.isArray(fuera[comidaId]) && fuera[comidaId].includes(dayIdx));
+
+/**
+ * Los gramos de cada alimento que pide la semana entera.
+ *
+ * Se recorren los dias de verdad, uno a uno, en vez de multiplicar por el
+ * numero de dias de cada tipo: hace falta saber QUE dia es cada uno para
+ * poder saltarse la comida del martes y no la del domingo.
+ */
+function gramosDeLaSemana(dias, comidaDelDia, edits, fuera) {
   const total = {};
-  for (const tipo of ["comer", "recortar"]) {
-    const dias = cuenta[tipo] || 0;
-    if (!dias) continue;
-    for (const comida of menuDe(tipo, edits)) {
-      for (const i of comida.ingredientes) {
-        total[i.id] = (total[i.id] || 0) + i.g * dias;
+  const menus = { comer: menuDe("comer", edits), recortar: menuDe("recortar", edits) };
+
+  (dias || []).forEach((dia, i) => {
+    const tipo = (comidaDelDia(dia) || {}).id;
+    const menu = menus[tipo];
+    if (!menu) return;
+    // El indice del dia dentro de la semana: del propio dia si lo trae, y si
+    // no, la posicion en la lista. Las semanas empiezan en lunes.
+    const dayIdx = typeof dia.dayIdx === "number" ? dia.dayIdx : i;
+
+    for (const comida of menu) {
+      if (seComeFuera(fuera, comida.id, dayIdx)) continue;
+      for (const ing of comida.ingredientes) {
+        total[ing.id] = (total[ing.id] || 0) + ing.g;
       }
     }
-  }
+  });
   return total;
 }
 
@@ -190,11 +223,11 @@ export const DESPENSA = [
 /**
  * La compra de la semana, lista para ir al supermercado.
  *
- * @param {{dias:Array, comidaDelDia:Function, edits?:object, margen?:number}} entrada
+ * @param {{dias:Array, comidaDelDia:Function, edits?:object, fuera?:object, margen?:number}} entrada
  */
-export function listaDeLaCompra({ dias, comidaDelDia, edits, margen = 1.1 }) {
+export function listaDeLaCompra({ dias, comidaDelDia, edits, fuera, margen = 1.1 }) {
   const cuenta = tiposDeSemana(dias, comidaDelDia);
-  const gramos = gramosDeLaSemana(cuenta, edits);
+  const gramos = gramosDeLaSemana(dias, comidaDelDia, edits, fuera);
 
   const items = Object.keys(gramos)
     .filter(id => ALIMENTO[id])
@@ -216,7 +249,12 @@ export function listaDeLaCompra({ dias, comidaDelDia, edits, margen = 1.1 }) {
     .map(s => ({ ...s, items: items.filter(i => i.seccion === s.id).sort((a, b) => a.nombre.localeCompare(b.nombre, "es")) }))
     .filter(s => s.items.length > 0);
 
-  return { cuenta, dias: (cuenta.comer || 0) + (cuenta.recortar || 0), secciones: porSeccion, items, despensa: DESPENSA };
+  return {
+    cuenta, dias: (cuenta.comer || 0) + (cuenta.recortar || 0),
+    secciones: porSeccion, items, despensa: DESPENSA,
+    // Cuantas comidas se hacen fuera, para poder decirlo en pantalla.
+    fueraDeCasa: Object.keys(fuera || {}).reduce((t, k) => t + (fuera[k] || []).length, 0),
+  };
 }
 
 /** Para poder tachar: una clave estable por semana y alimento. */

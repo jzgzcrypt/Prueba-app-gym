@@ -11,7 +11,8 @@ import { ListaCompra } from "@/features/nutricion/ListaCompra";
 export function NutricionScreen({ comida, apuntes = [], cambios, apuntarComida, apuntarVarias,
                                   deshacerComida, cambiarAlimento, edits,
                                   guardarComidaDelMenu, restaurarMenu, esHoy,
-                                  diasSemana, inicioSemana, compraMarcada, marcarCompra }) {
+                                  diasSemana, inicioSemana, compraMarcada, marcarCompra,
+                                  comidasFuera, marcarFuera }) {
   const [menuAbierto, setMenuAbierto] = useState(MENUS[0].id);
   const [diaAbierto, setDiaAbierto] = useState("entreno");
   const [verTips, setVerTips] = useState(false);
@@ -36,7 +37,8 @@ export function NutricionScreen({ comida, apuntes = [], cambios, apuntarComida, 
       {/* ═══ LA COMPRA — sale sola del menú ═══ */}
       {diasSemana && marcarCompra && (
         <ListaCompra dias={diasSemana} inicioSemana={inicioSemana} edits={edits}
-                     marcado={compraMarcada} marcarCompra={marcarCompra} />
+                     marcado={compraMarcada} marcarCompra={marcarCompra}
+                     fuera={comidasFuera} marcarFuera={marcarFuera} />
       )}
 
       {/* ═══ LOS MENÚS REALES ═══ */}

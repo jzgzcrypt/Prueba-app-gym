@@ -12,7 +12,7 @@ import { comidaDelDia } from "../src/domain/nutricion/dias.js";
 import { ALIMENTO } from "../src/domain/nutricion/alimentos.js";
 import { MENU_DIA, menuDe } from "../src/domain/nutricion/menu-dia.js";
 import {
-  DESPENSA, SECCIONES, cantidadDeCompra, claveCompra, listaDeLaCompra, tiposDeSemana,
+  DESPENSA, FUERA_POR_DEFECTO, SECCIONES, cantidadDeCompra, claveCompra, listaDeLaCompra, tiposDeSemana,
 } from "../src/domain/nutricion/compra.js";
 
 const semana = (n) => WEEKS[n].days;
@@ -165,5 +165,64 @@ test("todas las semanas del bloque dan una lista comprable", () => {
       assert.ok(i.cantidad && !/NaN|undefined/.test(i.cantidad), `semana ${w.n}, ${i.id}: "${i.cantidad}"`);
       assert.ok(i.gramos > 0, `semana ${w.n}, ${i.id}`);
     }
+  }
+});
+
+// ─── LO QUE COMES FUERA NO SE COMPRA ──────────────────────────────────────
+
+test("las comidas que haces fuera no entran en el carro", () => {
+  // De lunes a viernes come en la cantina: esa comida no se compra.
+  const con = lista();
+  const sin = lista({ fuera: FUERA_POR_DEFECTO });
+
+  const pollo = (l) => l.items.find(i => i.id === "pollo").gramos;
+  assert.ok(pollo(sin) < pollo(con) * 0.5, `${pollo(sin)} vs ${pollo(con)}`);
+  assert.equal(sin.fueraDeCasa, 5);
+});
+
+test("pero siguen contando para los macros del día", () => {
+  // No es lo mismo comer fuera que quitarlo del menú: el menú no cambia, solo
+  // la compra. Si se confundieran, el día dejaría de cuadrar.
+  const menuAntes = menuDe("recortar");
+  lista({ fuera: FUERA_POR_DEFECTO });
+  assert.deepEqual(menuDe("recortar"), menuAntes);
+  assert.ok(menuAntes.some(c => c.id === "comida"), "la comida sigue en el menú");
+});
+
+test("se salta el día que dices, no un día cualquiera", () => {
+  // El lunes es día de COMER igual que el domingo: si se contara por tipo de
+  // día en vez de por día de la semana, saltarse el lunes se llevaría por
+  // delante la comida del domingo, que sí haces en casa.
+  const soloLunes = lista({ fuera: { comida: [0] } });
+  const soloDomingo = lista({ fuera: { comida: [6] } });
+  const todos = lista();
+
+  const arroz = (l) => (l.items.find(i => i.id === "arroz") || { gramos: 0 }).gramos;
+  // El arroz solo está en la comida de los días de COMER: lunes y domingo.
+  assert.ok(arroz(soloLunes) < arroz(todos), "quitar el lunes no bajó el arroz");
+  assert.equal(arroz(soloLunes), arroz(soloDomingo), "lunes y domingo deberían pesar igual");
+  assert.equal(arroz(lista({ fuera: { comida: [0, 6] } })), 0, "sin ninguna comida de COMER no debería quedar arroz");
+});
+
+test("marcar todas las comidas fuera deja la compra vacía", () => {
+  const todasFuera = {};
+  for (const c of menuDe("comer").concat(menuDe("recortar"))) todasFuera[c.id] = [0, 1, 2, 3, 4, 5, 6];
+  const l = lista({ fuera: todasFuera });
+  assert.deepEqual(l.items, []);
+  // Y la despensa sigue ahí: la sal no depende de dónde comas.
+  assert.deepEqual(l.despensa, DESPENSA);
+});
+
+test("sin decir nada, se compra todo", () => {
+  assert.equal(lista().fueraDeCasa, 0);
+  assert.equal(lista({ fuera: {} }).fueraDeCasa, 0);
+  assert.equal(lista({ fuera: null }).items.length, lista().items.length);
+});
+
+test("una marca rara no descuadra la compra", () => {
+  for (const fuera of [{ comida: "lunes" }, { comida: [99] }, { inventada: [0, 1] }]) {
+    const l = lista({ fuera });
+    assert.ok(l.items.length > 10, JSON.stringify(fuera));
+    for (const i of l.items) assert.ok(i.gramos > 0, JSON.stringify(fuera) + " → " + i.id);
   }
 });

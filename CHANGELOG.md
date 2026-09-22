@@ -42,6 +42,12 @@ Todo cambio que se haga en la app se anota aquí. Sin excepciones.
   Se tacha tocando, y lo tachado se guarda por semana: el lunes la lista vuelve
   a estar entera. Y hay un botón para **copiarla en texto** y mandársela a
   quien haga la compra.
+- **Lo que comes fuera no se compra.** De lunes a viernes comes en la cantina,
+  así que esa comida no entra en el carro — pero **sigue contando para tus
+  macros**, por eso la apuntas. Son dos cosas distintas: confundirlas rompería
+  una de las dos (o comprarías de más todas las semanas, o el día dejaría de
+  cuadrar). Se marca por día de la semana, no por tipo de día, porque el lunes
+  es día de COMER igual que el domingo y el domingo sí comes en casa.
 - No se ofrecen cambios que nadie haría: la whey del batido no se sustituye
   por pollo, ni los 2 kg de queso batido de la precama. Llenar la lista de
   alternativas de relleno hace desconfiar de las que sí son buenas.

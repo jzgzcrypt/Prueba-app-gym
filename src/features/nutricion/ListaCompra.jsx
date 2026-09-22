@@ -18,7 +18,8 @@
 
 import { useState } from "react";
 import { C, CAT, R, SP, TAP_MIN, TYPE } from "@/design/tokens";
-import { DESPENSA, claveCompra, listaDeLaCompra } from "@/domain/nutricion/compra";
+import { DESPENSA, FUERA_POR_DEFECTO, claveCompra, listaDeLaCompra } from "@/domain/nutricion/compra";
+import { COMIDAS_DEL_DIA } from "@/domain/nutricion/menu-dia";
 import { comidaDelDia } from "@/domain/nutricion/dias";
 import { SectionHeader } from "@/features/ui/headers";
 
@@ -32,12 +33,16 @@ const Tacha = ({ marcado }) => (
   }}>{marcado ? "✓" : ""}</span>
 );
 
-export function ListaCompra({ dias, inicioSemana, edits, marcado, marcarCompra }) {
+const DIAS_CORTOS = ["L", "M", "X", "J", "V", "S", "D"];
+
+export function ListaCompra({ dias, inicioSemana, edits, marcado, marcarCompra, fuera, marcarFuera }) {
   const [abierto, setAbierto] = useState(null); // item cuyas alternativas se ven
+  const [verFuera, setVerFuera] = useState(false);
   const [copiado, setCopiado] = useState(false);
 
   if (!dias || !dias.length) return null;
-  const lista = listaDeLaCompra({ dias, comidaDelDia, edits });
+  const comidasFuera = fuera || FUERA_POR_DEFECTO;
+  const lista = listaDeLaCompra({ dias, comidaDelDia, edits, fuera: comidasFuera });
   const marcas = marcado || {};
   const esta = (id) => !!marcas[claveCompra(inicioSemana, id)];
 
@@ -47,7 +52,8 @@ export function ListaCompra({ dias, inicioSemana, edits, marcado, marcarCompra }
   /** En texto plano, para mandársela a alguien o pegarla donde sea. */
   const comoTexto = () =>
     "Compra de la semana (" + lista.cuenta.comer + " días de comer, " +
-    lista.cuenta.recortar + " de recortar)\n\n" +
+    lista.cuenta.recortar + " de recortar" +
+    (lista.fueraDeCasa ? ", " + lista.fueraDeCasa + " comidas fuera" : "") + ")\n\n" +
     lista.secciones.map(s => s.nombre + "\n" +
       s.items.map(i => "- " + i.nombre + ": " + i.cantidad).join("\n")).join("\n\n") +
     "\n\nRevisar en casa\n" + DESPENSA.map(d => "- " + d.nombre).join("\n");
@@ -79,6 +85,50 @@ export function ListaCompra({ dias, inicioSemana, edits, marcado, marcarCompra }
         <div className="mono" style={{ fontSize: 12, fontWeight: 700, color: CAT.nutricion, marginTop: SP.sm }}>
           {hechos} de {total} en el carro
         </div>
+
+        {/* ─── Lo que comes fuera no se compra ─── */}
+        <button className="btn" onClick={() => setVerFuera(!verFuera)} style={{
+          width: "100%", textAlign: "left", marginTop: SP.sm, padding: "10px 13px", minHeight: TAP_MIN,
+          background: C.surfaceMuted, border: "1px solid " + C.cardBorder, borderRadius: R.lg,
+          display: "flex", justifyContent: "space-between", alignItems: "center", gap: SP.sm,
+        }}>
+          <span style={{ ...TYPE.body, color: C.text }}>
+            {lista.fueraDeCasa > 0
+              ? lista.fueraDeCasa + (lista.fueraDeCasa === 1 ? " comida fuera de casa" : " comidas fuera de casa")
+              : "Todo lo comes en casa"}
+          </span>
+          <span style={{ color: C.textFaint, fontSize: 14 }}>{verFuera ? "–" : "+"}</span>
+        </button>
+
+        {verFuera && (
+          <div style={{ marginTop: SP.sm, background: C.card, border: "1px solid " + C.cardBorder,
+                        borderRadius: R.lg, padding: "12px 14px" }}>
+            <div style={{ ...TYPE.body, color: C.textDim, marginBottom: SP.sm, lineHeight: 1.45 }}>
+              Marca los días que cada comida la haces fuera. <strong style={{ color: C.text }}>Sigue
+              contando para tus macros</strong> —por eso la apuntas— pero no entra en el carro.
+            </div>
+            {COMIDAS_DEL_DIA.map(c => (
+              <div key={c.id} style={{ marginBottom: SP.sm }}>
+                <div style={{ ...TYPE.micro, color: C.textDim, marginBottom: 4 }}>{c.nombre.toUpperCase()}</div>
+                <div style={{ display: "flex", gap: 4 }}>
+                  {DIAS_CORTOS.map((letra, i) => {
+                    const activo = (comidasFuera[c.id] || []).includes(i);
+                    return (
+                      <button key={i} className="btn" onClick={() => marcarFuera(c.id, i)}
+                        aria-label={c.nombre + " " + letra}
+                        style={{
+                          flex: 1, minHeight: 34, borderRadius: R.md, fontSize: 12, fontWeight: 800,
+                          background: activo ? CAT.nutricion : "transparent",
+                          border: "1px solid " + (activo ? CAT.nutricion : C.cardBorder),
+                          color: activo ? "#FAFAF9" : C.textFaint,
+                        }}>{letra}</button>
+                    );
+                  })}
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
       </div>
 
       {lista.secciones.map(seccion => (
