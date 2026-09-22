@@ -41,7 +41,8 @@
  *                ~40%. Antes S10 era la semana de mas running del bloque.
  *   FUERZA       S5 ya no duplica el volumen la semana que entra el ritmo.
  *                El hombro se mantiene hasta S10 (las laterales no cansan las
- *                piernas). Pecho y espalda con un minimo fijo. Nada a fallo
+ *                piernas): 11 series de laterales por semana en S2-S7, tres
+ *                de ellas el sabado, y 10 en S8-S9. Pecho y espalda con un minimo fijo. Nada a fallo
  *                salvo la ultima serie: al fallo el trapecio carga el cuello.
  *   PREVENCION   Gemelo, gluteo medio y plancha lateral todas las semanas
  *                hasta S10. Antes la cadera desaparecia justo en S6.
@@ -161,11 +162,12 @@ export const WEEKS = [
           { grupo: "Biceps", nombre: "Curl bilateral con mancuernas", series: "3x10" },
           ROT_EXT,
         ]},
-      { dow: "Sabado", tipo: "fuerza", cat: "pierna", titulo: "Pierna + prevención", dur: "25 min",
+      { dow: "Sabado", tipo: "fuerza", cat: "pierna", titulo: "Pierna + prevención", dur: "30 min",
         ejercicios: [
           { grupo: "Pierna", nombre: "Sentadilla ATG sin peso", series: "2x10" },
           { grupo: "Pierna", nombre: "Cossack squat con peso corporal", series: "2x8/lado" },
           GEMELO, CLAMSHELL, PLANCHA_LAT,
+          LAT_MANC(3),
         ]},
       { dow: "Domingo", tipo: "run", cat: "runZ2", titulo: "Tirada suave", dur: "28 min", rpe: "4/10",
         what: "20 min corriendo suave continuo. Primera tirada sin caminar." },
@@ -196,9 +198,10 @@ export const WEEKS = [
           { grupo: "Biceps", nombre: "Curl bayesian en polea", series: "3x10" },
           ROT_EXT,
         ]},
-      { dow: "Sabado", tipo: "fuerza", cat: "pierna", titulo: "Pierna + prevención", dur: "25 min",
+      { dow: "Sabado", tipo: "fuerza", cat: "pierna", titulo: "Pierna + prevención", dur: "30 min",
         ejercicios: [
           BULGARA, GEMELO, CLAMSHELL, PLANCHA_LAT,
+          LAT_MANC(3),
         ]},
       { dow: "Domingo", tipo: "run", cat: "runZ2", titulo: "Tirada suave, algo más larga", dur: "30 min", rpe: "4/10",
         what: "22 min corriendo suave continuo." },
@@ -228,9 +231,10 @@ export const WEEKS = [
           { grupo: "Biceps", nombre: "Curl concentrado con mancuerna", series: "3x10" },
           ROT_EXT,
         ]},
-      { dow: "Sabado", tipo: "fuerza", cat: "pierna", titulo: "Pierna + prevención", dur: "25 min",
+      { dow: "Sabado", tipo: "fuerza", cat: "pierna", titulo: "Pierna + prevención", dur: "30 min",
         ejercicios: [
           BULGARA, GEMELO, CLAMSHELL, PLANCHA_LAT,
+          LAT_MANC(3),
         ]},
       { dow: "Domingo", tipo: "run", cat: "runZ2", titulo: "Tirada más larga", dur: "35 min", rpe: "4/10",
         what: "26 min corriendo suave continuo." },
@@ -262,9 +266,10 @@ export const WEEKS = [
           { grupo: "Biceps", nombre: "Curl concentrado con mancuerna", series: "3x10" },
           ROT_EXT,
         ]},
-      { dow: "Sabado", tipo: "fuerza", cat: "pierna", titulo: "Pierna + prevención", dur: "25 min",
+      { dow: "Sabado", tipo: "fuerza", cat: "pierna", titulo: "Pierna + prevención", dur: "30 min",
         ejercicios: [
           BULGARA, GEMELO, POGO, CLAMSHELL, PLANCHA_LAT,
+          LAT_MANC(3),
         ]},
       { dow: "Domingo", tipo: "run", cat: "runZ2", titulo: "Tirada larga 40 min", dur: "45 min", rpe: "4-5/10",
         what: "40 min suave continuo (~6 km). Primera tirada larga de verdad." },
@@ -295,9 +300,10 @@ export const WEEKS = [
           { grupo: "Biceps", nombre: "Curl bilateral con mancuernas", series: "3x10" },
           ROT_EXT,
         ]},
-      { dow: "Sabado", tipo: "fuerza", cat: "pierna", titulo: "Pierna + prevención", dur: "25 min",
+      { dow: "Sabado", tipo: "fuerza", cat: "pierna", titulo: "Pierna + prevención", dur: "30 min",
         ejercicios: [
           BULGARA, GEMELO, POGO, CLAMSHELL, PLANCHA_LAT,
+          LAT_MANC(3),
         ]},
       { dow: "Domingo", tipo: "run", cat: "runZ2", titulo: "Tirada larga 50 min", dur: "55 min", rpe: "5/10",
         what: "50 min suave continuo (~7 km). Ya corres la distancia del objetivo, a tu ritmo." },
@@ -328,9 +334,10 @@ export const WEEKS = [
           { grupo: "Biceps", nombre: "Curl concentrado con mancuerna", series: "3x12" },
           ROT_EXT,
         ]},
-      { dow: "Sabado", tipo: "fuerza", cat: "pierna", titulo: "Pierna + prevención", dur: "25 min",
+      { dow: "Sabado", tipo: "fuerza", cat: "pierna", titulo: "Pierna + prevención", dur: "30 min",
         ejercicios: [
           BULGARA, GEMELO, POGO, CLAMSHELL, PLANCHA_LAT,
+          LAT_MANC(3),
         ]},
       { dow: "Domingo", tipo: "run", cat: "runZ2", titulo: "Tirada larga 60 min", dur: "65 min", rpe: "5/10",
         what: "60 min suave continuo (~8-9 km). Más larga que el objetivo: que el día D los 7 km se te hagan cortos." },
@@ -344,13 +351,13 @@ export const WEEKS = [
         what: "18 min suave. Semana de test: todo lo de aquí al domingo es preparar, no entrenar." },
       { dow: "Miercoles", tipo: "fuerza", cat: "empuje", titulo: "Empuje ligero + prevención", dur: "35 min",
         ejercicios: [
-          LAT_POLEA(4),
+          LAT_POLEA(5),
           { grupo: "Pecho", nombre: "Aperturas con mancuernas en banco", series: "2x10" },
           FACE_PULL, GEMELO, CLAMSHELL,
         ]},
       { dow: "Jueves", tipo: "run", cat: "runQ", titulo: "Activación + progresivos", dur: "20 min", rpe: "3-4/10",
         what: "10 min suave + 4x100m progresivos. No hay sesión de calidad esta semana: el test del domingo es la sesión." },
-      HOMBRO_EXPRES(4),
+      HOMBRO_EXPRES(5),
       { dow: "Sabado", tipo: "run", cat: "runZ2", titulo: "Activación 15 min", dur: "15 min", rpe: "2/10", vispera: true,
         what: "15 min trote suave. Hoy se come con carbohidrato: mañana es el test." },
       { dow: "Domingo", tipo: "test", cat: "runQ", titulo: "Test 5 km — decide la fecha", dur: "45 min", rpe: "9/10",
@@ -365,14 +372,14 @@ export const WEEKS = [
         what: "18 min muy suave. Vienes del test del domingo y del tenis de ayer." },
       { dow: "Miercoles", tipo: "fuerza", cat: "tiron", titulo: "Tirón ligero + prevención", dur: "35 min",
         ejercicios: [
-          LAT_POLEA(4),
+          LAT_POLEA(5),
           { grupo: "Espalda", nombre: "Jalon al pecho unilateral", series: "2x10" },
           FACE_PULL, GEMELO, CLAMSHELL,
         ]},
       { dow: "Jueves", tipo: "run", cat: "runQ", titulo: "Series 3x2km a 4:45", dur: "55 min", rpe: "8/10", esCalidad: true,
         what: CALENTAR + " 3x2 km a 4:45/km con 2 min de trote suave entre series. 10 min suave. La sesión más dura del bloque: 6 km al ritmo del objetivo.",
         intervalos: [{r:3,s:[["rapido",570],["suave",120]]}] },
-      HOMBRO_EXPRES(4),
+      HOMBRO_EXPRES(5),
       { dow: "Sabado", tipo: "run", cat: "runQ", titulo: "Progresivos", dur: "15 min", rpe: "3/10",
         what: "10 min trote suave + 4x100m progresivos." },
       { dow: "Domingo", tipo: "run", cat: "runZ2", titulo: "Tirada larga 55 min", dur: "60 min", rpe: "5/10",

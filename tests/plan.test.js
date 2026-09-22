@@ -158,7 +158,9 @@ test("el hombro se trabaja todas las semanas hasta S10", () => {
     const lat = wk.days.flatMap(d => d.ejercicios || [])
       .filter(e => /laterales/i.test(e.nombre))
       .reduce((s, e) => s + parseInt(e.series, 10), 0);
-    assert.ok(lat >= 6, `S${wk.n}: solo ${lat} series de laterales`);
+    // 10 series a la semana es el minimo para que crezca; en S10 ya es mantener.
+    const minimo = wk.n <= 9 ? 10 : 6;
+    assert.ok(lat >= minimo, `S${wk.n}: solo ${lat} series de laterales`);
   }
 });
 

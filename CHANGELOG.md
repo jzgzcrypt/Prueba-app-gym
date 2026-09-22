@@ -43,6 +43,9 @@ Todo cambio que se haga en la app se anota aquí. Sin excepciones.
 - **Prevención todas las semanas hasta S10:** gemelo a una pierna, glúteo
   medio y plancha lateral. Antes la cadera desaparecía justo en S6. Entran la
   sentadilla búlgara y los pogo jumps.
+- **Hombro con volumen para crecer:** 11 series de laterales por semana en
+  S2-S7 (tres de ellas al final del sábado) y 10 en S8-S9. Con 8 se mantenía
+  pero apenas crecía, y las laterales no le quitan nada al 7K.
 - **Cuello:** face pull y rotación externa dos veces por semana; dominadas sin
   llegar al límite.
 - **Comida:** se come la víspera del test de 5 km y del objetivo, y S10-S11 van
