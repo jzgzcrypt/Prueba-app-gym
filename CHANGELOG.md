@@ -21,6 +21,15 @@ Todo cambio que se haga en la app se anota aquí. Sin excepciones.
 
 ## [Sin publicar]
 
+### Arreglado — Una foto de progreso dejaba de guardar todo lo demás
+- **Todo lo que apuntas se guarda en un solo bloque del navegador, que admite
+  unos 5 MB, y una foto del móvil tal cual ocupa 3-7 MB.** Con la primera foto
+  el bloque dejaba de caber y no se guardaba nada más, sin avisar.
+- **Ahora la foto se reduce antes de guardarla** a ~800 px de alto: de 9,5 MB
+  a menos de 250 KB. Para comparar el cuerpo cada dos semanas sobra.
+- **Si un guardado falla, se avisa en todas las pantallas**, no solo dentro de
+  Coach → Ajustes.
+
 ### Cambiado — El plan del 7K, revisado como entrenador
 - **Tres pruebas para saber de dónde partes.** El domingo de S1, cuánto
   aguantas corriendo seguido; el jueves de S4, 3 km a tope; el domingo de S8,

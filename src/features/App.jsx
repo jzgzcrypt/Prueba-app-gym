@@ -501,6 +501,19 @@ export default function App() {
 
       <div style={{ maxWidth: 480, margin: "0 auto", minHeight: "100vh", paddingBottom: 90 }}>
 
+        {/* Si el guardado falla, lo tiene que ver en cualquier pantalla: antes
+            solo se avisaba dentro de Coach > Ajustes, y se podian perder dias
+            de registro sin enterarse. */}
+        {storageStatus === "error" && (
+          <div role="alert" style={{ margin: "12px 16px 0", padding: "11px 14px", borderRadius: 12,
+                                     background: "#FBF0EF", border: "1px solid #E8C9C6" }}>
+            <div style={{ fontSize: 13, fontWeight: 800, color: "#171717" }}>No se está guardando lo que apuntas</div>
+            <div style={{ fontSize: 12, color: "#4A4A47", marginTop: 3, lineHeight: 1.4 }}>
+              El navegador no deja guardar más. Exporta una copia en Coach → Ajustes y, si acabas de añadir una foto, quítala.
+            </div>
+          </div>
+        )}
+
         {screen === "hoy" && (
           <HoyScreen day={currentDay} dayKey={dayKey} isToday={isToday} flatIdx={flatIdx}
             goDay={goDay} goToday={goToday} onJumpDay={jumpToDay}

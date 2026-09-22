@@ -16,7 +16,11 @@ export function ProgresoScreen({ medidas, setMedidas, ritmoReal, weeks, checked,
     const file = e.target.files[0];
     if (!file) return;
     const reader = new FileReader();
-    reader.onload = (ev) => setForm(p => Object.assign({}, p, { foto: ev.target.result }));
+    reader.onload = (ev) => {
+      reducirFoto(ev.target.result)
+        .then(foto => setForm(p => Object.assign({}, p, { foto })))
+        .catch(() => setForm(p => Object.assign({}, p, { foto: null })));
+    };
     reader.readAsDataURL(file);
   };
 
@@ -325,4 +329,31 @@ export function ProgresoScreen({ medidas, setMedidas, ritmoReal, weeks, checked,
       )}
     </div>
   );
+}
+
+/**
+ * Deja la foto en ~800 px de alto y JPEG al 70%: unos 60-120 KB.
+ *
+ * Todo lo guardado va en un solo bloque de localStorage, que admite unos 5 MB.
+ * Una foto del movil tal cual son 3-7 MB en base64: con la primera, el bloque
+ * no cabia y dejaba de guardarse TODO lo demas. Para comparar el cuerpo cada
+ * dos semanas sobra con esta resolucion.
+ */
+const FOTO_ALTO_MAX = 800;
+function reducirFoto(dataUrl) {
+  return new Promise((resolve, reject) => {
+    const img = new Image();
+    img.onload = () => {
+      const escala = Math.min(1, FOTO_ALTO_MAX / img.height);
+      const canvas = document.createElement("canvas");
+      canvas.width = Math.round(img.width * escala);
+      canvas.height = Math.round(img.height * escala);
+      const ctx = canvas.getContext("2d");
+      if (!ctx) { reject(new Error("sin canvas")); return; }
+      ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+      resolve(canvas.toDataURL("image/jpeg", 0.7));
+    };
+    img.onerror = reject;
+    img.src = dataUrl;
+  });
 }
