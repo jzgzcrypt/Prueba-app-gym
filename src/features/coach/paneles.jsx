@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { C, CAT, R, SP, TAP_MIN, TYPE } from "@/design/tokens";
 import { BLOQUE, DATE_MAP, FECHA_FIN, RANGO_BLOQUE, WEEKS, claveDia, claveSemana, todayLocalIso } from "@/domain/plan/calendario";
+import { REGLAS_BLOQUE } from "@/domain/plan/bloque-1-base-7k";
 import { SectionHeader } from "@/features/ui/headers";
 /** Dias enteros transcurridos desde una fecha "YYYY-MM-DD" hasta hoy. */
 function diasDesde(iso) {
@@ -385,12 +386,12 @@ function resumenSemana(wk, { checked, ritmoReal, painLog, cuelloChecks, magiaLog
 
 export function PlanGlobalContent({ jumpToDay, setWeekIdx, onJumpAway, checked }) {
   const FASES_INFO = [
-    { fase: "RAMPA", color: CAT.fuerza, semanas: "S1-S2", texto: "Reintroducción progresiva. Running suave 3x/semana, fuerza reducida (2-3 días cortos) para que el hábito prenda sin sobrecargar." },
-    { fase: "RECONSTRUCCION", color: CAT.cuello, semanas: "S2-S3", texto: "Base aeróbica desde cero, con memoria del cuerpo. Fuerza recupera su estructura completa de 6 días." },
-    { fase: "CALIDAD", color: "#946800", semanas: "S4-S6", texto: "Entra el fartlek y el primer ritmo específico. El running empieza a construir velocidad real." },
-    { fase: "ESPECIFICIDAD", color: CAT.running, semanas: "S7-S9", texto: "Ritmo cada vez más cercano al objetivo. Primer 7km completo de confirmación. Fuerza baja de volumen para priorizar el running." },
-    { fase: "TAPER", color: "#6B4C8A", semanas: "S10", texto: "El volumen baja a propósito. Se llega descansado, no se entrena más fuerte." },
-    { fase: "OBJETIVO", color: CAT.running, semanas: "S11", texto: "7km a 4:45/km. Estrategia de negative split: salir conservador, acabar fuerte." },
+    { fase: "RAMPA", color: CAT.fuerza, semanas: "S1", texto: "Correr/caminar y fuerza corta, para volver del parón. El domingo, la prueba de partida: cuánto aguantas corriendo seguido." },
+    { fase: "ESTETICA", color: CAT.cuello, semanas: "S2-S4", texto: "Base aeróbica con fartlek suave. Hombro dos veces por semana y mínimo fijo de pecho y espalda. El jueves de S4, 3 km a tope: de ahí salen tus ritmos." },
+    { fase: "CALIDAD", color: "#946800", semanas: "S5", texto: "Primeras series algo más rápidas que el objetivo. La fuerza no sube a la vez." },
+    { fase: "ESPECIFICIDAD", color: CAT.running, semanas: "S6-S9", texto: "Series al ritmo objetivo que se alargan: 800 m, 1 km, 2 km. Tirada de hasta 60 min. El 5 km de S8 decide la fecha. S9 es la semana más cargada del bloque." },
+    { fase: "PUENTE", color: "#6B4C8A", semanas: "S10", texto: "Baja el volumen, se mantiene el ritmo: 2x3 km a 4:45. Sin déficit de comida." },
+    { fase: "OBJETIVO", color: CAT.running, semanas: "S11", texto: "Taper y el día: km 1 a 4:48, km 2-6 a 4:45, km 7 a tope." },
   ];
 
   const todayIso = todayLocalIso();
@@ -419,11 +420,11 @@ export function PlanGlobalContent({ jumpToDay, setWeekIdx, onJumpAway, checked }
         <div style={{ background: C.card, border: "1px solid " + C.cardBorder, borderRadius: 14, padding: "14px 16px" }}>
           <div style={{ fontSize: 10, fontWeight: 800, color: C.accent, letterSpacing: 0.8, marginBottom: 6 }}>OBJETIVO A LARGO PLAZO</div>
           <div style={{ fontSize: 13, color: "#4A4A47", lineHeight: 1.55, marginBottom: 10 }}>
-            Correr 7km a 4:45/km el domingo 15 de noviembre. En paralelo, construir hombro/pecho/brazos visiblemente más definidos y resolver la rigidez de cuello/clavícula heredada del accidente — sin que ninguno de los tres objetivos sacrifique a los otros dos.
+            Correr 7km a 4:45/km el domingo 6 de diciembre, o más tarde si el 5 km de S8 dice que hace falta más tiempo: se mueve la fecha, no se baja el ritmo. En paralelo, construir hombro/pecho/brazos visiblemente más definidos y resolver la rigidez de cuello/clavícula heredada del accidente — sin que ninguno de los tres objetivos sacrifique a los otros dos.
           </div>
           <div style={{ fontSize: 10, fontWeight: 800, color: C.accent, letterSpacing: 0.8, marginBottom: 6 }}>CÓMO SE LLEGA</div>
           <div style={{ fontSize: 13, color: "#4A4A47", lineHeight: 1.55 }}>
-            El running manda siempre — nunca se sacrifica una sesión de calidad por fuerza. La fuerza entra en rampa las 2 primeras semanas y luego sigue un split empuje/tirón/pierna con hombro como máxima prioridad (frecuencia alta). El cuello se trabaja 3 veces al día, todos los días, sin excepción — es el hábito de menor esfuerzo y mayor constancia de todo el plan.
+            El running manda siempre — nunca se sacrifica una sesión de calidad por fuerza. Tres carreras y el tenis. La fuerza es empuje/tirón/pierna con hombro dos veces por semana hasta S10, y un bloque de prevención (gemelo, glúteo medio, core) todos los sábados. El cuello se trabaja todos los días, sin excepción — es el hábito de menor esfuerzo y mayor constancia de todo el plan.
           </div>
         </div>
       </div>
@@ -445,12 +446,24 @@ export function PlanGlobalContent({ jumpToDay, setWeekIdx, onJumpAway, checked }
         </div>
       </div>
 
+      <div style={{ padding: "0 16px 16px" }}>
+        <div style={{ fontSize: 11, fontWeight: 800, color: "#8A8A87", letterSpacing: 0.8, marginBottom: 8, paddingLeft: 2 }}>CUANDO LA SEMANA NO SALE</div>
+        <div style={{ background: C.card, border: "1px solid " + C.cardBorder, borderRadius: 14, padding: "4px 16px" }}>
+          {REGLAS_BLOQUE.map((r, i) => (
+            <div key={i} style={{ padding: "10px 0", borderTop: i ? "1px solid " + C.divider : "none" }}>
+              <div style={{ fontSize: 12.5, fontWeight: 800, color: C.text, marginBottom: 2 }}>{r.t}</div>
+              <div style={{ fontSize: 12, color: "#4A4A47", lineHeight: 1.45 }}>{r.d}</div>
+            </div>
+          ))}
+        </div>
+      </div>
+
       <div style={{ padding: "0 16px 8px" }}>
         <div style={{ fontSize: 11, fontWeight: 800, color: "#8A8A87", letterSpacing: 0.8, marginBottom: 8, paddingLeft: 2 }}>SEMANA A SEMANA — PASADO / PRESENTE / FUTURO</div>
       </div>
       <div style={{ padding: "0 16px 30px", display: "flex", flexDirection: "column", gap: 10 }}>
         {WEEKS.map((wk, wi) => {
-          const fc = { RAMPA: CAT.fuerza, RECONSTRUCCION: CAT.cuello, CALIDAD: "#946800", ESPECIFICIDAD: CAT.running, TAPER: "#6B4C8A", OBJETIVO: CAT.running }[wk.fase] || C.textDim;
+          const fc = (FASES_INFO.find(f => f.fase === wk.fase) || {}).color || C.textDim;
           const runSessions = wk.days.filter(d => d.tipo === "run" || d.tipo === "test" || d.tipo === "objetivo");
           const fuerzaDays = wk.days.filter(d => d.tipo === "fuerza").length;
 

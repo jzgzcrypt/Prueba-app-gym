@@ -174,3 +174,34 @@ respetar siempre.
 
 **Cuándo se revisa:** al diseñar el encadenado, en noviembre. Si el Bloque 2 no
 se puede expresar con estos seis papeles, faltan papeles.
+
+---
+
+## D-008 — Si 4:45 no llega, se mueve la fecha, no el ritmo
+
+**22 sep 2026**
+
+La revisión del plan como entrenador partió de lo que no se sabía: el punto
+de partida. Vuelve de 1-3 meses parado y nunca había bajado de 5:00/km, así
+que 4:45 en 7 km (un 5K de unas 23:15) sería su mejor marca. En 11 semanas es
+posible, pero no se puede dar por hecho.
+
+**Decisión:** el objetivo de ritmo no se toca. Lo que se mueve, si hace falta,
+es la fecha, y la decide un dato, no una sensación: el 5 km a tope de S8.
+23:30 o menos, se mantiene el 6 de diciembre; entre 23:30 y 25:00, unas 4
+semanas más; por encima, unas 8. La fecha nueva se elige ese día.
+
+**Lo que cambió con ella**, porque un objetivo que puede moverse necesita
+datos pronto:
+- Tres pruebas: la de partida (S1), 3 km a tope (S4) y el 5 km (S8).
+- Los jueves pasan a series al ritmo objetivo que se alargan, en vez de
+  tempos más lentos con un salto a 4:45 en S9.
+- El pico de carga en S9 y un taper de verdad (S10 era la semana más cargada).
+- Se come la víspera del test y del objetivo; S10-S11 sin déficit.
+- Hombro sostenido hasta S10, prevención de gemelo y cadera todas las
+  semanas, nada a fallo salvo la última serie, face pull y rotación externa
+  por el cuello.
+- Tres carreras más el tenis: la cuarta salida se descartó a propósito.
+
+**Coste asumido:** si hay que alargar, el Bloque 2 empieza más tarde, y
+alargar un bloque hoy es escribir semanas a mano en el plan (ver D-006).

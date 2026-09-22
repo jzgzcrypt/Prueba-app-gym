@@ -188,6 +188,15 @@ export const CATALOGO = {
     sensacion: "Estiramiento amplio del dorsal, distinto a los ejercicios de tirón horizontal.",
     errores: "No flexiones y extiendas el codo durante el movimiento — debe permanecer fijo.", youtube: "" },
 
+  face_pull_polea: { nombre: "Face pull en polea", grupo: "Espalda", categoria: "fuerza",
+    pasos: ["Polea a la altura de la cara, cuerda con las dos manos, palmas mirándose.", "Tira de la cuerda hacia la frente abriendo las manos a los lados de la cara, codos altos.", "Aprieta 1 segundo juntando los omóplatos y vuelve controlado."],
+    sensacion: "Trabajo en la parte de atrás del hombro y entre los omóplatos. Equilibra todo el empuje y protege el cuello y la postura.",
+    errores: "Peso ligero: no encojas los hombros hacia las orejas ni eches el cuello hacia delante.", youtube: "" },
+  rotacion_externa_banda: { nombre: "Rotacion externa con banda", grupo: "Hombro", categoria: "fuerza",
+    pasos: ["Banda atada a la altura del codo. Codo pegado al costado, doblado a 90 grados.", "Gira el antebrazo hacia fuera sin despegar el codo del cuerpo.", "Vuelve lento. Todas las repeticiones de un lado y cambia."],
+    sensacion: "Activación en la parte de atrás del hombro, pequeña pero clara. Protege el hombro de tanto trabajo de laterales y press.",
+    errores: "El codo no se separa del cuerpo. Banda suave: esto no es de fuerza, es de control.", youtube: "" },
+
   // ═══ FUERZA — BÍCEPS ═══
   curl_bayesian_polea: { nombre: "Curl bayesian en polea", grupo: "Biceps", categoria: "fuerza",
     pasos: ["De pie, de espaldas a la polea baja, brazo detrás del cuerpo.", "Flexiona el codo llevando la mano hacia el hombro.", "Baja controlado sintiendo el estiramiento detrás."],
@@ -215,6 +224,19 @@ export const CATALOGO = {
     pasos: ["De pie, barra o mancuernas al frente de los muslos.", "Empuja la cadera hacia atrás manteniendo la espalda recta, baja el peso pegado a las piernas.", "Sube empujando con los isquios y el glúteo, sin redondear la espalda."],
     sensacion: "Estiramiento intenso en isquiotibiales al bajar, activación de glúteo al subir.",
     errores: "No redondees la zona lumbar en ningún punto del recorrido.", youtube: "" },
+
+  gemelo_una_pierna: { nombre: "Elevacion de gemelo a una pierna", grupo: "Pierna", categoria: "fuerza",
+    pasos: ["De pie sobre un escalón, solo la punta del pie apoyada. Una mano en la pared para el equilibrio, no para empujar.", "Sube de puntillas todo lo que puedas con una sola pierna.", "Baja lento, unos 3 segundos, hasta que el talón quede por debajo del escalón.", "Haz la mitad de las series con la rodilla recta y la otra mitad algo flexionada: así trabajan gemelo y sóleo."],
+    sensacion: "Quemazón en la pantorrilla al final de la serie. El tendón de Aquiles se estira abajo, sin dolor.",
+    errores: "No rebotes abajo ni subas a medias. Cuando las 15 salgan fáciles, añade una mancuerna en la mano del mismo lado.", youtube: "" },
+  sentadilla_bulgara: { nombre: "Sentadilla bulgara", grupo: "Pierna", categoria: "fuerza",
+    pasos: ["De espaldas a un banco, apoya en él el empeine del pie de atrás.", "El pie de delante, lo bastante adelantado para que al bajar la rodilla no pase mucho de la punta.", "Baja recto hasta que la rodilla de atrás casi toque el suelo.", "Sube empujando con el talón de delante. Todas las repeticiones de un lado y cambia."],
+    sensacion: "Trabajo en glúteo y cuádriceps de la pierna de delante, y equilibrio. Es una pierna cada vez, como al correr.",
+    errores: "La rodilla de delante no se va hacia dentro. Empieza sin peso; cuando salga limpia, mancuernas ligeras.", youtube: "" },
+  pogo_jumps: { nombre: "Pogo jumps", grupo: "Pierna", categoria: "fuerza",
+    pasos: ["De pie, pies a la anchura de caderas, rodillas casi rectas.", "Salta en el sitio solo con los tobillos, rebotando rápido sobre la parte delantera del pie.", "Contacto con el suelo lo más corto posible, como si quemara."],
+    sensacion: "Rebote elástico en tobillos y gemelos. Mejora cómo devuelve energía el pie al correr.",
+    errores: "No flexiones las rodillas para saltar más alto: la altura no importa, la rapidez sí. Si molesta el Aquiles, fuera ese día.", youtube: "" },
 
   // ═══ FUERZA — CADERA / GLÚTEO ═══
   puente_gluteo_abduccion: { nombre: "Puente gluteo + abduccion", grupo: "Cadera", categoria: "fuerza",

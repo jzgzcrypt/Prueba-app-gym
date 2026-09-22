@@ -102,7 +102,12 @@ test("el lector de RPE toma el esfuerzo, no el denominador", () => {
   assert.equal(rpeMaximo(undefined), 0);
 });
 
-// ─── El bloque aprobado el 21 de septiembre ─────────────────────────────────
+// ─── El bloque revisado el 22 de septiembre ─────────────────────────────────
+
+const minutos = (d) => Number(((d.dur || "").match(/(\d+)/) || [0, 0])[1]);
+const minutosCorriendo = (wk) => wk.days
+  .filter(d => ["run", "test", "objetivo"].includes(d.tipo))
+  .reduce((s, d) => s + minutos(d), 0);
 
 test("la rampa es UNA semana, no dos", () => {
   const rampa = WEEKS.filter(w => w.fase === "RAMPA");
@@ -110,24 +115,74 @@ test("la rampa es UNA semana, no dos", () => {
   assert.equal(rampa[0].n, 1);
 });
 
-test("existe el puente: 6 km casi a ritmo, la semana antes del objetivo", () => {
-  // Sin el, el dia del objetivo pide 7 km a un ritmo solo sostenido 3 km.
-  const puente = WEEKS.find(w => w.fase === "PUENTE");
-  assert.ok(puente, "no hay semana puente");
-  assert.equal(puente.n, 10);
-  const sesion = puente.days.find(d => d.esCalidad);
-  assert.match(sesion.titulo, /6km/);
-  assert.match(sesion.what, /4:5[05]/);
+test("hay tres pruebas: la de partida, el 3 km de S4 y el 5 km de S8", () => {
+  // Sin ellas los ritmos del plan son una suposicion sobre un punto de
+  // partida que nadie ha medido.
+  const tests = WEEKS.flatMap(w => w.days.filter(d => d.tipo === "test").map(d => [w.n, d.dow]));
+  assert.deepEqual(tests, [[1, "Domingo"], [4, "Jueves"], [8, "Domingo"]]);
+  const s8 = WEEKS[7].days.find(d => d.tipo === "test");
+  assert.match(s8.titulo, /5 km/);
+  assert.match(s8.what, /23:30/, "el test de S8 tiene que decir que tiempo decide la fecha");
 });
 
-test("la progresion de ritmo sube escalon a escalon, sin saltos", () => {
-  // 3 km -> 4 km -> 5 km -> test -> 3 km a ritmo -> 6 km -> el dia.
-  const distancias = WEEKS
-    .map(w => w.days.find(d => d.esCalidad))
-    .filter(Boolean)
-    .map(d => Number((d.titulo.match(/(\d+)\s*km/i) || [])[1]))
-    .filter(Number.isFinite);
-  assert.deepEqual(distancias, [3, 4, 5, 3, 6]);
+test("las series al ritmo objetivo se alargan semana a semana", () => {
+  // Antes el ritmo se tocaba por primera vez en S9, de golpe. Ahora se
+  // aprende en tramos cortos y se alargan: 800 m -> 1 km -> 2 km -> 3 km.
+  const tramo = (n) => {
+    const d = WEEKS[n - 1].days.find(x => x.esCalidad);
+    assert.match(d.titulo, /4:45/, `la calidad de S${n} no va al ritmo objetivo`);
+    return Math.max(...d.intervalos.flatMap(b => b.s.filter(([t]) => t === "rapido").map(([, seg]) => seg)));
+  };
+  const tramos = [6, 7, 9, 10].map(tramo);
+  for (let i = 1; i < tramos.length; i++) assert.ok(tramos[i] > tramos[i - 1], "los tramos no crecen: " + tramos);
+});
+
+test("la carga maxima de running esta en S9 y luego baja de verdad", () => {
+  // Antes S10, a 10 dias del objetivo, era la semana con mas running.
+  const carga = WEEKS.map(minutosCorriendo);
+  const pico = Math.max(...carga);
+  assert.equal(carga[8], pico, "el pico no esta en S9: " + carga);
+  assert.ok(carga[9] <= carga[8] * 0.8, "S10 no baja al menos un 20%");
+  assert.ok(carga[10] < carga[9], "S11 no baja respecto a S10");
+});
+
+test("la semana que entra el ritmo no se dispara nada mas", () => {
+  // S5 duplicaba la fuerza la misma semana que subia un 30% el running.
+  const series = (wk) => wk.days.flatMap(d => d.ejercicios || []).reduce((s, e) => s + parseInt(e.series, 10), 0);
+  assert.ok(series(WEEKS[4]) <= series(WEEKS[3]) * 1.15, "la fuerza de S5 sube demasiado");
+  assert.ok(minutosCorriendo(WEEKS[4]) <= minutosCorriendo(WEEKS[3]) * 1.2, "el running de S5 sube demasiado");
+});
+
+test("el hombro se trabaja todas las semanas hasta S10", () => {
+  for (const wk of WEEKS.slice(1, 10)) {
+    const lat = wk.days.flatMap(d => d.ejercicios || [])
+      .filter(e => /laterales/i.test(e.nombre))
+      .reduce((s, e) => s + parseInt(e.series, 10), 0);
+    assert.ok(lat >= 6, `S${wk.n}: solo ${lat} series de laterales`);
+  }
+});
+
+test("la prevencion (gemelo) esta todas las semanas hasta S10", () => {
+  for (const wk of WEEKS.slice(0, 10)) {
+    const hay = wk.days.some(d => (d.ejercicios || []).some(e => /gemelo/i.test(e.nombre)));
+    assert.ok(hay, `S${wk.n} no trae trabajo de gemelo`);
+  }
+});
+
+test("nada va a fallo en todas las series", () => {
+  // Al fallo el trapecio sube y carga el cuello. Solo la ultima serie.
+  for (const wk of WEEKS) for (const d of wk.days) for (const e of d.ejercicios || []) {
+    assert.ok(!/^\d+x(fallo|max)$/.test(e.series), `S${wk.n} ${e.nombre}: ${e.series}`);
+  }
+});
+
+test("el reparto del dia D cuadra con 33:15", () => {
+  // El reparto anterior (5:00, 5:00, 4:50x3) dejaba los dos ultimos km a 4:22.
+  const dia = WEEKS[10].days.find(d => d.tipo === "objetivo");
+  assert.match(dia.what, /Km 1 a 4:48/);
+  const hastaKm6 = 288 + 5 * 285;
+  const km7 = 33 * 60 + 15 - hastaKm6;
+  assert.ok(km7 >= 270, "el ultimo km pide " + km7 + " s: mas rapido que 4:30");
 });
 
 test("el taper es una sola semana", () => {

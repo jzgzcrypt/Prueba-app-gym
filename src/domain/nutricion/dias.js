@@ -79,9 +79,19 @@ export const COMIDA = {
  *
  * Se comen los dias de: tenis (1h30 de intensidad real), la sesion de calidad,
  * el test, el dia del objetivo, y la tirada larga del domingo.
+ *
+ * Y dos excepciones que marca el plan, no el dia:
+ *  - `vispera`: el dia antes del test de 5 km y del objetivo. El glucogeno se
+ *    carga el dia ANTES; llegar a un esfuerzo a tope desde un dia de recorte
+ *    es salir con el deposito a medias. La vispera de la calidad de los
+ *    jueves no hace falta: es por la tarde, y la cantina de ese mismo dia ya
+ *    llena lo que una sesion de 40 minutos gasta.
+ *  - `sinDeficit`: las dos ultimas semanas (S10-S11). El rendimiento manda
+ *    sobre el peso cuando ya no queda nada que construir.
  */
 export function comidaDelDia(dia) {
   if (!dia) return COMIDA.recortar;
+  if (dia.vispera || dia.sinDeficit) return COMIDA.comer;
   const esFuerte = dia.tipo === "compromiso"
     || dia.esCalidad
     || dia.tipo === "test"

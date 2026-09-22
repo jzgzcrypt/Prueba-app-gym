@@ -28,14 +28,14 @@ test("el test y el dia del objetivo se comen", () => {
 });
 
 test("los dias de fuerza y de descanso recortan", () => {
-  for (const wk of WEEKS) for (const d of wk.days) {
+  for (const wk of WEEKS.filter(w => !w.sinDeficit)) for (const d of wk.days) {
     if (d.tipo === "fuerza") assert.equal(comidaDelDia(d).id, "recortar", `${wk.n}/${d.dow}`);
   }
 });
 
 test("cada semana tiene mas dias de recortar que de comer", () => {
   // Si no, no hay deficit y la grasa no se mueve.
-  for (const wk of WEEKS) {
+  for (const wk of WEEKS.filter(w => !w.sinDeficit)) {
     const comer = wk.days.filter(d => comidaDelDia(d).id === "comer").length;
     assert.ok(comer <= 3, `la semana ${wk.n} come ${comer} dias`);
     assert.ok(comer >= 1, `la semana ${wk.n} no come ningun dia`);
@@ -54,5 +54,22 @@ test("la tirada larga del domingo siempre se come", () => {
     const domingo = wk.days[6];
     if (domingo.tipo === "libre") continue;
     assert.equal(comidaDelDia(domingo).id, "comer", `la semana ${wk.n} recorta el domingo`);
+  }
+});
+
+test("la vispera del test de 5 km y del objetivo se come", () => {
+  // El glucogeno se carga el dia antes. Antes el sabado previo al objetivo
+  // era un dia de recorte a 2.100 kcal.
+  for (const n of [8, 11]) {
+    const sabado = WEEKS[n - 1].days[5];
+    assert.equal(comidaDelDia(sabado).id, "comer", `el sabado de S${n} recorta`);
+  }
+});
+
+test("las dos ultimas semanas van sin deficit", () => {
+  const sin = WEEKS.filter(w => w.sinDeficit).map(w => w.n);
+  assert.deepEqual(sin, [10, 11]);
+  for (const n of sin) for (const d of WEEKS[n - 1].days) {
+    assert.equal(comidaDelDia(d).id, "comer", `S${n}/${d.dow} recorta`);
   }
 });

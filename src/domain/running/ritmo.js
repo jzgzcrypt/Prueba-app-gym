@@ -1,15 +1,16 @@
-
-// Curva de ritmo objetivo esperado, semana a semana, sacada de los ritmos
-// planificados reales en las sesiones de calidad/test de cada semana.
+// Curva de ritmo esperado, semana a semana, sacada de los ritmos planificados
+// en las sesiones de calidad y test de cada semana.
 // Formato: segundos por km (para poder graficar y comparar numericamente).
+// Desde S6 la calidad son series AL ritmo objetivo, asi que la curva se aplana:
+// lo que progresa es la longitud de los tramos (800 m -> 3 km), no el ritmo.
 export const RITMO_ESPERADO = {
-  4: 355,  // fartlek ~5:55/km (RPE7 en zona ~5:50-6:00)
-  5: 350,  // fartlek progresando
-  6: 327,  // ritmo especifico 5:20-5:35 -> ~5:27 promedio
-  7: 305,  // ritmo 5km 5:00-5:10 -> ~5:05
-  8: 297,  // semana del test: el 7km manda, no hay sesion de ritmo
-  9: 285,  // 3km exacto a 4:45
-  10: 285, // taper, mantener
+  4: 290,  // prueba de 3 km a tope: ~14:30 va en linea con el objetivo
+  5: 275,  // series 6x400 a 4:35, algo mas rapido que el objetivo
+  6: 285,  // series 5x800 a 4:45
+  7: 285,  // series 4x1 km a 4:45
+  8: 282,  // test de 5 km: 23:30 o menos (4:42/km) mantiene la fecha
+  9: 285,  // series 3x2 km a 4:45
+  10: 285, // series 2x3 km a 4:45
   11: 285, // objetivo: 4:45/km = 285s
 };
 export function parseRitmoToSeconds(str) {

@@ -22,7 +22,9 @@ test("la semana se reparte entre días de comer y de recortar, y suman siete", (
   for (const w of WEEKS) {
     const c = tiposDeSemana(w.days, comidaDelDia);
     assert.equal(c.comer + c.recortar, 7, "semana " + w.n);
-    assert.ok(c.comer >= 1 && c.recortar >= 1, "semana " + w.n);
+    assert.ok(c.comer >= 1, "semana " + w.n);
+    // Las semanas sin deficit (S10-S11) no tienen dias de recortar, a proposito.
+    if (!w.sinDeficit) assert.ok(c.recortar >= 1, "semana " + w.n);
   }
 });
 

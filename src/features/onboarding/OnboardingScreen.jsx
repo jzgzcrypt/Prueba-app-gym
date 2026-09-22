@@ -10,7 +10,7 @@ export function OnboardingScreen({ onFinish }) {
   const pasos = [
     {
       titulo: "Bienvenido a Programa 7K",
-      texto: "11 semanas hasta el 15 de noviembre: 7km a 4:45/km. En paralelo, físico visible y salud de cuello real. Todo en un solo sitio, sin presión ni rachas.",
+      texto: "11 semanas hasta el 6 de diciembre: 7km a 4:45/km. En paralelo, físico visible y salud de cuello real. Todo en un solo sitio, sin presión ni rachas.",
       icono: LOGO_7K,
     },
     {

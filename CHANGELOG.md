@@ -21,6 +21,41 @@ Todo cambio que se haga en la app se anota aquí. Sin excepciones.
 
 ## [Sin publicar]
 
+### Cambiado — El plan del 7K, revisado como entrenador
+- **Tres pruebas para saber de dónde partes.** El domingo de S1, cuánto
+  aguantas corriendo seguido; el jueves de S4, 3 km a tope; el domingo de S8,
+  5 km a tope. Antes los ritmos se suponían sobre un punto de partida que
+  nadie había medido.
+- **El 5 km de S8 decide la fecha.** 23:30 o menos, el objetivo se queda el
+  6 de diciembre. Si no, se alarga el bloque: se mueve la fecha, no se baja el
+  ritmo.
+- **Los jueves, series al ritmo objetivo que se alargan** (800 m, 1 km, 2 km,
+  3 km), en vez de tempos más lentos y un salto de golpe a 4:45 en S9.
+- **La carga máxima pasa a S9 y el taper es de verdad.** Antes S10, a diez días
+  del objetivo, era la semana con más running.
+- **La tirada larga llega a 55-60 min** en S7 y S9: con tres carreras a la semana,
+  el volumen sale de ahí.
+- **El reparto del día D cuadra**: km 1 a 4:48, km 2-6 a 4:45, km 7 a tope. El
+  anterior pedía los dos últimos km a 4:22.
+- **Fuerza:** S5 ya no duplica el volumen la semana que entra el ritmo; el
+  hombro sigue hasta S10; mínimo fijo de pecho y espalda; nada a fallo salvo
+  la última serie, porque al fallo el trapecio carga el cuello.
+- **Prevención todas las semanas hasta S10:** gemelo a una pierna, glúteo
+  medio y plancha lateral. Antes la cadera desaparecía justo en S6. Entran la
+  sentadilla búlgara y los pogo jumps.
+- **Cuello:** face pull y rotación externa dos veces por semana; dominadas sin
+  llegar al límite.
+- **Comida:** se come la víspera del test de 5 km y del objetivo, y S10-S11 van
+  sin déficit.
+- **Coach > Plan:** las fases describen el plan que se sigue (antes, uno
+  antiguo) y hay reglas para cuando la semana no sale: qué hacer si pierdes el
+  jueves, si enfermas o si vas cansado.
+
+### Arreglado — Fechas y curva de ritmo
+- La curva de ritmo esperado del Coach iba desplazada una semana.
+- La bienvenida y el README decían 15 de noviembre; el bloque acaba el 6 de
+  diciembre.
+
 ### Arreglado — Una sesión marcada sin querer se puede desmarcar
 - **Antes, marcar un running o una fuerza como hecha no tenía vuelta atrás:**
   el botón desaparecía y solo quedaba "SESIÓN COMPLETADA". Un toque sin querer

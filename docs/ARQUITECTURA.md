@@ -96,7 +96,7 @@ historial con el estado vacío del arranque.
 
 ## Lo que hoy está cableado a propósito
 
-Tres cosas están fijas porque el objetivo actual (Base 7K, hasta el 15 nov de
+Tres cosas están fijas porque el objetivo actual (Base 7K, hasta el 6 dic de
 2026) no necesita más, y resolverlas mal ahora costaría más que resolverlas
 bien después. Están aisladas para que su día llegue sin cirugía:
 
