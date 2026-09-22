@@ -101,6 +101,13 @@ const HOMBRO_EXPRES = (n) => ({
 
 const CALENTAR = "15 min suave + 3 progresivos de 100 m.";
 
+// Campos que lee la app al cerrar una sesion (domain/progreso/libreta.js):
+//   ritmo    s/km que pide la sesion, para comparar el ritmo que apuntas.
+//   prueba   { distKm } convierte el tiempo apuntado en su 7K equivalente;
+//            enLinea: tiempo (s) que va en linea con el objetivo;
+//            decide: la prueba que decide la fecha (REGLAS_BLOQUE);
+//            partida: la prueba de S1, que no se cronometra.
+
 export const WEEKS = [
   // ══ S1 · RAMPA ══ Entrar en la rutina. El domingo, la prueba de partida.
   { n: 1, fase: "RAMPA",
@@ -134,6 +141,7 @@ export const WEEKS = [
           { grupo: "Core", nombre: "Plancha lateral", series: "2x20s/lado" },
         ]},
       { dow: "Domingo", tipo: "test", cat: "runQ", titulo: "Prueba de partida", dur: "30 min", rpe: "4/10",
+        prueba: { partida: true },
         what: "5 min andando rápido. Luego corre hasta 25 min SEGUIDOS a ritmo cómodo, en llano y grabando con Strava. Si necesitas caminar, caminas y sigues. No es un examen: es saber desde dónde empiezas. Apunta cuántos minutos aguantaste sin parar, el ritmo medio y cómo acabaste." },
     ]},
 
@@ -222,6 +230,7 @@ export const WEEKS = [
           FACE_PULL,
         ]},
       { dow: "Jueves", tipo: "test", cat: "runQ", titulo: "Prueba 3 km a tope", dur: "40 min", rpe: "9/10", esCalidad: true,
+        prueba: { distKm: 3, enLinea: 870 },
         what: CALENTAR + " Luego 3 km a tope, en llano y lo más regular que puedas: sal algo por debajo de lo que crees y aprieta el último km. 10 min suave para acabar. Apunta el tiempo total: de aquí salen los ritmos de S5 a S7. Orientativo: por debajo de ~14:30 vas en línea con 4:45." },
       { dow: "Viernes", tipo: "fuerza", cat: "tiron", titulo: "Tirón — Espalda, hombro y bíceps", dur: "45 min",
         ejercicios: [
@@ -255,7 +264,7 @@ export const WEEKS = [
           { grupo: "Triceps", nombre: "Extension polea alta agarre en V", series: "2x10" },
           FACE_PULL,
         ]},
-      { dow: "Jueves", tipo: "run", cat: "runQ", titulo: "Series 6x400m a 4:35", dur: "40 min", rpe: "7/10", esCalidad: true,
+      { dow: "Jueves", tipo: "run", cat: "runQ", titulo: "Series 6x400m a 4:35", dur: "40 min", rpe: "7/10", esCalidad: true, ritmo: 275,
         what: CALENTAR + " 6x400 m a 4:35/km (~1:50 cada una) con 90 s de trote suave entre series. 10 min suave. Un poco más rápido que el objetivo, para que 4:45 empiece a parecer cómodo. Si el 3 km de S4 salió más lento de 4:50/km, haz las series a ese ritmo.",
         intervalos: [{r:6,s:[["rapido",110],["suave",90]]}] },
       { dow: "Viernes", tipo: "fuerza", cat: "tiron", titulo: "Tirón — Espalda, hombro y bíceps", dur: "45 min",
@@ -289,7 +298,7 @@ export const WEEKS = [
           { grupo: "Triceps", nombre: "Extension katana en polea baja", series: "3x10" },
           FACE_PULL,
         ]},
-      { dow: "Jueves", tipo: "run", cat: "runQ", titulo: "Series 5x800m a 4:45", dur: "45 min", rpe: "7/10", esCalidad: true,
+      { dow: "Jueves", tipo: "run", cat: "runQ", titulo: "Series 5x800m a 4:45", dur: "45 min", rpe: "7/10", esCalidad: true, ritmo: 285,
         what: CALENTAR + " 5x800 m a 4:45/km (~3:48 cada una) con 2 min de trote suave entre series. 10 min suave. La primera vez que corres al ritmo del objetivo: en tramos cortos, para aprenderlo.",
         intervalos: [{r:5,s:[["rapido",228],["suave",120]]}] },
       { dow: "Viernes", tipo: "fuerza", cat: "tiron", titulo: "Tirón — Espalda, hombro y bíceps", dur: "45 min",
@@ -323,7 +332,7 @@ export const WEEKS = [
           { grupo: "Triceps", nombre: "Extension polea alta agarre en V", series: "3x12" },
           FACE_PULL,
         ]},
-      { dow: "Jueves", tipo: "run", cat: "runQ", titulo: "Series 4x1km a 4:45", dur: "45 min", rpe: "7-8/10", esCalidad: true,
+      { dow: "Jueves", tipo: "run", cat: "runQ", titulo: "Series 4x1km a 4:45", dur: "45 min", rpe: "7-8/10", esCalidad: true, ritmo: 285,
         what: CALENTAR + " 4x1 km a 4:45/km con 90 s de trote suave entre series. 10 min suave. Cuatro de los siete kilómetros del objetivo, a su ritmo.",
         intervalos: [{r:4,s:[["rapido",285],["suave",90]]}] },
       { dow: "Viernes", tipo: "fuerza", cat: "tiron", titulo: "Tirón — Espalda, hombro y bíceps", dur: "45 min",
@@ -361,6 +370,7 @@ export const WEEKS = [
       { dow: "Sabado", tipo: "run", cat: "runZ2", titulo: "Activación 15 min", dur: "15 min", rpe: "2/10", vispera: true,
         what: "15 min trote suave. Hoy se come con carbohidrato: mañana es el test." },
       { dow: "Domingo", tipo: "test", cat: "runQ", titulo: "Test 5 km — decide la fecha", dur: "45 min", rpe: "9/10",
+        prueba: { distKm: 5, decide: true },
         what: CALENTAR + " 5 km a tope, en llano. Km 1 algo contenido, luego regular, y el último lo que quede. Con el tiempo se decide: 23:30 o menos, el objetivo se queda el 6 de diciembre. Entre 23:30 y 25:00, el bloque se alarga unas 4 semanas. Más de 25:00, unas 8." },
     ]},
 
@@ -376,7 +386,7 @@ export const WEEKS = [
           { grupo: "Espalda", nombre: "Jalon al pecho unilateral", series: "2x10" },
           FACE_PULL, GEMELO, CLAMSHELL,
         ]},
-      { dow: "Jueves", tipo: "run", cat: "runQ", titulo: "Series 3x2km a 4:45", dur: "55 min", rpe: "8/10", esCalidad: true,
+      { dow: "Jueves", tipo: "run", cat: "runQ", titulo: "Series 3x2km a 4:45", dur: "55 min", rpe: "8/10", esCalidad: true, ritmo: 285,
         what: CALENTAR + " 3x2 km a 4:45/km con 2 min de trote suave entre series. 10 min suave. La sesión más dura del bloque: 6 km al ritmo del objetivo.",
         intervalos: [{r:3,s:[["rapido",570],["suave",120]]}] },
       HOMBRO_EXPRES(5),
@@ -399,7 +409,7 @@ export const WEEKS = [
           FACE_PULL,
           { grupo: "Pierna", nombre: "Elevacion de gemelo a una pierna", series: "2x15/lado" },
         ]},
-      { dow: "Jueves", tipo: "run", cat: "runQ", titulo: "Series 2x3km a 4:45", dur: "45 min", rpe: "8/10", esCalidad: true,
+      { dow: "Jueves", tipo: "run", cat: "runQ", titulo: "Series 2x3km a 4:45", dur: "45 min", rpe: "8/10", esCalidad: true, ritmo: 285,
         what: CALENTAR + " 2x3 km a 4:45/km con 2 min de trote suave entre medias. 10 min suave. Seis kilómetros al ritmo, en dos tramos. Si esto sale, el domingo 11 sale.",
         intervalos: [{r:2,s:[["rapido",855],["suave",120]]}] },
       HOMBRO_EXPRES(3),
@@ -416,13 +426,14 @@ export const WEEKS = [
       { dow: "Martes", tipo: "run", cat: "runZ2", titulo: "Activación mínima", dur: "20 min", rpe: "2-3/10",
         what: "15 min trote muy suave." },
       { dow: "Miercoles", tipo: "libre", cat: "descanso", titulo: "Descanso total" },
-      { dow: "Jueves", tipo: "run", cat: "runQ", titulo: "Recordatorio 2x1km a 4:45", dur: "30 min", rpe: "5/10",
+      { dow: "Jueves", tipo: "run", cat: "runQ", titulo: "Recordatorio 2x1km a 4:45", dur: "30 min", rpe: "5/10", ritmo: 285,
         what: "10 min suave + 2x1 km a 4:45/km con 2 min de trote entre medias + 5 min suave. Poco volumen, el ritmo exacto: que el cuerpo lo recuerde.",
         intervalos: [{r:2,s:[["rapido",285],["suave",120]]}] },
       { dow: "Viernes", tipo: "libre", cat: "descanso", titulo: "Descanso — prepara todo" },
       { dow: "Sabado", tipo: "run", cat: "runZ2", titulo: "Activación final", dur: "15 min", rpe: "2/10", vispera: true,
         what: "10 min trote muy suave. Hoy se come bien, con carbohidrato en cada comida." },
-      { dow: "Domingo", tipo: "objetivo", cat: "runQ", titulo: "7KM A 4:45/km — EL DÍA", dur: "~33:15", rpe: "8-9/10",
+      { dow: "Domingo", tipo: "objetivo", cat: "runQ", titulo: "7KM A 4:45/km — EL DÍA", dur: "~33:15", rpe: "8-9/10", ritmo: 285,
+        prueba: { distKm: 7 },
         what: "Calienta 10 min suave + 3 progresivos. Km 1 a 4:48, y no más rápido: la emoción te va a empujar. Km 2 a 6 a 4:45 clavados. Km 7 a tope, lo que quede. Desayuno con carbohidrato 2-3 h antes." },
     ]},
 ];

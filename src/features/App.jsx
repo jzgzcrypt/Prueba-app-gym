@@ -22,6 +22,8 @@ import { OnboardingScreen } from "@/features/onboarding/OnboardingScreen";
 import { ProgresoScreen } from "@/features/progreso/ProgresoScreen";
 import { SemanaScreen } from "@/features/semana/SemanaScreen";
 import { WorkoutMode } from "@/features/workout/WorkoutMode";
+import { CierreSesion } from "@/features/workout/CierreSesion";
+import { copiaPendiente } from "@/domain/progreso/libreta";
 
 export default function App() {
   const todayIdx = findTodayIndex();
@@ -51,6 +53,8 @@ export default function App() {
   const [guerreroLog, setGuerreroLog] = useState({}); // { dayKey: true } - dias que has practicado guerrero
   const [workoutWeights, setWorkoutWeights] = useState({}); // { dayKey: { exerciseIdx: { serieIdx: "20" } } }
   const [activeWorkout, setActiveWorkout] = useState(null);
+  // La pagina de la libreta que sale al terminar una sesion: la clave del dia.
+  const [cierre, setCierre] = useState(null);
   const [medidas, setMedidas] = useState([]); // [{fecha, peso, cintura, cadera}]
   const [ritmoReal, setRitmoReal] = useState({}); // { dayKey: "5:12/km" }
   const [ritmoTramos, setRitmoTramos] = useState({}); // { dayKey: "6:00" } - ritmo en los tramos corriendo (fase correr/caminar)
@@ -342,6 +346,12 @@ export default function App() {
   const goToday = () => { setFlatIdx(todayIdx); setScreen("hoy"); setExpandedBlock("main"); };
   const jumpToDay = (wIdx, dIdx) => { setFlatIdx(FLAT_DAYS.findIndex(d => d.weekIdx === wIdx && d.dayIdx === dIdx)); setScreen("hoy"); };
 
+  // Si anotas un ritmo, esa sesion se da por hecha automaticamente.
+  const guardarRitmo = (key, valor) => {
+    setRitmoReal(p => Object.assign({}, p, { [key]: valor }));
+    if (valor.trim()) setChecked(p => Object.assign({}, p, { [key]: true }));
+  };
+
   // ─── Exportar / Importar todos los datos como JSON ─────────────────────
   const exportData = () => {
     const payload = {
@@ -352,10 +362,22 @@ export default function App() {
       comidasLog, cambiosMenu, menuEditado, compraMarcada, comidasFuera, magiaProgress, magiaRepaso,
       magiaLog, guerreroLog, bloquesHistorial,
     };
+    const nombre = "programa-7k-backup-" + todayLocalIso() + ".json";
     const blob = new Blob([JSON.stringify(payload, null, 2)], { type: "application/json" });
+    // En el movil, compartir deja guardarla en Archivos o iCloud, que es donde
+    // sobrevive a un cambio de telefono. Una descarga en Safari se pierde.
+    try {
+      const archivo = new File([blob], nombre, { type: "application/json" });
+      if (navigator.canShare && navigator.canShare({ files: [archivo] })) {
+        navigator.share({ files: [archivo], title: "Copia del Programa 7K" })
+          .then(() => setUltimoBackup(todayLocalIso()))
+          .catch(() => { /* cancelada: no cuenta como copia */ });
+        return;
+      }
+    } catch { /* sin Web Share: se descarga */ }
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
-    a.href = url; a.download = "programa-7k-backup-" + todayLocalIso() + ".json";
+    a.href = url; a.download = nombre;
     document.body.appendChild(a); a.click(); document.body.removeChild(a);
     URL.revokeObjectURL(url);
     setUltimoBackup(todayLocalIso());
@@ -424,6 +446,11 @@ export default function App() {
     }} />;
   }
 
+  if (cierre) {
+    return <CierreSesion dayKey={cierre} workoutWeights={workoutWeights} ritmoReal={ritmoReal}
+      onGuardarRitmo={guardarRitmo} onVolver={() => { setCierre(null); setExpandedBlock("main"); }} />;
+  }
+
   if (activeWorkout) {
     const wDay = FLAT_DAYS.find(d => claveDia(d) === activeWorkout);
     const wMov = getMovilidad(wDay.cat, wDay.weekN);
@@ -455,7 +482,7 @@ export default function App() {
     return (
       <WorkoutMode day={wDay} mov={wMov} progress={workoutProgress[activeWorkout] || {}}
         onUpdateProgress={(ei, sd) => setWorkoutProgress(p => Object.assign({}, p, { [activeWorkout]: Object.assign({}, p[activeWorkout]||{}, { [ei]: sd }) }))}
-        onFinish={() => { setChecked(p => Object.assign({}, p, { [activeWorkout]: true })); setActiveWorkout(null); }}
+        onFinish={() => { setChecked(p => Object.assign({}, p, { [activeWorkout]: true })); setCierre(activeWorkout); setActiveWorkout(null); }}
         onExit={() => setActiveWorkout(null)}
         weights={workoutWeights[activeWorkout] || {}}
         onUpdateWeight={(ei, si, val) => {
@@ -531,12 +558,11 @@ export default function App() {
             sensaciones={sensaciones} setSensaciones={setSensaciones}
             editingRitmo={editingRitmo} setEditingRitmo={setEditingRitmo}
             saveRitmo={(key) => {
-              const valor = ritmoInput[key] || "";
-              setRitmoReal(p => Object.assign({}, p, { [key]: valor }));
+              guardarRitmo(key, ritmoInput[key] || "");
               setEditingRitmo(p => Object.assign({}, p, { [key]: false }));
-              // Si anotas un ritmo, esa sesion se da por hecha automaticamente
-              if (valor.trim()) setChecked(p => Object.assign({}, p, { [key]: true }));
             }}
+            copia={copiaPendiente(ultimoBackup, todayLocalIso(), Object.values(checked).some(Boolean))}
+            onCopia={exportData}
             postponed={postponed} setPostponed={setPostponed}
             expandedBlock={expandedBlock} setExpandedBlock={setExpandedBlock}
             painLog={painLog} setPainLog={setPainLog}

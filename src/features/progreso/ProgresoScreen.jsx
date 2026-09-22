@@ -1,7 +1,9 @@
 "use client";
 
-import { claveDia } from "@/domain/plan/calendario";
-import { useState } from "react";
+import { FECHA_INICIO, FLAT_DAYS, claveDia, todayLocalIso } from "@/domain/plan/calendario";
+import { useEffect, useRef, useState } from "react";
+import { diasParaMedir, lecturaPrueba } from "@/domain/progreso/libreta";
+import { LecturaSesion } from "@/features/ui/lectura";
 import { C, CAT } from "@/design/tokens";
 import { QuickFieldInput, SimpleLineChart } from "@/features/ui/charts";
 export function ProgresoScreen({ medidas, setMedidas, ritmoReal, weeks, checked, workoutWeights }) {
@@ -10,6 +12,10 @@ export function ProgresoScreen({ medidas, setMedidas, ritmoReal, weeks, checked,
   const [quickField, setQuickField] = useState(null); // "peso" | "cintura" | "cadera" | "hombro" | "cadenaPosterior" | "columna" | "caderaMov" | null (menu)
   const [showExport, setShowExport] = useState(false);
   const [selectedExercise, setSelectedExercise] = useState(null);
+  const formRef = useRef(null);
+  useEffect(() => {
+    if (showForm && formRef.current) formRef.current.scrollIntoView({ behavior: "smooth", block: "start" });
+  }, [showForm]);
   const [showComparativa, setShowComparativa] = useState(false);
 
   const handlePhotoUpload = (e) => {
@@ -25,7 +31,8 @@ export function ProgresoScreen({ medidas, setMedidas, ritmoReal, weeks, checked,
   };
 
   const addMedida = () => {
-    const tieneAlgo = form.peso || form.cintura || form.anchoHombro || form.cadera || form.hombro || form.cadenaPosterior || form.columna || form.caderaMov;
+    // La foto sola tambien vale: es la medicion que mas dice de la estetica.
+    const tieneAlgo = form.peso || form.cintura || form.anchoHombro || form.cadera || form.hombro || form.cadenaPosterior || form.columna || form.caderaMov || form.foto;
     if (!tieneAlgo) return;
     const fecha = new Date().toLocaleDateString("es-ES", { day: "2-digit", month: "short" });
     setMedidas(prev => [...prev, {
@@ -131,6 +138,11 @@ export function ProgresoScreen({ medidas, setMedidas, ritmoReal, weeks, checked,
     <div style={{ padding: "20px 16px" }}>
       <div style={{ fontSize: 22, fontWeight: 900, color: C.text, marginBottom: 4 }}>PROGRESO</div>
       <div style={{ fontSize: 12, color: C.textDim, marginBottom: 18, fontWeight: 600 }}>Datos objetivos. Sin rachas, sin porcentajes.</div>
+
+      <VamosALlegar ritmoReal={ritmoReal} />
+
+      <Estetica medidas={medidas} exerciseProgress={exerciseProgress}
+        onMedir={() => { setQuickField(null); setShowForm(true); }} />
 
       <div style={{ background: C.card, border: "1px solid " + C.cardBorder, borderRadius: 14, padding: "16px 18px", marginBottom: 12 }}>
         {ratioData.length > 1 && (
@@ -241,7 +253,7 @@ export function ProgresoScreen({ medidas, setMedidas, ritmoReal, weeks, checked,
       )}
 
       {showForm && (
-        <div style={{ background: C.card, border: "1px solid " + C.cardBorder, borderRadius: 14, padding: "16px 18px", marginBottom: 12 }}>
+        <div ref={formRef} style={{ background: C.card, border: "1px solid " + C.cardBorder, borderRadius: 14, padding: "16px 18px", marginBottom: 12 }}>
           <button className="btn" onClick={() => setShowForm(false)} style={{ fontSize: 11.5, color: "#787774", fontWeight: 700, marginBottom: 10 }}>&lsaquo; Volver a anotar solo un dato</button>
           <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
             {[["peso","Peso (kg) — opcional"],["cintura","Cintura (cm) — opcional"],["anchoHombro","Ancho de hombro (cm) — opcional"],["cadera","Cadera (cm) — opcional"],["hombro","Hombro — test manos espalda (cm) — opcional"]].map(([key,label]) => (
@@ -356,4 +368,110 @@ function reducirFoto(dataUrl) {
     img.onerror = reject;
     img.src = dataUrl;
   });
+}
+
+const tarjeta = { background: C.card, border: "1px solid " + C.cardBorder, borderRadius: 14, padding: "14px 16px", marginBottom: 12 };
+const etiqueta = { fontSize: 10.5, fontWeight: 800, color: C.textDim, letterSpacing: 0.6, marginBottom: 8 };
+
+/** Las pruebas del bloque, en orden, con lo que dijo cada una. Es la respuesta
+ *  a "¿vamos a llegar?" sacada de datos, no de sensaciones. */
+function VamosALlegar({ ritmoReal }) {
+  const hoy = todayLocalIso();
+  const pruebas = FLAT_DAYS.filter(d => d.prueba);
+  const hechas = pruebas.map(d => ({ d, l: lecturaPrueba(d.prueba, ritmoReal[claveDia(d)]) }))
+    .filter(x => x.l && !x.l.error);
+  const ultima = hechas.at(-1);
+  const proxima = pruebas.find(d => d.isoDate >= hoy && !ritmoReal[claveDia(d)]);
+  return (
+    <div style={{ ...tarjeta, borderLeft: "3px solid " + CAT.running }}>
+      <div style={etiqueta}>¿VAMOS A LLEGAR?</div>
+      {ultima ? (
+        <div style={{ fontSize: 13.5, color: C.text, fontWeight: 700, marginBottom: 10 }}>
+          Tu 7K equivalente: {formatea(ultima.l.equivalente)} · objetivo 33:15
+        </div>
+      ) : (
+        <div style={{ fontSize: 13, color: "#4A4A47", lineHeight: 1.45, marginBottom: 10 }}>
+          Lo dirán las pruebas. Cada una convierte tu tiempo en el 7K que harías hoy.
+        </div>
+      )}
+      {pruebas.map(d => {
+        const texto = ritmoReal[claveDia(d)];
+        return (
+          <div key={d.isoDate} style={{ padding: "9px 0", borderTop: "1px solid " + C.divider }}>
+            <div style={{ display: "flex", justifyContent: "space-between", gap: 8 }}>
+              <span style={{ fontSize: 12.5, fontWeight: 700, color: C.text }}>S{d.weekN} · {d.titulo}</span>
+              <span style={{ fontSize: 11.5, fontWeight: 600, color: texto ? C.ok : C.textDim, flexShrink: 0 }}>
+                {texto ? texto : d.isoDate === hoy ? "Hoy" : d.date}
+              </span>
+            </div>
+            {texto && <LecturaSesion day={d} texto={texto} ritmoReal={ritmoReal} />}
+          </div>
+        );
+      })}
+      {proxima && !ritmoReal[claveDia(proxima)] && (
+        <div style={{ fontSize: 11.5, color: C.textDim, marginTop: 8 }}>
+          Próxima: {proxima.titulo.toLowerCase()}, {proxima.dow.toLowerCase()} {proxima.date}.
+        </div>
+      )}
+    </div>
+  );
+}
+
+function formatea(seg) {
+  const m = Math.floor(seg / 60), s = Math.round(seg % 60);
+  return m + ":" + String(s).padStart(2, "0");
+}
+
+/** Cintura, hombro/cintura, laterales y fotos en una tarjeta, con cuando toca
+ *  medir. Lo que dice si la estetica avanza, sin mirar la bascula. */
+function Estetica({ medidas, exerciseProgress, onMedir }) {
+  const serie = (k) => medidas.filter(m => m[k] != null);
+  // Sin ninguna medida aun, falta el punto de partida: toca medir ya, no dentro
+  // de dos semanas.
+  const sinPartida = !medidas.some(m => m.cintura != null || m.foto);
+  const faltan = sinPartida ? 0 : diasParaMedir(FECHA_INICIO, todayLocalIso());
+  const cintura = serie("cintura");
+  const ratio = medidas.filter(m => m.anchoHombro != null && m.cintura).map(m => ({ fecha: m.fecha, v: m.anchoHombro / m.cintura }));
+  const fotos = medidas.filter(m => m.foto).length;
+  const laterales = ["Elevaciones laterales polea muñequera cruzadas", "Elevaciones laterales mancuerna"]
+    .map(n => ({ n, s: exerciseProgress[n] || [] })).filter(x => x.s.length);
+
+  const cambio = (arr, dec = 1) => {
+    if (arr.length < 2) return null;
+    const d = arr.at(-1).v - arr[0].v;
+    return (d > 0 ? "+" : "") + d.toFixed(dec);
+  };
+  const cinturaV = cintura.map(m => ({ fecha: m.fecha, v: m.cintura }));
+  const fila = (label, valor, nota) => (
+    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", padding: "8px 0", borderTop: "1px solid " + C.divider, gap: 8 }}>
+      <span style={{ fontSize: 12.5, fontWeight: 700, color: C.text }}>{label}</span>
+      <span style={{ textAlign: "right" }}>
+        <span className="mono" style={{ fontSize: 13.5, fontWeight: 800, color: C.text }}>{valor}</span>
+        {nota && <span style={{ fontSize: 11.5, fontWeight: 700, color: C.textDim, marginLeft: 6 }}>{nota}</span>}
+      </span>
+    </div>
+  );
+
+  return (
+    <div style={{ ...tarjeta, borderLeft: "3px solid " + CAT.fuerza }}>
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline" }}>
+        <div style={etiqueta}>ESTÉTICA</div>
+        <div style={{ fontSize: 11.5, fontWeight: 700, color: faltan === 0 ? C.amber : C.textDim }}>
+          {sinPartida ? "Falta el punto de partida" : faltan === 0 ? "Hoy toca medir" : "Medir en " + faltan + (faltan === 1 ? " día" : " días")}
+        </div>
+      </div>
+      {fila("Cintura", cinturaV.length ? cinturaV.at(-1).v + " cm" : "—", cambio(cinturaV) ? cambio(cinturaV) + " cm desde " + cinturaV[0].fecha : cinturaV.length ? "primera medida" : "sin medir")}
+      {fila("Hombro ÷ cintura", ratio.length ? ratio.at(-1).v.toFixed(2) : "—", cambio(ratio, 2) ? cambio(ratio, 2) + " (sube = bien)" : ratio.length ? "primera medida" : "mide hombro y cintura")}
+      {laterales.length
+        ? laterales.map(({ n, s }) => fila(n.includes("polea") ? "Laterales polea" : "Laterales mancuerna", s.at(-1).v + " kg",
+            s.length > 1 ? (s.at(-1).v - s[0].v >= 0 ? "+" : "") + (s.at(-1).v - s[0].v) + " kg desde " + s[0].fecha : "primer registro"))
+        : fila("Laterales", "—", "apunta el peso en cada sesión")}
+      {fila("Fotos", String(fotos), fotos >= 2 ? "antes / ahora abajo" : "una cada 2 semanas")}
+      <button className="btn" onClick={onMedir} style={{
+        width: "100%", marginTop: 10, padding: "12px", borderRadius: 10,
+        background: faltan === 0 ? C.accent : C.surfaceMuted, color: faltan === 0 ? "#FAFAF9" : C.text,
+        fontSize: 13, fontWeight: 800,
+      }}>MEDIR AHORA · CINTURA, HOMBRO Y FOTO</button>
+    </div>
+  );
 }

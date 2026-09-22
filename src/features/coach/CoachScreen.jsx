@@ -4,6 +4,7 @@ import { useState } from "react";
 import { C, CAT, R, SP, TYPE } from "@/design/tokens";
 import { DATE_MAP, FLAT_DAYS, WEEKS, claveDia, todayLocalIso } from "@/domain/plan/calendario";
 import { RITMO_ESPERADO, parseRitmoToSeconds } from "@/domain/running/ritmo";
+import { leerTiempo } from "@/domain/progreso/libreta";
 import { MOVILIDAD } from "@/domain/salud/movilidad";
 import { HitosContent, PaceComparisonChart, PhaseAdjustContent, PlanGlobalContent, WeeklyLogContent } from "@/features/coach/paneles";
 import { KpiBlock } from "@/features/semana/KpiBlock";
@@ -83,7 +84,10 @@ export function CoachScreen({ jumpToDay, setWeekIdx, checked, workoutWeights, ri
       const dayKey = claveDia(WEEKS[wn - 1].days[di]);
       const r = ritmoReal[dayKey];
       if (r) {
-        const sec = parseRitmoToSeconds(r);
+        // Las pruebas se apuntan en tiempo total ("14:20"): se pasa a ritmo.
+        const sec = day.prueba && day.prueba.distKm
+          ? Math.round((leerTiempo(r, day.prueba.distKm) || 0) / day.prueba.distKm) || null
+          : parseRitmoToSeconds(r);
         if (sec) { realSec = sec; realStr = r; }
       }
     });

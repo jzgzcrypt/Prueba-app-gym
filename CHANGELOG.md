@@ -21,6 +21,35 @@ Todo cambio que se haga en la app se anota aquí. Sin excepciones.
 
 ## [Sin publicar]
 
+### Añadido — La libreta: cada sesión termina comparándose con la anterior
+- **Al terminar una sesión de fuerza sale una página con cada ejercicio contra
+  la última vez:** "Laterales polea 9 kg · antes 8 kg · +1 kg". Antes marcabas
+  el check y no pasaba nada.
+- **Al terminar una de running se apunta el dato ahí mismo** y se lee: las
+  series contra el ritmo que pedían y contra la sesión anterior; las pruebas
+  (3 km de S4, 5 km de S8, el día D) convertidas en tu 7K equivalente y en si
+  vas en línea con el 6 de diciembre o cuánto se alarga el bloque.
+- **HOY pide el dato que toca**: el tiempo total en las pruebas, el ritmo medio
+  en las series, y lo lee al guardarlo.
+
+### Añadido — Progreso responde a las dos preguntas
+- **"¿Vamos a llegar?"**: las cuatro pruebas del bloque, con lo que dijo cada
+  una y la próxima.
+- **"Estética"**: cintura y cuánto ha bajado, hombro ÷ cintura, el peso de las
+  laterales desde el primer día, las fotos, y cuándo toca medir. Si aún no hay
+  ninguna medida, pide el punto de partida ya. Un botón abre la medición con
+  foto.
+- Una foto sola ya se puede guardar como medición.
+
+### Añadido — La copia de la semana
+- **Cada 7 días, HOY avisa y la copia se guarda con un toque.** En el móvil se
+  comparte, para guardarla en Archivos o iCloud, que es donde sobrevive a un
+  cambio de teléfono.
+
+### Arreglado
+- La gráfica de ritmo del Coach no leía las pruebas, que se apuntan en tiempo
+  total.
+
 ### Arreglado — Una foto de progreso dejaba de guardar todo lo demás
 - **Todo lo que apuntas se guarda en un solo bloque del navegador, que admite
   unos 5 MB, y una foto del móvil tal cual ocupa 3-7 MB.** Con la primera foto

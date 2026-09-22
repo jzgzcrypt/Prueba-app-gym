@@ -161,15 +161,20 @@ Están aquí para no repetirlos.
 
 ### Lo siguiente, por orden de lo que cuesta no hacerlo
 
-1. **Nada celebra terminar una sesión.** Es lo que más falta para la sensación
-   de libreta. Marcas el check y no pasa nada.
-2. **Copia de seguridad automática.** Todo vive en el `localStorage` de un
-   navegador. Hoy hay exportación manual, que depende de acordarse. Ver
-   `docs/MEJORAS.md` (M1).
-3. **Registrar actividad no planificada** (una pachanga, una caminata larga) y
+Hecho el 22 de septiembre: **la libreta** (al terminar una sesión se compara
+con la última vez, y las pruebas dicen si vas en línea con el objetivo), **la
+copia de la semana** (aviso en HOY, se guarda con un toque en Archivos o
+iCloud) y **Progreso con cintura, hombro/cintura, laterales y fotos**.
+
+1. **Un aviso a la hora del sofá.** Una notificación a las 16:30 con lo que
+   toca hoy. Es lo que más ayuda a cumplir, pero necesita un servidor de
+   notificaciones y la app instalada en el móvil.
+2. **Registrar actividad no planificada** (una pachanga, una caminata larga) y
    eventos de agenda sueltos.
-4. **Reglas de ajuste automático** cuando se falla un día: hoy se mueve la
-   sesión a mano.
+3. **Reglas de ajuste automático** cuando se falla un día. Hoy están escritas
+   en Coach → Plan, pero la sesión se mueve a mano.
+4. **El calentamiento de las sesiones de running** enseña ejercicios de
+   movilidad; el plan pide 15 min suaves y progresivos. Alinearlo.
 5. **Las calorías hay que verificarlas contra la cintura**, no contra la
    báscula. 2.500 / 2.100 es una estimación razonada, no una verdad. Si en tres
    semanas la cintura no se mueve, bajar 150 kcal de HC en los días de

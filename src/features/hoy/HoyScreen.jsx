@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { C, CAT, R, SP, TAP_MIN, TYPE } from "@/design/tokens";
+import { LecturaSesion, queApuntar } from "@/features/ui/lectura";
 import { ICON_FUERZA, ICON_MOVILIDAD, ICON_RUNNING, LOGO_7K } from "@/domain/assets/icons";
 import { parseSeries } from "@/domain/fuerza/series";
 import { BLOQUE, FECHA_FIN, FECHA_INICIO, FLAT_DAYS, WEEKS, claveDia, todayLocalIso } from "@/domain/plan/calendario";
@@ -172,7 +173,26 @@ export function HoyScreen(props) {
 
         {isMedicionDay && (
           <div style={{ background: "#FDF6E3", border: "1px solid #E8D9A8", borderRadius: 12, padding: "11px 14px" }}>
-            <div style={{ fontSize: 12, fontWeight: 700, color: "#171717" }}>Toca medición — ve a PROGRESO</div>
+            <div style={{ fontSize: 12.5, fontWeight: 800, color: "#171717" }}>Hoy toca medir</div>
+            <div style={{ fontSize: 11.5, color: "#4A4A47", marginTop: 2, lineHeight: 1.4 }}>
+              Cintura, ancho de hombro y una foto de frente y otra de lado. En ayunas, con la misma luz que la última vez. Se apunta en PROGRESO.
+            </div>
+          </div>
+        )}
+
+        {isToday && props.copia && props.copia.toca && (
+          <div style={{ background: C.card, border: "1px solid " + C.cardBorder, borderRadius: 12, padding: "12px 14px",
+                        display: "flex", alignItems: "center", gap: 12 }}>
+            <div style={{ flex: 1 }}>
+              <div style={{ fontSize: 12.5, fontWeight: 800, color: C.text }}>Guarda la copia de la semana</div>
+              <div style={{ fontSize: 11.5, color: C.textDim, marginTop: 2, lineHeight: 1.4 }}>
+                {props.copia.dias == null ? "Todavía no tienes ninguna." : "La última es de hace " + props.copia.dias + " días."} Todo vive solo en este móvil.
+              </div>
+            </div>
+            <button className="btn" onClick={props.onCopia} style={{
+              minHeight: TAP_MIN, padding: "0 14px", borderRadius: 10, background: C.accent,
+              fontSize: 12, fontWeight: 800, color: "#FAFAF9", flexShrink: 0,
+            }}>GUARDAR</button>
           </div>
         )}
 
@@ -213,7 +233,7 @@ export function HoyScreen(props) {
             {(mainDone || day.isoDate < todayLocalIso()) && (
               <div style={{ marginTop: 10 }}>
                 <div style={{ fontSize: 9.5, fontWeight: 800, color: "#787774", letterSpacing: 0.5, marginBottom: 5 }}>
-                  {mainDone ? "RITMO REAL" : "¿CORRISTE ESTE DÍA? ANOTA TU RITMO"}
+                  {mainDone ? queApuntar(day).label : "¿CORRISTE ESTE DÍA? " + queApuntar(day).label}
                 </div>
                 {props.ritmoReal[dayKey] && !props.editingRitmo[dayKey] ? (
                   <div onClick={() => { props.setRitmoInput(p=>Object.assign({},p,{[dayKey]:props.ritmoReal[dayKey]})); props.setEditingRitmo(p=>Object.assign({},p,{[dayKey]:true})); }}
@@ -223,7 +243,7 @@ export function HoyScreen(props) {
                 ) : (
                   <div style={{ display: "flex", gap: 6 }}>
                     <input value={props.ritmoInput[dayKey] || ""} onChange={e => props.setRitmoInput(p=>Object.assign({},p,{[dayKey]:e.target.value}))}
-                      placeholder="Ej: 5:12/km o 31:20" style={{
+                      placeholder={queApuntar(day).ph} style={{
                         flex: 1, fontSize: 13, padding: "8px 12px", borderRadius: 10,
                         background: "#F2F2F0", border: "1px solid #D4D4D1", color: "#171717", outline: "none",
                       }} />
@@ -231,6 +251,9 @@ export function HoyScreen(props) {
                       fontSize: 12, fontWeight: 800, color: "#FAFAF9", background: C.accent, padding: "0 14px", borderRadius: 10,
                     }}>OK</button>
                   </div>
+                )}
+                {props.ritmoReal[dayKey] && !props.editingRitmo[dayKey] && (
+                  <LecturaSesion day={day} texto={props.ritmoReal[dayKey]} ritmoReal={props.ritmoReal} />
                 )}
 
                 {day.weekN <= 3 && (
