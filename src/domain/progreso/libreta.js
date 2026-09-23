@@ -149,33 +149,6 @@ export function lecturaRitmo(dia, texto, anteriores = []) {
   };
 }
 
-/** Peso maximo de las series apuntadas de un ejercicio: { 0: "8", 1: "9" } -> 9. */
-function pesoMaximo(series) {
-  if (!series) return null;
-  const v = Object.values(series).map(x => parseFloat(x)).filter(x => !Number.isNaN(x) && x > 0);
-  return v.length ? Math.max(...v) : null;
-}
-
-/**
- * Cada ejercicio de hoy contra la ultima vez que se hizo.
- * @returns {Array<{nombre, hoy:number|null, antes:{fecha:string, v:number}|null}>}
- */
-export function comparativaFuerza(dia, workoutWeights, dias) {
-  if (!dia || !dia.ejercicios) return [];
-  const hoyW = (workoutWeights || {})[dia.isoDate] || {};
-  return dia.ejercicios.map((ej, i) => {
-    let antes = null;
-    for (const d of dias) {
-      if (d.isoDate >= dia.isoDate || !d.ejercicios) continue;
-      const idx = d.ejercicios.findIndex(e => e.nombre === ej.nombre);
-      if (idx === -1) continue;
-      const v = pesoMaximo(((workoutWeights || {})[d.isoDate] || {})[idx]);
-      if (v != null && (!antes || d.isoDate > antes.isoDate)) antes = { isoDate: d.isoDate, fecha: d.date, v };
-    }
-    return { nombre: ej.nombre, hoy: pesoMaximo(hoyW[i]), antes };
-  });
-}
-
 /** Dias desde la ultima copia, y si toca hacer una: cada 7 dias, y solo si ya
  *  hay algo apuntado que perder. */
 export function copiaPendiente(ultimoBackup, hoyIso, hayDatos) {

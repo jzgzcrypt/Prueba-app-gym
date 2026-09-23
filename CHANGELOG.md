@@ -21,6 +21,33 @@ Todo cambio que se haga en la app se anota aquí. Sin excepciones.
 
 ## [Sin publicar]
 
+### Cambiado — Apuntar una serie es un toque, como en la libreta
+- **Antes cada serie era casilla pequeña, campo que empezaba en 0 y OK, y solo
+  se apuntaba el peso.** Ahora cada serie viene rellena con lo que toca —la
+  serie anterior de hoy, o esa serie la última vez, o lo que pide el plan—, con
+  − / + para peso y repeticiones y un botón grande "✓ HECHA · 9 kg × 13". Si
+  repites lo de la última vez, es un solo toque.
+- **Se apuntan las repeticiones.** Las laterales progresan por reps tanto como
+  por peso, y sin ellas la libreta se quedaba a medias.
+- **"La última vez" arriba de cada ejercicio, serie a serie** (8 kg × 14, 13,
+  12), con la consigna: una rep más o un poco más de peso.
+- **Descanso entre series** con cuenta atrás: 2 min en press, remo y
+  dominadas; 90 s en aislamiento; 60 s en core y peso corporal. Vibra al
+  acabar.
+- **El cierre de la sesión cuenta como progreso el mismo peso con más reps**, y
+  enseña las series completas de hoy y de la última vez.
+- Una serie hecha se toca para corregirla.
+
+### Arreglado
+- "Vaciar el día" no borraba el progreso de las series de fuerza.
+
+### Datos
+- Campo nuevo `workoutReps`, con la misma forma que `workoutWeights`
+  (`{ fecha: { ejercicio: { serie: reps } } }`). Es opcional: los días
+  guardados antes no lo tienen y se leen como repeticiones sin apuntar. No
+  cambia la versión del esquema (sigue en v4) ni hace falta migración. Entra en
+  el guardado, la copia, la importación y "vaciar el día".
+
 ### Añadido — La libreta: cada sesión termina comparándose con la anterior
 - **Al terminar una sesión de fuerza sale una página con cada ejercicio contra
   la última vez:** "Laterales polea 9 kg · antes 8 kg · +1 kg". Antes marcabas

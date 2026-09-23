@@ -4,10 +4,10 @@
  */
 import test from "node:test";
 import assert from "node:assert/strict";
-import { FLAT_DAYS, WEEKS, FECHA_INICIO } from "../src/domain/plan/calendario.js";
+import { WEEKS, FECHA_INICIO } from "../src/domain/plan/calendario.js";
 import {
   OBJETIVO_7K, textoTiempo, leerRitmo, leerTiempo, equivalente7k,
-  lecturaPrueba, lecturaRitmo, comparativaFuerza, copiaPendiente, diasParaMedir,
+  lecturaPrueba, lecturaRitmo, copiaPendiente, diasParaMedir,
 } from "../src/domain/progreso/libreta.js";
 
 const dia = (n, dow) => WEEKS[n - 1].days.find(d => d.dow === dow);
@@ -70,19 +70,6 @@ test("el ritmo de las series se compara con lo pedido y con la vez anterior", ()
   assert.equal(segunda.tono, "bien");
   assert.match(segunda.detalle, /0:06\/km más rápido/);
   assert.equal(lecturaRitmo(dia(2, "Martes"), "6:30", []), null, "un rodaje suave no tiene ritmo que comparar");
-});
-
-test("cada ejercicio se compara con la ultima vez que se hizo", () => {
-  const s2mie = dia(2, "Miercoles"), s3mie = dia(3, "Miercoles");
-  const pesos = {
-    [s2mie.isoDate]: { 0: { 0: "8", 1: "9" } },   // laterales polea
-    [s3mie.isoDate]: { 0: { 0: "10" } },
-  };
-  const c = comparativaFuerza(s3mie, pesos, FLAT_DAYS);
-  assert.equal(c[0].nombre, s2mie.ejercicios[0].nombre);
-  assert.equal(c[0].hoy, 10);
-  assert.equal(c[0].antes.v, 9);
-  assert.equal(c[1].hoy, null, "sin peso apuntado hoy no se inventa nada");
 });
 
 test("la copia toca cada 7 dias, y no si no hay nada que perder", () => {

@@ -24,6 +24,7 @@ import { SemanaScreen } from "@/features/semana/SemanaScreen";
 import { WorkoutMode } from "@/features/workout/WorkoutMode";
 import { CierreSesion } from "@/features/workout/CierreSesion";
 import { copiaPendiente } from "@/domain/progreso/libreta";
+import { ultimaVez } from "@/domain/fuerza/registro";
 
 export default function App() {
   const todayIdx = findTodayIndex();
@@ -52,6 +53,9 @@ export default function App() {
   const [magiaLog, setMagiaLog] = useState({}); // { dayKey: true } - dias que has practicado magia
   const [guerreroLog, setGuerreroLog] = useState({}); // { dayKey: true } - dias que has practicado guerrero
   const [workoutWeights, setWorkoutWeights] = useState({}); // { dayKey: { exerciseIdx: { serieIdx: "20" } } }
+  // Reps de cada serie, con la misma forma que los pesos. Es un campo nuevo:
+  // los dias guardados antes no lo tienen y se leen como "reps sin apuntar".
+  const [workoutReps, setWorkoutReps] = useState({}); // { dayKey: { exerciseIdx: { serieIdx: 12 } } }
   const [activeWorkout, setActiveWorkout] = useState(null);
   // La pagina de la libreta que sale al terminar una sesion: la clave del dia.
   const [cierre, setCierre] = useState(null);
@@ -148,6 +152,7 @@ export default function App() {
           if (d.magiaLog) setMagiaLog(d.magiaLog);
           if (d.guerreroLog) setGuerreroLog(d.guerreroLog);
           if (d.workoutWeights) setWorkoutWeights(d.workoutWeights);
+          if (d.workoutReps) setWorkoutReps(d.workoutReps);
           if (d.medidas) setMedidas(d.medidas);
           if (d.ritmoReal) setRitmoReal(d.ritmoReal);
         if (d.ritmoTramos) setRitmoTramos(d.ritmoTramos);
@@ -232,7 +237,7 @@ export default function App() {
       version: VERSION_ESQUEMA,
       checked, cuelloChecks, notes, youtubeLinks, customExercises, painLog,
       flaggedExercises, pausedRanges, workoutProgress, magiaProgress, magiaRepaso, magiaLog,
-      guerreroLog, workoutWeights, medidas, ritmoReal, ritmoTramos, sensaciones, postponed, phaseAdjustNote,
+      guerreroLog, workoutWeights, workoutReps, medidas, ritmoReal, ritmoTramos, sensaciones, postponed, phaseAdjustNote,
       currentWeekOverride, weeklyLog, comidasLog, cambiosMenu, menuEditado, compraMarcada, comidasFuera,
       bloquesHistorial, ultimoBackup, cuelloFaseManual, onboardingVisto,
     };
@@ -243,7 +248,7 @@ export default function App() {
     return () => clearTimeout(t);
   }, [checked, cuelloChecks, notes, youtubeLinks, customExercises, painLog,
       flaggedExercises, pausedRanges, workoutProgress, magiaProgress, magiaRepaso, magiaLog,
-      guerreroLog, workoutWeights, medidas, ritmoReal, ritmoTramos, sensaciones, postponed, phaseAdjustNote,
+      guerreroLog, workoutWeights, workoutReps, medidas, ritmoReal, ritmoTramos, sensaciones, postponed, phaseAdjustNote,
       currentWeekOverride, weeklyLog, comidasLog, cambiosMenu, menuEditado, compraMarcada, comidasFuera,
       bloquesHistorial, ultimoBackup, cuelloFaseManual, onboardingVisto, storageReady]);
 
@@ -263,19 +268,21 @@ export default function App() {
   // para poder decirlo, y deja el deshacer preparado por si era un error.
   const vaciarDia = (clave) => {
     const actual = { checked, cuelloChecks, notes, painLog, magiaLog, guerreroLog,
-                     workoutWeights, ritmoReal, ritmoTramos, sensaciones, postponed, comidasLog, cambiosMenu };
+                     workoutWeights, workoutReps, workoutProgress, ritmoReal, ritmoTramos, sensaciones, postponed, comidasLog, cambiosMenu };
     const cuantas = cuantoHayEn(actual, clave);
     if (!cuantas) return 0;
     const { estado } = limpiarDia(actual, clave);
     setChecked(estado.checked); setCuelloChecks(estado.cuelloChecks); setNotes(estado.notes);
     setPainLog(estado.painLog); setMagiaLog(estado.magiaLog); setGuerreroLog(estado.guerreroLog);
-    setWorkoutWeights(estado.workoutWeights); setRitmoReal(estado.ritmoReal);
+    setWorkoutWeights(estado.workoutWeights); setWorkoutReps(estado.workoutReps);
+    setWorkoutProgress(estado.workoutProgress); setRitmoReal(estado.ritmoReal);
     setRitmoTramos(estado.ritmoTramos); setSensaciones(estado.sensaciones);
     setPostponed(estado.postponed); setComidasLog(estado.comidasLog); setCambiosMenu(estado.cambiosMenu);
     pushUndo("Día vaciado", () => {
       setChecked(actual.checked); setCuelloChecks(actual.cuelloChecks); setNotes(actual.notes);
       setPainLog(actual.painLog); setMagiaLog(actual.magiaLog); setGuerreroLog(actual.guerreroLog);
-      setWorkoutWeights(actual.workoutWeights); setRitmoReal(actual.ritmoReal);
+      setWorkoutWeights(actual.workoutWeights); setWorkoutReps(actual.workoutReps);
+      setWorkoutProgress(actual.workoutProgress); setRitmoReal(actual.ritmoReal);
       setRitmoTramos(actual.ritmoTramos); setSensaciones(actual.sensaciones);
       setPostponed(actual.postponed); setComidasLog(actual.comidasLog); setCambiosMenu(actual.cambiosMenu);
     });
@@ -357,7 +364,7 @@ export default function App() {
     const payload = {
       version: VERSION_ESQUEMA, exportedAt: new Date().toISOString(),
       checked, cuelloChecks, notes, youtubeLinks, customExercises, painLog,
-      flaggedExercises, pausedRanges, workoutProgress, workoutWeights, medidas,
+      flaggedExercises, pausedRanges, workoutProgress, workoutWeights, workoutReps, medidas,
       ritmoReal, ritmoTramos, sensaciones, postponed, phaseAdjustNote, currentWeekOverride, weeklyLog,
       comidasLog, cambiosMenu, menuEditado, compraMarcada, comidasFuera, magiaProgress, magiaRepaso,
       magiaLog, guerreroLog, bloquesHistorial,
@@ -400,6 +407,7 @@ export default function App() {
         if (data.pausedRanges) setPausedRanges(data.pausedRanges);
         if (data.workoutProgress) setWorkoutProgress(data.workoutProgress);
         if (data.workoutWeights) setWorkoutWeights(data.workoutWeights);
+        if (data.workoutReps) setWorkoutReps(data.workoutReps);
         if (data.medidas) setMedidas(data.medidas);
         if (data.ritmoReal) setRitmoReal(data.ritmoReal);
         if (data.ritmoTramos) setRitmoTramos(data.ritmoTramos);
@@ -447,7 +455,7 @@ export default function App() {
   }
 
   if (cierre) {
-    return <CierreSesion dayKey={cierre} workoutWeights={workoutWeights} ritmoReal={ritmoReal}
+    return <CierreSesion dayKey={cierre} workoutWeights={workoutWeights} workoutReps={workoutReps} ritmoReal={ritmoReal}
       onGuardarRitmo={guardarRitmo} onVolver={() => { setCierre(null); setExpandedBlock("main"); }} />;
   }
 
@@ -455,29 +463,6 @@ export default function App() {
     const wDay = FLAT_DAYS.find(d => claveDia(d) === activeWorkout);
     const wMov = getMovilidad(wDay.cat, wDay.weekN);
 
-    // Busca el ultimo registro de peso de un ejercicio por nombre, en dias anteriores al actual
-    const getExerciseHistory = (nombreEjercicio) => {
-      let best = null; // { fecha, pesoMax, weekN, dayIdx }
-      WEEKS.forEach(wk => {
-        wk.days.forEach((d, di) => {
-          if (d.tipo !== "fuerza") return;
-          const dk = claveDia(wk.days[di]);
-          if (dk === activeWorkout) return; // excluir el dia actual
-          const dw = workoutWeights[dk];
-          if (!dw) return;
-          const exIdx = d.ejercicios.findIndex(e => e.nombre === nombreEjercicio);
-          if (exIdx === -1) return;
-          const serieWeights = dw[exIdx];
-          if (!serieWeights) return;
-          const vals = Object.values(serieWeights).map(v => parseFloat(v)).filter(v => !isNaN(v) && v > 0);
-          if (vals.length === 0) return;
-          const maxW = Math.max(...vals);
-          const isNewer = !best || (wk.n > best.weekN) || (wk.n === best.weekN && di > best.dayIdx);
-          if (isNewer) best = { fecha: d.date, pesoMax: maxW, weekN: wk.n, dayIdx: di };
-        });
-      });
-      return best;
-    };
 
     return (
       <WorkoutMode day={wDay} mov={wMov} progress={workoutProgress[activeWorkout] || {}}
@@ -504,7 +489,14 @@ export default function App() {
             }));
           }
         }}
-        getExerciseHistory={getExerciseHistory} flaggedExercises={flaggedExercises} />
+        reps={workoutReps[activeWorkout] || {}}
+        onUpdateReps={(ei, si, val) => setWorkoutReps(p => {
+          const dayR = Object.assign({}, p[activeWorkout] || {});
+          dayR[ei] = Object.assign({}, dayR[ei] || {}, { [si]: val });
+          return Object.assign({}, p, { [activeWorkout]: dayR });
+        })}
+        ultimaVez={(nombre) => ultimaVez(nombre, wDay.isoDate, FLAT_DAYS, workoutWeights, workoutReps)}
+        flaggedExercises={flaggedExercises} />
     );
   }
 
@@ -547,7 +539,7 @@ export default function App() {
             isFuerzaDay={isFuerzaDay} isRunDay={isRunDay} isCompromisoDay={isCompromisoDay} mov={mov}
             comida={comida} vaciarDia={vaciarDia}
             apuntesComida={comidasLog[dayKey] || []} irANutricion={() => setScreen("nutricion")}
-            cosasEnElDia={cuantoHayEn({ checked, cuelloChecks, notes, painLog, magiaLog, guerreroLog, workoutWeights, ritmoReal, ritmoTramos, sensaciones, postponed, comidasLog, cambiosMenu }, dayKey)}
+            cosasEnElDia={cuantoHayEn({ checked, cuelloChecks, notes, painLog, magiaLog, guerreroLog, workoutWeights, workoutReps, workoutProgress, ritmoReal, ritmoTramos, sensaciones, postponed, comidasLog, cambiosMenu }, dayKey)}
             cuelloEj={cuelloEj} cuelloChecks={cuelloChecks} toggleCuello={toggleCuello}
             checked={checked} toggleCheck={toggleCheck} mainDone={mainDone}
             workoutProgress={workoutProgress[dayKey]} onStartWorkout={() => setActiveWorkout(dayKey)}

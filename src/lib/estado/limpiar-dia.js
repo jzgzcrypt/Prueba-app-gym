@@ -12,7 +12,7 @@
  */
 
 /** Claves que guardan UN valor por dia, indexadas por dayKey exacto. */
-const POR_DIA = ["notes", "painLog", "magiaLog", "guerreroLog", "workoutWeights",
+const POR_DIA = ["notes", "painLog", "magiaLog", "guerreroLog", "workoutWeights", "workoutReps", "workoutProgress",
                  "ritmoReal", "ritmoTramos", "sensaciones", "postponed", "comidasLog", "cambiosMenu"];
 
 /** Claves donde un dia puede tener varias entradas: el propio dayKey y
