@@ -26,7 +26,7 @@ import { CierreSesion } from "@/features/workout/CierreSesion";
 import { copiaPendiente } from "@/domain/progreso/libreta";
 import { ultimaVez } from "@/domain/fuerza/registro";
 import { ritmoDelDia } from "@/domain/running/adaptar";
-import { resumenSemana } from "@/domain/progreso/resumen";
+import { resumenSemana, semanasCumplidas } from "@/domain/progreso/resumen";
 
 export default function App() {
   const todayIdx = findTodayIndex();
@@ -557,6 +557,7 @@ export default function App() {
               setEditingRitmo(p => Object.assign({}, p, { [key]: false }));
             }}
             copia={copiaPendiente(ultimoBackup, todayLocalIso(), Object.values(checked).some(Boolean))}
+            semanasCumplidas={semanasCumplidas(WEEKS, checked, todayLocalIso())}
             resumenSemana={isToday && currentDay.dayIdx <= 2 && currentDay.weekIdx > 0
               ? resumenSemana(WEEKS[currentDay.weekIdx - 1], { checked, ritmoReal, pesos: workoutWeights, reps: workoutReps }, FLAT_DAYS)
               : null}

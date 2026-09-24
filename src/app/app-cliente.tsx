@@ -1,6 +1,7 @@
 "use client";
 
 import dynamic from "next/dynamic";
+import { useEffect } from "react";
 
 /**
  * La app se pinta solo en el navegador.
@@ -17,5 +18,17 @@ const App = dynamic(() => import("@/features/App"), {
 });
 
 export default function AppCliente() {
+  // Guarda la app en el movil para que abra sin cobertura (ver public/sw.js).
+  // Solo en produccion: en desarrollo cachearia codigo a medio escribir.
+  useEffect(() => {
+    if (process.env.NODE_ENV !== "production" || !("serviceWorker" in navigator)) return;
+    navigator.serviceWorker.register("/sw.js")
+      .then(() => navigator.serviceWorker.ready)
+      .then((reg) => {
+        const urls = performance.getEntriesByType("resource").map((r) => r.name);
+        reg.active?.postMessage({ tipo: "guardar", urls });
+      })
+      .catch(() => { /* sin SW: la app sigue igual, pero necesita red */ });
+  }, []);
   return <App />;
 }

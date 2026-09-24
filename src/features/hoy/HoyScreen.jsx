@@ -4,6 +4,7 @@ import { useState } from "react";
 import { C, CAT, R, SP, TAP_MIN, TYPE } from "@/design/tokens";
 import { AvisoRitmo, LecturaSesion, queApuntar } from "@/features/ui/lectura";
 import { TarjetaResumen } from "@/features/ui/resumen";
+import { TarjetaCalendario } from "@/features/ui/calendario";
 import { ICON_FUERZA, ICON_MOVILIDAD, ICON_RUNNING, LOGO_7K } from "@/domain/assets/icons";
 import { parseSeries } from "@/domain/fuerza/series";
 import { BLOQUE, FECHA_FIN, FECHA_INICIO, FLAT_DAYS, WEEKS, claveDia, todayLocalIso } from "@/domain/plan/calendario";
@@ -84,7 +85,12 @@ export function HoyScreen(props) {
         <div style={{ background: C.accent, borderRadius: R.xl, padding: "16px 18px 14px" }}>
           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline" }}>
             <span style={{ ...TYPE.micro, color: "#8A8A87" }}>{bloqueActivo ? bloqueActivo.nombre.toUpperCase() : "BLOQUE 1"}</span>
-            <span style={{ ...TYPE.micro, color: "#8A8A87" }}>DÍA {diaActualBloque} DE {totalDiasBloque}</span>
+            <span style={{ ...TYPE.micro, color: "#8A8A87" }}>
+              DÍA {diaActualBloque} DE {totalDiasBloque}
+              {props.semanasCumplidas > 0 && (
+                <span style={{ color: "#7FC79A" }}> · {props.semanasCumplidas} {props.semanasCumplidas === 1 ? "SEMANA CUMPLIDA" : "SEMANAS CUMPLIDAS"}</span>
+              )}
+            </span>
           </div>
 
           <div style={{ display: "flex", alignItems: "flex-end", justifyContent: "space-between", gap: SP.md, marginTop: 10 }}>
@@ -182,6 +188,8 @@ export function HoyScreen(props) {
         )}
 
         {props.resumenSemana && <TarjetaResumen resumen={props.resumenSemana} nombreBloque="Base 7K" />}
+
+        {isToday && <TarjetaCalendario modo="hoy" />}
 
         {isToday && props.copia && props.copia.toca && (
           <div style={{ background: C.card, border: "1px solid " + C.cardBorder, borderRadius: 12, padding: "12px 14px",

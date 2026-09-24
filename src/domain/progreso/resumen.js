@@ -47,3 +47,30 @@ export function textoResumen(r, nombreBloque) {
     r.records.map(x => x.nombre + " " + x.texto).join(", "));
   return lineas.join("\n");
 }
+
+/** Las sesiones que hacen "cumplida" una semana: el running del jueves y del
+ *  domingo, las dos que construyen el 7K. Un martes o una fuerza perdida no
+ *  rompe nada: premiar la constancia sin castigar un mal dia. */
+function clavesDeSemana(semana) {
+  return semana.days.filter(d => (d.dayIdx === 3 || d.dayIdx === 6) && ["run", "test", "objetivo"].includes(d.tipo));
+}
+
+/**
+ * Semanas seguidas cumplidas, contando hacia atras desde la ultima terminada.
+ * La semana en curso suma si ya esta cumplida, pero no corta la cuenta si aun
+ * no lo esta: todavia puede cumplirse.
+ */
+export function semanasCumplidas(semanas, checked, hoyIso) {
+  const ch = checked || {};
+  const cumplida = (s) => { const c = clavesDeSemana(s); return c.length > 0 && c.every(d => ch[d.isoDate]); };
+  let n = 0;
+  for (let i = semanas.length - 1; i >= 0; i--) {
+    const s = semanas[i];
+    if (s.days[0].isoDate > hoyIso) continue;              // aun no ha empezado
+    const enCurso = s.days[6].isoDate >= hoyIso;
+    if (cumplida(s)) { n++; continue; }
+    if (enCurso) continue;                                  // puede cumplirse todavia
+    break;
+  }
+  return n;
+}

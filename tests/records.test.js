@@ -76,3 +76,15 @@ test("manda la ultima prueba, y el dia D no se toca", () => {
   const diaD = dia(11, "Domingo");
   assert.equal(ritmoDelDia(diaD, FLAT_DAYS, { [s8.isoDate]: "26:00" }).ritmo, 285);
 });
+
+import { semanasCumplidas } from "../src/domain/progreso/resumen.js";
+
+test("semanas cumplidas: jueves y domingo, sin castigar la semana en curso", () => {
+  const j = (n) => WEEKS[n - 1].days[3].isoDate, d = (n) => WEEKS[n - 1].days[6].isoDate;
+  const hoyS4 = WEEKS[3].days[1].isoDate; // martes de S4
+  const ch = { [j(1)]: true, [d(1)]: true, [j(2)]: true, [d(2)]: true, [j(3)]: true, [d(3)]: true };
+  assert.equal(semanasCumplidas(WEEKS, ch, hoyS4), 3, "S4 en curso no corta la cuenta");
+  assert.equal(semanasCumplidas(WEEKS, { ...ch, [d(2)]: false }, hoyS4), 1, "S2 incompleta corta");
+  assert.equal(semanasCumplidas(WEEKS, { ...ch, [j(4)]: true, [d(4)]: true }, WEEKS[3].days[6].isoDate), 4);
+  assert.equal(semanasCumplidas(WEEKS, {}, hoyS4), 0);
+});

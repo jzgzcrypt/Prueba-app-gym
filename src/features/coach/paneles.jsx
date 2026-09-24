@@ -5,6 +5,7 @@ import { C, CAT, R, SP, TAP_MIN, TYPE } from "@/design/tokens";
 import { BLOQUE, DATE_MAP, FECHA_FIN, RANGO_BLOQUE, WEEKS, claveDia, claveSemana, todayLocalIso } from "@/domain/plan/calendario";
 import { REGLAS_BLOQUE } from "@/domain/plan/bloque-1-base-7k";
 import { SectionHeader } from "@/features/ui/headers";
+import { TarjetaCalendario } from "@/features/ui/calendario";
 /** Dias enteros transcurridos desde una fecha "YYYY-MM-DD" hasta hoy. */
 function diasDesde(iso) {
   const [y, m, d] = iso.split("-").map(Number);
@@ -87,10 +88,14 @@ export function PhaseAdjustContent({ currentWeekN, currentWeekOverride, setCurre
         </div>
       </div>
 
+      <div style={{ marginBottom: SP.md }}>
+        <TarjetaCalendario modo="ajustes" />
+      </div>
+
       <div style={{ background: C.card, border: "1px solid " + C.cardBorder, borderRadius: R.xl, padding: SP.lg + "px" }}>
-        <SectionHeader>COPIA DE SEGURIDAD MANUAL</SectionHeader>
+        <SectionHeader>COPIA DE SEGURIDAD</SectionHeader>
         <div style={{ fontSize: 11.5, color: C.textDim, lineHeight: 1.45, marginBottom: SP.md }}>
-          El guardado automático ya protege tus datos en este artifact publicado. Usa esto solo como copia extra, o para llevar tus datos a otra cuenta o dispositivo.
+          Todo lo que apuntas se guarda solo, pero únicamente en este móvil. La copia es lo que te salva si lo pierdes o cambias de teléfono, y sirve para llevar tus datos a otro dispositivo.
         </div>
         {(() => {
           // Los datos viven en este navegador y en ningun sitio mas. El aviso no

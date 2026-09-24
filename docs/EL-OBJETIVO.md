@@ -173,7 +173,9 @@ Están aquí para no repetirlos.
 
 ### Lo siguiente, por orden de lo que cuesta no hacerlo
 
-Hecho el 24 de septiembre: **la movilidad va dentro de las sesiones** (nada
+Hecho el 24 de septiembre: **la app abre sin cobertura**, **el plan en el
+calendario del móvil con aviso antes de cada sesión**, **semanas cumplidas**,
+**la movilidad va dentro de las sesiones** (nada
 suelto para casa; el calentamiento de running es el del plan), **récords y
 resumen de la semana**, **series de
 running ajustadas a la última prueba** y **voz en el temporizador**.
@@ -183,19 +185,14 @@ con la última vez, y las pruebas dicen si vas en línea con el objetivo), **la
 copia de la semana** (aviso en HOY, se guarda con un toque en Archivos o
 iCloud) y **Progreso con cintura, hombro/cintura, laterales y fotos**.
 
-1. **Un aviso a la hora del sofá.** Lo que toca hoy, a las 16:30. El atajo sin
-   servidor: exportar el plan al calendario del móvil, cada sesión como evento
-   con aviso.
-2. **Semanas cumplidas** en vez de rachas: contar semanas seguidas con el
-   jueves y el domingo hechos. Premia la constancia sin castigar un mal día.
-3. **Traer los datos de Strava solos.** Necesita conectar la cuenta y un
+1. **Traer los datos de Strava solos.** Necesita conectar la cuenta y un
    pequeño servidor.
-4. **Modo oscuro.**
-5. **Registrar actividad no planificada** (una pachanga, una caminata larga) y
+2. **Modo oscuro.**
+3. **Registrar actividad no planificada** (una pachanga, una caminata larga) y
    eventos de agenda sueltos.
-6. **Reglas de ajuste automático** cuando se falla un día. Hoy están escritas
+4. **Reglas de ajuste automático** cuando se falla un día. Hoy están escritas
    en Coach → Plan, pero la sesión se mueve a mano.
-7. **Las calorías hay que verificarlas contra la cintura**, no contra la
+5. **Las calorías hay que verificarlas contra la cintura**, no contra la
    báscula. 2.500 / 2.100 es una estimación razonada, no una verdad. Si en tres
    semanas la cintura no se mueve, bajar 150 kcal de HC en los días de
    RECORTAR. Si el ritmo Z2 se pone duro, subirlas.

@@ -21,6 +21,32 @@ Todo cambio que se haga en la app se anota aquí. Sin excepciones.
 
 ## [Sin publicar]
 
+### Añadido — La app abre sin cobertura
+- **En muchos gimnasios no hay señal, y sin ella la app no abría.** Ahora se
+  guarda en el móvil desde la primera visita (service worker, `public/sw.js`):
+  sin red abre igual, con el día de hoy y todo lo apuntado. Con red, siempre
+  carga la última versión.
+
+### Añadido — El plan en el calendario del móvil, con aviso
+- **Cada sesión del bloque como evento, con aviso 30 min antes; el tenis a las
+  20:00 con aviso 45 min antes; nada en los descansos.** Suena aunque la app
+  esté cerrada: es la alarma contra el sofá sin necesidad de un servidor de
+  notificaciones.
+- Se elige la hora de entreno (17:00, 18:00 o 19:00) y en el iPhone se abre la
+  lista de eventos con «Añadir todo». Tarjeta en HOY hasta que se añade (o
+  "Ahora no"), y siempre disponible en Coach → Ajustes. Lo sirve `/plan.ics`.
+
+### Añadido — Semanas cumplidas
+- **La cabecera de HOY cuenta las semanas seguidas con el jueves y el domingo
+  de running hechos**, las dos sesiones que construyen el 7K. Un martes o una
+  fuerza perdida no rompe la cuenta, y la semana en curso no la corta hasta
+  que termina: constancia sin castigar un mal día.
+
+### Arreglado
+- El texto de la copia de seguridad hablaba de "este artifact publicado", de
+  la versión antigua. Ahora dice la verdad: todo se guarda solo, pero
+  únicamente en este móvil.
+
 ### Cambiado — Ningún botón invita a saltarse el calentamiento
 - **Al calentar o estirar, si no marcabas cada ejercicio, el botón decía
   "SALTAR" en gris.** Ahora dice siempre lo que viene ("YA ESTOY CALIENTE · A
