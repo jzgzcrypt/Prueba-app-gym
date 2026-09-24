@@ -54,10 +54,15 @@ export function leerTiempo(str, distKm) {
   return l.esRitmo ? Math.round(l.seg * distKm) : l.seg;
 }
 
-/** El 7K que corresponde a un tiempo en otra distancia (formula de Riegel,
- *  la que usan las calculadoras de carrera). */
+/** El tiempo que corresponde en otra distancia (formula de Riegel, la que
+ *  usan las calculadoras de carrera). */
+export function equivalente(distKm, seg, aKm) {
+  return Math.round(seg * Math.pow(aKm / distKm, 1.06));
+}
+
+/** El 7K que corresponde a un tiempo en otra distancia. */
 export function equivalente7k(distKm, seg) {
-  return Math.round(seg * Math.pow(7 / distKm, 1.06));
+  return equivalente(distKm, seg, 7);
 }
 
 /**

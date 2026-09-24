@@ -4,9 +4,10 @@ import { FECHA_INICIO, FLAT_DAYS, claveDia, todayLocalIso } from "@/domain/plan/
 import { useEffect, useRef, useState } from "react";
 import { diasParaMedir, lecturaPrueba } from "@/domain/progreso/libreta";
 import { LecturaSesion } from "@/features/ui/lectura";
+import { tablaRecords } from "@/domain/fuerza/registro";
 import { C, CAT } from "@/design/tokens";
 import { QuickFieldInput, SimpleLineChart } from "@/features/ui/charts";
-export function ProgresoScreen({ medidas, setMedidas, ritmoReal, weeks, checked, workoutWeights }) {
+export function ProgresoScreen({ medidas, setMedidas, ritmoReal, weeks, checked, workoutWeights, workoutReps }) {
   const [showForm, setShowForm] = useState(false);
   const [form, setForm] = useState({ peso: "", cintura: "", anchoHombro: "", cadera: "", hombro: "", cadenaPosterior: "", columna: "", caderaMov: "", foto: null });
   const [quickField, setQuickField] = useState(null); // "peso" | "cintura" | "cadera" | "hombro" | "cadenaPosterior" | "columna" | "caderaMov" | null (menu)
@@ -143,6 +144,8 @@ export function ProgresoScreen({ medidas, setMedidas, ritmoReal, weeks, checked,
 
       <Estetica medidas={medidas} exerciseProgress={exerciseProgress}
         onMedir={() => { setQuickField(null); setShowForm(true); }} />
+
+      <Records pesos={workoutWeights} reps={workoutReps} />
 
       <div style={{ background: C.card, border: "1px solid " + C.cardBorder, borderRadius: 14, padding: "16px 18px", marginBottom: 12 }}>
         {ratioData.length > 1 && (
@@ -472,6 +475,33 @@ function Estetica({ medidas, exerciseProgress, onMedir }) {
         background: faltan === 0 ? C.accent : C.surfaceMuted, color: faltan === 0 ? "#FAFAF9" : C.text,
         fontSize: 13, fontWeight: 800,
       }}>MEDIR AHORA · CINTURA, HOMBRO Y FOTO</button>
+    </div>
+  );
+}
+
+/** Tus mejores marcas de cada ejercicio: peso y reps, y cuando. */
+function Records({ pesos, reps }) {
+  const tabla = tablaRecords(FLAT_DAYS, pesos, reps);
+  return (
+    <div style={{ ...tarjeta, borderLeft: "3px solid #946800" }}>
+      <div style={etiqueta}>TUS RÉCORDS</div>
+      {tabla.length === 0 && (
+        <div style={{ fontSize: 13, color: "#4A4A47", lineHeight: 1.45 }}>
+          Aparecen al apuntar series: cada vez que superes tu mejor peso, o tus mejores reps con ese peso, sale aquí.
+        </div>
+      )}
+      {tabla.slice(0, 10).map(t => (
+        <div key={t.nombre} style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", gap: 8,
+                                     padding: "8px 0", borderTop: "1px solid " + C.divider }}>
+          <span style={{ fontSize: 12.5, fontWeight: 700, color: C.text, flex: 1, minWidth: 0 }}>{t.nombre}</span>
+          <span style={{ textAlign: "right", flexShrink: 0 }}>
+            <span className="mono" style={{ fontSize: 13.5, fontWeight: 800, color: C.text }}>
+              {(t.peso != null ? t.peso + " kg" : "") + (t.reps != null ? (t.peso != null ? " × " : "× ") + t.reps : "")}
+            </span>
+            <span style={{ fontSize: 11, color: C.textDim, marginLeft: 6 }}>{t.fecha}</span>
+          </span>
+        </div>
+      ))}
     </div>
   );
 }

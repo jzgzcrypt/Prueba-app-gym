@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { C, CAT, TAP_MIN } from "@/design/tokens";
 import { FLAT_DAYS, claveDia } from "@/domain/plan/calendario";
-import { progresion, seriesDe, textoSeries, ultimaVez } from "@/domain/fuerza/registro";
+import { progresion, recordsDelDia, seriesDe, textoSeries, ultimaVez } from "@/domain/fuerza/registro";
 import { LecturaSesion, queApuntar } from "@/features/ui/lectura";
 
 /**
@@ -28,6 +28,8 @@ export function CierreSesion({ dayKey, workoutWeights, workoutReps, ritmoReal, o
     return { nombre: ej.nombre, hoy, antes, prog: antes ? progresion(hoy, antes.series) : null };
   }) : [];
   const conDatos = filas.filter(f => f.hoy.length);
+  const records = esFuerza ? recordsDelDia(day, FLAT_DAYS, workoutWeights, workoutReps) : [];
+  const esRecord = new Set(records.map(r => r.nombre));
   const subidas = filas.filter(f => f.prog && (f.prog.tipo === "peso" || f.prog.tipo === "reps")).length;
   const apuntar = queApuntar(day);
 
@@ -47,6 +49,19 @@ export function CierreSesion({ dayKey, workoutWeights, workoutReps, ritmoReal, o
         <div style={{ fontSize: 11, fontWeight: 800, color: acento, letterSpacing: 0.8 }}>SESIÓN HECHA · {day.date}</div>
         <div style={{ fontSize: 24, fontWeight: 900, color: C.text, marginTop: 4, lineHeight: 1.2 }}>{day.titulo}</div>
 
+        {records.length > 0 && (
+          <div style={{ marginTop: 16, padding: "14px 16px", borderRadius: 14, background: "#FDF6E3", border: "1px solid #E8D9A8" }}>
+            <div style={{ fontSize: 11, fontWeight: 900, color: "#946800", letterSpacing: 0.8 }}>
+              {records.length === 1 ? "NUEVO RÉCORD" : records.length + " RÉCORDS NUEVOS"}
+            </div>
+            {records.map((r, i) => (
+              <div key={i} style={{ fontSize: 15, fontWeight: 800, color: C.text, marginTop: 4 }}>
+                {r.nombre}: <span className="mono">{r.texto}</span>
+              </div>
+            ))}
+          </div>
+        )}
+
         {esFuerza && (
           <div style={{ marginTop: 18, background: C.card, border: "1px solid " + C.cardBorder, borderRadius: 14, padding: "6px 16px" }}>
             {conDatos.length === 0 && (
@@ -64,6 +79,10 @@ export function CierreSesion({ dayKey, workoutWeights, workoutReps, ritmoReal, o
                 <div key={i} style={{ padding: "11px 0", borderTop: i ? "1px solid " + C.divider : "none" }}>
                   <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", gap: 10 }}>
                     <div style={{ fontSize: 13, fontWeight: 700, color: C.text, flex: 1, minWidth: 0 }}>{f.nombre}</div>
+                    {esRecord.has(f.nombre) && (
+                      <span style={{ fontSize: 10.5, fontWeight: 900, letterSpacing: 0.5, color: "#FAFAF9", background: "#946800",
+                                     borderRadius: 999, padding: "3px 8px", flexShrink: 0 }}>RÉCORD</span>
+                    )}
                     {etiqueta && <div style={{ fontSize: 12, fontWeight: 800, color, flexShrink: 0 }}>{etiqueta}</div>}
                   </div>
                   <div className="mono" style={{ fontSize: 14, fontWeight: 700, color: f.hoy.length ? C.text : C.textFaint, marginTop: 3 }}>

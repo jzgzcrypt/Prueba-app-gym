@@ -21,6 +21,35 @@ Todo cambio que se haga en la app se anota aquí. Sin excepciones.
 
 ## [Sin publicar]
 
+### Añadido — Récords y resumen de la semana
+- **Récords de fuerza**: superar tu mejor peso, o tus mejores reps con ese
+  peso, sale como "NUEVO RÉCORD" al terminar la sesión y queda en Progreso →
+  Tus récords. La primera vez que haces un ejercicio no cuenta: no hay con qué
+  comparar.
+- **Resumen de la semana en HOY** de lunes a miércoles: sesiones hechas,
+  minutos corriendo, series, récords y el ritmo de las series. Se comparte con
+  un toque.
+
+### Añadido — Las series de running se ajustan a tus pruebas
+- **Si la última prueba dice que aún no llegas al ritmo del plan, las series
+  se corren al que te toca hoy**: los 400 m al ritmo de tu 3 km menos 5 s, las
+  de 800 m o más a tu ritmo de 5 km equivalente. Solo se ajusta hacia abajo:
+  acelerar lo decide la siguiente prueba, no una cuenta. El día D no se toca.
+- Se avisa en HOY y en la sesión ("Hoy, las series a 5:20/km · ajustado a tu
+  prueba de 3 km"), cada serie del temporizador dura lo que se tarda en correr
+  sus metros a ese ritmo, y el ritmo apuntado se compara con el ajustado.
+
+### Añadido — Voz en las series
+- **El temporizador habla**: "Serie 3 de 5. A 4 45. ¡Ya!", "Recupera, trote
+  suave. 2 minutos", "Mitad de la serie" en las largas y "Terminado" al final.
+  Se apaga con un toque y la app lo recuerda. La pantalla dice "SERIE 3 DE 5 ·
+  A 4:45/KM" en vez de "RAPIDO".
+
+### Arreglado
+- **La app llegaba con el día del despliegue** y React tenía que repintarla
+  (error #418), con un instante del día equivocado. Ahora se pinta solo en el
+  móvil, con la fecha de hoy.
+
 ### Cambiado — Apuntar una serie es un toque, como en la libreta
 - **Antes cada serie era casilla pequeña, campo que empezaba en 0 y OK, y solo
   se apuntaba el peso.** Ahora cada serie viene rellena con lo que toca —la

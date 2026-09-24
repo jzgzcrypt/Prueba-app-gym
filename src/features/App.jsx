@@ -25,6 +25,8 @@ import { WorkoutMode } from "@/features/workout/WorkoutMode";
 import { CierreSesion } from "@/features/workout/CierreSesion";
 import { copiaPendiente } from "@/domain/progreso/libreta";
 import { ultimaVez } from "@/domain/fuerza/registro";
+import { ritmoDelDia } from "@/domain/running/adaptar";
+import { resumenSemana } from "@/domain/progreso/resumen";
 
 export default function App() {
   const todayIdx = findTodayIndex();
@@ -496,6 +498,7 @@ export default function App() {
           return Object.assign({}, p, { [activeWorkout]: dayR });
         })}
         ultimaVez={(nombre) => ultimaVez(nombre, wDay.isoDate, FLAT_DAYS, workoutWeights, workoutReps)}
+        ritmoSeries={ritmoDelDia(wDay, FLAT_DAYS, ritmoReal)}
         flaggedExercises={flaggedExercises} />
     );
   }
@@ -554,6 +557,9 @@ export default function App() {
               setEditingRitmo(p => Object.assign({}, p, { [key]: false }));
             }}
             copia={copiaPendiente(ultimoBackup, todayLocalIso(), Object.values(checked).some(Boolean))}
+            resumenSemana={isToday && currentDay.dayIdx <= 2 && currentDay.weekIdx > 0
+              ? resumenSemana(WEEKS[currentDay.weekIdx - 1], { checked, ritmoReal, pesos: workoutWeights, reps: workoutReps }, FLAT_DAYS)
+              : null}
             onCopia={exportData}
             postponed={postponed} setPostponed={setPostponed}
             expandedBlock={expandedBlock} setExpandedBlock={setExpandedBlock}
@@ -598,7 +604,7 @@ export default function App() {
 
         {screen === "progreso" && (
           <ProgresoScreen medidas={medidas} setMedidas={setMedidas}
-            ritmoReal={ritmoReal} weeks={WEEKS} checked={checked} workoutWeights={workoutWeights} />
+            ritmoReal={ritmoReal} weeks={WEEKS} checked={checked} workoutWeights={workoutWeights} workoutReps={workoutReps} />
         )}
 
         {screen === "coach" && (

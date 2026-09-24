@@ -1,4 +1,4 @@
-import App from "@/features/App";
+import AppCliente from "./app-cliente";
 
 /**
  * Unica ruta de la app. El App Router aqui es solo el envoltorio: toda la
@@ -7,5 +7,5 @@ import App from "@/features/App";
  * hermanas — el dominio y la persistencia no cambian.
  */
 export default function Page() {
-  return <App />;
+  return <AppCliente />;
 }

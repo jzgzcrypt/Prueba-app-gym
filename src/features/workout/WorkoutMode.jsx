@@ -7,7 +7,18 @@ import { parseSeries } from "@/domain/fuerza/series";
 import { descansoEntreSeries, objetivoSerie, pasoPeso, propuestaSerie, textoSeries } from "@/domain/fuerza/registro";
 import { getPatronMovilidadDelDia } from "@/domain/salud/patrones";
 import { IntervalTimer } from "@/features/workout/IntervalTimer";
-export function WorkoutMode({ day, mov, progress, onUpdateProgress, onFinish, onExit, weights, onUpdateWeight, reps, onUpdateReps, ultimaVez, flaggedExercises }) {
+/** "5:05" a partir de segundos. */
+function textoRitmo(seg) { return Math.floor(seg / 60) + ":" + String(Math.round(seg % 60)).padStart(2, "0"); }
+
+/** Las series rapidas son de distancia: si el ritmo se ajusta, cada una dura
+ *  lo que tarda en cubrir sus metros a ese ritmo. */
+function intervalosDelDia(day, ritmoSeries) {
+  if (!ritmoSeries || !ritmoSeries.ajustado || !day.tramoM) return day.intervalos;
+  const seg = Math.round(day.tramoM / 1000 * ritmoSeries.ritmo);
+  return day.intervalos.map(b => ({ ...b, s: b.s.map(([t, d]) => t === "rapido" ? [t, seg] : [t, d]) }));
+}
+
+export function WorkoutMode({ day, mov, progress, onUpdateProgress, onFinish, onExit, weights, onUpdateWeight, reps, onUpdateReps, ultimaVez, ritmoSeries, flaggedExercises }) {
   const isFuerza = day.tipo === "fuerza";
   const hasCal = mov.cal && mov.cal.length > 0;
   const hasEnf = mov.enf && mov.enf.length > 0;
@@ -177,8 +188,17 @@ export function WorkoutMode({ day, mov, progress, onUpdateProgress, onFinish, on
               </div>
             </div>
 
+            {ritmoSeries && ritmoSeries.ajustado && (
+              <div style={{ padding: "11px 13px", borderRadius: 10, background: "#FDF6E3", border: "1px solid #E8D9A8", marginBottom: 14 }}>
+                <div style={{ fontSize: 13.5, fontWeight: 800, color: "#171717" }}>Hoy, las series a {textoRitmo(ritmoSeries.ritmo)}/km</div>
+                <div style={{ fontSize: 12, color: "#4A4A47", marginTop: 2, lineHeight: 1.4 }}>
+                  Ajustado a tu prueba de {ritmoSeries.fuente.distKm} km ({textoRitmo(ritmoSeries.fuente.total)}). El plan pide {textoRitmo(ritmoSeries.plan)}: se llega subiendo prueba a prueba, no reventando hoy.
+                </div>
+              </div>
+            )}
+
             {day.intervalos ? (
-              <IntervalTimer intervalos={day.intervalos} />
+              <IntervalTimer intervalos={intervalosDelDia(day, ritmoSeries)} ritmo={ritmoSeries ? ritmoSeries.ritmo : null} />
             ) : (
               <div style={{ fontSize: 11.5, color: "#8A8A87", lineHeight: 1.5 }}>Al terminar, pulsa continuar para registrar el ritmo real.</div>
             )}

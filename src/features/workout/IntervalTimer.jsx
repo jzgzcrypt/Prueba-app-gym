@@ -2,7 +2,35 @@
 
 import { useState, useEffect, useRef } from "react";
 import { C, CAT } from "@/design/tokens";
-export function IntervalTimer({ intervalos }) {
+/** "4:45" dicho como se dice corriendo: "4 45". */
+function ritmoHablado(seg) {
+  const m = Math.floor(seg / 60), s = Math.round(seg % 60);
+  return m + " " + (s === 0 ? "en punto" : String(s).padStart(2, "0"));
+}
+/** 90 -> "90 segundos"; 120 -> "2 minutos"; 150 -> "2 minutos y medio". */
+function duracionHablada(seg) {
+  if (seg < 100) return seg + " segundos";
+  const m = Math.floor(seg / 60), r = seg % 60;
+  if (r === 0) return m + (m === 1 ? " minuto" : " minutos");
+  if (r === 30) return m + " minutos y medio";
+  return m + " minutos " + r;
+}
+/** Lo que dice la voz al empezar un tramo. Numera las series rapidas: es lo
+ *  que se pierde de vista con el movil en el bolsillo. */
+function anuncio(tramo, nSerie, totalSeries, ritmo) {
+  if (tramo.tipo === "rapido") {
+    return "Serie " + nSerie + " de " + totalSeries + ". " + (ritmo ? "A " + ritmoHablado(ritmo) + ". " : "") + "¡Ya!";
+  }
+  if (tramo.tipo === "correr") return "Corre. " + duracionHablada(tramo.seg) + ".";
+  if (tramo.tipo === "caminar") return "Camina. " + duracionHablada(tramo.seg) + ".";
+  return "Recupera, trote suave. " + duracionHablada(tramo.seg) + ".";
+}
+
+const CLAVE_VOZ = "programa7k:voz";
+function leerVoz() { try { return window.localStorage.getItem(CLAVE_VOZ) !== "no"; } catch { return true; } }
+function guardarVoz(si) { try { window.localStorage.setItem(CLAVE_VOZ, si ? "si" : "no"); } catch { /* sin storage: solo esta sesion */ } }
+
+export function IntervalTimer({ intervalos, ritmo }) {
   // Expande la estructura comprimida [{r:6, s:[["correr",90],["caminar",120]]}] en una lista plana de tramos
   const tramos = [];
   intervalos.forEach(bloque => {
@@ -15,6 +43,24 @@ export function IntervalTimer({ intervalos }) {
   const [restante, setRestante] = useState(tramos[0] ? tramos[0].seg : 0);
   const [corriendo, setCorriendo] = useState(false);
   const [terminado, setTerminado] = useState(false);
+  // Voz: con el movil en el bolsillo no se ve la pantalla. Se puede apagar.
+  const [voz, setVoz] = useState(true);
+  // El intervalo lee la voz de un ref: si se apaga a mitad de tramo, calla ya.
+  const vozRef = useRef(true);
+  useEffect(() => { const v = leerVoz(); setVoz(v); vozRef.current = v; }, []);
+  const hablar = (texto) => {
+    try {
+      if (!vozRef.current || !("speechSynthesis" in window)) return;
+      window.speechSynthesis.cancel();
+      const u = new SpeechSynthesisUtterance(texto);
+      u.lang = "es-ES"; u.rate = 1.05;
+      window.speechSynthesis.speak(u);
+    } catch { /* sin voz en este navegador */ }
+  };
+  // Numero de serie rapida de cada tramo, para decir "serie 3 de 5".
+  const totalRapidas = tramos.filter(t => t.tipo === "rapido").length;
+  const nSerieDe = (i) => tramos.slice(0, i + 1).filter(t => t.tipo === "rapido").length;
+  const anunciar = (i) => { const t = tramos[i]; if (t) hablar(anuncio(t, nSerieDe(i), totalRapidas, ritmo)); };
   const audioCtxRef = useRef(null);
   const wakeLockRef = useRef(null);
 
@@ -79,10 +125,16 @@ export function IntervalTimer({ intervalos }) {
         pitar(1320, 450); vibrar([180, 90, 180]);
         setIdx(prevIdx => {
           const nuevoIdx = prevIdx + 1;
-          if (nuevoIdx >= tramos.length) { setTerminado(true); setCorriendo(false); return prevIdx; }
+          if (nuevoIdx >= tramos.length) { setTerminado(true); setCorriendo(false); hablar("Terminado. Buen trabajo."); return prevIdx; }
           setRestante(tramos[nuevoIdx].seg);
+          anunciar(nuevoIdx);
           return nuevoIdx;
         });
+      }
+      // A mitad de una serie larga, un aviso: ayuda a no cebarse al principio.
+      const t0 = tramos[idx];
+      if (t0 && t0.tipo === "rapido" && t0.seg >= 240 && seg === Math.round(t0.seg / 2) && ultimoAvisado !== "mitad") {
+        ultimoAvisado = "mitad"; hablar("Mitad de la serie.");
       }
     }, 250); // 250ms para no perder avisos si hay microcortes
     return () => clearInterval(t);
@@ -108,7 +160,9 @@ export function IntervalTimer({ intervalos }) {
     <div style={{ border: "1px solid #E5E5E3", borderRadius: 4, overflow: "hidden" }}>
       <div style={{ background: colorTramo, padding: "20px 16px", textAlign: "center" }}>
         <div style={{ fontSize: 11, fontWeight: 800, color: "#FAFAF9", letterSpacing: 1.5, opacity: 0.9 }}>
-          {actual ? actual.tipo.toUpperCase() : ""}
+          {actual ? (actual.tipo === "rapido" ? "SERIE " + nSerieDe(idx) + " DE " + totalRapidas
+            : { correr: "CORRE", caminar: "CAMINA", suave: "RECUPERA" }[actual.tipo] || actual.tipo.toUpperCase()) : ""}
+          {actual && actual.tipo === "rapido" && ritmo ? " · A " + Math.floor(ritmo / 60) + ":" + String(ritmo % 60).padStart(2, "0") + "/KM" : ""}
         </div>
         <div className="mono" style={{ fontSize: 48, fontWeight: 800, color: "#FAFAF9", lineHeight: 1.1, marginTop: 4 }}>
           {mm}:{ss}
@@ -123,7 +177,13 @@ export function IntervalTimer({ intervalos }) {
       </div>
 
       <div style={{ padding: "14px 16px", display: "flex", gap: 8 }}>
-        <button className="nb" onClick={() => { pitar(660, 100); setCorriendo(c => !c); }} style={{
+        <button className="nb" onClick={() => {
+          pitar(660, 100);
+          // El primer "hablar" tiene que salir de un toque: iOS no deja hablar
+          // a una pagina que no ha tocado nadie.
+          if (!corriendo) anunciar(idx);
+          setCorriendo(c => !c);
+        }} style={{
           flex: 1, height: 46, borderRadius: 4, background: corriendo ? "#F2F2F0" : "#171717",
           border: "1px solid " + (corriendo ? "#D4D4D1" : "#171717"),
           fontSize: 13, fontWeight: 700, color: corriendo ? "#171717" : "#FAFAF9", letterSpacing: 0.5,
@@ -133,12 +193,19 @@ export function IntervalTimer({ intervalos }) {
             const n = prev + 1;
             if (n >= tramos.length) { setTerminado(true); setCorriendo(false); return prev; }
             setRestante(tramos[n].seg);
+            if (corriendo) anunciar(n);
             return n;
           });
         }} style={{
           width: 88, height: 46, borderRadius: 4, background: "#F2F2F0", border: "1px solid #D4D4D1",
           fontSize: 12, fontWeight: 700, color: "#787774",
         }}>SALTAR</button>
+      </div>
+
+      <div style={{ padding: "0 16px 10px" }}>
+        <button className="nb" onClick={() => { const n = !voz; setVoz(n); vozRef.current = n; guardarVoz(n); if (n) hablar("Voz activada."); else try { window.speechSynthesis.cancel(); } catch { /* nada */ } }} style={{
+          fontSize: 12, fontWeight: 800, color: voz ? "#171717" : "#8A8A87", minHeight: 36,
+        }}>{voz ? "VOZ: SÍ" : "VOZ: NO"} · te dice cada serie y su ritmo</button>
       </div>
 
       <div style={{ padding: "0 16px 14px", fontSize: 10.5, color: "#8A8A87", lineHeight: 1.4 }}>

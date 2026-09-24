@@ -131,3 +131,67 @@ export function propuestaSerie({ si, pesosHoy, repsHoy, ultima, objetivo }) {
 
   return { peso, reps: r };
 }
+
+// ─── Records ────────────────────────────────────────────────────────────────
+
+/** La mejor serie de una lista: la de mas peso y, a igual peso, mas reps. */
+export function mejorSerie(series) {
+  let mejor = null;
+  for (const s of series || []) {
+    if (!mejor) { mejor = s; continue; }
+    const p = s.peso ?? -1, mp = mejor.peso ?? -1;
+    if (p > mp || (p === mp && (s.reps ?? 0) > (mejor.reps ?? 0))) mejor = s;
+  }
+  return mejor;
+}
+
+/** Todas las series de un ejercicio antes de una fecha. */
+function seriesPrevias(nombre, antesDe, dias, pesos, reps) {
+  const out = [];
+  for (const d of dias || []) {
+    if (!d.ejercicios || d.isoDate >= antesDe) continue;
+    const idx = d.ejercicios.findIndex(e => e.nombre === nombre);
+    if (idx !== -1) out.push(...seriesDe(d.isoDate, idx, pesos, reps));
+  }
+  return out;
+}
+
+/**
+ * Los records que se batieron un dia. Record es superar todo lo anterior:
+ * mas peso que nunca, o las mas reps de siempre con tu peso maximo. La
+ * primera vez que haces un ejercicio no es record: no hay con que comparar.
+ * @returns {Array<{nombre, tipo:"peso"|"reps", texto}>}
+ */
+export function recordsDelDia(dia, dias, pesos, reps) {
+  if (!dia || !dia.ejercicios) return [];
+  const out = [];
+  dia.ejercicios.forEach((ej, idx) => {
+    const hoy = mejorSerie(seriesDe(dia.isoDate, idx, pesos, reps));
+    if (!hoy) return;
+    const previas = seriesPrevias(ej.nombre, dia.isoDate, dias, pesos, reps);
+    if (!previas.length) return;
+    const antes = mejorSerie(previas);
+    const texto = (hoy.peso != null ? hoy.peso + " kg" : "") + (hoy.reps != null ? (hoy.peso != null ? " × " : "") + hoy.reps + " reps" : "");
+    if ((hoy.peso ?? -1) > (antes.peso ?? -1)) out.push({ nombre: ej.nombre, tipo: "peso", texto });
+    else if ((hoy.peso ?? -1) === (antes.peso ?? -1) && (hoy.reps ?? 0) > (antes.reps ?? 0)) out.push({ nombre: ej.nombre, tipo: "reps", texto });
+  });
+  return out;
+}
+
+/** El mejor registro de cada ejercicio en todo el bloque, con su fecha. */
+export function tablaRecords(dias, pesos, reps) {
+  const porNombre = {};
+  for (const d of dias || []) {
+    if (!d.ejercicios) continue;
+    d.ejercicios.forEach((ej, idx) => {
+      const m = mejorSerie(seriesDe(d.isoDate, idx, pesos, reps));
+      if (!m) return;
+      const actual = porNombre[ej.nombre];
+      // mejorSerie devuelve el primero si empatan: solo se cambia si hoy es mejor.
+      if (!actual || mejorSerie([actual, m]) === m) {
+        porNombre[ej.nombre] = { nombre: ej.nombre, peso: m.peso, reps: m.reps, fecha: d.date, isoDate: d.isoDate };
+      }
+    });
+  }
+  return Object.values(porNombre).sort((a, b) => a.isoDate < b.isoDate ? 1 : -1);
+}

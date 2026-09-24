@@ -2,7 +2,8 @@
 
 import { useState } from "react";
 import { C, CAT, R, SP, TAP_MIN, TYPE } from "@/design/tokens";
-import { LecturaSesion, queApuntar } from "@/features/ui/lectura";
+import { AvisoRitmo, LecturaSesion, queApuntar } from "@/features/ui/lectura";
+import { TarjetaResumen } from "@/features/ui/resumen";
 import { ICON_FUERZA, ICON_MOVILIDAD, ICON_RUNNING, LOGO_7K } from "@/domain/assets/icons";
 import { parseSeries } from "@/domain/fuerza/series";
 import { BLOQUE, FECHA_FIN, FECHA_INICIO, FLAT_DAYS, WEEKS, claveDia, todayLocalIso } from "@/domain/plan/calendario";
@@ -180,6 +181,8 @@ export function HoyScreen(props) {
           </div>
         )}
 
+        {props.resumenSemana && <TarjetaResumen resumen={props.resumenSemana} nombreBloque="Base 7K" />}
+
         {isToday && props.copia && props.copia.toca && (
           <div style={{ background: C.card, border: "1px solid " + C.cardBorder, borderRadius: 12, padding: "12px 14px",
                         display: "flex", alignItems: "center", gap: 12 }}>
@@ -202,6 +205,7 @@ export function HoyScreen(props) {
             icon={ICON_RUNNING} accent={CAT.running} title={day.titulo}
             statusText={day.dur} statusDone={mainDone}>
             <div style={{ fontSize: 13, color: "#4A4A47", marginTop: 4, marginBottom: 14, lineHeight: 1.5 }}>{day.what}</div>
+            <AvisoRitmo day={day} ritmoReal={props.ritmoReal} />
 
             <div style={{ background: "#F0F5F8", border: "1px solid #D8E5EC", borderRadius: 10, padding: "11px 13px", marginBottom: 14 }}>
               <div style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 4 }}>
