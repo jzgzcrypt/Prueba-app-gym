@@ -5,6 +5,7 @@ import { C, CAT, R, SP, TAP_MIN, TYPE } from "@/design/tokens";
 import { AvisoRitmo, LecturaSesion, queApuntar } from "@/features/ui/lectura";
 import { TarjetaResumen } from "@/features/ui/resumen";
 import { TarjetaCalendario } from "@/features/ui/calendario";
+import { LineaPlan } from "@/features/ui/plan-vs-real";
 import { ICON_FUERZA, ICON_MOVILIDAD, ICON_RUNNING, LOGO_7K } from "@/domain/assets/icons";
 import { parseSeries } from "@/domain/fuerza/series";
 import { BLOQUE, FECHA_FIN, FECHA_INICIO, FLAT_DAYS, WEEKS, claveDia, todayLocalIso } from "@/domain/plan/calendario";
@@ -112,6 +113,12 @@ export function HoyScreen(props) {
             <div style={{ width: pctBloque + "%", height: "100%", background: "#FAFAF9", borderRadius: 3, transition: "width .3s ease" }} />
           </div>
         </div>
+        {/* ¿Voy segun plan? En una linea, sin abrir nada. Toca para la grafica. */}
+        {isToday && (
+          <div style={{ marginTop: 8 }}>
+            <LineaPlan ritmoReal={props.ritmoReal} onVer={props.onVerProgreso} />
+          </div>
+        )}
       </div>
 
       <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "0 " + SP.md + "px " + SP.lg + "px" }}>

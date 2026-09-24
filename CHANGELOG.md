@@ -21,6 +21,18 @@ Todo cambio que se haga en la app se anota aquí. Sin excepciones.
 
 ## [Sin publicar]
 
+### Añadido — Tú contra el plan
+- **Una línea en HOY responde "¿voy según plan?"**: "25 s por delante del
+  plan", "1:10 por detrás" o "Justo en el plan". Antes de tener datos dice
+  cuándo llega el primero. Tocándola se abre la gráfica.
+- **La gráfica en Progreso**: tu 7K equivalente semana a semana contra el que
+  el plan espera a esas alturas, hasta 33:15. Arriba es más rápido. Las
+  pruebas son puntos rellenos (el dato bueno); las series, huecos (una
+  estimación que las pruebas confirman). Tocando un punto dice de dónde sale.
+- **La línea del plan sale de sus propios umbrales**, no de una curva
+  inventada: el 3 km de S4 en línea (14:30), el 5 km de S8 que mantiene la
+  fecha (23:30) y el objetivo, pasados a 7K.
+
 ### Añadido — La app abre sin cobertura
 - **En muchos gimnasios no hay señal, y sin ella la app no abría.** Ahora se
   guarda en el móvil desde la primera visita (service worker, `public/sw.js`):

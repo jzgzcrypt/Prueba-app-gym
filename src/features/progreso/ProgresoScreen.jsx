@@ -2,8 +2,9 @@
 
 import { FECHA_INICIO, FLAT_DAYS, claveDia, todayLocalIso } from "@/domain/plan/calendario";
 import { useEffect, useRef, useState } from "react";
-import { diasParaMedir, lecturaPrueba } from "@/domain/progreso/libreta";
+import { diasParaMedir } from "@/domain/progreso/libreta";
 import { LecturaSesion } from "@/features/ui/lectura";
+import { GraficoPlan } from "@/features/ui/plan-vs-real";
 import { tablaRecords } from "@/domain/fuerza/registro";
 import { C, CAT } from "@/design/tokens";
 import { QuickFieldInput, SimpleLineChart } from "@/features/ui/charts";
@@ -381,22 +382,13 @@ const etiqueta = { fontSize: 10.5, fontWeight: 800, color: C.textDim, letterSpac
 function VamosALlegar({ ritmoReal }) {
   const hoy = todayLocalIso();
   const pruebas = FLAT_DAYS.filter(d => d.prueba);
-  const hechas = pruebas.map(d => ({ d, l: lecturaPrueba(d.prueba, ritmoReal[claveDia(d)]) }))
-    .filter(x => x.l && !x.l.error);
-  const ultima = hechas.at(-1);
   const proxima = pruebas.find(d => d.isoDate >= hoy && !ritmoReal[claveDia(d)]);
   return (
     <div style={{ ...tarjeta, borderLeft: "3px solid " + CAT.running }}>
-      <div style={etiqueta}>¿VAMOS A LLEGAR?</div>
-      {ultima ? (
-        <div style={{ fontSize: 13.5, color: C.text, fontWeight: 700, marginBottom: 10 }}>
-          Tu 7K equivalente: {formatea(ultima.l.equivalente)} · objetivo 33:15
-        </div>
-      ) : (
-        <div style={{ fontSize: 13, color: "#4A4A47", lineHeight: 1.45, marginBottom: 10 }}>
-          Lo dirán las pruebas. Cada una convierte tu tiempo en el 7K que harías hoy.
-        </div>
-      )}
+      <div style={etiqueta}>TÚ CONTRA EL PLAN</div>
+      <div style={{ marginBottom: 12 }}>
+        <GraficoPlan ritmoReal={ritmoReal} />
+      </div>
       {pruebas.map(d => {
         const texto = ritmoReal[claveDia(d)];
         return (
@@ -420,10 +412,6 @@ function VamosALlegar({ ritmoReal }) {
   );
 }
 
-function formatea(seg) {
-  const m = Math.floor(seg / 60), s = Math.round(seg % 60);
-  return m + ":" + String(s).padStart(2, "0");
-}
 
 /** Cintura, hombro/cintura, laterales y fotos en una tarjeta, con cuando toca
  *  medir. Lo que dice si la estetica avanza, sin mirar la bascula. */

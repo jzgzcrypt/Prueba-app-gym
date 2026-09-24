@@ -558,6 +558,7 @@ export default function App() {
             }}
             copia={copiaPendiente(ultimoBackup, todayLocalIso(), Object.values(checked).some(Boolean))}
             semanasCumplidas={semanasCumplidas(WEEKS, checked, todayLocalIso())}
+            onVerProgreso={() => setScreen("progreso")}
             resumenSemana={isToday && currentDay.dayIdx <= 2 && currentDay.weekIdx > 0
               ? resumenSemana(WEEKS[currentDay.weekIdx - 1], { checked, ritmoReal, pesos: workoutWeights, reps: workoutReps }, FLAT_DAYS)
               : null}
