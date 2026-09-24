@@ -424,7 +424,7 @@ export function PlanGlobalContent({ jumpToDay, setWeekIdx, onJumpAway, checked }
           </div>
           <div style={{ fontSize: 10, fontWeight: 800, color: C.accent, letterSpacing: 0.8, marginBottom: 6 }}>CÓMO SE LLEGA</div>
           <div style={{ fontSize: 13, color: "#4A4A47", lineHeight: 1.55 }}>
-            El running manda siempre — nunca se sacrifica una sesión de calidad por fuerza. Tres carreras y el tenis. La fuerza es empuje/tirón/pierna con hombro dos veces por semana hasta S10, y un bloque de prevención (gemelo, glúteo medio, core) todos los sábados. El cuello se trabaja todos los días, sin excepción — es el hábito de menor esfuerzo y mayor constancia de todo el plan.
+            El running manda siempre — nunca se sacrifica una sesión de calidad por fuerza. Tres carreras y el tenis. La fuerza es empuje/tirón/pierna con hombro dos veces por semana hasta S10, y un bloque de prevención (gemelo, glúteo medio, core) todos los sábados. La movilidad va dentro de cada sesión, en el gimnasio o donde corres: nada suelto para casa. El cuello se trabaja todos los días, sin excepción — es el hábito de menor esfuerzo y mayor constancia de todo el plan.
           </div>
         </div>
       </div>

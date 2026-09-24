@@ -68,11 +68,24 @@ export const MOVILIDAD_PATRONES = {
     ] },
 };
 export const MOVILIDAD_PATRON_ORDEN = ["hombro", "cadenaPosterior", "columna", "cadera"];
-export function getPatronMovilidadDelDia(weekN, dayIdx) {
-  // Rota entre los 4 patrones segun el indice del dia, para que los 4 reciban atencion en la semana
-  const key = MOVILIDAD_PATRON_ORDEN[dayIdx % MOVILIDAD_PATRON_ORDEN.length];
-  const patron = MOVILIDAD_PATRONES[key];
+/**
+ * Que patron de movilidad se trabaja en cada sesion de gimnasio. Antes
+ * rotaban por dia de la semana y el del lunes (tenis) no se hacia nunca.
+ * Ahora cada patron va con la sesion que ya lo calienta: hombro con el
+ * empuje, columna con el tiron, y cadera y cadena posterior con la pierna.
+ */
+export const PATRONES_POR_SESION = {
+  empuje: ["hombro"],
+  tiron: ["columna"],
+  pierna: ["cadera", "cadenaPosterior"],
+};
+
+/** Los patrones de una sesion, con el nivel que toca por semana. */
+export function getPatronesDeSesion(cat, weekN) {
   const nivel = (() => { const w = semanaHabito(weekN); return w <= 4 ? 1 : w <= 8 ? 2 : 3; })();
-  const nivelData = patron.niveles.find(n => n.nivel === nivel);
-  return { key, nombre: patron.nombre, color: patron.color, objetivo: patron.objetivo, test: patron.test, nivel, nivelNombre: nivelData.nombre, pasos: nivelData.pasos, verificable: nivelData.verificable };
+  return (PATRONES_POR_SESION[cat] || []).map(key => {
+    const patron = MOVILIDAD_PATRONES[key];
+    const nivelData = patron.niveles.find(n => n.nivel === nivel);
+    return { key, nombre: patron.nombre, color: patron.color, objetivo: patron.objetivo, test: patron.test, nivel, nivelNombre: nivelData.nombre, pasos: nivelData.pasos, verificable: nivelData.verificable };
+  });
 }

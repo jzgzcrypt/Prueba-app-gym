@@ -135,9 +135,10 @@ export const WEEKS = [
           { grupo: "Triceps", nombre: "Extension polea alta agarre en V", series: "3x10" },
           ROT_EXT,
         ]},
+      // La sentadilla ATG y el cossack van en el calentamiento (patron de
+      // cadera, ver salud/patrones.js): aqui no se repiten.
       { dow: "Sabado", tipo: "fuerza", cat: "pierna", titulo: "Pierna + prevención (rampa)", dur: "25 min",
         ejercicios: [
-          { grupo: "Pierna", nombre: "Sentadilla ATG sin peso", series: "3x10" },
           { grupo: "Pierna", nombre: "Elevacion de gemelo a una pierna", series: "2x12/lado" },
           { grupo: "Cadera", nombre: "Puente gluteo + abduccion", series: "3x15" },
           { grupo: "Core", nombre: "Plancha lateral", series: "2x20s/lado" },
@@ -174,8 +175,6 @@ export const WEEKS = [
         ]},
       { dow: "Sabado", tipo: "fuerza", cat: "pierna", titulo: "Pierna + prevención", dur: "30 min",
         ejercicios: [
-          { grupo: "Pierna", nombre: "Sentadilla ATG sin peso", series: "2x10" },
-          { grupo: "Pierna", nombre: "Cossack squat con peso corporal", series: "2x8/lado" },
           GEMELO, CLAMSHELL, PLANCHA_LAT,
           LAT_MANC(3),
         ]},

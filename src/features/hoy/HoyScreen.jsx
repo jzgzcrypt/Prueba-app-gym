@@ -358,26 +358,32 @@ export function HoyScreen(props) {
         {day.tipo === "libre" && (
           <div style={{ background: C.card, border: "1px solid " + C.cardBorder, borderRadius: 14, padding: "14px 16px" }}>
             <div style={{ fontSize: 14, fontWeight: 700, color: C.text }}>Descanso</div>
-            <div style={{ fontSize: 12, color: C.textDim, marginTop: 2 }}>Sin fuerza ni running hoy</div>
+            <div style={{ fontSize: 12, color: C.textDim, marginTop: 2 }}>Sin fuerza, running ni movilidad. Descansar también es el plan.</div>
           </div>
         )}
 
-        {/* ═══ MOVILIDAD (día libre) — colapsable ═══ */}
-        {(day.tipo === "libre" || isCompromisoDay) && mov.enf.length > 0 && (
+        {/* ═══ TENIS — su movilidad, en la pista. Los dias de descanso no llevan
+            movilidad: todo va dentro de alguna sesion, no suelto para casa. ═══ */}
+        {isCompromisoDay && (mov.cal.length + mov.enf.length) > 0 && (
           <ListBlock id="mov" expandedBlock={expandedBlock} toggleBlock={toggleBlock}
-            icon={ICON_MOVILIDAD} accent={CAT.movilidad} title="Movilidad del día"
-            statusText={mov.enf.length + " ej."} statusDone={!!checked[dayKey+"-movenf"]}>
-            <div style={{ display: "flex", flexDirection: "column", gap: 6, marginTop: 4, marginBottom: 10 }}>
-              {mov.enf.map((m,i) => (
-                <div key={i} onClick={() => openCatalogo(m.id)} className="btn" style={{
-                  display: "flex", justifyContent: "space-between", padding: "10px 12px",
-                  background: "#F2F2F0", borderRadius: 10, cursor: "pointer",
-                }}>
-                  <span style={{ fontSize: 13, color: "#3A3A38", fontWeight: 600 }}>{m.ex}</span>
-                  <span style={{ fontSize: 11, color: "#8A8A87" }}>{m.t}</span>
+            icon={ICON_MOVILIDAD} accent={CAT.movilidad} title="Antes y después del tenis"
+            statusText={(mov.cal.length + mov.enf.length) + " ej."} statusDone={!!checked[dayKey+"-movenf"]}>
+            {[["ANTES, EN LA PISTA", mov.cal], ["DESPUÉS", mov.enf]].filter(([, l]) => l.length).map(([titulo, lista]) => (
+              <div key={titulo} style={{ marginTop: 4, marginBottom: 10 }}>
+                <div style={{ fontSize: 10, fontWeight: 800, color: C.textDim, letterSpacing: 0.5, marginBottom: 6 }}>{titulo}</div>
+                <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
+                  {lista.map((m,i) => (
+                    <div key={i} onClick={() => m.id && openCatalogo(m.id)} className="btn" style={{
+                      display: "flex", justifyContent: "space-between", padding: "10px 12px",
+                      background: "#F2F2F0", borderRadius: 10, cursor: "pointer",
+                    }}>
+                      <span style={{ fontSize: 13, color: "#3A3A38", fontWeight: 600 }}>{m.ex}</span>
+                      <span style={{ fontSize: 11, color: "#8A8A87" }}>{m.t}</span>
+                    </div>
+                  ))}
                 </div>
-              ))}
-            </div>
+              </div>
+            ))}
             <button className="btn" onClick={() => toggleCheck(dayKey+"-movenf")} style={{
               width: "100%", padding: "12px", borderRadius: 10,
               background: checked[dayKey+"-movenf"] ? C.ok : "#EDEDEB",

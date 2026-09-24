@@ -9,7 +9,7 @@ import { NUTRICION } from "@/domain/nutricion/nutricion";
 import { BLOQUE, FECHA_FIN, FECHA_INICIO, FLAT_DAYS, WEEKS, claveDia, findTodayIndex, todayLocalIso } from "@/domain/plan/calendario";
 import { getCuelloEj } from "@/domain/salud/cuello";
 import { comidaDelDia } from "@/domain/nutricion/dias";
-import { getMovilidad } from "@/domain/salud/movilidad";
+import { getMovilidadDelDia } from "@/domain/salud/movilidad";
 import { CoachScreen } from "@/features/coach/CoachScreen";
 import { EjerciciosScreen } from "@/features/ejercicios/EjerciciosScreen";
 import { MagiaCatalogoScreen } from "@/features/habilidades/MagiaCatalogoScreen";
@@ -259,7 +259,7 @@ export default function App() {
   const dayKey = claveDia(currentDay);
   const isFuerzaDay = currentDay.tipo === "fuerza";
   const isRunDay = currentDay.tipo === "run" || currentDay.tipo === "test" || currentDay.tipo === "objetivo";
-  const mov = getMovilidad(currentDay.cat, currentDay.weekN);
+  const mov = getMovilidadDelDia(currentDay);
   // La fase del cuello sale de los dias practicados, no de la semana del bloque.
   const cuelloEj = getCuelloEj(cuelloChecks, cuelloFaseManual);
   const comida = comidaDelDia(currentDay);
@@ -463,7 +463,7 @@ export default function App() {
 
   if (activeWorkout) {
     const wDay = FLAT_DAYS.find(d => claveDia(d) === activeWorkout);
-    const wMov = getMovilidad(wDay.cat, wDay.weekN);
+    const wMov = getMovilidadDelDia(wDay);
 
 
     return (

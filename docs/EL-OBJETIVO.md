@@ -161,7 +161,9 @@ Están aquí para no repetirlos.
 
 ### Lo siguiente, por orden de lo que cuesta no hacerlo
 
-Hecho el 24 de septiembre: **récords y resumen de la semana**, **series de
+Hecho el 24 de septiembre: **la movilidad va dentro de las sesiones** (nada
+suelto para casa; el calentamiento de running es el del plan), **récords y
+resumen de la semana**, **series de
 running ajustadas a la última prueba** y **voz en el temporizador**.
 
 Hecho el 22 de septiembre: **la libreta** (al terminar una sesión se compara
@@ -181,9 +183,7 @@ iCloud) y **Progreso con cintura, hombro/cintura, laterales y fotos**.
    eventos de agenda sueltos.
 6. **Reglas de ajuste automático** cuando se falla un día. Hoy están escritas
    en Coach → Plan, pero la sesión se mueve a mano.
-7. **El calentamiento de las sesiones de running** enseña ejercicios de
-   movilidad; el plan pide 15 min suaves y progresivos. Alinearlo.
-8. **Las calorías hay que verificarlas contra la cintura**, no contra la
+7. **Las calorías hay que verificarlas contra la cintura**, no contra la
    báscula. 2.500 / 2.100 es una estimación razonada, no una verdad. Si en tres
    semanas la cintura no se mueve, bajar 150 kcal de HC en los días de
    RECORTAR. Si el ritmo Z2 se pone duro, subirlas.

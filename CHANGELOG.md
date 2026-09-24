@@ -21,6 +21,24 @@ Todo cambio que se haga en la app se anota aquí. Sin excepciones.
 
 ## [Sin publicar]
 
+### Cambiado — La movilidad va dentro de cada sesión, nada suelto para casa
+- **Lo que queda "para casa" no se hace; lo que va pegado a una sesión, sí.**
+  Los días de descanso ya no piden movilidad: descansar también es el plan.
+- **Los cuatro patrones de movilidad se reparten en el gimnasio**: hombro con
+  el empuje (miércoles), columna con el tirón (viernes), y cadera y cadena
+  posterior con la pierna (sábado). Antes rotaban por día de la semana y el
+  del lunes, día de tenis sin sesión, no se hacía nunca.
+- **El calentamiento de running es el que pide el plan**: 15 min de trote
+  suave, cossack dinámico, tobillo, skips (S4-S9) y 3 progresivos al final; y
+  10 min suaves, gemelo y cintilla al acabar. Antes enseñaba movilidad de
+  gimnasio (foam roller incluido) a quien corre en la calle.
+- **Las activaciones, los progresivos sueltos y la prueba de partida llevan un
+  calentamiento corto**: el largo era más largo que la propia sesión. El día D
+  calienta 10 min, como dice el plan.
+- **El tenis tiene su bloque "Antes y después del tenis"**, en la pista.
+- La sentadilla ATG y el cossack de los sábados de S1-S2 ya no se repiten: van
+  en el calentamiento (patrón de cadera).
+
 ### Añadido — Récords y resumen de la semana
 - **Récords de fuerza**: superar tu mejor peso, o tus mejores reps con ese
   peso, sale como "NUEVO RÉCORD" al terminar la sesión y queda en Progreso →

@@ -5,7 +5,7 @@ import { C, CAT } from "@/design/tokens";
 import { CATALOGO } from "@/domain/fuerza/catalogo";
 import { parseSeries } from "@/domain/fuerza/series";
 import { descansoEntreSeries, objetivoSerie, pasoPeso, propuestaSerie, textoSeries } from "@/domain/fuerza/registro";
-import { getPatronMovilidadDelDia } from "@/domain/salud/patrones";
+import { getPatronesDeSesion } from "@/domain/salud/patrones";
 import { IntervalTimer } from "@/features/workout/IntervalTimer";
 /** "5:05" a partir de segundos. */
 function textoRitmo(seg) { return Math.floor(seg / 60) + ":" + String(Math.round(seg % 60)).padStart(2, "0"); }
@@ -62,11 +62,15 @@ export function WorkoutMode({ day, mov, progress, onUpdateProgress, onFinish, on
       const ficha = CATALOGO[item.id];
       return ficha ? Object.assign({}, item, { pasos: ficha.pasos }) : item;
     });
-    // El habito de movilidad rota entre 4 patrones (hombro/cadena posterior/columna/cadera), progresando de nivel por semana
-    const patronDia = getPatronMovilidadDelDia(day.weekN, day.dayIdx);
-    const bloque = phase === "cal"
-      ? [{ ex: patronDia.nivelNombre, t: "", patron: patronDia.nombre, habito: true, objetivo: patronDia.objetivo, pasos: patronDia.pasos }, ...baseBloque]
-      : baseBloque;
+    // Los patrones de movilidad van con la sesion de gimnasio que los calienta
+    // (hombro con empuje, columna con tiron, cadera y cadena posterior con
+    // pierna), progresando de nivel por semana. En running no hay patron: el
+    // calentamiento es el que pide el plan.
+    const patrones = phase === "cal" ? getPatronesDeSesion(day.cat, day.weekN) : [];
+    const bloque = [
+      ...patrones.map(p => ({ ex: p.nivelNombre, t: "", patron: p.nombre, habito: true, objetivo: p.objetivo, pasos: p.pasos })),
+      ...baseBloque,
+    ];
     const doneMap = phase === "cal" ? calDone : enfDone;
     const setDoneMap = phase === "cal" ? setCalDone : setEnfDone;
     const allDone = bloque.every((_, i) => doneMap[i]);

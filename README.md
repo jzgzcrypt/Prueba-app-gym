@@ -15,7 +15,7 @@ verdad y se ajusta el plan a la realidad, semana a semana.
 | **Running** | Sesiones con intervalos y cronómetro, ritmo real contra ritmo esperado |
 | **Fuerza** | Sesiones guiadas, catálogo de ejercicios, pesos serie a serie con historial |
 | **Cuello** | Protocolo de fisio diario en tres fases |
-| **Movilidad** | Cuatro patrones en paralelo, cada uno con su test |
+| **Movilidad** | Dentro de cada sesión: cuatro patrones repartidos en los días de gimnasio, cada uno con su test |
 | **Técnica** | Cadencia y apoyo, repetición deliberada en cada carrera |
 | **Magia** | Trucos de cartas con repaso espaciado: avanzas dominando |
 | **Guerrero** | Cuatro pilares: calma, golpeo, mentalidad y aplicación |
