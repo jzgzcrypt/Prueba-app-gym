@@ -73,7 +73,6 @@ export function WorkoutMode({ day, mov, progress, onUpdateProgress, onFinish, on
     ];
     const doneMap = phase === "cal" ? calDone : enfDone;
     const setDoneMap = phase === "cal" ? setCalDone : setEnfDone;
-    const allDone = bloque.every((_, i) => doneMap[i]);
     const label = phase === "cal" ? "CALENTAMIENTO" : "ENFRIAMIENTO";
 
     return (
@@ -147,11 +146,12 @@ export function WorkoutMode({ day, mov, progress, onUpdateProgress, onFinish, on
                 width: 48, height: 48, borderRadius: 4, background: "#F2F2F0", fontSize: 16, color: "#8A8A87",
               }}>&lsaquo;</button>
             )}
+            {/* Siempre dice lo que viene, nunca "saltar": el boton no puede
+                invitar a escaquearse. Marcar cada ejercicio es opcional. */}
             <button className="nb" onClick={goNextPhase} style={{
-              flex: 1, height: 48, borderRadius: 4, background: allDone ? "#171717" : "#FFFFFF",
-              border: "1px solid " + (allDone ? "#171717" : "#D4D4D1"),
-              fontSize: 13, fontWeight: 700, color: allDone ? "#FAFAF9" : "#8A8A87", letterSpacing: 0.5,
-            }}>{allDone ? "CONTINUAR" : "SALTAR"}</button>
+              flex: 1, height: 52, borderRadius: 12, background: "#171717", border: "1px solid #171717",
+              fontSize: 13.5, fontWeight: 800, color: "#FAFAF9", letterSpacing: 0.5,
+            }}>{phase === "cal" ? "YA ESTOY CALIENTE · A LA SESIÓN" : phaseIdx === phases.length - 1 ? "TERMINAR" : "SIGUIENTE"}</button>
           </div>
         </div>
       </div>

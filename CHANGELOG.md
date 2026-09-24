@@ -21,6 +21,13 @@ Todo cambio que se haga en la app se anota aquí. Sin excepciones.
 
 ## [Sin publicar]
 
+### Cambiado — Ningún botón invita a saltarse el calentamiento
+- **Al calentar o estirar, si no marcabas cada ejercicio, el botón decía
+  "SALTAR" en gris.** Ahora dice siempre lo que viene ("YA ESTOY CALIENTE · A
+  LA SESIÓN", "TERMINAR") y marcar cada ejercicio es opcional.
+- **Queda escrita la regla que manda sobre todas**: cómodo, y que nada invite a
+  escaquearse (`docs/EL-OBJETIVO.md`, regla 13).
+
 ### Cambiado — La movilidad va dentro de cada sesión, nada suelto para casa
 - **Lo que queda "para casa" no se hace; lo que va pegado a una sesión, sí.**
   Los días de descanso ya no piden movilidad: descansar también es el plan.

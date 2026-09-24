@@ -130,6 +130,18 @@ Cada una costó una vuelta entera. Romperlas es repetir un error ya cometido.
 11. **Un guardado nunca puede tener menos datos que el anterior.**
 12. **Nada se borra: se apila una capa encima.** Por eso "volver al original"
     siempre funciona.
+13. **Pensar siempre en él: cómodo, y que nada invite a escaquearse.** Es la
+    regla que manda sobre las demás al diseñar cualquier cosa. En concreto:
+    - **Nada suelto "para casa".** Lo que va pegado a una sesión se hace; lo
+      que queda suelto, no. Por eso la movilidad va dentro de las sesiones.
+    - **Un toque, no un formulario.** Todo viene relleno con lo de la última
+      vez o lo que pide el plan; apuntar es confirmar.
+    - **Ningún botón dice "saltar" donde se puede evitar.** El botón dice lo
+      que viene ("a la sesión", "terminar"); lo opcional no bloquea ni culpa.
+    - **Lo que se pide, ajustado a como está hoy.** Un ritmo imposible o una
+      sesión eterna es una invitación a no ir.
+    Antes de añadir algo, preguntarse: ¿esto se lo hace más fácil, o le da
+    una excusa?
 
 ---
 
