@@ -173,6 +173,10 @@ Están aquí para no repetirlos.
 
 ### Lo siguiente, por orden de lo que cuesta no hacerlo
 
+Hecho el 25 de septiembre: **tú contra el plan** (una línea en HOY y la
+gráfica en Progreso) y **el peso de cada serie decidido y explicado** (doble
+progresión, idea de TrueLift).
+
 Hecho el 24 de septiembre: **la app abre sin cobertura**, **el plan en el
 calendario del móvil con aviso antes de cada sesión**, **semanas cumplidas**,
 **la movilidad va dentro de las sesiones** (nada

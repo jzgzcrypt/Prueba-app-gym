@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { C, CAT } from "@/design/tokens";
 import { CATALOGO } from "@/domain/fuerza/catalogo";
 import { parseSeries } from "@/domain/fuerza/series";
-import { descansoEntreSeries, objetivoSerie, pasoPeso, propuestaSerie, textoSeries } from "@/domain/fuerza/registro";
+import { descansoEntreSeries, objetivoSerie, pasoPeso, propuestaSerie, sugerenciaCarga, textoSeries } from "@/domain/fuerza/registro";
 import { getPatronesDeSesion } from "@/domain/salud/patrones";
 import { IntervalTimer } from "@/features/workout/IntervalTimer";
 /** "5:05" a partir de segundos. */
@@ -235,6 +235,7 @@ export function WorkoutMode({ day, mov, progress, onUpdateProgress, onFinish, on
   const exReps = (reps && reps[exIdx]) || {};
   const ultima = ultimaVez ? ultimaVez(ejercicio.nombre) : null;
   const objetivo = objetivoSerie(ejercicio.series);
+  const sugerencia = sugerenciaCarga({ ultima, objetivo, nombre: ejercicio.nombre });
   const ejercicioHecho = seriesDone >= totalSeries;
   const siguienteTexto = isLastEj ? (phaseIdx === phases.length - 1 ? "TERMINAR" : "SIGUIENTE FASE") : "SIGUIENTE EJERCICIO";
 
@@ -297,9 +298,15 @@ export function WorkoutMode({ day, mov, progress, onUpdateProgress, onFinish, on
             <div className="mono" style={{ fontSize: 15, color: "#171717", fontWeight: 700, marginTop: 2 }}>
               {ultima ? textoSeries(ultima.series) : "Primera vez: apunta lo que hagas y la próxima tendrás con qué comparar."}
             </div>
-            {ultima && (
-              <div style={{ fontSize: 11.5, color: "#4A4A47", marginTop: 3 }}>Hoy, una rep más o un poco más de peso.</div>
-            )}
+            {/* Lo que toca hoy, decidido y explicado: ya viene puesto en la serie. */}
+            <div style={{ marginTop: 8, paddingTop: 8, borderTop: "1px solid #E5E5E3" }}>
+              <div style={{ fontSize: 14, fontWeight: 900,
+                            color: sugerencia.decision === "sube" ? "#2F7D4F" : sugerencia.decision === "baja" ? "#946800" : "#171717" }}>
+                HOY: {sugerencia.titular}
+                {sugerencia.reps != null && sugerencia.decision !== "primera" ? " × " + sugerencia.reps : ""}
+              </div>
+              <div style={{ fontSize: 11.5, color: "#4A4A47", marginTop: 2, lineHeight: 1.4 }}>{sugerencia.porque}</div>
+            </div>
           </div>
 
           <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
@@ -324,7 +331,7 @@ export function WorkoutMode({ day, mov, progress, onUpdateProgress, onFinish, on
               }
               if (activa) {
                 return <SerieActiva key={si + "-" + exIdx} si={si} ejercicio={ejercicio} objetivo={objetivo}
-                  propuesta={propuestaSerie({ si, pesosHoy: exWeights, repsHoy: exReps, ultima, objetivo })}
+                  propuesta={propuestaSerie({ si, pesosHoy: exWeights, repsHoy: exReps, ultima, objetivo, nombre: ejercicio.nombre })}
                   onApuntar={(v) => apuntarSerie(si, v)} />;
               }
               return (

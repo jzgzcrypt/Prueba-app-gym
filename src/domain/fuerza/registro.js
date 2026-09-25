@@ -12,25 +12,31 @@
 /**
  * Lo que pide el plan en cada serie, leido de "3x12-15 (última al fallo)",
  * "3x10", "3x15/lado", "2x30s/lado", "3x5 (sin llegar al límite)", "2xmax".
- * @returns {{ reps:number|null, unidad:"rep"|"s", porLado:boolean, texto:string }}
+ * reps es el minimo del rango y repsMax el tope ("12-15" -> 12 y 15; "10" -> 10 y 10).
+ * @returns {{ reps:number|null, repsMax:number|null, unidad:"rep"|"s", porLado:boolean, texto:string }}
  */
 export function objetivoSerie(series) {
   const s = String(series || "");
   const tras = s.replace(/^\d+\s*x\s*/i, "");
   const m = tras.match(/^(\d+)(?:\s*-\s*(\d+))?\s*(s)?/i);
   const porLado = /\/\s*lado/i.test(tras);
-  if (!m) return { reps: null, unidad: "rep", porLado, texto: tras };
+  if (!m) return { reps: null, repsMax: null, unidad: "rep", porLado, texto: tras };
   return {
     reps: Number(m[1]),
+    repsMax: m[2] ? Number(m[2]) : Number(m[1]),
     unidad: m[3] ? "s" : "rep",
     porLado,
     texto: tras,
   };
 }
 
-/** Cuanto sube o baja el peso con cada toque: barra de 2,5 en 2,5; lo demas de 1 en 1. */
+/** El escalon de peso que existe en su gimnasio: mancuernas de 2 en 2 kg,
+ *  barra de 2,5 en 2,5 (discos de 1,25 por lado), poleas y maquinas de 1 en 1. */
 export function pasoPeso(nombre) {
-  return /barra/i.test(nombre || "") ? 2.5 : 1;
+  const n = nombre || "";
+  if (/barra/i.test(n)) return 2.5;
+  if (/mancuerna/i.test(n)) return 2;
+  return 1;
 }
 
 /** Ejercicios que se hacen sin carga casi siempre: no se propone peso,
@@ -111,24 +117,86 @@ export function textoSeries(series) {
   return s.map(x => (x.peso ?? "–") + " × " + (x.reps ?? "?")).join(" · ") + " kg";
 }
 
+const redondear = (x) => Math.round(x * 10) / 10;
+
 /**
- * Lo que se propone en la serie `si`: lo que ya este apuntado en ella; si no,
- * lo de la serie anterior de hoy; si no, lo de esa serie la ultima vez; si
- * no, sin peso y las reps que pide el plan.
+ * EL PESO DE HOY, DECIDIDO Y EXPLICADO (doble progresion)
+ *
+ * La idea es de TrueLift: que la app decida la carga y diga por que, en vez
+ * de dejarle pensar si toca subir (que es una excusa para repetir siempre).
+ *
+ *   Llego al tope del rango en todas las series  -> sube un escalon y vuelve
+ *                                                   al minimo del rango.
+ *   La mayoria por debajo del minimo             -> baja un escalon.
+ *   Lo demas                                     -> mantiene, a por una rep mas.
+ *
+ * Sin carga (sentadilla sin peso, plancha...) solo progresan las reps. Sin
+ * reps apuntadas la ultima vez no se puede decidir: se mantiene y se pide
+ * apuntarlas.
+ * @returns {{ peso:number|null, reps:number|null,
+ *   decision:"sube"|"mantiene"|"baja"|"primera"|"sin-carga", titular:string, porque:string }}
  */
-export function propuestaSerie({ si, pesosHoy, repsHoy, ultima, objetivo }) {
+export function sugerenciaCarga({ ultima, objetivo, nombre }) {
+  const min = objetivo && objetivo.reps != null ? objetivo.reps : null;
+  const max = objetivo && objetivo.repsMax != null ? objetivo.repsMax : min;
+  const u = objetivo && objetivo.unidad === "s" ? " s" : "";
+
+  if (!ultima || !ultima.series.length) {
+    return { peso: null, reps: min, decision: "primera", titular: "Primera vez",
+      porque: min != null ? "Elige un peso con el que llegues a " + min + u + " y apúntalo: la próxima vez decido yo." : "Apúntalo y la próxima vez decido yo." };
+  }
+  const antes = textoSeries(ultima.series);
+  const pesoTrabajo = Math.max(0, ...ultima.series.map(x => x.peso || 0)) || null;
+
+  // Sin carga: solo reps.
+  if (pesoTrabajo == null) {
+    const mejor = Math.max(0, ...ultima.series.map(x => x.reps || 0)) || null;
+    const obj = mejor == null ? min : Math.max(min || 0, mejor + (objetivo && objetivo.unidad === "s" ? 5 : 1));
+    return { peso: null, reps: obj, decision: "sin-carga", titular: "A por " + obj + u,
+      porque: "La última vez: " + antes + ". Una más que entonces." };
+  }
+
+  const aPeso = ultima.series.filter(x => x.peso === pesoTrabajo);
+  const conReps = aPeso.filter(x => x.reps != null);
+  const paso = pasoPeso(nombre);
+
+  if (!conReps.length || min == null) {
+    return { peso: pesoTrabajo, reps: min, decision: "mantiene", titular: "Mantén " + pesoTrabajo + " kg",
+      porque: "La última vez no apuntaste las repeticiones: apúntalas y sabré cuándo subir." };
+  }
+  if (conReps.length === aPeso.length && conReps.every(x => x.reps >= max)) {
+    const nuevo = redondear(pesoTrabajo + paso);
+    return { peso: nuevo, reps: min, decision: "sube", titular: "Sube a " + nuevo + " kg",
+      porque: "La última vez: " + antes + ". Llegaste al tope (" + max + u + ") en todas: toca subir y volver a " + min + u + "." };
+  }
+  const bajo = conReps.filter(x => x.reps < min).length;
+  if (bajo > conReps.length / 2 && pesoTrabajo - paso >= paso) {
+    const nuevo = redondear(pesoTrabajo - paso);
+    return { peso: nuevo, reps: min, decision: "baja", titular: "Baja a " + nuevo + " kg",
+      porque: "La última vez: " + antes + ". No llegaste a " + min + u + ": con menos peso harás las repeticiones que construyen." };
+  }
+  const mejor = Math.max(...conReps.map(x => x.reps));
+  const obj = Math.min(max, Math.max(min, mejor + 1));
+  return { peso: pesoTrabajo, reps: obj, decision: "mantiene", titular: "Mantén " + pesoTrabajo + " kg",
+    porque: "La última vez: " + antes + ". Sube cuando llegues a " + max + u + " en todas. Hoy, a por " + obj + "." };
+}
+
+/**
+ * Lo que se propone en la serie `si`: lo que ya este apuntado en ella; si
+ * no, el peso de la serie anterior de hoy (si lo cambiaste, las demas lo
+ * siguen); si no, lo que decide `sugerenciaCarga`. Las reps, las que tocan hoy.
+ */
+export function propuestaSerie({ si, pesosHoy, repsHoy, ultima, objetivo, nombre }) {
   const ph = pesosHoy || {}, rh = repsHoy || {};
-  const deUltima = ultima ? (ultima.series[si] || ultima.series[ultima.series.length - 1]) : null;
-  const anteriorHoy = si > 0 ? { peso: num(ph[si - 1]), reps: num(rh[si - 1]) } : null;
+  const sug = sugerenciaCarga({ ultima, objetivo, nombre });
+  const anteriorHoy = si > 0 ? num(ph[si - 1]) : null;
 
   let peso = num(ph[si]);
-  if (peso == null && anteriorHoy && anteriorHoy.peso != null) peso = anteriorHoy.peso;
-  if (peso == null && deUltima && deUltima.peso != null) peso = deUltima.peso;
+  if (peso == null && anteriorHoy != null) peso = anteriorHoy;
+  if (peso == null) peso = sug.peso;
 
   let r = num(rh[si]);
-  if (r == null && deUltima && deUltima.reps != null) r = deUltima.reps;
-  if (r == null && objetivo && objetivo.reps != null) r = objetivo.reps;
-
+  if (r == null) r = sug.reps;
   return { peso, reps: r };
 }
 

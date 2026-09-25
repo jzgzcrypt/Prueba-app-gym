@@ -21,6 +21,18 @@ Todo cambio que se haga en la app se anota aquí. Sin excepciones.
 
 ## [Sin publicar]
 
+### Añadido — El peso de cada serie, decidido y explicado (idea de TrueLift)
+- **Antes de cada ejercicio, la app decide y dice por qué**: "HOY: Sube a
+  10 kg × 12 · La última vez: 8 kg × 15, 15, 15. Llegaste al tope en todas",
+  "Mantén 8 kg × 15 · sube cuando llegues a 15 en todas", o "Baja a 8 kg" si
+  la mayoría no llegó al mínimo. Ya viene puesto en la serie: aceptarlo es
+  pulsar ✓.
+- **Doble progresión**: se sube cuando se llega al tope del rango en todas
+  las series, y se vuelve al mínimo. Sin carga (búlgara, plancha…) progresan
+  las reps. Sin reps apuntadas la última vez, mantiene y pide apuntarlas.
+- **Escalones reales del gimnasio**: mancuernas de 2 en 2 kg, barra de 2,5 en
+  2,5, poleas de 1 en 1. También en los − / +.
+
 ### Añadido — Tú contra el plan
 - **Una línea en HOY responde "¿voy según plan?"**: "25 s por delante del
   plan", "1:10 por detrás" o "Justo en el plan". Antes de tener datos dice
