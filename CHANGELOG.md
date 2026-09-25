@@ -21,6 +21,25 @@ Todo cambio que se haga en la app se anota aquí. Sin excepciones.
 
 ## [Sin publicar]
 
+### Añadido — Tu mes: el informe mensual (idea de TrueLift)
+- **Una pantalla oscura, tarjeta a tarjeta, con los números en grande**:
+  sesiones hechas (con barras por running, fuerza y tenis), minutos corriendo y
+  tus mejores series, series y kilos movidos, récords, el hombro (laterales al
+  empezar → al acabar el mes), la cintura, tú contra el plan y una frase de
+  cierre que nunca culpa ("Mes redondo: el hombro ha subido 2 kg", o "Noviembre
+  empieza de cero").
+- **Solo salen las tarjetas con datos**: nunca un "0" triste. El mes en curso
+  se puede ver "hasta hoy".
+- **COMPARTIR** genera una imagen vertical (formato historia) con las cifras
+  del mes, para WhatsApp o Instagram.
+- En HOY, los 5 primeros días de cada mes: "Tu mes está listo". En Progreso,
+  "Tus meses" con todos los del bloque.
+
+### Datos
+- Las medidas nuevas guardan también `iso` (la fecha completa), para saber a
+  qué mes pertenecen. Campo opcional, sin migración: las antiguas ("24 sept")
+  se leen con el año del bloque.
+
 ### Añadido — El peso de cada serie, decidido y explicado (idea de TrueLift)
 - **Antes de cada ejercicio, la app decide y dice por qué**: "HOY: Sube a
   10 kg × 12 · La última vez: 8 kg × 15, 15, 15. Llegaste al tope en todas",

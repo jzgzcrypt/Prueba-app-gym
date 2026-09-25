@@ -6,6 +6,7 @@ import { AvisoRitmo, LecturaSesion, queApuntar } from "@/features/ui/lectura";
 import { TarjetaResumen } from "@/features/ui/resumen";
 import { TarjetaCalendario } from "@/features/ui/calendario";
 import { LineaPlan } from "@/features/ui/plan-vs-real";
+import { nombreMes } from "@/domain/progreso/informe";
 import { ICON_FUERZA, ICON_MOVILIDAD, ICON_RUNNING, LOGO_7K } from "@/domain/assets/icons";
 import { parseSeries } from "@/domain/fuerza/series";
 import { BLOQUE, FECHA_FIN, FECHA_INICIO, FLAT_DAYS, WEEKS, claveDia, todayLocalIso } from "@/domain/plan/calendario";
@@ -192,6 +193,19 @@ export function HoyScreen(props) {
               Cintura, ancho de hombro y una foto de frente y otra de lado. En ayunas, con la misma luz que la última vez. Se apunta en PROGRESO.
             </div>
           </div>
+        )}
+
+        {props.informePendiente && (
+          <button className="btn" onClick={() => props.onVerInforme(props.informePendiente)} style={{
+            width: "100%", textAlign: "left", background: "#121212", borderRadius: 14, padding: "16px 16px",
+            display: "flex", alignItems: "center", gap: 12, minHeight: TAP_MIN,
+          }}>
+            <div style={{ flex: 1 }}>
+              <div style={{ fontSize: 10.5, fontWeight: 800, color: "#9A9A96", letterSpacing: 1 }}>TU MES ESTÁ LISTO</div>
+              <div style={{ fontSize: 20, fontWeight: 900, color: "#FAFAF9", marginTop: 2 }}>Tu {nombreMes(props.informePendiente)}</div>
+            </div>
+            <span style={{ color: "#5FB38A", fontSize: 22, fontWeight: 900 }}>→</span>
+          </button>
         )}
 
         {props.resumenSemana && <TarjetaResumen resumen={props.resumenSemana} nombreBloque="Base 7K" />}

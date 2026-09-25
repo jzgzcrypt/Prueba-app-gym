@@ -25,6 +25,8 @@ import { WorkoutMode } from "@/features/workout/WorkoutMode";
 import { CierreSesion } from "@/features/workout/CierreSesion";
 import { copiaPendiente } from "@/domain/progreso/libreta";
 import { ultimaVez } from "@/domain/fuerza/registro";
+import { informeMensual, informePendiente } from "@/domain/progreso/informe";
+import { InformeScreen } from "@/features/informe/InformeScreen";
 import { ritmoDelDia } from "@/domain/running/adaptar";
 import { resumenSemana, semanasCumplidas } from "@/domain/progreso/resumen";
 
@@ -61,6 +63,8 @@ export default function App() {
   const [activeWorkout, setActiveWorkout] = useState(null);
   // La pagina de la libreta que sale al terminar una sesion: la clave del dia.
   const [cierre, setCierre] = useState(null);
+  // El informe mensual abierto: "2026-10", o null.
+  const [informeMes, setInformeMes] = useState(null);
   const [medidas, setMedidas] = useState([]); // [{fecha, peso, cintura, cadera}]
   const [ritmoReal, setRitmoReal] = useState({}); // { dayKey: "5:12/km" }
   const [ritmoTramos, setRitmoTramos] = useState({}); // { dayKey: "6:00" } - ritmo en los tramos corriendo (fase correr/caminar)
@@ -456,6 +460,12 @@ export default function App() {
     }} />;
   }
 
+  if (informeMes) {
+    const inf = informeMensual(informeMes, { dias: FLAT_DAYS, semanas: WEEKS, checked, ritmoReal,
+      pesos: workoutWeights, reps: workoutReps, medidas, hoyIso: todayLocalIso() });
+    return <InformeScreen informe={inf} onCerrar={() => setInformeMes(null)} />;
+  }
+
   if (cierre) {
     return <CierreSesion dayKey={cierre} workoutWeights={workoutWeights} workoutReps={workoutReps} ritmoReal={ritmoReal}
       onGuardarRitmo={guardarRitmo} onVolver={() => { setCierre(null); setExpandedBlock("main"); }} />;
@@ -559,6 +569,8 @@ export default function App() {
             copia={copiaPendiente(ultimoBackup, todayLocalIso(), Object.values(checked).some(Boolean))}
             semanasCumplidas={semanasCumplidas(WEEKS, checked, todayLocalIso())}
             onVerProgreso={() => setScreen("progreso")}
+            informePendiente={isToday ? informePendiente(FLAT_DAYS, todayLocalIso()) : null}
+            onVerInforme={setInformeMes}
             resumenSemana={isToday && currentDay.dayIdx <= 2 && currentDay.weekIdx > 0
               ? resumenSemana(WEEKS[currentDay.weekIdx - 1], { checked, ritmoReal, pesos: workoutWeights, reps: workoutReps }, FLAT_DAYS)
               : null}
@@ -606,7 +618,8 @@ export default function App() {
 
         {screen === "progreso" && (
           <ProgresoScreen medidas={medidas} setMedidas={setMedidas}
-            ritmoReal={ritmoReal} weeks={WEEKS} checked={checked} workoutWeights={workoutWeights} workoutReps={workoutReps} />
+            ritmoReal={ritmoReal} weeks={WEEKS} checked={checked} workoutWeights={workoutWeights} workoutReps={workoutReps}
+            onVerInforme={setInformeMes} />
         )}
 
         {screen === "coach" && (

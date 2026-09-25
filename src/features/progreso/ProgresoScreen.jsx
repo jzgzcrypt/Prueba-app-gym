@@ -3,12 +3,13 @@
 import { FECHA_INICIO, FLAT_DAYS, claveDia, todayLocalIso } from "@/domain/plan/calendario";
 import { useEffect, useRef, useState } from "react";
 import { diasParaMedir } from "@/domain/progreso/libreta";
+import { mesesDelBloque, nombreMes } from "@/domain/progreso/informe";
 import { LecturaSesion } from "@/features/ui/lectura";
 import { GraficoPlan } from "@/features/ui/plan-vs-real";
 import { tablaRecords } from "@/domain/fuerza/registro";
 import { C, CAT } from "@/design/tokens";
 import { QuickFieldInput, SimpleLineChart } from "@/features/ui/charts";
-export function ProgresoScreen({ medidas, setMedidas, ritmoReal, weeks, checked, workoutWeights, workoutReps }) {
+export function ProgresoScreen({ medidas, setMedidas, ritmoReal, weeks, checked, workoutWeights, workoutReps, onVerInforme }) {
   const [showForm, setShowForm] = useState(false);
   const [form, setForm] = useState({ peso: "", cintura: "", anchoHombro: "", cadera: "", hombro: "", cadenaPosterior: "", columna: "", caderaMov: "", foto: null });
   const [quickField, setQuickField] = useState(null); // "peso" | "cintura" | "cadera" | "hombro" | "cadenaPosterior" | "columna" | "caderaMov" | null (menu)
@@ -38,7 +39,9 @@ export function ProgresoScreen({ medidas, setMedidas, ritmoReal, weeks, checked,
     if (!tieneAlgo) return;
     const fecha = new Date().toLocaleDateString("es-ES", { day: "2-digit", month: "short" });
     setMedidas(prev => [...prev, {
-      fecha, peso: form.peso ? parseFloat(form.peso) : null,
+      // iso: la fecha completa, para el informe mensual. "fecha" se queda para
+      // que lo guardado antes se siga leyendo igual.
+      fecha, iso: todayLocalIso(), peso: form.peso ? parseFloat(form.peso) : null,
       cintura: form.cintura ? parseFloat(form.cintura) : null,
       anchoHombro: form.anchoHombro ? parseFloat(form.anchoHombro) : null,
       cadera: form.cadera ? parseFloat(form.cadera) : null,
@@ -56,7 +59,7 @@ export function ProgresoScreen({ medidas, setMedidas, ritmoReal, weeks, checked,
     if (!value) return;
     const fecha = new Date().toLocaleDateString("es-ES", { day: "2-digit", month: "short" });
     setMedidas(prev => [...prev, {
-      fecha, peso: null, cintura: null, cadera: null, hombro: null, cadenaPosterior: null, columna: null, caderaMov: null, foto: null,
+      fecha, iso: todayLocalIso(), peso: null, cintura: null, cadera: null, hombro: null, cadenaPosterior: null, columna: null, caderaMov: null, foto: null,
       [key]: parseFloat(value),
     }]);
     setQuickField(null);
@@ -147,6 +150,8 @@ export function ProgresoScreen({ medidas, setMedidas, ritmoReal, weeks, checked,
         onMedir={() => { setQuickField(null); setShowForm(true); }} />
 
       <Records pesos={workoutWeights} reps={workoutReps} />
+
+      <TusMeses onVer={onVerInforme} />
 
       <div style={{ background: C.card, border: "1px solid " + C.cardBorder, borderRadius: 14, padding: "16px 18px", marginBottom: 12 }}>
         {ratioData.length > 1 && (
@@ -490,6 +495,31 @@ function Records({ pesos, reps }) {
           </span>
         </div>
       ))}
+    </div>
+  );
+}
+
+/** Los meses del bloque, cada uno con su informe. El en curso tambien. */
+function TusMeses({ onVer }) {
+  const hoy = todayLocalIso();
+  const meses = mesesDelBloque(FLAT_DAYS, hoy).reverse();
+  if (!meses.length || !onVer) return null;
+  return (
+    <div style={{ ...tarjeta }}>
+      <div style={etiqueta}>TUS MESES</div>
+      <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+        {meses.map(m => (
+          <button key={m} className="btn" onClick={() => onVer(m)} style={{
+            display: "flex", alignItems: "center", justifyContent: "space-between", minHeight: 52,
+            background: "#121212", borderRadius: 12, padding: "0 16px",
+          }}>
+            <span style={{ fontSize: 17, fontWeight: 900, color: "#FAFAF9" }}>Tu {nombreMes(m)}</span>
+            <span style={{ fontSize: 11.5, fontWeight: 800, color: m === hoy.slice(0, 7) ? "#9A9A96" : "#5FB38A" }}>
+              {m === hoy.slice(0, 7) ? "EN CURSO →" : "VER →"}
+            </span>
+          </button>
+        ))}
+      </div>
     </div>
   );
 }
