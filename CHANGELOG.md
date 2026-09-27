@@ -21,6 +21,21 @@ Todo cambio que se haga en la app se anota aquí. Sin excepciones.
 
 ## [Sin publicar]
 
+### Cambiado — Progreso es ahora el parte del coach
+- **Arriba, lo que miraría un coach, sin hacer scroll**: una frase de
+  veredicto ("Vas bien…", "Esta semana falta el jueves…"), la tira de
+  constancia del bloque entero (11 semanas × 7 días), tus 4 objetivos en una
+  fila cada uno (7K, panza, hombro, cuello) con valor y tendencia, o qué hacer
+  si aún no hay dato, y la próxima prueba y medición.
+- **Alarmas solo si las hay (máx. 3), cada una con su acción**: falta la sesión
+  clave de la semana, molestia de 3/5 o más en los últimos 7 días, ejercicio
+  estancado, cintura que no baja en 3 semanas.
+- **El detalle, plegado**: Running, Cuerpo, Fuerza y Tus meses; se abre al
+  tocar su fila o el objetivo, y la app recuerda cuál tenías abierto.
+- Fuera "Últimos ritmos", la tarjeta de estética suelta y los párrafos de las
+  pruebas. El resumen para Claude queda como enlace pequeño al final. No cambia
+  nada de lo guardado.
+
 ### Añadido — Tu mes: el informe mensual (idea de TrueLift)
 - **Una pantalla oscura, tarjeta a tarjeta, con los números en grande**:
   sesiones hechas (con barras por running, fuerza y tenis), minutos corriendo y

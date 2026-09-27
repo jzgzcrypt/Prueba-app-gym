@@ -2,14 +2,14 @@
 
 import { FECHA_INICIO, FLAT_DAYS, claveDia, todayLocalIso } from "@/domain/plan/calendario";
 import { useEffect, useRef, useState } from "react";
-import { diasParaMedir } from "@/domain/progreso/libreta";
+import { lecturaPrueba } from "@/domain/progreso/libreta";
+import { parteDelCoach } from "@/domain/progreso/parte";
 import { mesesDelBloque, nombreMes } from "@/domain/progreso/informe";
-import { LecturaSesion } from "@/features/ui/lectura";
 import { GraficoPlan } from "@/features/ui/plan-vs-real";
 import { tablaRecords } from "@/domain/fuerza/registro";
 import { C, CAT } from "@/design/tokens";
 import { QuickFieldInput, SimpleLineChart } from "@/features/ui/charts";
-export function ProgresoScreen({ medidas, setMedidas, ritmoReal, weeks, checked, workoutWeights, workoutReps, onVerInforme }) {
+export function ProgresoScreen({ medidas, setMedidas, ritmoReal, weeks, checked, workoutWeights, workoutReps, onVerInforme, cuelloChecks, painLog }) {
   const [showForm, setShowForm] = useState(false);
   const [form, setForm] = useState({ peso: "", cintura: "", anchoHombro: "", cadera: "", hombro: "", cadenaPosterior: "", columna: "", caderaMov: "", foto: null });
   const [quickField, setQuickField] = useState(null); // "peso" | "cintura" | "cadera" | "hombro" | "cadenaPosterior" | "columna" | "caderaMov" | null (menu)
@@ -20,6 +20,16 @@ export function ProgresoScreen({ medidas, setMedidas, ritmoReal, weeks, checked,
     if (showForm && formRef.current) formRef.current.scrollIntoView({ behavior: "smooth", block: "start" });
   }, [showForm]);
   const [showComparativa, setShowComparativa] = useState(false);
+  // Que seccion del detalle esta abierta. Se recuerda en este movil.
+  const [abierta, setAbiertaEstado] = useState(null);
+  useEffect(() => { try { setAbiertaEstado(window.localStorage.getItem("programa7k:progreso") || null); } catch { /* sin storage */ } }, []);
+  const setAbierta = (s) => { setAbiertaEstado(s); try { window.localStorage.setItem("programa7k:progreso", s || ""); } catch { /* sin storage */ } };
+  const abrir = (s) => {
+    setAbierta(s);
+    setTimeout(() => { const el = document.getElementById("detalle-" + s); if (el) el.scrollIntoView({ behavior: "smooth", block: "start" }); }, 50);
+  };
+  const parte = parteDelCoach({ dias: FLAT_DAYS, semanas: weeks, checked, cuelloChecks, painLog, ritmoReal,
+    pesos: workoutWeights, reps: workoutReps, medidas, fechaInicio: FECHA_INICIO, hoyIso: todayLocalIso() });
 
   const handlePhotoUpload = (e) => {
     const file = e.target.files[0];
@@ -139,94 +149,22 @@ export function ProgresoScreen({ medidas, setMedidas, ritmoReal, weeks, checked,
     return txt;
   };
 
+
   return (
-    <div style={{ padding: "20px 16px" }}>
-      <div style={{ fontSize: 22, fontWeight: 900, color: C.text, marginBottom: 4 }}>PROGRESO</div>
-      <div style={{ fontSize: 12, color: C.textDim, marginBottom: 18, fontWeight: 600 }}>Datos objetivos. Sin rachas, sin porcentajes.</div>
+    <div style={{ padding: "20px 16px 28px" }}>
+      <div style={{ fontSize: 22, fontWeight: 900, color: C.text, marginBottom: 12 }}>PROGRESO</div>
 
-      <VamosALlegar ritmoReal={ritmoReal} />
+      <Parte parte={parte} onAbrir={abrir} />
 
-      <Estetica medidas={medidas} exerciseProgress={exerciseProgress}
-        onMedir={() => { setQuickField(null); setShowForm(true); }} />
-
-      <Records pesos={workoutWeights} reps={workoutReps} />
-
-      <TusMeses onVer={onVerInforme} />
-
-      <div style={{ background: C.card, border: "1px solid " + C.cardBorder, borderRadius: 14, padding: "16px 18px", marginBottom: 12 }}>
-        {ratioData.length > 1 && (
-          <div style={{ marginBottom: 16 }}>
-            <SimpleLineChart data={ratioData} label="Hombro ÷ cintura — tu estética en un número" unit="" color={CAT.fuerza} />
-            <div style={{ fontSize: 11.5, color: C.textDim, marginTop: 6, lineHeight: 1.4 }}>
-              Sube por los dos lados a la vez: hombro más ancho o cintura más estrecha.
-              Es mejor indicador que el peso, que con recomposición engaña.
-            </div>
-          </div>
-        )}
-
-        <SimpleLineChart data={pesoData} label="Peso" unit="kg" color={C.accent} onAddData={() => { setQuickField("peso"); setShowForm(false); }} />
+      <div style={{ display: "flex", gap: 8, margin: "12px 0" }}>
+        <button className="btn" onClick={() => { setQuickField(null); setShowForm(!showForm); }} style={{
+          flex: 1, minHeight: 48, borderRadius: 12, background: showForm ? "#F2F2F0" : C.accent,
+          fontSize: 14, fontWeight: 900, color: showForm ? C.text : "#FAFAF9",
+        }}>{showForm ? "CANCELAR" : "MEDIR · CINTURA, HOMBRO Y FOTO"}</button>
+        <button className="btn" onClick={() => { setShowForm(false); setQuickField(quickField ? null : "menu"); }} style={{
+          minHeight: 48, borderRadius: 12, background: "#F2F2F0", padding: "0 14px", fontSize: 12.5, fontWeight: 800, color: C.text,
+        }}>{quickField ? "✕" : "1 dato"}</button>
       </div>
-
-      {(cinturaData.length > 1 || caderaData.length > 1 || hombroData.length > 1) && (
-        <div style={{ background: C.card, border: "1px solid " + C.cardBorder, borderRadius: 14, padding: "16px 18px", marginBottom: 12 }}>
-          {cinturaData.length > 1 && <div style={{ marginBottom: (caderaData.length > 1 || hombroData.length > 1) ? 16 : 0 }}><SimpleLineChart data={cinturaData} label="Cintura" unit="cm" color="#3A6EA5" /></div>}
-          {caderaData.length > 1 && <div style={{ marginBottom: hombroData.length > 1 ? 16 : 0 }}><SimpleLineChart data={caderaData} label="Cadera" unit="cm" color="#946800" /></div>}
-          {hombroData.length > 1 && <SimpleLineChart data={hombroData} label="Hombro (test manos espalda — menos es mejor)" unit="cm" color={CAT.cuello} />}
-        </div>
-      )}
-
-      {stagnantList.length > 0 && (
-        <div style={{ background: "#FBF0EF", border: "1px solid #E8C9C6", borderRadius: 14, padding: "13px 16px", marginBottom: 12 }}>
-          <div style={{ fontSize: 12.5, fontWeight: 800, color: "#171717" }}>Estancamiento detectado</div>
-          <div style={{ fontSize: 11.5, color: "#787774", marginTop: 3, lineHeight: 1.4 }}>
-            {stagnantList.length === 1
-              ? stagnantList[0] + " lleva 2+ registros sin superar tu peso máximo previo."
-              : stagnantList.length + " ejercicios llevan 2+ registros sin superar el peso máximo previo: " + stagnantList.join(", ") + "."}
-          </div>
-        </div>
-      )}
-
-      {exerciseNames.length > 0 && (
-        <div style={{ background: C.card, border: "1px solid " + C.cardBorder, borderLeft: "3px solid " + CAT.fuerza, borderRadius: 14, padding: "16px 18px", marginBottom: 12 }}>
-          <div style={{ fontSize: 12.5, fontWeight: 700, color: C.text, marginBottom: 10 }}>Progresión de carga</div>
-          {!selectedExercise ? (
-            <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
-              {exerciseNames.map(name => {
-                const isStagnant = exerciseStagnant[name];
-                return (
-                  <button key={name} className="btn" onClick={() => setSelectedExercise(name)} style={{
-                    textAlign: "left", padding: "10px 12px", background: "#F2F2F0", borderRadius: 10,
-                    fontSize: 12.5, fontWeight: 600, color: C.text, display: "flex", justifyContent: "space-between", alignItems: "center",
-                  }}>
-                    <span style={{ display: "flex", alignItems: "center", gap: 6 }}>
-                      {isStagnant && <span style={{ fontSize: 11 }}>⚠</span>}
-                      {name}
-                    </span>
-                    <span style={{ display: "flex", alignItems: "baseline", gap: 6 }}>
-                      <span className="mono" style={{ color: CAT.fuerza, fontWeight: 800, fontSize: 13 }}>{exercisePRs[name]}kg</span>
-                      <span style={{ fontSize: 9, color: "#8A8A87", fontWeight: 700 }}>PR</span>
-                    </span>
-                  </button>
-                );
-              })}
-            </div>
-          ) : (
-            <div>
-              <button onClick={() => setSelectedExercise(null)} style={{ fontSize: 11.5, color: "#787774", fontWeight: 700, marginBottom: 10 }}>&lsaquo; Todos los ejercicios</button>
-              <div style={{ display: "flex", alignItems: "baseline", gap: 8, marginBottom: 10 }}>
-                <span className="mono" style={{ fontSize: 20, fontWeight: 800, color: CAT.fuerza }}>{exercisePRs[selectedExercise]}kg</span>
-                <span style={{ fontSize: 11, color: "#8A8A87", fontWeight: 700 }}>récord personal</span>
-              </div>
-              <SimpleLineChart data={exerciseProgress[selectedExercise]} label={selectedExercise} unit="kg" color={CAT.fuerza} />
-            </div>
-          )}
-        </div>
-      )}
-
-      <button className="btn" onClick={() => { setQuickField(quickField ? null : "menu"); setShowForm(false); }} style={{
-        width: "100%", padding: "14px", borderRadius: 12, background: quickField ? "#F2F2F0" : C.accent,
-        fontSize: 14, fontWeight: 800, color: quickField ? C.text : "#FAFAF9", marginBottom: 12,
-      }}>{quickField ? "CANCELAR" : "+ ANOTAR UN DATO"}</button>
 
       {quickField === "menu" && (
         <div style={{ marginBottom: 12 }}>
@@ -263,7 +201,6 @@ export function ProgresoScreen({ medidas, setMedidas, ritmoReal, weeks, checked,
 
       {showForm && (
         <div ref={formRef} style={{ background: C.card, border: "1px solid " + C.cardBorder, borderRadius: 14, padding: "16px 18px", marginBottom: 12 }}>
-          <button className="btn" onClick={() => setShowForm(false)} style={{ fontSize: 11.5, color: "#787774", fontWeight: 700, marginBottom: 10 }}>&lsaquo; Volver a anotar solo un dato</button>
           <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
             {[["peso","Peso (kg) — opcional"],["cintura","Cintura (cm) — opcional"],["anchoHombro","Ancho de hombro (cm) — opcional"],["cadera","Cadera (cm) — opcional"],["hombro","Hombro — test manos espalda (cm) — opcional"]].map(([key,label]) => (
               <div key={key}>
@@ -302,15 +239,43 @@ export function ProgresoScreen({ medidas, setMedidas, ritmoReal, weeks, checked,
         </div>
       )}
 
+      <div style={{ fontSize: 10.5, fontWeight: 800, color: C.textDim, letterSpacing: 0.6, margin: "18px 2px 8px" }}>DETALLE</div>
+
+      <Seccion id="running" titulo="Running" resumen={parte.objetivos[0].valor ? parte.objetivos[0].tendencia : "sin pruebas aún"} abierta={abierta} setAbierta={setAbierta}>
+        <GraficoPlan ritmoReal={ritmoReal} />
+        <PruebasCompactas ritmoReal={ritmoReal} />
+      </Seccion>
+
+      <Seccion id="cuerpo" titulo="Cuerpo" resumen={parte.objetivos[1].valor || "sin medidas"} abierta={abierta} setAbierta={setAbierta}>
+      <div>
+        {ratioData.length > 1 && (
+          <div style={{ marginBottom: 16 }}>
+            <SimpleLineChart data={ratioData} label="Hombro ÷ cintura — tu estética en un número" unit="" color={CAT.fuerza} />
+            <div style={{ fontSize: 11.5, color: C.textDim, marginTop: 6, lineHeight: 1.4 }}>
+              Sube por los dos lados a la vez: hombro más ancho o cintura más estrecha.
+              Es mejor indicador que el peso, que con recomposición engaña.
+            </div>
+          </div>
+        )}
+
+        <SimpleLineChart data={pesoData} label="Peso" unit="kg" color={C.accent} onAddData={() => { setQuickField("peso"); setShowForm(false); }} />
+      </div>
+      {(cinturaData.length > 1 || caderaData.length > 1 || hombroData.length > 1) && (
+        <div style={{ marginTop: 16 }}>
+          {cinturaData.length > 1 && <div style={{ marginBottom: (caderaData.length > 1 || hombroData.length > 1) ? 16 : 0 }}><SimpleLineChart data={cinturaData} label="Cintura" unit="cm" color="#3A6EA5" /></div>}
+          {caderaData.length > 1 && <div style={{ marginBottom: hombroData.length > 1 ? 16 : 0 }}><SimpleLineChart data={caderaData} label="Cadera" unit="cm" color="#946800" /></div>}
+          {hombroData.length > 1 && <SimpleLineChart data={hombroData} label="Hombro (test manos espalda — menos es mejor)" unit="cm" color={CAT.cuello} />}
+        </div>
+      )}
       {medidasConFoto.length >= 2 && (
         <button className="btn" onClick={() => setShowComparativa(!showComparativa)} style={{
           width: "100%", padding: "12px", borderRadius: 12, background: showComparativa ? C.accent : "#F2F2F0",
-          fontSize: 13, fontWeight: 800, color: showComparativa ? "#FAFAF9" : C.text, marginBottom: 12,
+          fontSize: 13, fontWeight: 800, color: showComparativa ? "#FAFAF9" : C.text, marginTop: 14,
         }}>{showComparativa ? "OCULTAR COMPARATIVA" : "VER ANTES / DESPUÉS"}</button>
       )}
 
       {showComparativa && medidasConFoto.length >= 2 && (
-        <div style={{ background: C.card, border: "1px solid " + C.cardBorder, borderRadius: 14, padding: "16px 18px", marginBottom: 12 }}>
+        <div style={{ marginTop: 12 }}>
           <div style={{ display: "flex", gap: 10 }}>
             {[medidasConFoto[0], medidasConFoto[medidasConFoto.length-1]].map((m, i) => (
               <div key={i} style={{ flex: 1 }}>
@@ -325,22 +290,66 @@ export function ProgresoScreen({ medidas, setMedidas, ritmoReal, weeks, checked,
           )}
         </div>
       )}
+      </Seccion>
 
-      {ritmosData.length > 0 && (
-        <div style={{ background: C.card, border: "1px solid " + C.cardBorder, borderRadius: 14, padding: "16px 18px", marginBottom: 12 }}>
-          <div style={{ fontSize: 12.5, fontWeight: 700, color: C.text, marginBottom: 8 }}>Últimos ritmos</div>
-          <div style={{ display: "flex", flexDirection: "column", gap: 5 }}>
-            {ritmosData.map(([k, v], i) => (
-              <div key={i} style={{ fontSize: 13, color: "#4A4A47", fontWeight: 600 }}>{v}</div>
-            ))}
+      <Seccion id="fuerza" titulo="Fuerza" resumen={parte.objetivos[2].valor ? parte.objetivos[2].valor + " laterales" : "sin pesos aún"} abierta={abierta} setAbierta={setAbierta}>
+        <Records pesos={workoutWeights} reps={workoutReps} />
+      {stagnantList.length > 0 && (
+        <div style={{ background: "#FBF0EF", border: "1px solid #E8C9C6", borderRadius: 14, padding: "13px 16px", marginBottom: 12 }}>
+          <div style={{ fontSize: 12.5, fontWeight: 800, color: "#171717" }}>Estancamiento detectado</div>
+          <div style={{ fontSize: 11.5, color: "#787774", marginTop: 3, lineHeight: 1.4 }}>
+            {stagnantList.length === 1
+              ? stagnantList[0] + " lleva 2+ registros sin superar tu peso máximo previo."
+              : stagnantList.length + " ejercicios llevan 2+ registros sin superar el peso máximo previo: " + stagnantList.join(", ") + "."}
           </div>
         </div>
       )}
+      {exerciseNames.length > 0 && (
+        <div style={{ marginTop: 4 }}>
+          <div style={{ fontSize: 12.5, fontWeight: 700, color: C.text, marginBottom: 10 }}>Progresión de carga</div>
+          {!selectedExercise ? (
+            <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
+              {exerciseNames.map(name => {
+                const isStagnant = exerciseStagnant[name];
+                return (
+                  <button key={name} className="btn" onClick={() => setSelectedExercise(name)} style={{
+                    textAlign: "left", padding: "10px 12px", background: "#F2F2F0", borderRadius: 10,
+                    fontSize: 12.5, fontWeight: 600, color: C.text, display: "flex", justifyContent: "space-between", alignItems: "center",
+                  }}>
+                    <span style={{ display: "flex", alignItems: "center", gap: 6 }}>
+                      {isStagnant && <span style={{ fontSize: 11 }}>⚠</span>}
+                      {name}
+                    </span>
+                    <span style={{ display: "flex", alignItems: "baseline", gap: 6 }}>
+                      <span className="mono" style={{ color: CAT.fuerza, fontWeight: 800, fontSize: 13 }}>{exercisePRs[name]}kg</span>
+                      <span style={{ fontSize: 9, color: "#8A8A87", fontWeight: 700 }}>PR</span>
+                    </span>
+                  </button>
+                );
+              })}
+            </div>
+          ) : (
+            <div>
+              <button onClick={() => setSelectedExercise(null)} style={{ fontSize: 11.5, color: "#787774", fontWeight: 700, marginBottom: 10 }}>&lsaquo; Todos los ejercicios</button>
+              <div style={{ display: "flex", alignItems: "baseline", gap: 8, marginBottom: 10 }}>
+                <span className="mono" style={{ fontSize: 20, fontWeight: 800, color: CAT.fuerza }}>{exercisePRs[selectedExercise]}kg</span>
+                <span style={{ fontSize: 11, color: "#8A8A87", fontWeight: 700 }}>récord personal</span>
+              </div>
+              <SimpleLineChart data={exerciseProgress[selectedExercise]} label={selectedExercise} unit="kg" color={CAT.fuerza} />
+            </div>
+          )}
+        </div>
+      )}
+      </Seccion>
 
+      <Seccion id="meses" titulo="Tus meses" resumen="informe de cada mes" abierta={abierta} setAbierta={setAbierta}>
+        <TusMeses onVer={onVerInforme} />
+      </Seccion>
+
+      <div style={{ marginTop: 14 }}>
       <button className="btn" onClick={() => setShowExport(!showExport)} style={{
-        width: "100%", padding: "12px", borderRadius: 12, background: "#F2F2F0",
-        fontSize: 13, fontWeight: 800, color: C.text,
-      }}>{showExport ? "OCULTAR RESUMEN" : "EXPORTAR RESUMEN"}</button>
+        width: "100%", padding: "10px", fontSize: 11.5, fontWeight: 700, color: C.textDim,
+      }}>{showExport ? "Ocultar resumen" : "Resumen en texto para Claude"}</button>
 
       {showExport && (
         <div style={{ marginTop: 12, background: C.card, border: "1px solid " + C.cardBorder, borderRadius: 14, padding: "16px 18px" }}>
@@ -348,6 +357,7 @@ export function ProgresoScreen({ medidas, setMedidas, ritmoReal, weeks, checked,
           <div style={{ fontSize: 11, color: "#8A8A87", marginTop: 8 }}>Copia este texto y pégalo en el chat para que Claude lo revise.</div>
         </div>
       )}
+      </div>
     </div>
   );
 }
@@ -382,101 +392,14 @@ function reducirFoto(dataUrl) {
 const tarjeta = { background: C.card, border: "1px solid " + C.cardBorder, borderRadius: 14, padding: "14px 16px", marginBottom: 12 };
 const etiqueta = { fontSize: 10.5, fontWeight: 800, color: C.textDim, letterSpacing: 0.6, marginBottom: 8 };
 
-/** Las pruebas del bloque, en orden, con lo que dijo cada una. Es la respuesta
- *  a "¿vamos a llegar?" sacada de datos, no de sensaciones. */
-function VamosALlegar({ ritmoReal }) {
-  const hoy = todayLocalIso();
-  const pruebas = FLAT_DAYS.filter(d => d.prueba);
-  const proxima = pruebas.find(d => d.isoDate >= hoy && !ritmoReal[claveDia(d)]);
-  return (
-    <div style={{ ...tarjeta, borderLeft: "3px solid " + CAT.running }}>
-      <div style={etiqueta}>TÚ CONTRA EL PLAN</div>
-      <div style={{ marginBottom: 12 }}>
-        <GraficoPlan ritmoReal={ritmoReal} />
-      </div>
-      {pruebas.map(d => {
-        const texto = ritmoReal[claveDia(d)];
-        return (
-          <div key={d.isoDate} style={{ padding: "9px 0", borderTop: "1px solid " + C.divider }}>
-            <div style={{ display: "flex", justifyContent: "space-between", gap: 8 }}>
-              <span style={{ fontSize: 12.5, fontWeight: 700, color: C.text }}>S{d.weekN} · {d.titulo}</span>
-              <span style={{ fontSize: 11.5, fontWeight: 600, color: texto ? C.ok : C.textDim, flexShrink: 0 }}>
-                {texto ? texto : d.isoDate === hoy ? "Hoy" : d.date}
-              </span>
-            </div>
-            {texto && <LecturaSesion day={d} texto={texto} ritmoReal={ritmoReal} />}
-          </div>
-        );
-      })}
-      {proxima && !ritmoReal[claveDia(proxima)] && (
-        <div style={{ fontSize: 11.5, color: C.textDim, marginTop: 8 }}>
-          Próxima: {proxima.titulo.toLowerCase()}, {proxima.dow.toLowerCase()} {proxima.date}.
-        </div>
-      )}
-    </div>
-  );
-}
 
 
-/** Cintura, hombro/cintura, laterales y fotos en una tarjeta, con cuando toca
- *  medir. Lo que dice si la estetica avanza, sin mirar la bascula. */
-function Estetica({ medidas, exerciseProgress, onMedir }) {
-  const serie = (k) => medidas.filter(m => m[k] != null);
-  // Sin ninguna medida aun, falta el punto de partida: toca medir ya, no dentro
-  // de dos semanas.
-  const sinPartida = !medidas.some(m => m.cintura != null || m.foto);
-  const faltan = sinPartida ? 0 : diasParaMedir(FECHA_INICIO, todayLocalIso());
-  const cintura = serie("cintura");
-  const ratio = medidas.filter(m => m.anchoHombro != null && m.cintura).map(m => ({ fecha: m.fecha, v: m.anchoHombro / m.cintura }));
-  const fotos = medidas.filter(m => m.foto).length;
-  const laterales = ["Elevaciones laterales polea muñequera cruzadas", "Elevaciones laterales mancuerna"]
-    .map(n => ({ n, s: exerciseProgress[n] || [] })).filter(x => x.s.length);
-
-  const cambio = (arr, dec = 1) => {
-    if (arr.length < 2) return null;
-    const d = arr.at(-1).v - arr[0].v;
-    return (d > 0 ? "+" : "") + d.toFixed(dec);
-  };
-  const cinturaV = cintura.map(m => ({ fecha: m.fecha, v: m.cintura }));
-  const fila = (label, valor, nota) => (
-    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", padding: "8px 0", borderTop: "1px solid " + C.divider, gap: 8 }}>
-      <span style={{ fontSize: 12.5, fontWeight: 700, color: C.text }}>{label}</span>
-      <span style={{ textAlign: "right" }}>
-        <span className="mono" style={{ fontSize: 13.5, fontWeight: 800, color: C.text }}>{valor}</span>
-        {nota && <span style={{ fontSize: 11.5, fontWeight: 700, color: C.textDim, marginLeft: 6 }}>{nota}</span>}
-      </span>
-    </div>
-  );
-
-  return (
-    <div style={{ ...tarjeta, borderLeft: "3px solid " + CAT.fuerza }}>
-      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline" }}>
-        <div style={etiqueta}>ESTÉTICA</div>
-        <div style={{ fontSize: 11.5, fontWeight: 700, color: faltan === 0 ? C.amber : C.textDim }}>
-          {sinPartida ? "Falta el punto de partida" : faltan === 0 ? "Hoy toca medir" : "Medir en " + faltan + (faltan === 1 ? " día" : " días")}
-        </div>
-      </div>
-      {fila("Cintura", cinturaV.length ? cinturaV.at(-1).v + " cm" : "—", cambio(cinturaV) ? cambio(cinturaV) + " cm desde " + cinturaV[0].fecha : cinturaV.length ? "primera medida" : "sin medir")}
-      {fila("Hombro ÷ cintura", ratio.length ? ratio.at(-1).v.toFixed(2) : "—", cambio(ratio, 2) ? cambio(ratio, 2) + " (sube = bien)" : ratio.length ? "primera medida" : "mide hombro y cintura")}
-      {laterales.length
-        ? laterales.map(({ n, s }) => fila(n.includes("polea") ? "Laterales polea" : "Laterales mancuerna", s.at(-1).v + " kg",
-            s.length > 1 ? (s.at(-1).v - s[0].v >= 0 ? "+" : "") + (s.at(-1).v - s[0].v) + " kg desde " + s[0].fecha : "primer registro"))
-        : fila("Laterales", "—", "apunta el peso en cada sesión")}
-      {fila("Fotos", String(fotos), fotos >= 2 ? "antes / ahora abajo" : "una cada 2 semanas")}
-      <button className="btn" onClick={onMedir} style={{
-        width: "100%", marginTop: 10, padding: "12px", borderRadius: 10,
-        background: faltan === 0 ? C.accent : C.surfaceMuted, color: faltan === 0 ? "#FAFAF9" : C.text,
-        fontSize: 13, fontWeight: 800,
-      }}>MEDIR AHORA · CINTURA, HOMBRO Y FOTO</button>
-    </div>
-  );
-}
 
 /** Tus mejores marcas de cada ejercicio: peso y reps, y cuando. */
 function Records({ pesos, reps }) {
   const tabla = tablaRecords(FLAT_DAYS, pesos, reps);
   return (
-    <div style={{ ...tarjeta, borderLeft: "3px solid #946800" }}>
+    <div style={{ marginBottom: 12 }}>
       <div style={etiqueta}>TUS RÉCORDS</div>
       {tabla.length === 0 && (
         <div style={{ fontSize: 13, color: "#4A4A47", lineHeight: 1.45 }}>
@@ -505,8 +428,7 @@ function TusMeses({ onVer }) {
   const meses = mesesDelBloque(FLAT_DAYS, hoy).reverse();
   if (!meses.length || !onVer) return null;
   return (
-    <div style={{ ...tarjeta }}>
-      <div style={etiqueta}>TUS MESES</div>
+    <div>
       <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
         {meses.map(m => (
           <button key={m} className="btn" onClick={() => onVer(m)} style={{
@@ -520,6 +442,123 @@ function TusMeses({ onVer }) {
           </button>
         ))}
       </div>
+    </div>
+  );
+}
+
+const TONO = { bien: C.ok, ojo: C.amber, gris: C.textFaint, neutro: C.text };
+const ESTADO_PUNTO = {
+  hecho: { background: C.ok }, falta: { background: "transparent", border: "1.5px solid " + C.amber },
+  hoy: { background: "transparent", border: "2px solid " + C.text }, descanso: { background: "#E3E3E0" },
+  futuro: { background: "transparent", border: "1.5px solid #E3E3E0" }, "futuro-descanso": { background: "#F0F0EE" },
+};
+
+/**
+ * El parte del coach: veredicto, constancia, los 4 objetivos, alarmas y lo
+ * que viene. Corto y al pie: una frase, una tira, cuatro filas.
+ */
+function Parte({ parte, onAbrir }) {
+  const { veredicto, constancia, objetivos, alarmas, proximo } = parte;
+  return (
+    <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+      <div style={{ ...tarjeta, marginBottom: 0, borderLeft: "3px solid " + TONO[veredicto.tono] }}>
+        <div style={{ fontSize: 17, fontWeight: 900, color: C.text, lineHeight: 1.3 }}>{veredicto.texto}</div>
+      </div>
+
+      <div style={{ ...tarjeta, marginBottom: 0 }}>
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", marginBottom: 10 }}>
+          <span style={etiqueta}>CONSTANCIA</span>
+          <span style={{ fontSize: 12, fontWeight: 800, color: C.text }}>
+            {constancia.cumplidas > 0 ? constancia.cumplidas + (constancia.cumplidas === 1 ? " semana cumplida · " : " semanas cumplidas · ") : ""}{constancia.hechas}/{constancia.pasadas} sesiones
+          </span>
+        </div>
+        <div style={{ display: "flex", gap: 4, justifyContent: "space-between" }} aria-label="Sesiones del bloque, semana a semana">
+          {constancia.tira.map((sem, i) => (
+            <div key={i} style={{ display: "flex", flexDirection: "column", gap: 3, alignItems: "center" }}>
+              {sem.map((e, j) => (
+                <span key={j} title={e} style={{ width: 10, height: 10, borderRadius: 3, boxSizing: "border-box", ...ESTADO_PUNTO[e] }} />
+              ))}
+              <span style={{ fontSize: 8.5, fontWeight: 700, color: C.textFaint, marginTop: 2 }}>{i + 1}</span>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      <div style={{ ...tarjeta, marginBottom: 0, padding: "4px 16px" }}>
+        {objetivos.map((o, i) => (
+          <button key={o.id} className="btn" onClick={() => o.seccion && onAbrir(o.seccion)} style={{
+            width: "100%", display: "flex", alignItems: "center", gap: 10, minHeight: 50, textAlign: "left",
+            borderTop: i ? "1px solid " + C.divider : "none", cursor: o.seccion ? "pointer" : "default",
+          }}>
+            <span style={{ width: 62, fontSize: 12, fontWeight: 800, color: C.textDim, flexShrink: 0 }}>{o.nombre}</span>
+            {o.valor ? (
+              <>
+                <span className="mono" style={{ fontSize: 16, fontWeight: 800, color: C.text, flexShrink: 0 }}>{o.valor}</span>
+                <span style={{ flex: 1, fontSize: 12, fontWeight: 700, color: TONO[o.tono], textAlign: "right" }}>
+                  {o.flecha ? o.flecha + " " : ""}{o.tendencia}
+                </span>
+              </>
+            ) : (
+              <span style={{ flex: 1, fontSize: 12.5, fontWeight: 700, color: C.textDim }}>{o.accion} {o.seccion ? "→" : ""}</span>
+            )}
+          </button>
+        ))}
+      </div>
+
+      {alarmas.length > 0 && (
+        <div style={{ ...tarjeta, marginBottom: 0, borderLeft: "3px solid " + C.amber, padding: "10px 16px" }}>
+          {alarmas.map((a, i) => (
+            <div key={i} style={{ padding: "6px 0", borderTop: i ? "1px solid " + C.divider : "none" }}>
+              <div style={{ fontSize: 13, fontWeight: 800, color: C.text }}>{a.texto}</div>
+              <div style={{ fontSize: 12, color: "#4A4A47", marginTop: 2 }}>→ {a.accion}</div>
+            </div>
+          ))}
+        </div>
+      )}
+
+      <div style={{ fontSize: 12, color: C.textDim, fontWeight: 600, padding: "0 2px", lineHeight: 1.5 }}>
+        {proximo.prueba && <>Próxima prueba: <b style={{ color: C.text }}>{proximo.prueba.texto}</b> · {proximo.prueba.cuando}</>}
+        {proximo.prueba && " · "}
+        Medir: <b style={{ color: C.text }}>{proximo.medicion.cuando}</b>
+      </div>
+    </div>
+  );
+}
+
+/** Una seccion del detalle: una linea plegada, se abre al tocar. */
+function Seccion({ id, titulo, resumen, abierta, setAbierta, children }) {
+  const open = abierta === id;
+  return (
+    <div id={"detalle-" + id} style={{ ...tarjeta, marginBottom: 8, padding: 0, overflow: "hidden" }}>
+      <button className="btn" onClick={() => setAbierta(open ? null : id)} style={{
+        width: "100%", display: "flex", alignItems: "center", gap: 10, minHeight: 48, padding: "0 16px", textAlign: "left",
+      }}>
+        <span style={{ fontSize: 14, fontWeight: 800, color: C.text, flex: 1 }}>{titulo}</span>
+        <span style={{ fontSize: 12, fontWeight: 600, color: C.textDim }}>{resumen}</span>
+        <span style={{ color: C.textFaint, fontSize: 16, transform: open ? "rotate(90deg)" : "none", transition: "transform .2s" }}>›</span>
+      </button>
+      {open && <div style={{ padding: "4px 16px 16px" }}>{children}</div>}
+    </div>
+  );
+}
+
+/** Las pruebas del bloque, una linea cada una. */
+function PruebasCompactas({ ritmoReal }) {
+  const hoy = todayLocalIso();
+  return (
+    <div style={{ marginTop: 12 }}>
+      {FLAT_DAYS.filter(d => d.prueba).map(d => {
+        const texto = ritmoReal[claveDia(d)];
+        const l = texto && d.prueba.distKm ? lecturaPrueba(d.prueba, texto) : null;
+        return (
+          <div key={d.isoDate} style={{ display: "flex", justifyContent: "space-between", gap: 8, padding: "8px 0", borderTop: "1px solid " + C.divider }}>
+            <span style={{ fontSize: 12.5, fontWeight: 700, color: C.text }}>S{d.weekN} · {d.prueba.partida ? "Partida" : d.tipo === "objetivo" ? "El día" : d.prueba.distKm + " km"}</span>
+            <span style={{ fontSize: 12, fontWeight: 700, color: l && !l.error ? (l.tono === "bien" ? C.ok : C.amber) : texto ? C.text : C.textDim, textAlign: "right" }}>
+              {texto ? texto + (l && !l.error ? " · " + (l.tono === "bien" ? "✓" : "ojo") : "") : d.isoDate === hoy ? "hoy" : d.date}
+            </span>
+          </div>
+        );
+      })}
     </div>
   );
 }

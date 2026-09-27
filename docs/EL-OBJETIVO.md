@@ -173,6 +173,10 @@ Están aquí para no repetirlos.
 
 ### Lo siguiente, por orden de lo que cuesta no hacerlo
 
+Hecho el 27 de septiembre: **Progreso es el parte del coach** (veredicto,
+constancia, los 4 objetivos, alarmas con acción y lo que viene; el detalle,
+plegado).
+
 Hecho el 25 de septiembre: **tú contra el plan** (una línea en HOY y la
 gráfica en Progreso), **el peso de cada serie decidido y explicado** (doble
 progresión, idea de TrueLift) y **tu mes**, el informe mensual para compartir.

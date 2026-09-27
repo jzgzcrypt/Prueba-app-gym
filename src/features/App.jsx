@@ -619,7 +619,7 @@ export default function App() {
         {screen === "progreso" && (
           <ProgresoScreen medidas={medidas} setMedidas={setMedidas}
             ritmoReal={ritmoReal} weeks={WEEKS} checked={checked} workoutWeights={workoutWeights} workoutReps={workoutReps}
-            onVerInforme={setInformeMes} />
+            onVerInforme={setInformeMes} cuelloChecks={cuelloChecks} painLog={painLog} />
         )}
 
         {screen === "coach" && (
