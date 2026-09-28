@@ -16,6 +16,11 @@ import { PLATO_CANTINA, RACIONES, SECCIONES_CANTINA, macrosPlato, platosDe } fro
 import { COMIDAS_RAPIDAS, macrosDelDia, macrosRapida, restoDelDia } from "@/domain/nutricion/iifym";
 import { interpretar, totalDe } from "@/domain/nutricion/escribir";
 import { PORCION, apunteDePlato, enGramos, platoCena, textoPorcion } from "@/domain/nutricion/plato";
+import { INSTRUCCIONES_IA, enlacesIA, leerRespuestaIA, totalLeido } from "@/domain/nutricion/pegar";
+
+const CLAVE_IA = "programa7k:ia-instrucciones";
+const leerIA = () => { try { return window.localStorage.getItem(CLAVE_IA) === "si"; } catch { return false; } };
+const guardarIA = () => { try { window.localStorage.setItem(CLAVE_IA, "si"); } catch { /* solo esta sesion */ } };
 
 const SLOTS = [
   { id: "desayuno", nombre: "Desayuno" },
@@ -113,6 +118,85 @@ function Escribir({ comidaId, apuntarVarias, onCerrar, placeholder }) {
         <button className="btn" onClick={apuntar} disabled={total.kcal <= 0} style={{ ...boton(total.kcal > 0), opacity: total.kcal > 0 ? 1 : 0.45 }}>
           {total.kcal > 0 ? "Apuntar · " + r(total.kcal) + " kcal" : "Escribe lo que has comido"}
         </button>
+      </div>
+    </div>
+  );
+}
+
+/**
+ * Con tu IA: le dices (o le mandas foto de) lo que has comido en tu chat de
+ * Claude o ChatGPT, copias su respuesta y la pegas aqui. La app solo lee
+ * numeros: vale para cualquier comida.
+ */
+function ConIA({ comidaId, apuntarVarias, onCerrar, onEscribir }) {
+  const [pegado, setPegado] = useState("");
+  const [yaCopiadas, setYaCopiadas] = useState(false);
+  const [aviso, setAviso] = useState(null);
+  useEffect(() => { setYaCopiadas(leerIA()); }, []);
+  const lineas = leerRespuestaIA(pegado);
+  const total = totalLeido(lineas);
+  const enlaces = enlacesIA("");
+  const copiar = async () => {
+    try { await navigator.clipboard.writeText(INSTRUCCIONES_IA); guardarIA(); setYaCopiadas(true); setAviso("Copiadas: pégalas en un chat nuevo de tu IA."); }
+    catch { setAviso("No se pudo copiar. Mantén pulsado el texto de abajo para copiarlo."); }
+  };
+  const pegar = async () => {
+    try {
+      const t = await navigator.clipboard.readText();
+      if (t) { setPegado(t); setAviso(null); } else setAviso("El portapapeles está vacío: copia la respuesta de tu IA.");
+    } catch { setAviso("Chrome no deja leer el portapapeles: pégala en el cuadro (mantén pulsado → Pegar)."); }
+  };
+  const apuntar = () => {
+    if (!lineas.length) return;
+    apuntarVarias(lineas.map(l => ({ comida: comidaId || undefined, origen: "texto", texto: l.nombre,
+      kcal: l.kcal, prot: l.prot, hc: l.hc, grasa: l.grasa })));
+    onCerrar();
+  };
+  const enlace = { ...boton(false), display: "flex", alignItems: "center", justifyContent: "center", textDecoration: "none", minHeight: 38, fontSize: 12.5 };
+  return (
+    <div data-ia style={{ marginTop: SP.sm }}>
+      {!yaCopiadas ? (
+        <div style={{ background: C.surfaceMuted, borderRadius: R.md, padding: "10px 12px", marginBottom: SP.sm }}>
+          <div style={{ fontSize: 12.5, color: C.text, lineHeight: 1.45 }}>
+            <b>Solo la primera vez:</b> copia las instrucciones y pégalas en un chat nuevo de Claude o ChatGPT. Llámalo «Macros» y usa siempre ese chat.
+          </div>
+          <button className="btn" onClick={copiar} style={{ ...boton(true), width: "100%", marginTop: 8, minHeight: 40 }}>Copiar instrucciones</button>
+        </div>
+      ) : (
+        <div style={{ fontSize: 12.5, color: C.textDim, lineHeight: 1.45, marginBottom: SP.sm }}>
+          En tu chat «Macros», escribe o manda foto de lo que has comido. Copia la respuesta y pégala aquí.
+        </div>
+      )}
+      <div style={{ display: "flex", gap: SP.sm }}>
+        <a href={enlaces.claude} target="_blank" rel="noreferrer" style={enlace}>Abrir Claude</a>
+        <a href={enlaces.chatgpt} target="_blank" rel="noreferrer" style={enlace}>Abrir ChatGPT</a>
+      </div>
+      <button className="btn" onClick={pegar} style={{ ...boton(!lineas.length), width: "100%", marginTop: SP.sm }}>Pegar la respuesta</button>
+      <textarea value={pegado} onChange={e => setPegado(e.target.value)} rows={pegado ? 3 : 2}
+        placeholder="…o pégala aquí"
+        style={{ width: "100%", marginTop: SP.sm, padding: "9px 12px", borderRadius: R.lg, resize: "vertical", border: "1px solid " + C.cardBorder,
+                 background: C.bg, color: C.text, fontSize: 13, lineHeight: 1.45, fontFamily: "inherit" }} />
+      {aviso && <div style={{ fontSize: 12, color: C.amber, marginTop: 4 }}>{aviso}</div>}
+      {pegado && !lineas.length && <div style={{ fontSize: 12, color: C.amber, marginTop: 4 }}>No encuentro números de kcal ni de macros en lo pegado.</div>}
+      {lineas.length > 0 && (
+        <div style={{ marginTop: 6, display: "flex", flexDirection: "column", gap: 3 }}>
+          {lineas.map((l, i) => (
+            <div key={i} style={{ display: "flex", justifyContent: "space-between", gap: 10, fontSize: 13, color: C.text }}>
+              <span style={{ minWidth: 0 }}>{l.nombre}{l.confianza === "estimado" && <span style={{ display: "block", fontSize: 11.5, color: C.textFaint }}>solo kcal: macros estimados</span>}</span>
+              <span className="mono" style={{ flexShrink: 0, color: C.textDim, fontSize: 12 }}>{r(l.kcal)} kcal · {r(l.prot)} p</span>
+            </div>
+          ))}
+        </div>
+      )}
+      <div style={{ display: "flex", gap: SP.sm, marginTop: SP.sm }}>
+        <button className="btn" onClick={onCerrar} style={{ ...boton(false), flex: "0 0 auto" }}>Cancelar</button>
+        <button className="btn" onClick={apuntar} disabled={!lineas.length} style={{ ...boton(lineas.length > 0), opacity: lineas.length ? 1 : 0.45 }}>
+          {lineas.length ? "Apuntar · " + r(total.kcal) + " kcal" : "Pega la respuesta"}
+        </button>
+      </div>
+      <div style={{ display: "flex", justifyContent: "space-between", marginTop: 6 }}>
+        <button className="btn" onClick={onEscribir} style={{ fontSize: 11.5, color: C.textFaint, fontWeight: 700, minHeight: 28 }}>Sin IA: escribir aquí</button>
+        {yaCopiadas && <button className="btn" onClick={copiar} style={{ fontSize: 11.5, color: C.textFaint, fontWeight: 700, minHeight: 28 }}>Copiar instrucciones otra vez</button>}
       </div>
     </div>
   );
@@ -222,6 +306,8 @@ export function TuDia({ comida, apuntes, apuntarVarias, deshacerComida, esHoy })
               <Escribir comidaId={s.id} apuntarVarias={apuntarVarias} onCerrar={cerrar} />
             ) : modo === "cantina" ? (
               <Cantina apuntarVarias={apuntarVarias} onCerrar={cerrar} />
+            ) : modo === "ia" ? (
+              <ConIA comidaId={s.id} apuntarVarias={apuntarVarias} onCerrar={cerrar} onEscribir={() => setAbierto(s.id + ":escribir")} />
             ) : (
               <>
                 <div style={{ display: "flex", gap: SP.sm }}>
@@ -231,7 +317,7 @@ export function TuDia({ comida, apuntes, apuntarVarias, deshacerComida, esHoy })
                     </button>
                   )}
                   {s.cantina && <button className="btn" onClick={() => setAbierto(s.id + ":cantina")} style={boton(!rapida)}>Cantina</button>}
-                  <button className="btn" onClick={() => setAbierto(s.id + ":escribir")} style={boton(false)}>Escribir</button>
+                  <button className="btn" onClick={() => setAbierto(s.id + ":ia")} style={boton(false)}>Con tu IA</button>
                 </div>
                 {eligiendoSiempre === s.id ? (
                   <div style={{ display: "flex", gap: 5, flexWrap: "wrap", marginTop: SP.sm }}>
@@ -258,7 +344,9 @@ export function TuDia({ comida, apuntes, apuntarVarias, deshacerComida, esHoy })
           <span style={{ ...TYPE.cardTitle, color: C.text }}>Cena</span>
           {!cenaApuntada.length && <span style={{ fontSize: 11.5, fontWeight: 800, color: C.textDim, letterSpacing: 0.4 }}>CUADRA TU DÍA</span>}
         </div>
-        {cenaApuntada.length > 0 ? <Hecha id="cena" aps={cenaApuntada} /> : lista.length === 0 && abierto !== "cena:escribir" ? (
+        {cenaApuntada.length > 0 ? <Hecha id="cena" aps={cenaApuntada} /> : abierto === "cena:ia" ? (
+          <ConIA comidaId="cena" apuntarVarias={apuntarVarias} onCerrar={cerrar} onEscribir={() => setAbierto("cena:escribir")} />
+        ) : lista.length === 0 && abierto !== "cena:escribir" ? (
           <div style={{ fontSize: 13.5, color: C.textDim, lineHeight: 1.5 }}>
             Apunta desayuno, comida y merienda como caigan: aquí te sale la cena que cuadra el día, a ojo, sin pesar nada.
           </div>
@@ -293,7 +381,7 @@ export function TuDia({ comida, apuntes, apuntarVarias, deshacerComida, esHoy })
             )}
             <div style={{ display: "flex", gap: SP.sm, marginTop: SP.md }}>
               <button className="btn" onClick={() => apuntarVarias([apunteDePlato(plato)])} style={boton(true)}>Cené esto</button>
-              <button className="btn" onClick={() => setAbierto("cena:escribir")} style={boton(false)}>Cené otra cosa</button>
+              <button className="btn" onClick={() => setAbierto("cena:ia")} style={boton(false)}>Cené otra cosa</button>
             </div>
           </>
         )}
@@ -308,11 +396,13 @@ export function TuDia({ comida, apuntes, apuntarVarias, deshacerComida, esHoy })
               style={{ fontSize: 17, color: C.textFaint, padding: "2px 6px" }}>×</button>
           </div>
         ))}
-        {abierto === "extra:escribir" ? (
+        {abierto === "extra:ia" ? (
+          <ConIA comidaId={null} apuntarVarias={apuntarVarias} onCerrar={cerrar} onEscribir={() => setAbierto("extra:escribir")} />
+        ) : abierto === "extra:escribir" ? (
           <Escribir comidaId={null} apuntarVarias={apuntarVarias} onCerrar={cerrar} placeholder={"Una caña\nUn puñado de patatas"} />
         ) : (
           <div style={{ display: "flex", gap: SP.sm, alignItems: "center" }}>
-            <button className="btn" onClick={() => setAbierto("extra:escribir")} style={{ fontSize: 13, fontWeight: 700, color: C.text, minHeight: 36 }}>+ Algo más, fuera de horas</button>
+            <button className="btn" onClick={() => setAbierto("extra:ia")} style={{ fontSize: 13, fontWeight: 700, color: C.text, minHeight: 36 }}>+ Algo más, fuera de horas</button>
             <span style={{ flex: 1 }} />
             <button className="btn" onClick={() => apuntarVarias([{ origen: "rapida", id: "picoteo" }])} style={{ ...pastilla(false), minHeight: 32 }}>Picoteo</button>
           </div>

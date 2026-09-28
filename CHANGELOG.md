@@ -21,6 +21,21 @@ Todo cambio que se haga en la app se anota aquí. Sin excepciones.
 
 ## [Sin publicar]
 
+### Añadido — Apuntar comida con tu IA (copiar y pegar, sin API)
+- En cada comida, **«Con tu IA»**: le dices (o le mandas foto de) lo que has
+  comido a tu Claude o ChatGPT, copias su respuesta y la pegas. La IA entiende
+  cualquier plato, marca o restaurante; la app solo lee números.
+- La primera vez, **«Copiar instrucciones»** para un chat «Macros» que pide
+  a la IA una línea por alimento: `Nombre | kcal | proteína | hidratos | grasa`.
+- El lector (`pegar.js`) no tiene ni un nombre de alimento: lee cualquier
+  formato razonable — el pedido, tablas markdown (con columnas en cualquier
+  orden, por su cabecera), viñetas con etiquetas («70 kcal, 5 g proteína…»,
+  «P 12 · C 1 · G 14»), comas decimales— e ignora cabeceras, filas de Total y
+  el texto de cortesía. Si solo hay kcal, reparte los macros y lo dice.
+- «Pegar la respuesta» lee el portapapeles; si Chrome no deja, se pega en el
+  cuadro. «Abrir Claude / ChatGPT» abre tu IA.
+- «Escribir» sin IA sigue como respaldo sin conexión.
+
 ### Arreglado — Al escribir lo comido, ya no pone cosas que no has escrito
 - "Tostada de jamón" se leía como "Tostadas con aguacate" (tu desayuno de
   siempre, 400 kcal) porque bastaba con coincidir en una palabra. Las comidas
