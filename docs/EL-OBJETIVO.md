@@ -173,6 +173,9 @@ Están aquí para no repetirlos.
 
 ### Lo siguiente, por orden de lo que cuesta no hacerlo
 
+Hecho el 28 de septiembre: **el ritmo con GPS dentro de la app** (series a
+±2,4 s/km con la velocidad Doppler del móvil; se apunta solo).
+
 Hecho el 27 de septiembre: **Progreso es el parte del coach** (veredicto,
 constancia, los 4 objetivos, alarmas con acción y lo que viene; el detalle,
 plegado).

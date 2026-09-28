@@ -1,12 +1,13 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { C, CAT } from "@/design/tokens";
 import { CATALOGO } from "@/domain/fuerza/catalogo";
 import { parseSeries } from "@/domain/fuerza/series";
 import { descansoEntreSeries, objetivoSerie, pasoPeso, propuestaSerie, sugerenciaCarga, textoSeries } from "@/domain/fuerza/registro";
 import { getPatronesDeSesion } from "@/domain/salud/patrones";
 import { IntervalTimer } from "@/features/workout/IntervalTimer";
+import { CarreraGps } from "@/features/workout/CarreraGps";
 /** "5:05" a partir de segundos. */
 function textoRitmo(seg) { return Math.floor(seg / 60) + ":" + String(Math.round(seg % 60)).padStart(2, "0"); }
 
@@ -43,9 +44,11 @@ export function WorkoutMode({ day, mov, progress, onUpdateProgress, onFinish, on
   const phase = phases[phaseIdx];
   const catColor = isFuerza ? CAT.fuerza : CAT.running;
 
+  // Lo que midio el GPS en la carrera (lo rellenan IntervalTimer y CarreraGps).
+  const gpsRef = useRef(null);
   const goNextPhase = () => {
     if (phaseIdx < phases.length - 1) setPhaseIdx(phaseIdx + 1);
-    else onFinish();
+    else onFinish(gpsRef.current);
   };
   const goPrevPhase = () => { if (phaseIdx > 0) setPhaseIdx(phaseIdx - 1); };
 
@@ -202,9 +205,9 @@ export function WorkoutMode({ day, mov, progress, onUpdateProgress, onFinish, on
             )}
 
             {day.intervalos ? (
-              <IntervalTimer intervalos={intervalosDelDia(day, ritmoSeries)} ritmo={ritmoSeries ? ritmoSeries.ritmo : null} />
+              <IntervalTimer intervalos={intervalosDelDia(day, ritmoSeries)} ritmo={ritmoSeries ? ritmoSeries.ritmo : (day.ritmo || null)} resultadoRef={gpsRef} />
             ) : (
-              <div style={{ fontSize: 11.5, color: "#8A8A87", lineHeight: 1.5 }}>Al terminar, pulsa continuar para registrar el ritmo real.</div>
+              <CarreraGps day={day} resultadoRef={gpsRef} />
             )}
           </div>
 

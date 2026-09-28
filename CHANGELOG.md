@@ -21,6 +21,31 @@ Todo cambio que se haga en la app se anota aquí. Sin excepciones.
 
 ## [Sin publicar]
 
+### Añadido — Ritmo con GPS dentro de la app (sin Strava)
+- **En las series, el ritmo de ahora en grande** (verde si vas en el
+  objetivo, ámbar si te sales), los metros de la serie y, al acabar cada una,
+  su ritmo. Al terminar, la media va sola a la libreta: un toque menos.
+- **En rodajes, tiradas y pruebas, crono + km + ritmo ahora y medio.** En las
+  pruebas de 3 y 5 km, al llegar a la distancia se para el reloj de la prueba
+  (vibra) y ese tiempo es el que se apunta.
+- **Cómo mide**: con la velocidad Doppler del GPS (`coords.speed`, lo que
+  usan Strava y los relojes) integrada en el tiempo; si el móvil no la da,
+  con la posición limpia de saltos y promediada. Cada serie se corta en el
+  instante exacto, no en el último fix.
+- **Precisión medida con un simulador** (`node scripts/sim-gps.mjs`: ruta con
+  giros, deriva, ruido, saltos de 20-60 m y fixes perdidos). Con Doppler:
+  series de 400 m a ±2,4 s/km (antes ±8-23) y distancia al 0,2-0,7% en 1-7 km
+  incluso con mala señal. Sin Doppler: ±8-22 s/km en series cortas y 0,5-1,8%
+  en 7 km; la app avisa de que es aproximado. Sumar los fixes tal cual infla
+  la distancia un 25-180%. Se probó un filtro de Kalman para la posición y
+  salía peor con los saltos de ciudad: se descartó.
+- Sin voz nueva: el temporizador dice los tramos como antes. Con la pantalla
+  bloqueada Chrome no da GPS: móvil en la mano o en el brazo.
+
+### Datos
+- Nuevo campo opcional `gps` por día: `{ m, seg, series }` (sin coordenadas).
+  Esquema v4, sin migración. Entra en exportar/importar y en vaciar el día.
+
 ### Cambiado — Progreso es ahora el parte del coach
 - **Arriba, lo que miraría un coach, sin hacer scroll**: una frase de
   veredicto ("Vas bien…", "Esta semana falta el jueves…"), la tira de

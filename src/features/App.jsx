@@ -28,6 +28,7 @@ import { ultimaVez } from "@/domain/fuerza/registro";
 import { informeMensual, informePendiente } from "@/domain/progreso/informe";
 import { InformeScreen } from "@/features/informe/InformeScreen";
 import { ritmoDelDia } from "@/domain/running/adaptar";
+import { textoParaLibreta } from "@/domain/running/gps";
 import { resumenSemana, semanasCumplidas } from "@/domain/progreso/resumen";
 
 export default function App() {
@@ -67,6 +68,7 @@ export default function App() {
   const [informeMes, setInformeMes] = useState(null);
   const [medidas, setMedidas] = useState([]); // [{fecha, peso, cintura, cadera}]
   const [ritmoReal, setRitmoReal] = useState({}); // { dayKey: "5:12/km" }
+  const [gps, setGps] = useState({}); // { dayKey: { m, seg, series: [s/km] } } - lo que midio el GPS
   const [ritmoTramos, setRitmoTramos] = useState({}); // { dayKey: "6:00" } - ritmo en los tramos corriendo (fase correr/caminar)
   const [sensaciones, setSensaciones] = useState({}); // { dayKey: "texto" } - como te sentiste en la sesion
   const [ritmoInput, setRitmoInput] = useState({});
@@ -162,6 +164,7 @@ export default function App() {
           if (d.medidas) setMedidas(d.medidas);
           if (d.ritmoReal) setRitmoReal(d.ritmoReal);
         if (d.ritmoTramos) setRitmoTramos(d.ritmoTramos);
+        if (d.gps) setGps(d.gps);
         if (d.sensaciones) setSensaciones(d.sensaciones);
           if (d.postponed) setPostponed(d.postponed);
           if (d.phaseAdjustNote != null) setPhaseAdjustNote(d.phaseAdjustNote);
@@ -243,7 +246,7 @@ export default function App() {
       version: VERSION_ESQUEMA,
       checked, cuelloChecks, notes, youtubeLinks, customExercises, painLog,
       flaggedExercises, pausedRanges, workoutProgress, magiaProgress, magiaRepaso, magiaLog,
-      guerreroLog, workoutWeights, workoutReps, medidas, ritmoReal, ritmoTramos, sensaciones, postponed, phaseAdjustNote,
+      guerreroLog, workoutWeights, workoutReps, medidas, ritmoReal, ritmoTramos, gps, sensaciones, postponed, phaseAdjustNote,
       currentWeekOverride, weeklyLog, comidasLog, cambiosMenu, menuEditado, compraMarcada, comidasFuera,
       bloquesHistorial, ultimoBackup, cuelloFaseManual, onboardingVisto,
     };
@@ -254,7 +257,7 @@ export default function App() {
     return () => clearTimeout(t);
   }, [checked, cuelloChecks, notes, youtubeLinks, customExercises, painLog,
       flaggedExercises, pausedRanges, workoutProgress, magiaProgress, magiaRepaso, magiaLog,
-      guerreroLog, workoutWeights, workoutReps, medidas, ritmoReal, ritmoTramos, sensaciones, postponed, phaseAdjustNote,
+      guerreroLog, workoutWeights, workoutReps, medidas, ritmoReal, ritmoTramos, gps, sensaciones, postponed, phaseAdjustNote,
       currentWeekOverride, weeklyLog, comidasLog, cambiosMenu, menuEditado, compraMarcada, comidasFuera,
       bloquesHistorial, ultimoBackup, cuelloFaseManual, onboardingVisto, storageReady]);
 
@@ -274,7 +277,7 @@ export default function App() {
   // para poder decirlo, y deja el deshacer preparado por si era un error.
   const vaciarDia = (clave) => {
     const actual = { checked, cuelloChecks, notes, painLog, magiaLog, guerreroLog,
-                     workoutWeights, workoutReps, workoutProgress, ritmoReal, ritmoTramos, sensaciones, postponed, comidasLog, cambiosMenu };
+                     workoutWeights, workoutReps, workoutProgress, ritmoReal, ritmoTramos, gps, sensaciones, postponed, comidasLog, cambiosMenu };
     const cuantas = cuantoHayEn(actual, clave);
     if (!cuantas) return 0;
     const { estado } = limpiarDia(actual, clave);
@@ -282,14 +285,14 @@ export default function App() {
     setPainLog(estado.painLog); setMagiaLog(estado.magiaLog); setGuerreroLog(estado.guerreroLog);
     setWorkoutWeights(estado.workoutWeights); setWorkoutReps(estado.workoutReps);
     setWorkoutProgress(estado.workoutProgress); setRitmoReal(estado.ritmoReal);
-    setRitmoTramos(estado.ritmoTramos); setSensaciones(estado.sensaciones);
+    setRitmoTramos(estado.ritmoTramos); setGps(estado.gps); setSensaciones(estado.sensaciones);
     setPostponed(estado.postponed); setComidasLog(estado.comidasLog); setCambiosMenu(estado.cambiosMenu);
     pushUndo("Día vaciado", () => {
       setChecked(actual.checked); setCuelloChecks(actual.cuelloChecks); setNotes(actual.notes);
       setPainLog(actual.painLog); setMagiaLog(actual.magiaLog); setGuerreroLog(actual.guerreroLog);
       setWorkoutWeights(actual.workoutWeights); setWorkoutReps(actual.workoutReps);
       setWorkoutProgress(actual.workoutProgress); setRitmoReal(actual.ritmoReal);
-      setRitmoTramos(actual.ritmoTramos); setSensaciones(actual.sensaciones);
+      setRitmoTramos(actual.ritmoTramos); setGps(actual.gps); setSensaciones(actual.sensaciones);
       setPostponed(actual.postponed); setComidasLog(actual.comidasLog); setCambiosMenu(actual.cambiosMenu);
     });
     return cuantas;
@@ -371,7 +374,7 @@ export default function App() {
       version: VERSION_ESQUEMA, exportedAt: new Date().toISOString(),
       checked, cuelloChecks, notes, youtubeLinks, customExercises, painLog,
       flaggedExercises, pausedRanges, workoutProgress, workoutWeights, workoutReps, medidas,
-      ritmoReal, ritmoTramos, sensaciones, postponed, phaseAdjustNote, currentWeekOverride, weeklyLog,
+      ritmoReal, ritmoTramos, gps, sensaciones, postponed, phaseAdjustNote, currentWeekOverride, weeklyLog,
       comidasLog, cambiosMenu, menuEditado, compraMarcada, comidasFuera, magiaProgress, magiaRepaso,
       magiaLog, guerreroLog, bloquesHistorial,
     };
@@ -417,6 +420,7 @@ export default function App() {
         if (data.medidas) setMedidas(data.medidas);
         if (data.ritmoReal) setRitmoReal(data.ritmoReal);
         if (data.ritmoTramos) setRitmoTramos(data.ritmoTramos);
+        if (data.gps) setGps(data.gps);
         if (data.sensaciones) setSensaciones(data.sensaciones);
         if (data.postponed) setPostponed(data.postponed);
         if (data.phaseAdjustNote != null) setPhaseAdjustNote(data.phaseAdjustNote);
@@ -467,7 +471,7 @@ export default function App() {
   }
 
   if (cierre) {
-    return <CierreSesion dayKey={cierre} workoutWeights={workoutWeights} workoutReps={workoutReps} ritmoReal={ritmoReal}
+    return <CierreSesion dayKey={cierre} workoutWeights={workoutWeights} workoutReps={workoutReps} ritmoReal={ritmoReal} gps={gps[cierre]}
       onGuardarRitmo={guardarRitmo} onVolver={() => { setCierre(null); setExpandedBlock("main"); }} />;
   }
 
@@ -479,7 +483,17 @@ export default function App() {
     return (
       <WorkoutMode day={wDay} mov={wMov} progress={workoutProgress[activeWorkout] || {}}
         onUpdateProgress={(ei, sd) => setWorkoutProgress(p => Object.assign({}, p, { [activeWorkout]: Object.assign({}, p[activeWorkout]||{}, { [ei]: sd }) }))}
-        onFinish={() => { setChecked(p => Object.assign({}, p, { [activeWorkout]: true })); setCierre(activeWorkout); setActiveWorkout(null); }}
+        onFinish={(res) => {
+          setChecked(p => Object.assign({}, p, { [activeWorkout]: true }));
+          // Lo del GPS se apunta solo, salvo que ya hubiera algo escrito a mano.
+          if (res && res.total && res.total.m >= 50) {
+            const series = (res.tramos || []).filter(t => t.ritmo).map(t => Math.round(t.ritmo));
+            setGps(p => Object.assign({}, p, { [activeWorkout]: { m: Math.round(res.total.m), seg: Math.round(res.total.seg), series } }));
+            const texto = textoParaLibreta({ day: wDay, ...res });
+            if (texto && !(ritmoReal[activeWorkout] || "").trim()) guardarRitmo(activeWorkout, texto);
+          }
+          setCierre(activeWorkout); setActiveWorkout(null);
+        }}
         onExit={() => setActiveWorkout(null)}
         weights={workoutWeights[activeWorkout] || {}}
         onUpdateWeight={(ei, si, val) => {
@@ -552,7 +566,7 @@ export default function App() {
             isFuerzaDay={isFuerzaDay} isRunDay={isRunDay} isCompromisoDay={isCompromisoDay} mov={mov}
             comida={comida} vaciarDia={vaciarDia}
             apuntesComida={comidasLog[dayKey] || []} irANutricion={() => setScreen("nutricion")}
-            cosasEnElDia={cuantoHayEn({ checked, cuelloChecks, notes, painLog, magiaLog, guerreroLog, workoutWeights, workoutReps, workoutProgress, ritmoReal, ritmoTramos, sensaciones, postponed, comidasLog, cambiosMenu }, dayKey)}
+            cosasEnElDia={cuantoHayEn({ checked, cuelloChecks, notes, painLog, magiaLog, guerreroLog, workoutWeights, workoutReps, workoutProgress, ritmoReal, ritmoTramos, gps, sensaciones, postponed, comidasLog, cambiosMenu }, dayKey)}
             cuelloEj={cuelloEj} cuelloChecks={cuelloChecks} toggleCuello={toggleCuello}
             checked={checked} toggleCheck={toggleCheck} mainDone={mainDone}
             workoutProgress={workoutProgress[dayKey]} onStartWorkout={() => setActiveWorkout(dayKey)}

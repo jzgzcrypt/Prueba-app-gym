@@ -5,6 +5,7 @@ import { C, CAT, TAP_MIN } from "@/design/tokens";
 import { FLAT_DAYS, claveDia } from "@/domain/plan/calendario";
 import { progresion, recordsDelDia, seriesDe, textoSeries, ultimaVez } from "@/domain/fuerza/registro";
 import { LecturaSesion, queApuntar } from "@/features/ui/lectura";
+import { textoTiempo } from "@/domain/running/gps";
 
 /**
  * Lo que sale al terminar una sesion: la pagina de la libreta.
@@ -14,7 +15,7 @@ import { LecturaSesion, queApuntar } from "@/features/ui/lectura";
  * progresado, o el ritmo de las series de running contra lo que pedian, o lo
  * que dice una prueba del objetivo. Sin confeti ni rachas.
  */
-export function CierreSesion({ dayKey, workoutWeights, workoutReps, ritmoReal, onGuardarRitmo, onVolver }) {
+export function CierreSesion({ dayKey, workoutWeights, workoutReps, ritmoReal, gps, onGuardarRitmo, onVolver }) {
   const day = FLAT_DAYS.find(d => claveDia(d) === dayKey);
   const [texto, setTexto] = useState(ritmoReal[dayKey] || "");
   const [guardado, setGuardado] = useState(ritmoReal[dayKey] || "");
@@ -106,6 +107,12 @@ export function CierreSesion({ dayKey, workoutWeights, workoutReps, ritmoReal, o
 
         {!esFuerza && (
           <div style={{ marginTop: 18, background: C.card, border: "1px solid " + C.cardBorder, borderRadius: 14, padding: "14px 16px" }}>
+            {gps && gps.m > 0 && (
+              <div className="mono" style={{ fontSize: 12.5, fontWeight: 700, color: C.textDim, marginBottom: 10 }}>
+                GPS: {(gps.m / 1000).toFixed(2).replace(".", ",")} km · {textoTiempo(gps.seg)}
+                {gps.series && gps.series.length > 0 ? " · series " + gps.series.map(textoTiempo).join(" ") : ""}
+              </div>
+            )}
             <div style={{ fontSize: 10, fontWeight: 800, color: C.textDim, letterSpacing: 0.5, marginBottom: 6 }}>{apuntar.label}</div>
             <div style={{ display: "flex", gap: 6 }}>
               <input value={texto} onChange={e => setTexto(e.target.value)} placeholder={apuntar.ph}
