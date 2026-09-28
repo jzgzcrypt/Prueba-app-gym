@@ -19,6 +19,9 @@ export function CarreraGps({ day, resultadoRef }) {
   const distPrueba = day.prueba && day.prueba.distKm ? day.prueba.distKm * 1000 : null;
   const objetivo = day.ritmo || null;
   const gps = useGps();
+  // El GPS empieza a buscar al abrir la sesion: al pulsar EMPEZAR ya tiene
+  // señal y los primeros metros cuentan bien. Hasta entonces no se cuenta nada.
+  useEffect(() => { gps.escuchar(); }, []); // eslint-disable-line react-hooks/exhaustive-deps
   const [corriendo, setCorriendo] = useState(false);
   const [empezado, setEmpezado] = useState(false);
   const [, setTic] = useState(0);
@@ -96,6 +99,9 @@ export function CarreraGps({ day, resultadoRef }) {
       </div>
 
       {corriendo && gps.reg.modo === "posicion" && <div style={{ padding: "8px 16px 0", fontSize: 11, color: "#8A8A87" }}>Tu móvil no da velocidad GPS: el ritmo es algo menos preciso.</div>}
+      {!corriendo && gps.estado === "ok" && gps.precision != null && (
+        <div data-gps-listo style={{ padding: "10px 16px 0", fontSize: 12, fontWeight: 800, color: C.ok }}>GPS listo · ±{Math.round(gps.precision)} m</div>
+      )}
       {aviso && <div style={{ padding: "10px 16px 0", fontSize: 12, fontWeight: 700, color: C.amber, lineHeight: 1.4 }}>{aviso}</div>}
 
       <div style={{ padding: "14px 16px" }}>

@@ -21,6 +21,18 @@ Todo cambio que se haga en la app se anota aquí. Sin excepciones.
 
 ## [Sin publicar]
 
+### Cambiado — GPS: listo antes de salir, avisos claros y nada se pierde
+- **El GPS empieza a buscar al abrir la sesión**, no al pulsar EMPEZAR: sale
+  "GPS listo · ±5 m" y los primeros metros ya cuentan bien.
+- **Ubicación aproximada detectada**: si Android solo da a Chrome la
+  aproximada (fixes de 1-3 km), la app dice dónde activar «Usar ubicación
+  precisa», en vez de "buscando señal" para siempre.
+- **Permiso denegado**: dice cómo darlo (candado → Permisos → Ubicación).
+- **SALIR a mitad de carrera ya no tira lo corrido**: los km, el tiempo y la
+  ruta se guardan (sin dar la sesión por hecha).
+- Medido: una hora de carrera cuesta ~50 ms de cálculo en total y la ruta
+  guardada ~8 KB.
+
 ### Añadido — El mapa de cada salida (OpenStreetMap)
 - **Al terminar una sesión con GPS, la ruta en el mapa**, coloreada por ritmo:
   verde a tu ritmo objetivo o más rápido, amarillo algo más lento, gris la

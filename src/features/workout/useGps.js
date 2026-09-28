@@ -6,7 +6,8 @@ import { agregarPunto, marcarTramo, nuevoRegistro, pausar as pausarRegistro, PRE
 /**
  * El GPS del movil (Chrome lo da con watchPosition; hace falta HTTPS).
  *
- * `estado`: "apagado" | "buscando" | "ok" | "denegado" | "sin-gps".
+ * `estado`: "apagado" | "buscando" | "ok" | "aproximada" | "denegado" | "sin-gps".
+ * `precision`: la del ultimo fix (m), para ensenar "GPS listo · ±5 m".
  * `regRef.current` es el registro de siempre (para leerlo dentro de un
  * setInterval sin esperar a React); `reg` el mismo, para pintar.
  *
@@ -15,6 +16,9 @@ import { agregarPunto, marcarTramo, nuevoRegistro, pausar as pausarRegistro, PRE
  */
 export function useGps() {
   const [estado, setEstado] = useState("apagado");
+  const [precision, setPrecision] = useState(null);
+  // Fixes seguidos malisimos: Android le da a Chrome la ubicacion aproximada.
+  const malosRef = useRef(0);
   const [reg, setReg] = useState(nuevoRegistro);
   const regRef = useRef(reg);
   const activoRef = useRef(false);
@@ -30,7 +34,12 @@ export function useGps() {
           const c = pos.coords;
           // speed: la velocidad Doppler del GPS; es lo que hace preciso el ritmo.
           const p = { lat: c.latitude, lon: c.longitude, acc: c.accuracy, speed: c.speed, t: pos.timestamp || Date.now() };
-          setEstado(c.accuracy <= PRECISION_MAX_M || c.speed != null ? "ok" : "buscando");
+          setPrecision(c.accuracy);
+          // La ubicacion aproximada de Android llega a 1-3 km; un GPS que aun
+          // esta cogiendo señal baja de 200 m en segundos. 3 seguidos, sin
+          // velocidad, es que Chrome no tiene la precisa.
+          malosRef.current = c.accuracy >= 200 && c.speed == null ? malosRef.current + 1 : 0;
+          setEstado(c.accuracy <= PRECISION_MAX_M || c.speed != null ? "ok" : malosRef.current >= 3 ? "aproximada" : "buscando");
           if (!activoRef.current) return;
           regRef.current = agregarPunto(regRef.current, p);
           setReg(regRef.current);
@@ -61,13 +70,14 @@ export function useGps() {
 
   useEffect(() => () => soltar(), []);
 
-  return { estado, reg, regRef, iniciar, pausar, parar, escuchar, marcar };
+  return { estado, precision, reg, regRef, iniciar, pausar, parar, escuchar, marcar };
 }
 
 /** La linea de estado del GPS, o null si va bien. */
 export function avisoGps(estado) {
   if (estado === "buscando") return "GPS: buscando señal… (mejor al aire libre, lejos de edificios altos)";
-  if (estado === "denegado") return "Sin permiso de ubicación: el tiempo va igual; el ritmo lo apuntas tú al terminar.";
+  if (estado === "aproximada") return "Chrome tiene tu ubicación aproximada: así no hay ritmo ni mapa. Ajustes → Aplicaciones → Chrome → Permisos → Ubicación → activa «Usar ubicación precisa».";
+  if (estado === "denegado") return "Sin permiso de ubicación: el tiempo va igual, pero sin ritmo ni mapa. Para darlo: toca el candado junto a la dirección → Permisos → Ubicación → Permitir.";
   if (estado === "sin-gps") return "Este navegador no da GPS: el ritmo lo apuntas tú al terminar.";
   return null;
 }

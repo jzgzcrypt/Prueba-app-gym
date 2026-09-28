@@ -54,6 +54,9 @@ export function IntervalTimer({ intervalos, ritmo, resultadoRef }) {
   const hablar = (texto) => { if (vozRef.current && texto) decir(texto); };
 
   const gps = useGps();
+  // El GPS empieza a buscar al abrir la sesion: al pulsar EMPEZAR ya tiene
+  // señal y los primeros metros cuentan bien. Hasta entonces no se cuenta nada.
+  useEffect(() => { gps.escuchar(); }, []); // eslint-disable-line react-hooks/exhaustive-deps
   // Cada tramo corrido, medido: { [idx]: { tipo, m, seg, ritmo } }. Por indice,
   // asi cerrar el mismo tramo dos veces no lo duplica.
   const [medidos, setMedidos] = useState({});
@@ -238,6 +241,9 @@ export function IntervalTimer({ intervalos, ritmo, resultadoRef }) {
       )}
       {aproximado && <div style={{ padding: "6px 16px 0", fontSize: 11, color: "#8A8A87" }}>Tu móvil no da velocidad GPS: el ritmo de las series es aproximado.</div>}
       {series.length > 0 && <div style={{ padding: "0 16px" }}><ListaSeries /></div>}
+      {!corriendo && gps.estado === "ok" && gps.precision != null && (
+        <div data-gps-listo style={{ padding: "10px 16px 0", fontSize: 12, fontWeight: 800, color: C.ok }}>GPS listo · ±{Math.round(gps.precision)} m</div>
+      )}
       {aviso && <div style={{ padding: "10px 16px 0", fontSize: 12, fontWeight: 700, color: C.amber, lineHeight: 1.4 }}>{aviso}</div>}
 
       <div style={{ padding: "14px 16px", display: "flex", gap: 8 }}>

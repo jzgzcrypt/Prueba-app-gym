@@ -84,7 +84,7 @@ export function WorkoutMode({ day, mov, progress, onUpdateProgress, onFinish, on
         <div style={containerStyle}>
 
           <div style={{ padding: "16px 20px 12px", display: "flex", justifyContent: "space-between", alignItems: "center", borderBottom: "1px solid #E5E5E3" }}>
-            <button className="rb" onClick={onExit} style={{ fontSize: 12, color: "#8A8A87", fontWeight: 600, letterSpacing: 0.3 }}>SALIR</button>
+            <button className="rb" onClick={() => onExit(gpsRef.current)} style={{ fontSize: 12, color: "#8A8A87", fontWeight: 600, letterSpacing: 0.3 }}>SALIR</button>
             <div style={{ fontSize: 10.5, color: "#8A8A87", fontWeight: 700, letterSpacing: 0.5 }}>{day.titulo.toUpperCase()}</div>
             <div className="mono" style={{ fontSize: 11, color: "#8A8A87" }}>{phaseIdx+1}/{phases.length}</div>
           </div>
@@ -169,7 +169,7 @@ export function WorkoutMode({ day, mov, progress, onUpdateProgress, onFinish, on
         <div style={containerStyle}>
 
           <div style={{ padding: "16px 20px 12px", display: "flex", justifyContent: "space-between", alignItems: "center", borderBottom: "1px solid #E5E5E3" }}>
-            <button className="rb" onClick={onExit} style={{ fontSize: 12, color: "#8A8A87", fontWeight: 600, letterSpacing: 0.3 }}>SALIR</button>
+            <button className="rb" onClick={() => onExit(gpsRef.current)} style={{ fontSize: 12, color: "#8A8A87", fontWeight: 600, letterSpacing: 0.3 }}>SALIR</button>
             <div style={{ fontSize: 10.5, color: "#8A8A87", fontWeight: 700, letterSpacing: 0.5 }}>{day.titulo.toUpperCase()}</div>
             <div className="mono" style={{ fontSize: 11, color: "#8A8A87" }}>{phaseIdx+1}/{phases.length}</div>
           </div>
@@ -259,7 +259,7 @@ export function WorkoutMode({ day, mov, progress, onUpdateProgress, onFinish, on
       <div style={containerStyle}>
 
         <div style={{ padding: "16px 20px 12px", display: "flex", justifyContent: "space-between", alignItems: "center", borderBottom: "1px solid #E5E5E3" }}>
-          <button className="rb" onClick={onExit} style={{ fontSize: 12, color: "#8A8A87", fontWeight: 600, letterSpacing: 0.3, minHeight: 32 }}>SALIR</button>
+          <button className="rb" onClick={() => onExit(gpsRef.current)} style={{ fontSize: 12, color: "#8A8A87", fontWeight: 600, letterSpacing: 0.3, minHeight: 32 }}>SALIR</button>
           <div style={{ fontSize: 10.5, color: "#8A8A87", fontWeight: 700, letterSpacing: 0.5 }}>{day.titulo.toUpperCase()}</div>
           <div className="mono" style={{ fontSize: 11, color: "#8A8A87" }}>{phaseIdx+1}/{phases.length}</div>
         </div>

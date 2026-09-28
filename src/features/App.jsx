@@ -491,6 +491,16 @@ export default function App() {
   if (activeWorkout) {
     const wDay = FLAT_DAYS.find(d => claveDia(d) === activeWorkout);
     const wMov = getMovilidadDelDia(wDay);
+    /** Guarda lo que midio el GPS en este dia. false si no hay nada que guardar. */
+    const guardarGps = (res) => {
+      if (!res || !res.total || res.total.m < 50) return false;
+      const series = (res.tramos || []).filter(t => t.ritmo).map(t => Math.round(t.ritmo));
+      const aj = ritmoDelDia(wDay, FLAT_DAYS, ritmoReal);
+      const obj = aj ? aj.ritmo : (wDay.ritmo || null);
+      const ruta = simplificar(res.traza);
+      setGps(p => sinRutasDeMas(Object.assign({}, p, { [activeWorkout]: { m: Math.round(res.total.m), seg: Math.round(res.total.seg), series, obj, ruta } })));
+      return true;
+    };
 
 
     return (
@@ -499,18 +509,15 @@ export default function App() {
         onFinish={(res) => {
           setChecked(p => Object.assign({}, p, { [activeWorkout]: true }));
           // Lo del GPS se apunta solo, salvo que ya hubiera algo escrito a mano.
-          if (res && res.total && res.total.m >= 50) {
-            const series = (res.tramos || []).filter(t => t.ritmo).map(t => Math.round(t.ritmo));
-            const aj = ritmoDelDia(wDay, FLAT_DAYS, ritmoReal);
-            const obj = aj ? aj.ritmo : (wDay.ritmo || null);
-            const ruta = simplificar(res.traza);
-            setGps(p => sinRutasDeMas(Object.assign({}, p, { [activeWorkout]: { m: Math.round(res.total.m), seg: Math.round(res.total.seg), series, obj, ruta } })));
+          if (guardarGps(res)) {
             const texto = textoParaLibreta({ day: wDay, ...res });
             if (texto && !(ritmoReal[activeWorkout] || "").trim()) guardarRitmo(activeWorkout, texto);
           }
           setCierre(activeWorkout); setActiveWorkout(null);
         }}
-        onExit={() => setActiveWorkout(null)}
+        // SALIR a mitad de carrera no tira lo corrido: la ruta y los km se
+        // guardan (sin dar la sesion por hecha).
+        onExit={(res) => { guardarGps(res); setActiveWorkout(null); }}
         weights={workoutWeights[activeWorkout] || {}}
         onUpdateWeight={(ei, si, val) => {
           const prevVal = (workoutWeights[activeWorkout] || {})[ei] ? (workoutWeights[activeWorkout][ei][si] || "") : "";
