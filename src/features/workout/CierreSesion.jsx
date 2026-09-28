@@ -6,6 +6,7 @@ import { FLAT_DAYS, claveDia } from "@/domain/plan/calendario";
 import { progresion, recordsDelDia, seriesDe, textoSeries, ultimaVez } from "@/domain/fuerza/registro";
 import { LecturaSesion, queApuntar } from "@/features/ui/lectura";
 import { textoTiempo } from "@/domain/running/gps";
+import { MapaRuta } from "@/features/ui/MapaRuta";
 
 /**
  * Lo que sale al terminar una sesion: la pagina de la libreta.
@@ -107,6 +108,11 @@ export function CierreSesion({ dayKey, workoutWeights, workoutReps, ritmoReal, g
 
         {!esFuerza && (
           <div style={{ marginTop: 18, background: C.card, border: "1px solid " + C.cardBorder, borderRadius: 14, padding: "14px 16px" }}>
+            {gps && gps.ruta && (
+              <div style={{ marginBottom: 12 }}>
+                <MapaRuta ruta={gps.ruta} objetivo={gps.obj} titulo={day.titulo} fecha={day.isoDate} />
+              </div>
+            )}
             {gps && gps.m > 0 && (
               <div className="mono" style={{ fontSize: 12.5, fontWeight: 700, color: C.textDim, marginBottom: 10 }}>
                 GPS: {(gps.m / 1000).toFixed(2).replace(".", ",")} km · {textoTiempo(gps.seg)}

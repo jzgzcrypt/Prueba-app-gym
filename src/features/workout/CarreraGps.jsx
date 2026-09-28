@@ -45,7 +45,7 @@ export function CarreraGps({ day, resultadoRef }) {
         pruebaRef.current = tp; setTiempoPrueba(tp);
         try { if (navigator.vibrate) navigator.vibrate([300, 120, 300]); } catch { /* sin vibracion */ }
       }
-      if (resultadoRef) resultadoRef.current = { tramos: [], total: foto(reg), tiempoPrueba: pruebaRef.current };
+      if (resultadoRef) resultadoRef.current = { tramos: [], total: foto(reg), tiempoPrueba: pruebaRef.current, traza: reg.traza };
     }, 1000);
     return () => clearInterval(t);
   }, [corriendo]);
@@ -55,7 +55,7 @@ export function CarreraGps({ day, resultadoRef }) {
     if (corriendo) {
       c.acumulado += Date.now() - c.desde; c.desde = null;
       gps.pausar(); setCorriendo(false);
-      if (resultadoRef) resultadoRef.current = { tramos: [], total: foto(gps.regRef.current), tiempoPrueba: pruebaRef.current };
+      if (resultadoRef) resultadoRef.current = { tramos: [], total: foto(gps.regRef.current), tiempoPrueba: pruebaRef.current, traza: gps.regRef.current.traza };
     } else {
       c.desde = Date.now();
       gps.iniciar(); setCorriendo(true);

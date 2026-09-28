@@ -52,10 +52,17 @@ export function distanciaM(a, b) {
  *  ultimo: el ultimo fix (null tras una pausa: el siguiente solo ancla).
  *  pos: el ultimo fix de posicion bueno; buf, suave, ancla: la posicion promediada.
  *  vDoppler: la ultima velocidad Doppler buena; vAhora: la suavizada para mostrar.
+ *  traza: la ruta para el mapa, [lat, lon, t, v, k] por fix bueno y null en
+ *  cada pausa (ver ruta.js); k lo pone marcarTramo (0 corre, 1 recupera).
  */
 export function nuevoRegistro() {
   return { m: 0, seg: 0, ultimo: null, pos: null, buf: [], suave: null, ancla: null, linea: [],
-           vDoppler: null, rechazosV: 0, vAhora: null, segActivo: 0, modo: null };
+           vDoppler: null, rechazosV: 0, vAhora: null, segActivo: 0, modo: null, traza: [], k: 0 };
+}
+
+/** El temporizador avisa de si ahora se corre (0) o se recupera (1): el mapa lo pinta distinto. */
+export function marcarTramo(reg, k) {
+  return reg.k === k ? reg : { ...reg, k };
 }
 
 function promedio(buf) {
@@ -95,8 +102,9 @@ export function agregarPunto(reg, p) {
     if (!okPos && vd == null) return reg;
     const buf = okPos ? [p] : [];
     const suave = okPos ? promedio(buf) : null;
+    const traza = okPos ? [...(reg.traza || []), [p.lat, p.lon, p.t, vd, reg.k || 0]] : (reg.traza || []);
     return { ...reg, ultimo: p, pos: okPos ? p : null, buf, suave, ancla: suave, vDoppler: vd, rechazosV: 0,
-             vAhora: null, segActivo: 0, modo: null,
+             vAhora: null, segActivo: 0, modo: null, traza,
              linea: reg.linea.length ? reg.linea : [{ t: p.t, s: reg.seg, m: reg.m }] };
   }
   const dt = (p.t - reg.ultimo.t) / 1000;
@@ -104,8 +112,9 @@ export function agregarPunto(reg, p) {
 
   // Posicion: promedio de los ultimos fixes buenos.
   let { pos, buf, suave, ancla } = reg;
-  let dPos = 0;
+  let dPos = 0, posNueva = false;
   if (posicionValida(reg, p)) {
+    posNueva = true;
     pos = p;
     buf = [...buf, p].slice(-SUAVIZADO);
     suave = promedio(buf);
@@ -146,8 +155,10 @@ export function agregarPunto(reg, p) {
   }
   const w = 1 - Math.exp(-dt / TAU_AHORA);
   const vAhora = vMedida == null ? reg.vAhora : reg.vAhora == null ? vMedida : reg.vAhora + w * (vMedida - reg.vAhora);
+  // Para el mapa, la posicion promediada (dibuja una linea limpia, sin zigzag).
+  const traza = posNueva ? [...(reg.traza || []), [suave.lat, suave.lon, suave.t, vMedida, reg.k || 0]] : (reg.traza || []);
   return { ...reg, ultimo: p, pos, buf, suave, ancla, vDoppler: vd != null ? vd : reg.vDoppler, rechazosV,
-           m, seg, modo, vAhora, segActivo: reg.segActivo + dt, linea };
+           m, seg, modo, vAhora, segActivo: reg.segActivo + dt, linea, traza };
 }
 
 /**
@@ -171,7 +182,8 @@ export function foto(reg, ahoraT) {
 /** Pausa: el siguiente fix vuelve a anclar, asi no se cuenta el hueco. */
 export function pausar(reg) {
   const f = foto(reg);
-  return { ...reg, m: f.m, ultimo: null, pos: null, buf: [], suave: null, ancla: null, vDoppler: null, vAhora: null, modo: null };
+  const traza = reg.traza && reg.traza.length && reg.traza[reg.traza.length - 1] !== null ? [...reg.traza, null] : reg.traza;
+  return { ...reg, m: f.m, ultimo: null, pos: null, buf: [], suave: null, ancla: null, vDoppler: null, vAhora: null, modo: null, traza };
 }
 
 /**

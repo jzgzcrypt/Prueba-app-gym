@@ -29,6 +29,7 @@ import { informeMensual, informePendiente } from "@/domain/progreso/informe";
 import { InformeScreen } from "@/features/informe/InformeScreen";
 import { ritmoDelDia } from "@/domain/running/adaptar";
 import { textoParaLibreta } from "@/domain/running/gps";
+import { simplificar } from "@/domain/running/ruta";
 import { resumenSemana, semanasCumplidas } from "@/domain/progreso/resumen";
 
 export default function App() {
@@ -362,6 +363,18 @@ export default function App() {
   const goToday = () => { setFlatIdx(todayIdx); setScreen("hoy"); setExpandedBlock("main"); };
   const jumpToDay = (wIdx, dIdx) => { setFlatIdx(FLAT_DAYS.findIndex(d => d.weekIdx === wIdx && d.dayIdx === dIdx)); setScreen("hoy"); };
 
+  // Las rutas del mapa ocupan ~4-6 KB cada una. Por si algun dia se juntan
+  // muchas, se quitan las mas viejas antes de acercarse al limite de ~5 MB
+  // del almacenamiento (en un bloque de 11 semanas no pasa).
+  const sinRutasDeMas = (g) => {
+    const out = { ...g };
+    const conRuta = Object.keys(out).filter(k => out[k] && out[k].ruta).sort();
+    while (conRuta.length && JSON.stringify(out).length > 1500000) {
+      const k = conRuta.shift(); out[k] = { ...out[k], ruta: null };
+    }
+    return out;
+  };
+
   // Si anotas un ritmo, esa sesion se da por hecha automaticamente.
   const guardarRitmo = (key, valor) => {
     setRitmoReal(p => Object.assign({}, p, { [key]: valor }));
@@ -488,7 +501,10 @@ export default function App() {
           // Lo del GPS se apunta solo, salvo que ya hubiera algo escrito a mano.
           if (res && res.total && res.total.m >= 50) {
             const series = (res.tramos || []).filter(t => t.ritmo).map(t => Math.round(t.ritmo));
-            setGps(p => Object.assign({}, p, { [activeWorkout]: { m: Math.round(res.total.m), seg: Math.round(res.total.seg), series } }));
+            const aj = ritmoDelDia(wDay, FLAT_DAYS, ritmoReal);
+            const obj = aj ? aj.ritmo : (wDay.ritmo || null);
+            const ruta = simplificar(res.traza);
+            setGps(p => sinRutasDeMas(Object.assign({}, p, { [activeWorkout]: { m: Math.round(res.total.m), seg: Math.round(res.total.seg), series, obj, ruta } })));
             const texto = textoParaLibreta({ day: wDay, ...res });
             if (texto && !(ritmoReal[activeWorkout] || "").trim()) guardarRitmo(activeWorkout, texto);
           }
@@ -633,7 +649,7 @@ export default function App() {
         {screen === "progreso" && (
           <ProgresoScreen medidas={medidas} setMedidas={setMedidas}
             ritmoReal={ritmoReal} weeks={WEEKS} checked={checked} workoutWeights={workoutWeights} workoutReps={workoutReps}
-            onVerInforme={setInformeMes} cuelloChecks={cuelloChecks} painLog={painLog} />
+            onVerInforme={setInformeMes} cuelloChecks={cuelloChecks} painLog={painLog} gps={gps} />
         )}
 
         {screen === "coach" && (

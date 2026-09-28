@@ -6,10 +6,12 @@ import { lecturaPrueba } from "@/domain/progreso/libreta";
 import { parteDelCoach } from "@/domain/progreso/parte";
 import { mesesDelBloque, nombreMes } from "@/domain/progreso/informe";
 import { GraficoPlan } from "@/features/ui/plan-vs-real";
+import { MapaRuta } from "@/features/ui/MapaRuta";
+import { textoTiempo } from "@/domain/running/gps";
 import { tablaRecords } from "@/domain/fuerza/registro";
 import { C, CAT } from "@/design/tokens";
 import { QuickFieldInput, SimpleLineChart } from "@/features/ui/charts";
-export function ProgresoScreen({ medidas, setMedidas, ritmoReal, weeks, checked, workoutWeights, workoutReps, onVerInforme, cuelloChecks, painLog }) {
+export function ProgresoScreen({ medidas, setMedidas, ritmoReal, weeks, checked, workoutWeights, workoutReps, onVerInforme, cuelloChecks, painLog, gps }) {
   const [showForm, setShowForm] = useState(false);
   const [form, setForm] = useState({ peso: "", cintura: "", anchoHombro: "", cadera: "", hombro: "", cadenaPosterior: "", columna: "", caderaMov: "", foto: null });
   const [quickField, setQuickField] = useState(null); // "peso" | "cintura" | "cadera" | "hombro" | "cadenaPosterior" | "columna" | "caderaMov" | null (menu)
@@ -244,6 +246,7 @@ export function ProgresoScreen({ medidas, setMedidas, ritmoReal, weeks, checked,
       <Seccion id="running" titulo="Running" resumen={parte.objetivos[0].valor ? parte.objetivos[0].tendencia : "sin pruebas aún"} abierta={abierta} setAbierta={setAbierta}>
         <GraficoPlan ritmoReal={ritmoReal} />
         <PruebasCompactas ritmoReal={ritmoReal} />
+        <TusSalidas gps={gps} />
       </Seccion>
 
       <Seccion id="cuerpo" titulo="Cuerpo" resumen={parte.objetivos[1].valor || "sin medidas"} abierta={abierta} setAbierta={setAbierta}>
@@ -559,6 +562,31 @@ function PruebasCompactas({ ritmoReal }) {
           </div>
         );
       })}
+    </div>
+  );
+}
+
+/** Las ultimas salidas con GPS: una fila cada una; al tocarla, su mapa. */
+function TusSalidas({ gps }) {
+  const [abierta, setAbierta] = useState(null);
+  const salidas = Object.keys(gps || {}).filter(k => gps[k] && gps[k].ruta).sort().reverse().slice(0, 5)
+    .map(k => ({ k, g: gps[k], day: FLAT_DAYS.find(d => claveDia(d) === k) })).filter(x => x.day);
+  if (!salidas.length) return null;
+  return (
+    <div style={{ marginTop: 14 }}>
+      <div style={{ fontSize: 10.5, fontWeight: 800, color: C.textDim, letterSpacing: 0.6, marginBottom: 6 }}>TUS SALIDAS</div>
+      {salidas.map(({ k, g, day }) => (
+        <div key={k} style={{ borderTop: "1px solid " + C.cardBorder }}>
+          <button className="btn" onClick={() => setAbierta(abierta === k ? null : k)} style={{
+            width: "100%", display: "flex", justifyContent: "space-between", alignItems: "center", minHeight: 44, textAlign: "left" }}>
+            <span style={{ fontSize: 13.5, fontWeight: 700, color: C.text }}>{day.date} · {day.titulo}</span>
+            <span className="mono" style={{ fontSize: 12.5, color: C.textDim, flexShrink: 0, marginLeft: 8 }}>
+              {(g.m / 1000).toFixed(2).replace(".", ",")} km · {textoTiempo(g.seg)} {abierta === k ? "▾" : "›"}
+            </span>
+          </button>
+          {abierta === k && <div style={{ paddingBottom: 12 }}><MapaRuta ruta={g.ruta} objetivo={g.obj} titulo={day.titulo} fecha={day.isoDate} /></div>}
+        </div>
+      ))}
     </div>
   );
 }

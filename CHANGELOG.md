@@ -21,6 +21,21 @@ Todo cambio que se haga en la app se anota aquí. Sin excepciones.
 
 ## [Sin publicar]
 
+### Añadido — El mapa de cada salida (OpenStreetMap)
+- **Al terminar una sesión con GPS, la ruta en el mapa**, coloreada por ritmo:
+  verde a tu ritmo objetivo o más rápido, amarillo algo más lento, gris la
+  recuperación entre series. Salida y llegada marcadas.
+- **En Progreso › Running, "Tus salidas"**: las 5 últimas; al tocar una, su mapa.
+- **Botón GPX**: la ruta para abrirla en Google Earth o subirla a Strava.
+- Mapa de OpenStreetMap sin librerías ni claves (teselas + la ruta en SVG).
+  Sin cobertura no salen las calles, pero la ruta sí.
+
+### Datos
+- `gps[día].ruta = { t0, p: [[lat, lon, s, v×10, k] | null] }` y `gps[día].obj`
+  (ritmo objetivo del día). Ruta simplificada (Douglas-Peucker a 3 m): unos
+  1-6 KB por salida. Si el total pasara de ~1,5 MB se quitan las rutas más
+  viejas. Esquema v4, sin migración.
+
 ### Añadido — Ritmo con GPS dentro de la app (sin Strava)
 - **En las series, el ritmo de ahora en grande** (verde si vas en el
   objetivo, ámbar si te sales), los metros de la serie y, al acabar cada una,

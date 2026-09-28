@@ -67,7 +67,7 @@ export function IntervalTimer({ intervalos, ritmo, resultadoRef }) {
   const guardarResultado = () => {
     if (!resultadoRef) return;
     const lista = Object.keys(medidosRef.current).sort((a, b) => a - b).map(k => medidosRef.current[k]);
-    resultadoRef.current = { tramos: lista, total: foto(gps.regRef.current) };
+    resultadoRef.current = { tramos: lista, total: foto(gps.regRef.current), traza: gps.regRef.current.traza };
   };
   /** Cierra el tramo `i`: lo mide, cortando en este instante exacto. */
   const cerrarTramo = (i) => {
@@ -112,6 +112,9 @@ export function IntervalTimer({ intervalos, ritmo, resultadoRef }) {
   const vibrar = (patron) => {
     try { if (navigator.vibrate) navigator.vibrate(patron); } catch (e) { /* sin vibracion */ }
   };
+
+  // Para el mapa: las series en color, la recuperacion en gris.
+  useEffect(() => { const t = tramos[idx]; gps.marcar(t && CORRIDO.has(t.tipo) ? 0 : 1); }, [idx]);
 
   // Pantalla encendida mientras corre: con ella apagada, Chrome suspende los
   // avisos y deja de dar GPS.

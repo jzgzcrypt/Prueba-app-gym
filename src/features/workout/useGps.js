@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { agregarPunto, nuevoRegistro, pausar as pausarRegistro, PRECISION_MAX_M } from "@/domain/running/gps";
+import { agregarPunto, marcarTramo, nuevoRegistro, pausar as pausarRegistro, PRECISION_MAX_M } from "@/domain/running/gps";
 
 /**
  * El GPS del movil (Chrome lo da con watchPosition; hace falta HTTPS).
@@ -54,12 +54,14 @@ export function useGps() {
     regRef.current = pausarRegistro(regRef.current);
     setReg(regRef.current);
   };
+  /** Marca si ahora se corre (0) o se recupera (1), para el mapa. */
+  const marcar = (k) => { regRef.current = marcarTramo(regRef.current, k); };
   /** Deja de contar y suelta el GPS (bateria). */
   const parar = () => { pausar(); soltar(); setEstado("apagado"); };
 
   useEffect(() => () => soltar(), []);
 
-  return { estado, reg, regRef, iniciar, pausar, parar, escuchar };
+  return { estado, reg, regRef, iniciar, pausar, parar, escuchar, marcar };
 }
 
 /** La linea de estado del GPS, o null si va bien. */
