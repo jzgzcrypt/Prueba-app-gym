@@ -5,17 +5,33 @@ import { C, CAT, R, SP, TAP_MIN, TYPE } from "@/design/tokens";
 import { ICON_NUTRICION } from "@/domain/assets/icons";
 import { CHEAT_MEAL, EQUIVALENCIAS, MENUS, NEAT, TIPS_NUTRICION } from "@/domain/nutricion/menus";
 import { ScreenHeader, SectionHeader } from "@/features/ui/headers";
-import { DiaDeComida } from "@/features/nutricion/DiaDeComida";
+import { TuDia } from "@/features/nutricion/TuDia";
 import { ListaCompra } from "@/features/nutricion/ListaCompra";
 
-export function NutricionScreen({ comida, apuntes = [], cambios, apuntarComida, apuntarVarias,
-                                  deshacerComida, cambiarAlimento, edits,
-                                  guardarComidaDelMenu, restaurarMenu, esHoy,
+// (App aun pasa cambios, apuntarComida, cambiarAlimento, guardarComidaDelMenu y
+// restaurarMenu: eran del menu en gramos, que ya no se pinta.)
+export function NutricionScreen({ comida, apuntes = [], apuntarVarias,
+                                  deshacerComida, edits, esHoy,
                                   diasSemana, inicioSemana, compraMarcada, marcarCompra,
                                   comidasFuera, marcarFuera }) {
   const [menuAbierto, setMenuAbierto] = useState(MENUS[0].id);
   const [diaAbierto, setDiaAbierto] = useState("entreno");
   const [verTips, setVerTips] = useState(false);
+  // Lo de consulta va plegado: lo diario es apuntar y ver la cena.
+  const [plegable, setPlegable] = useState(null);
+  const Plegable = ({ id, titulo, children }) => (
+    <div style={{ padding: "0 " + SP.xl + "px", marginBottom: SP.sm }}>
+      <button className="btn" onClick={() => setPlegable(plegable === id ? null : id)} style={{
+        width: "100%", textAlign: "left", padding: "12px 14px", minHeight: TAP_MIN,
+        background: C.card, border: "1px solid " + C.cardBorder, borderRadius: R.xl,
+        display: "flex", justifyContent: "space-between", alignItems: "center",
+      }}>
+        <span style={{ ...TYPE.cardTitle, color: C.text }}>{titulo}</span>
+        <span style={{ color: C.textFaint, fontSize: 14 }}>{plegable === id ? "–" : "+"}</span>
+      </button>
+      {plegable === id && <div style={{ margin: SP.sm + "px -" + SP.xl + "px 0" }}>{children}</div>}
+    </div>
+  );
 
   const menu = MENUS.find(m => m.id === menuAbierto) || MENUS[0];
   const dia = menu.dias.find(d => d.tipo === diaAbierto) || menu.dias[0];
@@ -26,23 +42,24 @@ export function NutricionScreen({ comida, apuntes = [], cambios, apuntarComida, 
       <ScreenHeader icon={ICON_NUTRICION} title="NUTRICIÓN" />
 
       {/* ═══ HOY — lo único que se toca a diario: apuntar y que la cena cuadre ═══ */}
-      {comida && apuntarComida && (
-        <DiaDeComida comida={comida} apuntes={apuntes} cambios={cambios}
-                     apuntarComida={apuntarComida} apuntarVarias={apuntarVarias}
-                     deshacerComida={deshacerComida} cambiarAlimento={cambiarAlimento}
-                     edits={edits} guardarComidaDelMenu={guardarComidaDelMenu}
-                     restaurarMenu={restaurarMenu} esHoy={esHoy} />
+      {comida && apuntarVarias && (
+        <TuDia comida={comida} apuntes={apuntes} apuntarVarias={apuntarVarias}
+               deshacerComida={deshacerComida} esHoy={esHoy} />
       )}
+
+      <div style={{ ...TYPE.sectionLabel, color: C.textDim, padding: SP.lg + "px " + SP.xl + "px " + SP.sm + "px" }}>Para consultar</div>
 
       {/* ═══ LA COMPRA — sale sola del menú ═══ */}
       {diasSemana && marcarCompra && (
-        <ListaCompra dias={diasSemana} inicioSemana={inicioSemana} edits={edits}
-                     marcado={compraMarcada} marcarCompra={marcarCompra}
-                     fuera={comidasFuera} marcarFuera={marcarFuera} />
+        <Plegable id="compra" titulo="La compra de la semana">
+          <ListaCompra dias={diasSemana} inicioSemana={inicioSemana} edits={edits}
+                       marcado={compraMarcada} marcarCompra={marcarCompra}
+                       fuera={comidasFuera} marcarFuera={marcarFuera} />
+        </Plegable>
       )}
 
       {/* ═══ LOS MENÚS REALES ═══ */}
-      <SectionHeader>Tus menús</SectionHeader>
+      <Plegable id="menus" titulo="Tus menús de 2022 y equivalencias">
       <div style={{ padding: "0 " + SP.xl + "px " + SP.md + "px" }}>
         <div style={{ ...TYPE.body, color: C.textDim, marginBottom: SP.md, lineHeight: 1.5 }}>
           Los programas que ya seguiste. Están como referencia, no como prescripción: los escribió un dietista para
@@ -115,7 +132,10 @@ export function NutricionScreen({ comida, apuntes = [], cambios, apuntarComida, 
         </div>
       </div>
 
+      </Plegable>
+
       {/* ═══ PASOS ═══ */}
+      <Plegable id="mas" titulo="Pasos, comida libre y trucos">
       <SectionHeader>Los pasos</SectionHeader>
       <div style={{ padding: "0 " + SP.xl + "px " + SP.md + "px" }}>
         <div style={{ background: C.card, border: "1px solid " + C.cardBorder, borderRadius: R.xl, padding: "14px 16px" }}>
@@ -160,6 +180,8 @@ export function NutricionScreen({ comida, apuntes = [], cambios, apuntarComida, 
           </div>
         )}
       </div>
+      </Plegable>
+      <div style={{ height: 30 }} />
     </div>
   );
 }

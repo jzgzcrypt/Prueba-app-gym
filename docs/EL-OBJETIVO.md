@@ -173,6 +173,9 @@ Están aquí para no repetirlos.
 
 ### Lo siguiente, por orden de lo que cuesta no hacerlo
 
+Hecho el 28 de septiembre: **nutrición IIFYM** (apuntas como caiga y la cena
+se cuadra a ojo: palmas, puños y pulgares).
+
 Hecho el 28 de septiembre: **el mapa de cada salida** (OpenStreetMap,
 coloreado por ritmo, y GPX).
 

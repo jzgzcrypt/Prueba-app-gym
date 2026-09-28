@@ -21,6 +21,24 @@ Todo cambio que se haga en la app se anota aquí. Sin excepciones.
 
 ## [Sin publicar]
 
+### Cambiado — Nutrición es IIFYM: dices lo que comes y la cena se cuadra sola
+- **Fuera el menú de 6 comidas pesado al gramo.** Ahora: Desayuno, Comida y
+  Merienda se apuntan como caigan —«lo de siempre» de un toque, escrito en tus
+  palabras («macarrones con tomate», «pizza 800 kcal») o señalando en la
+  cantina con poco/normal/mucho— y la **Cena cuadra el día**.
+- **La cena, a ojo**: lo que queda del día en manos — 🖐 palmas de proteína,
+  ✊ puños de hidrato, 🥦 puños de verdura, 👍 pulgares de grasa (método de
+  Precision Nutrition). «Ver en gramos» para quien quiera. Proteína primero,
+  verdura siempre, el hidrato es la palanca y la grasa cierra. Si el día ya va
+  lleno: «proteína y verdura, mañana normal», sin culpa.
+- **«Cené esto»**: un toque y el día queda apuntado (en la prueba: 2088/2100
+  kcal y 167/165 g de proteína en un día de RECORTAR con cantina).
+- **En HOY**, la tarjeta de comida dice ya la cena: «Cena: 2 palmas · 1 puño ·
+  2 puños · ½ pulgar».
+- La compra, los menús de 2022, pasos y trucos siguen, plegados abajo.
+- Lo guardado no cambia: mismos apuntes en `comidasLog`; «lo de siempre» es
+  una preferencia del móvil (`programa7k:siempre`).
+
 ### Cambiado — GPS: listo antes de salir, avisos claros y nada se pierde
 - **El GPS empieza a buscar al abrir la sesión**, no al pulsar EMPEZAR: sale
   "GPS listo · ±5 m" y los primeros metros ya cuentan bien.

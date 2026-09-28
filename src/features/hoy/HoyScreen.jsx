@@ -18,7 +18,8 @@ import { progresoMagia } from "@/domain/habilidades/magia";
 import { WeekDots } from "@/features/ui/WeekDots";
 import { destinoDe, llegadasA } from "@/lib/estado/mover-sesion";
 import { PROTEINA_DIARIA } from "@/domain/nutricion/dias";
-import { macrosDelDia } from "@/domain/nutricion/iifym";
+import { macrosDelDia, restoDelDia } from "@/domain/nutricion/iifym";
+import { platoCena, textoPorcion } from "@/domain/nutricion/plato";
 export function HoyScreen(props) {
   const { day, dayKey, isToday, flatIdx, goDay, goToday, isFuerzaDay, isRunDay, isCompromisoDay, mov,
           comida, vaciarDia, cosasEnElDia, apuntesComida,
@@ -29,6 +30,10 @@ export function HoyScreen(props) {
   // Lo que llevas comido hoy, para que la tira de comida diga algo util en
   // vez de repetir siempre el mismo numero.
   const llevaComido = Math.round(macrosDelDia(apuntesComida).kcal);
+  // La respuesta a "¿que ceno?" sin entrar en Nutricion: el plato a ojo.
+  const cenado = (apuntesComida || []).some(ap => ap && ap.comida === "cena");
+  const cena = comida && llevaComido > 0 && !cenado ? platoCena(restoDelDia(comida.macros, apuntesComida)).porciones : null;
+  const textoCena = cena ? ["prot", "hc", "verdura", "grasa"].filter(k => cena[k] > 0).map(k => textoPorcion(cena[k], k)).join(" · ") : null;
 
   const frase = getFraseHoy(flatIdx);
   // Cuanto falta para el dia del objetivo. Es el dato que de verdad empuja.
@@ -163,7 +168,7 @@ export function HoyScreen(props) {
                   <div style={{ ...TYPE.bodyStrong, color: C.text }}>
                     {llevaComido} de {comida.macros.kcal} kcal · quedan {comida.macros.kcal - llevaComido}
                   </div>
-                  <div style={{ fontSize: 11.5, color: C.textDim, marginTop: 1 }}>Toca para ver qué cenar</div>
+                  <div style={{ fontSize: 11.5, color: C.textDim, marginTop: 1 }}>{textoCena ? "Cena: " + textoCena : cenado ? "Día apuntado" : "Toca para ver qué cenar"}</div>
                 </>
               ) : (
                 <>
