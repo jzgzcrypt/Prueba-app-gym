@@ -21,6 +21,16 @@ Todo cambio que se haga en la app se anota aquí. Sin excepciones.
 
 ## [Sin publicar]
 
+### Añadido — Pídele idea a tu IA para la merienda o la cena
+- En Merienda y en Cena, **«💡 Pídele idea a tu IA»** copia un mensaje con lo
+  que te queda del día (tipo de día, lo que llevas comido, kcal y macros
+  objetivo; en la cena también el plato a ojo) y pide UNA propuesta fácil de
+  casa en el formato de siempre. Si te la comes, pegas la respuesta con «Con
+  tu IA» y queda apuntada. También «Abrir en Claude / ChatGPT» con el mensaje
+  ya puesto.
+- La merienda deja sitio a la cena: como mucho una cuarta parte de lo que
+  queda (tope 300 kcal), con 15-30 g de proteína.
+
 ### Añadido — Apuntar comida con tu IA (copiar y pegar, sin API)
 - En cada comida, **«Con tu IA»**: le dices (o le mandas foto de) lo que has
   comido a tu Claude o ChatGPT, copias su respuesta y la pegas. La IA entiende

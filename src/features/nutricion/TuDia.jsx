@@ -16,7 +16,7 @@ import { PLATO_CANTINA, RACIONES, SECCIONES_CANTINA, macrosPlato, platosDe } fro
 import { COMIDAS_RAPIDAS, macrosDelDia, macrosRapida, restoDelDia } from "@/domain/nutricion/iifym";
 import { interpretar, totalDe } from "@/domain/nutricion/escribir";
 import { PORCION, apunteDePlato, enGramos, platoCena, textoPorcion } from "@/domain/nutricion/plato";
-import { INSTRUCCIONES_IA, enlacesIA, leerRespuestaIA, totalLeido } from "@/domain/nutricion/pegar";
+import { INSTRUCCIONES_IA, enlacesIA, leerRespuestaIA, promptRecomendacion, totalLeido } from "@/domain/nutricion/pegar";
 
 const CLAVE_IA = "programa7k:ia-instrucciones";
 const leerIA = () => { try { return window.localStorage.getItem(CLAVE_IA) === "si"; } catch { return false; } };
@@ -202,6 +202,41 @@ function ConIA({ comidaId, apuntarVarias, onCerrar, onEscribir }) {
   );
 }
 
+/**
+ * Pedirle a tu IA una idea para la merienda o la cena con lo que queda del
+ * dia. Copia el mensaje (o abre la IA con el ya puesto); la IA contesta en el
+ * formato de siempre, y si te lo comes lo pegas con «Con tu IA».
+ */
+function PedirIdea({ que, resto, tipoDia, comido, plato }) {
+  const [hecho, setHecho] = useState(null);
+  const texto = promptRecomendacion({ que, resto, tipoDia, comido, plato });
+  const enlaces = enlacesIA(texto);
+  const copiar = async () => {
+    try { await navigator.clipboard.writeText(texto); setHecho("copiado"); } catch { setHecho("abrir"); }
+  };
+  const enlace = { ...boton(false), display: "flex", alignItems: "center", justifyContent: "center", textDecoration: "none", minHeight: 36, fontSize: 12.5 };
+  return (
+    <div data-idea={que} style={{ marginTop: SP.sm }}>
+      <button className="btn" onClick={copiar} style={{ fontSize: 12.5, fontWeight: 800, color: C.text, minHeight: 34, padding: 0 }}>
+        💡 Pídele idea a tu IA para {que === "cena" ? "la cena" : "la merienda"}
+      </button>
+      {hecho && (
+        <div style={{ background: C.surfaceMuted, borderRadius: R.md, padding: "9px 11px", marginTop: 4 }}>
+          <div style={{ fontSize: 12, color: C.textDim, lineHeight: 1.45 }}>
+            {hecho === "copiado"
+              ? "Copiado con lo que te queda del día. Pégalo en tu chat «Macros». Si te lo comes, copia su respuesta y apúntala con «Con tu IA»."
+              : "No se pudo copiar: ábrelo directamente en tu IA."}
+          </div>
+          <div style={{ display: "flex", gap: SP.sm, marginTop: 7 }}>
+            <a href={enlaces.claude} target="_blank" rel="noreferrer" style={enlace}>Abrir en Claude</a>
+            <a href={enlaces.chatgpt} target="_blank" rel="noreferrer" style={enlace}>Abrir en ChatGPT</a>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
 /** La cantina: tocas lo que ha caido y dices si fue poco, normal o mucho. */
 function Cantina({ apuntarVarias, onCerrar }) {
   const [seccion, setSeccion] = useState(SECCIONES_CANTINA[0]);
@@ -260,6 +295,9 @@ export function TuDia({ comida, apuntes, apuntarVarias, deshacerComida, esHoy })
   const sueltos = lista.map((ap, i) => ({ ap, i })).filter(({ ap }) => ap && !EN_TARJETAS.has(ap.comida));
   const cenaApuntada = de("cena");
   const plato = platoCena(resto);
+  const comidoTextos = lista.filter(Boolean).map(textoApunte);
+  const platoTexto = ["prot", "hc", "verdura", "grasa"].filter(k => plato.porciones[k] > 0)
+    .map(k => textoPorcion(plato.porciones[k], k) + " de " + PORCION[k].nombre.toLowerCase()).join(", ");
   const cerrar = () => setAbierto(null);
   const apuntadoTexto = (aps) => {
     const m = macrosDelDia(aps);
@@ -319,6 +357,9 @@ export function TuDia({ comida, apuntes, apuntarVarias, deshacerComida, esHoy })
                   {s.cantina && <button className="btn" onClick={() => setAbierto(s.id + ":cantina")} style={boton(!rapida)}>Cantina</button>}
                   <button className="btn" onClick={() => setAbierto(s.id + ":ia")} style={boton(false)}>Con tu IA</button>
                 </div>
+                {s.id === "merienda" && (
+                  <PedirIdea que="merienda" resto={resto} tipoDia={comida.id} comido={comidoTextos} />
+                )}
                 {eligiendoSiempre === s.id ? (
                   <div style={{ display: "flex", gap: 5, flexWrap: "wrap", marginTop: SP.sm }}>
                     {COMIDAS_RAPIDAS.filter(c => c.id !== "picoteo" && c.id !== "cafe").map(c => (
@@ -383,6 +424,7 @@ export function TuDia({ comida, apuntes, apuntarVarias, deshacerComida, esHoy })
               <button className="btn" onClick={() => apuntarVarias([apunteDePlato(plato)])} style={boton(true)}>Cené esto</button>
               <button className="btn" onClick={() => setAbierto("cena:ia")} style={boton(false)}>Cené otra cosa</button>
             </div>
+            <PedirIdea que="cena" resto={resto} tipoDia={comida.id} comido={comidoTextos} plato={platoTexto} />
           </>
         )}
       </div>

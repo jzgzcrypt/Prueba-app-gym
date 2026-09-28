@@ -184,3 +184,36 @@ export function enlacesIA(texto) {
     chatgpt: "https://chatgpt.com/" + (q ? "?q=" + q : ""),
   };
 }
+
+/**
+ * El mensaje para pedirle a tu IA que te proponga la merienda o la cena con
+ * lo que queda del dia. Pide la respuesta en el mismo formato de siempre: asi,
+ * si te lo comes, la copias y la pegas tal cual.
+ *
+ * La merienda no se come el dia: se lleva como mucho una cuarta parte de lo
+ * que queda (tope 300 kcal), con proteina, para que la cena siga cuadrando.
+ */
+export function promptRecomendacion({ que, resto, tipoDia, comido = [], plato = null }) {
+  const r = (x) => Math.max(0, Math.round(x));
+  const esCena = que === "cena";
+  const obj = esCena ? resto : {
+    kcal: Math.min(300, resto.kcal * 0.25), prot: Math.max(15, Math.min(30, resto.prot * 0.25)),
+    hc: resto.hc * 0.25, grasa: resto.grasa * 0.2,
+  };
+  const lineas = [
+    `Propónme ${esCena ? "la cena" : "la merienda"} de hoy.`,
+    `Hoy es día de ${tipoDia === "comer" ? "COMER (entreno fuerte: hidratos bien)" : "RECORTAR (sin sesión intensa: déficit)"}.`,
+    comido.length ? "Llevo comido: " + comido.join("; ") + "." : "Aún no he apuntado nada más hoy.",
+    `Tiene que acercarse a: ${r(obj.kcal)} kcal, ${r(obj.prot)} g de proteína, ${r(obj.hc)} g de hidratos y ${r(obj.grasa)} g de grasa` +
+      (esCena ? " (es lo que me queda del día)." : " (dejando sitio para la cena)."),
+  ];
+  if (esCena && plato) lineas.push("A ojo me sale: " + plato + ".");
+  if (esCena && resto.kcal < 350) lineas.push("Me queda poco: algo ligero, sobre todo proteína y verdura.");
+  lineas.push(
+    `Algo normal de casa, fácil${esCena ? " y en menos de 20 minutos" : ""}, con ingredientes de supermercado en España. La proteína es lo más importante.`,
+    "Dame UNA propuesta y responde con el formato de siempre, una línea por alimento con su cantidad en el nombre:",
+    "Nombre (cantidad) | kcal | proteína g | hidratos g | grasa g",
+    "Sin totales ni explicaciones.",
+  );
+  return lineas.join("\n");
+}

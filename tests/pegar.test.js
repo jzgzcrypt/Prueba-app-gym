@@ -63,3 +63,21 @@ test("enlaces para abrir la IA con el texto puesto", () => {
   assert.equal(enlacesIA("tostada y café").claude, "https://claude.ai/new?q=tostada%20y%20caf%C3%A9");
   assert.equal(enlacesIA("").chatgpt, "https://chatgpt.com/");
 });
+
+import { promptRecomendacion } from "../src/domain/nutricion/pegar.js";
+
+test("el mensaje para que la IA proponga la cena lleva lo que queda y pide el formato de siempre", () => {
+  const t = promptRecomendacion({ que: "cena", resto: { kcal: 620, prot: 48, hc: 55, grasa: 18 }, tipoDia: "recortar",
+    comido: ["Porridge de siempre", "Fabada asturiana"], plato: "2 palmas · 1 puño · 2 puños · ½ pulgar" });
+  assert.match(t, /la cena/);
+  assert.match(t, /RECORTAR/);
+  assert.match(t, /620 kcal, 48 g de proteína, 55 g de hidratos y 18 g de grasa/);
+  assert.match(t, /Porridge de siempre; Fabada asturiana/);
+  assert.match(t, /Nombre \(cantidad\) \| kcal/);
+});
+
+test("la merienda deja sitio a la cena", () => {
+  const t = promptRecomendacion({ que: "merienda", resto: { kcal: 1400, prot: 90, hc: 150, grasa: 40 }, tipoDia: "comer" });
+  assert.match(t, /300 kcal/, "tope de 300 kcal");
+  assert.match(t, /dejando sitio para la cena/);
+});
