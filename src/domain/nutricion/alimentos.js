@@ -20,7 +20,9 @@
  *          se parte en tres, el arroz si se puede servir de cinco en cinco)
  */
 
-/** @typedef {{id:string,nombre:string,grupo:string,kcal:number,prot:number,hc:number,grasa:number,paso?:number,unidad?:{nombre:string,g:number},nota?:string}} Alimento */
+/** @typedef {{id:string,nombre:string,grupo:string,kcal:number,prot:number,hc:number,grasa:number,paso?:number,unidad?:{nombre:string,g:number},racion?:number,nota?:string}} Alimento */
+// `racion`: lo que lleva un plato normal cuando no dices cuanto ("tostada de
+// jamon" son dos lonchas, no 100 g de jamon).
 
 /** @type {Alimento[]} */
 export const ALIMENTOS = [
@@ -36,7 +38,7 @@ export const ALIMENTOS = [
   { id: "gambas", nombre: "Gambas o langostinos", grupo: "proteina", kcal: 85, prot: 18, hc: 0, grasa: 1, paso: 10 },
   { id: "huevo", nombre: "Huevo", grupo: "proteina", kcal: 130, prot: 12.5, hc: 0.7, grasa: 9, paso: 60, unidad: { nombre: "huevo", g: 60 } },
   { id: "clara", nombre: "Clara de huevo", grupo: "proteina", kcal: 48, prot: 11, hc: 0.7, grasa: 0.2, paso: 33, unidad: { nombre: "clara", g: 33 } },
-  { id: "jamon_serrano", nombre: "Jamón serrano", grupo: "proteina", kcal: 240, prot: 31, hc: 0, grasa: 12, paso: 10 },
+  { id: "jamon_serrano", nombre: "Jamón serrano", grupo: "proteina", kcal: 240, prot: 31, hc: 0, grasa: 12, paso: 10, unidad: { nombre: "loncha", g: 15 }, racion: 30 },
   { id: "pavo_lonchas", nombre: "Pavo en lonchas", grupo: "proteina", kcal: 100, prot: 18, hc: 1.5, grasa: 2.5, paso: 10 },
   { id: "queso_batido", nombre: "Queso fresco batido 0%", grupo: "proteina", kcal: 47, prot: 8, hc: 4, grasa: 0.2, paso: 25 },
   { id: "yogur_proteico", nombre: "Yogur proteico", grupo: "proteina", kcal: 60, prot: 10, hc: 4, grasa: 0.3, paso: 150, unidad: { nombre: "yogur", g: 150 } },
@@ -64,7 +66,7 @@ export const ALIMENTOS = [
   { id: "calabacin", nombre: "Calabacín", grupo: "verdura", kcal: 17, prot: 1.2, hc: 2, grasa: 0.3, paso: 50 },
   { id: "champinones", nombre: "Champiñones", grupo: "verdura", kcal: 22, prot: 3, hc: 1, grasa: 0.3, paso: 50 },
   { id: "pimiento", nombre: "Pimiento", grupo: "verdura", kcal: 26, prot: 1, hc: 5, grasa: 0.3, paso: 50 },
-  { id: "tomate", nombre: "Tomate", grupo: "verdura", kcal: 18, prot: 0.9, hc: 3.5, grasa: 0.2, paso: 50 },
+  { id: "tomate", nombre: "Tomate", grupo: "verdura", kcal: 18, prot: 0.9, hc: 3.5, grasa: 0.2, paso: 50, racion: 60 },
 
   // ─── FRUTA ─────────────────────────────────────────────────────────────
   { id: "fruta", nombre: "Fruta de temporada", grupo: "fruta", kcal: 55, prot: 0.7, hc: 12, grasa: 0.2, paso: 25 },
@@ -79,7 +81,10 @@ export const ALIMENTOS = [
 
   // ─── EXTRAS ────────────────────────────────────────────────────────────
   { id: "bebida_almendras", nombre: "Bebida de almendras zero", grupo: "extra", kcal: 13, prot: 0.5, hc: 0.1, grasa: 1.1, paso: 50 },
-  { id: "leche_desnatada", nombre: "Leche desnatada", grupo: "extra", kcal: 34, prot: 3.4, hc: 4.8, grasa: 0.2, paso: 50 },
+  { id: "leche_desnatada", nombre: "Leche desnatada", grupo: "extra", kcal: 34, prot: 3.4, hc: 4.8, grasa: 0.2, paso: 50, racion: 150 },
+  { id: "leche_semi", nombre: "Leche semidesnatada", grupo: "extra", kcal: 46, prot: 3.3, hc: 4.8, grasa: 1.6, paso: 50, racion: 150 },
+  { id: "leche_entera", nombre: "Leche entera", grupo: "extra", kcal: 63, prot: 3.2, hc: 4.7, grasa: 3.6, paso: 50, racion: 150 },
+  { id: "cafe", nombre: "Café", grupo: "extra", kcal: 2, prot: 0.1, hc: 0, grasa: 0, paso: 30, racion: 40 },
 ];
 
 /** @type {Record<string, Alimento>} */

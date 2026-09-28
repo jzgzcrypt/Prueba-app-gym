@@ -69,7 +69,9 @@ const SINONIMOS = {
   fruta: "fruta", manzana: "fruta", naranja: "fruta", pera: "fruta",
   platano: "platano", frutos: "frutos_secos", almendras: "frutos_secos",
   nueces: "frutos_secos", cacahuete: "crema_cacahuete",
-  aceite: "aceite", aguacate: "aguacate", leche: "leche_desnatada",
+  aceite: "aceite", aguacate: "aguacate", leche: "leche_semi",
+  desnatada: "leche_desnatada", semidesnatada: "leche_semi", semi: "leche_semi", entera: "leche_entera",
+  cafe: "cafe", cortado: "cafe", tostadas: "pan_molde", loncha: "jamon_serrano", lonchas: "jamon_serrano",
 };
 
 /** El diccionario contra el que se reconoce: alimentos, platos de cantina y
@@ -77,8 +79,11 @@ const SINONIMOS = {
  *  ("macarrones con tomate" gana a "pasta"). */
 function construirDiccionario() {
   const entradas = [];
+  // Tus comidas de siempre (porridge, tostadas con aguacate…) son combinados
+  // tuyos: solo cuentan si los nombras enteros. "Tostada" no es "tostadas con
+  // aguacate", y colarlo es apuntar algo que no has escrito.
   for (const c of COMIDAS_RAPIDAS) {
-    entradas.push({ tipo: "plato", id: c.id, nombre: c.nombre, tokens: normalizar(c.nombre).split(" "),
+    entradas.push({ tipo: "plato", entera: true, id: c.id, nombre: c.nombre, tokens: normalizar(c.nombre).split(" "),
                     macros: { kcal: c.kcal, prot: c.prot, hc: c.hc, grasa: c.grasa } });
   }
   for (const p of PLATOS_CANTINA) {
@@ -209,6 +214,7 @@ function reconocerEntre(tokens, pesado) {
     if (!aciertos) continue;
     // Se premia cubrir la entrada entera: "macarrones con tomate" gana a "pasta".
     const utiles = e.tokens.filter(t => !VACIAS.has(t)).length || 1;
+    if (e.entera && aciertos < utiles) continue;
     const punto = aciertos / utiles + aciertos * 0.35 + (e.tipo === "plato" ? (pesado ? -0.7 : 0.15) : 0);
     if (punto > mejorPunto) { mejorPunto = punto; mejor = e; mejorUsados = usados; }
   }
@@ -359,6 +365,7 @@ export function interpretar(texto) {
 function porDefecto(id) {
   const a = ALIMENTO[id];
   if (!a) return 100;
+  if (a.racion) return a.racion;
   if (a.unidad) return a.unidad.g;
   if (a.grupo === "verdura") return 250;
   if (a.grupo === "grasa") return 15;
@@ -385,6 +392,9 @@ function linea(crudo, encontrado, macros, confianza, gramos) {
   return {
     crudo,
     nombre: encontrado ? encontrado.nombre : limpiarNombre(crudo),
+    // Lo que TU escribiste, que es lo que se enseña y se guarda. `nombre` es
+    // lo que se ha entendido, y va debajo, en pequeño.
+    escrito: limpiarNombre(crudo),
     id: encontrado ? encontrado.id : null,
     gramos: gramos || null,
     confianza,

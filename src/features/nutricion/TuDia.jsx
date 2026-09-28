@@ -82,7 +82,7 @@ function Escribir({ comidaId, apuntarVarias, onCerrar, placeholder }) {
   const apuntar = () => {
     const buenas = lineas.filter(l => l.macros.kcal > 0);
     if (!buenas.length) return;
-    apuntarVarias(buenas.map(l => ({ comida: comidaId || undefined, origen: "texto", texto: l.nombre,
+    apuntarVarias(buenas.map(l => ({ comida: comidaId || undefined, origen: "texto", texto: l.escrito || l.nombre,
       kcal: l.macros.kcal, prot: l.macros.prot, hc: l.macros.hc, grasa: l.macros.grasa })));
     onCerrar();
   };
@@ -95,10 +95,15 @@ function Escribir({ comidaId, apuntarVarias, onCerrar, placeholder }) {
       {lineas.length > 0 && (
         <div style={{ marginTop: 6, display: "flex", flexDirection: "column", gap: 3 }}>
           {lineas.map((l, i) => (
-            <div key={i} style={{ display: "flex", justifyContent: "space-between", fontSize: 12.5,
-              color: l.confianza === "sin-entender" ? C.amber : C.textDim }}>
-              <span>{l.nombre}{l.confianza === "sin-entender" ? " — no lo sé: añade las kcal (ej. «450 kcal»)" : ""}</span>
-              {l.macros.kcal > 0 && <span className="mono">{r(l.macros.kcal)} kcal · {r(l.macros.prot)} p</span>}
+            <div key={i} style={{ display: "flex", justifyContent: "space-between", gap: 10, fontSize: 13,
+              color: l.confianza === "sin-entender" ? C.amber : C.text }}>
+              <span style={{ minWidth: 0 }}>
+                {l.escrito || l.nombre}
+                {l.confianza === "sin-entender"
+                  ? <span style={{ display: "block", fontSize: 11.5 }}>No lo conozco: añade las kcal (ej. «450 kcal»)</span>
+                  : l.nombre && l.nombre !== l.escrito && <span style={{ display: "block", fontSize: 11.5, color: C.textFaint }}>≈ {l.nombre.toLowerCase()}</span>}
+              </span>
+              {l.macros.kcal > 0 && <span className="mono" style={{ flexShrink: 0, color: C.textDim, fontSize: 12 }}>{r(l.macros.kcal)} kcal · {r(l.macros.prot)} p</span>}
             </div>
           ))}
         </div>

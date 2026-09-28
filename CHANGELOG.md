@@ -21,6 +21,18 @@ Todo cambio que se haga en la app se anota aquí. Sin excepciones.
 
 ## [Sin publicar]
 
+### Arreglado — Al escribir lo comido, ya no pone cosas que no has escrito
+- "Tostada de jamón" se leía como "Tostadas con aguacate" (tu desayuno de
+  siempre, 400 kcal) porque bastaba con coincidir en una palabra. Las comidas
+  de siempre ahora solo cuentan si las nombras enteras.
+- Se enseña **lo que tú escribiste**; lo que se ha entendido va debajo, en
+  pequeño ("≈ tomate + jamón serrano + pan de molde"). Y eso es lo que se guarda.
+- Raciones realistas cuando no dices cuánto: el jamón de una tostada son dos
+  lonchas (30 g), no 100 g; el tomate rallado 60 g; la leche de un café 150 ml.
+- Nuevos: café, leche semidesnatada y entera, loncha.
+- Ejemplo real: "café con leche semidesnatada + tostada de jamón con tomate"
+  pasa de 724 kcal a 228.
+
 ### Cambiado — Nutrición es IIFYM: dices lo que comes y la cena se cuadra sola
 - **Fuera el menú de 6 comidas pesado al gramo.** Ahora: Desayuno, Comida y
   Merienda se apuntan como caigan —«lo de siempre» de un toque, escrito en tus

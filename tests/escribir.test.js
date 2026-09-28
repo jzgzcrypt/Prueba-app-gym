@@ -142,3 +142,14 @@ test("reconocer devuelve null cuando no hay nada que reconocer", () => {
   assert.equal(reconocer("   de la y "), null);
   assert.deepEqual(reconocerTodos(""), []);
 });
+
+test("no cuela lo que no has escrito: una tostada no es 'tostadas con aguacate'", () => {
+  const l = interpretar("Café con leche semidesnatada\nTostada de jamón con tomate rallado");
+  assert.equal(l[0].escrito, "Café con leche semidesnatada");
+  assert.ok(!/aguacate/i.test(l[1].nombre), l[1].nombre);
+  assert.ok(/semidesnatada/i.test(l[0].nombre), l[0].nombre);
+  const kcal = l[0].macros.kcal + l[1].macros.kcal;
+  assert.ok(kcal > 150 && kcal < 350, "un desayuno de cafe y tostada: " + kcal);
+  // Tus comidas de siempre, solo si las nombras enteras.
+  assert.equal(interpretar("tostadas con aguacate")[0].id, "tostadas");
+});
