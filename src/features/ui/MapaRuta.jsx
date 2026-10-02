@@ -1,8 +1,8 @@
 "use client";
 
 import { useEffect, useId, useRef, useState } from "react";
-import { C, CAT } from "@/design/tokens";
-import { aGpx, flechas, marcasKm, proyectar, remuestrear, suavizar, tramosPorColor } from "@/domain/running/ruta";
+import { C } from "@/design/tokens";
+import { aGpx, flechas, marcasKm, proyectar, remuestrear, suavizar, tramosCorridos, tramosPorColor } from "@/domain/running/ruta";
 import { textoTiempo } from "@/domain/running/gps";
 import { PALETAS, recolorear } from "@/domain/running/teselas";
 
@@ -26,9 +26,9 @@ const ANCHO = 360, ALTO = 260, FRANJA = 54;
 const COLOR = {
   objetivo: C.ok,        // a tu ritmo o mas rapido
   cerca: "#D39B12",      // hasta 30 s/km mas lento
-  suave: CAT.running,    // mas lento
-  corre: CAT.running,    // rodaje sin ritmo objetivo
-  recupera: "#8A8A87",   // trote o caminar entre series
+  suave: "#F2542D",      // mas lento
+  corre: "#F2542D",      // corriendo, sin ritmo objetivo
+  recupera: "#A8A39A",   // trote o caminar entre series
 };
 // Arena: callejero en tonos crema, ruta naranja con sombra suave.
 const E = {
@@ -36,7 +36,7 @@ const E = {
   linea: "#F2542D", km: { fondo: "#FFFFFF", borde: "#F2542D", texto: "#F2542D" },
   panel: "rgba(255,255,255,.82)", tinta: "#2B2622", tenue: "#8C8378",
 };
-const LEYENDA = { objetivo: "a tu ritmo", cerca: "algo más lento", suave: "suave", recupera: "recuperación" };
+const LEYENDA = { objetivo: "a tu ritmo", cerca: "algo más lento", suave: "suave", corre: "corriendo", recupera: "recuperación" };
 
 /**
  * Una tesela de OSM repintada con la paleta del estilo. Se pide con CORS para
@@ -97,10 +97,11 @@ export function MapaRuta({ ruta, objetivo, titulo, fecha, rutaCompleta, datos })
   const linea = (pts) => pts.map(p => p[0].toFixed(1) + "," + p[1].toFixed(1)).join(" ");
   // Cada tramo en pixeles y con las esquinas redondeadas.
   const curvas = tramos.map(t => ({ cat: t.cat, puntos: suavizar(remuestrear(t.puntos.map(q => { const p = m.punto(q); return [p.x, p.y]; }), 9), 3) }));
-  // Con series (varios ritmos), el color dice el ritmo; si no, el avance de la salida.
-  const porRitmo = cats.length > 1;
-  const trazos = porRitmo ? curvas.map(c => ({ color: COLOR[c.cat], puntos: c.puntos }))
-    : curvas.map(c => ({ color: E.linea, puntos: c.puntos }));
+  // Con tramos distintos (series y recuperacion, o ritmos), cada uno de su color.
+  const porRitmo = new Set(tramos.map(t => t.cat)).size > 1;
+  const trazos = curvas.map(c => ({ cat: c.cat, color: porRitmo ? COLOR[c.cat] : E.linea, puntos: c.puntos }));
+  // El ritmo de cada tramo corrido, en sesiones con recuperaciones.
+  const corridos = tramosCorridos(ruta);
   // Los km, en proporcion a la distancia medida: el "2" cae donde se contaron 2 km.
   const marcas = marcasKm(ruta, conDatos ? datos.m : null);
   const sentido = flechas(ruta, 3).map(f => {
@@ -137,7 +138,7 @@ export function MapaRuta({ ruta, objetivo, titulo, fecha, rutaCompleta, datos })
               strokeWidth="8" strokeLinecap="round" strokeLinejoin="round" />
           ))}
           {trazos.map((t, i) => (
-            <polyline key={i} points={linea(t.puntos)} fill="none" stroke={t.color}
+            <polyline key={i} data-cat={t.cat} points={linea(t.puntos)} fill="none" stroke={t.color}
               strokeWidth="5" strokeLinecap="round" strokeLinejoin="round" />
           ))}
           {sentido.map((f, i) => (
@@ -152,6 +153,17 @@ export function MapaRuta({ ruta, objetivo, titulo, fecha, rutaCompleta, datos })
                 <circle cx={p.x} cy={p.y} r="8.5" fill={E.km.fondo} stroke={E.km.borde} strokeWidth="1.8" />
                 <text x={p.x} y={p.y + 3.4} textAnchor="middle" fontSize="9.5" fontWeight="800"
                   fontFamily="-apple-system, Inter, sans-serif" fill={E.km.texto}>{k.n}</text>
+              </g>
+            );
+          })}
+          {corridos.map(t => {
+            const p = m.punto([t.lat, t.lon]), texto = textoTiempo(t.ritmo), w = texto.length * 5.6 + 8;
+            // Encima de la linea; si ahi la tapa la franja de datos, debajo.
+            const y = conDatos && p.y - 20 < FRANJA + 2 ? p.y + 13 : p.y - 13;
+            return (
+              <g key={"r" + t.n} data-ritmo-tramo={t.n} transform={"translate(" + p.x.toFixed(1) + "," + y.toFixed(1) + ")"}>
+                <rect x={-w / 2} y="-7" width={w} height="14" rx="7" fill="#FFFFFF" stroke={E.linea} strokeWidth="1.3" />
+                <text y="3.4" textAnchor="middle" fontSize="9.5" fontWeight="800" fontFamily="ui-monospace, Menlo, monospace" fill={E.tinta}>{texto}</text>
               </g>
             );
           })}
@@ -200,6 +212,18 @@ export function MapaRuta({ ruta, objetivo, titulo, fecha, rutaCompleta, datos })
           padding: "0 10px", minHeight: 32, background: C.card, flexShrink: 0 }}>GPX</button>
         </div>
       </div>
+      {corridos.length > 0 && (
+        <div data-tramos style={{ marginTop: 10 }}>
+          <div style={{ fontSize: 10.5, fontWeight: 800, color: C.textDim, letterSpacing: 0.6, marginBottom: 4 }}>TRAMOS CORRIENDO</div>
+          {corridos.map(t => (
+            <div key={t.n} className="mono" style={{ display: "flex", justifyContent: "space-between", fontSize: 12.5, color: C.textDim,
+                                                      padding: "3px 0", borderTop: t.n > 1 ? "1px solid " + C.cardBorder : "none" }}>
+              <span><b style={{ color: C.text }}>{t.n}</b> · {textoTiempo(t.seg)} · {t.metros} m</span>
+              <b style={{ color: C.text }}>{textoTiempo(t.ritmo)}/km</b>
+            </div>
+          ))}
+        </div>
+      )}
     </div>
   );
 }

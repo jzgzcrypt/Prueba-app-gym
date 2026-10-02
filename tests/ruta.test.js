@@ -5,7 +5,7 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import { agregarPunto, marcarTramo, nuevoRegistro, pausar } from "../src/domain/running/gps.js";
-import { aGpx, aPixel, categoria, flechas, marcasKm, proyectar, simplificar, tramosPorColor, suavizar, remuestrear, colorEn, degradado } from "../src/domain/running/ruta.js";
+import { aGpx, aPixel, categoria, flechas, marcasKm, proyectar, simplificar, tramosPorColor, suavizar, remuestrear, colorEn, degradado, tramosCorridos } from "../src/domain/running/ruta.js";
 
 const M_LAT = 111195, M_LON = M_LAT * Math.cos(41.65 * Math.PI / 180);
 const fix = (x, y, t, v = 3.5) => ({ lat: 41.65 + y / M_LAT, lon: -0.88 + x / M_LON, acc: 5, speed: v, t });
@@ -180,4 +180,44 @@ test("proyectar ajustado: teselas al 60-95 %, sin huecos, y la ruta llena el rec
   }
   // Sin ajustar, como siempre: teselas enteras de 256.
   assert.ok(proyectar(recta(1000), 360, 260, 20, 62).teselas.every(t => t.size === 256));
+});
+
+// Una linea hacia el norte: `tramos` = [[metros, segundos, k], ...], un punto cada 10 m.
+function sesion(tramos, pausaEn = null) {
+  const p = []; let lat = 41.65, t = 0;
+  for (const [metros, seg, k] of tramos) {
+    const n = Math.round(metros / 10);
+    for (let i = 0; i < n; i++) {
+      if (pausaEn != null && p.length === pausaEn) { p.push(null); t += 300; }
+      lat += 10 / 111195; t += seg / n;
+      p.push([lat, -0.88, Math.round(t), 30, k]);
+    }
+  }
+  return { t0: 0, p };
+}
+
+test("tramos corridos: dos series con recuperación, con su ritmo y su punto medio", () => {
+  const r = sesion([[250, 60, 0], [300, 120, 1], [260, 60, 0], [300, 120, 1]]);
+  const t = tramosCorridos(r);
+  assert.equal(t.length, 2);
+  assert.deepEqual(t.map(x => x.n), [1, 2]);
+  assert.ok(Math.abs(t[0].metros - 240) <= 15, "metros " + t[0].metros);
+  assert.ok(Math.abs(t[0].seg - 60) <= 7, "seg " + t[0].seg);
+  assert.ok(Math.abs(t[0].ritmo - 250) <= 30, "ritmo " + t[0].ritmo);
+  // El punto medio del primero cae a ~125 m de la salida.
+  assert.ok(Math.abs((t[0].lat - 41.65) * 111195 - 125) <= 15);
+  // El segundo, despues de la recuperacion.
+  assert.ok((t[1].lat - 41.65) * 111195 > 550);
+});
+
+test("tramos corridos: un rodaje continuo no tiene tramos", () => {
+  assert.deepEqual(tramosCorridos(sesion([[2000, 700, 0]])), []);
+  assert.deepEqual(tramosCorridos(null), []);
+});
+
+test("tramos corridos: una pausa no suma tiempo y los de menos de 50 m no cuentan", () => {
+  const conPausa = tramosCorridos(sesion([[250, 60, 0], [200, 90, 1]], 10));
+  assert.equal(conPausa.length, 1);
+  assert.ok(conPausa[0].seg <= 66, "seg " + conPausa[0].seg);
+  assert.equal(tramosCorridos(sesion([[30, 8, 0], [200, 90, 1], [250, 60, 0]])).length, 1);
 });

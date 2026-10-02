@@ -21,6 +21,10 @@ Todo cambio que se haga en la app se anota aquí. Sin excepciones.
 
 ## [Sin publicar]
 
+### Mapa: vuelven los tramos y el ritmo de cada uno
+- Arreglado: en sesiones sin ritmo objetivo (fartlek, rodaje con caminatas) toda la ruta salía en naranja. Vuelve la recuperación en gris y lo corrido en naranja, con leyenda "corriendo · recuperación".
+- En sesiones con recuperaciones, cada tramo corrido lleva su ritmo encima en el mapa, y debajo una lista "Tramos corriendo" con tiempo, metros y ritmo de cada uno (las pausas no cuentan).
+
 ### Mapa de la salida: Arena, con nombres pequeños
 - Se queda el estilo Arena (tonos crema, parques verdes, agua azul, ruta naranja con sombra). Se quita Niebla y el selector provisional.
 - Zoom ajustado a cada salida: la ruta llena el recuadro (antes, según la salida, quedaba hasta la mitad de pequeña) y los nombres salen al 60-95 % de su tamaño, legibles sin gritar. Nombres en gris arena algo más marcado.

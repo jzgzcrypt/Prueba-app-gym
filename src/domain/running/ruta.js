@@ -366,3 +366,35 @@ export function degradado(lineas, colores, pasos = 32) {
   }
   return out.map(({ color, puntos }) => ({ color, puntos }));
 }
+
+// ─── TRAMOS DE UNA SESION CON SERIES ──────────────────────────────────────
+
+/**
+ * Los tramos corridos de una sesion con recuperaciones (series, fartlek):
+ * [{ n, metros, seg, ritmo (s/km), lat, lon }], con el punto a mitad del tramo
+ * para poner su ritmo encima. Las pausas no suman tiempo. Tramos de menos de
+ * 50 m fuera. En un rodaje continuo (sin recuperaciones), [].
+ */
+export function tramosCorridos(ruta) {
+  const p = (ruta && ruta.p) || [];
+  if (!p.some(q => q && q[4] === 1)) return [];
+  const grupos = [];
+  let actual = null;
+  for (const q of p) {
+    if (!q) { if (actual) actual.p.push(null); continue; }
+    const k = q[4] || 0;
+    if (!actual || actual.k !== k) { actual = { k, p: [] }; grupos.push(actual); }
+    actual.p.push(q);
+  }
+  const out = [];
+  for (const g of grupos) {
+    if (g.k !== 0) continue;
+    let seg = 0, prev = null;
+    for (const q of g.p) { if (q && prev) seg += q[2] - prev[2]; prev = q; }
+    const r = recorrido({ p: g.p });
+    if (r.total < 50 || seg <= 0) continue;
+    const medio = puntoA(r, r.total / 2);
+    out.push({ n: out.length + 1, metros: Math.round(r.total), seg, ritmo: seg / r.total * 1000, lat: medio.lat, lon: medio.lon });
+  }
+  return out;
+}
