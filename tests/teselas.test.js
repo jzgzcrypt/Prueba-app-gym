@@ -37,11 +37,20 @@ test("recolorear: los colores de referencia de OSM dan los de la paleta, y el al
   }
 });
 
-test("recolorear: el parque sigue verde y el agua azul, el fondo neutro", () => {
+test("recolorear: el parque sigue verde, el agua azul y el fondo crema", () => {
   const datos = new Uint8ClampedArray([...rgb("#C8FACC"), 255, ...rgb("#AAD3DF"), 255, ...rgb("#F2EFE9"), 255]);
-  recolorear(datos, PALETAS.niebla);
+  recolorear(datos, PALETAS.arena);
   const [pr, pg, pb] = datos.slice(0, 3), [ar, ag, ab] = datos.slice(4, 7), [fr, fg, fb] = datos.slice(8, 11);
   assert.ok(pg > pr && pg > pb, "parque verde");
   assert.ok(ab > ar && ab >= ag, "agua azul");
-  assert.ok(Math.max(fr, fg, fb) - Math.min(fr, fg, fb) <= 6, "fondo gris");
+  assert.ok(fr >= fg && fg >= fb && fr - fb <= 14, "fondo crema");
+});
+
+test("las letras oscuras de OSM salen claras, cerca del fondo", () => {
+  const datos = new Uint8ClampedArray([0x33, 0x33, 0x33, 255, 0x66, 0x66, 0x66, 255]);
+  recolorear(datos, PALETAS.arena);
+  for (const i of [0, 4]) {
+    const l = (Math.max(datos[i], datos[i + 1], datos[i + 2]) + Math.min(datos[i], datos[i + 1], datos[i + 2])) / 2 / 255;
+    assert.ok(l > 0.6, "luz " + l.toFixed(2));
+  }
 });

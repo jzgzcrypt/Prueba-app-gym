@@ -151,3 +151,26 @@ test("remuestrear: un punto cada paso, con el inicio y el final", () => {
   for (let i = 1; i < r.length - 1; i++) assert.ok(Math.abs(Math.hypot(r[i][0] - r[i - 1][0], r[i][1] - r[i - 1][1]) - 10) < 3.5);
   assert.equal(r.length, 7); // 0, 10, 20, (25,5), (25,15), (25,25), final
 });
+
+test("proyectar con retina: teselas del zoom siguiente a la mitad, cubriendo todo el recuadro", () => {
+  const normal = proyectar(recta(1000), 360, 260, 20, 62);
+  const r = proyectar(recta(1000), 360, 260, 20, 62, true);
+  assert.equal(r.z, normal.z);
+  assert.ok(r.teselas.every(t => t.z === normal.z + 1 && t.size === 128));
+  assert.ok(normal.teselas.every(t => t.size === 256));
+  // Cubren el recuadro: desde antes de (0,0) hasta pasado (360,260).
+  assert.ok(Math.min(...r.teselas.map(t => t.left)) <= 0 && Math.min(...r.teselas.map(t => t.top)) <= 0);
+  assert.ok(Math.max(...r.teselas.map(t => t.left + 128)) >= 360 && Math.max(...r.teselas.map(t => t.top + 128)) >= 260);
+  // Sin huecos: cada columna y fila seguida.
+  const lefts = [...new Set(r.teselas.map(t => t.left))].sort((a, b) => a - b);
+  for (let i = 1; i < lefts.length; i++) assert.ok(Math.abs(lefts[i] - lefts[i - 1] - 128) < 1e-6);
+  // La ruta cae en el mismo sitio.
+  const q = recta(1000).p[20];
+  assert.deepEqual(r.punto(q), normal.punto(q));
+  // Cada tesela retina es un cuarto de su tesela normal, en su sitio.
+  for (const t of r.teselas) {
+    const madre = normal.teselas.find(n => n.x === t.x >> 1 && n.y === t.y >> 1);
+    assert.ok(madre, "tiene madre");
+    assert.ok(Math.abs(t.left - madre.left - (t.x & 1) * 128) < 1e-6 && Math.abs(t.top - madre.top - (t.y & 1) * 128) < 1e-6);
+  }
+});

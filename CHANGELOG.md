@@ -21,6 +21,10 @@ Todo cambio que se haga en la app se anota aquí. Sin excepciones.
 
 ## [Sin publicar]
 
+### Mapa de la salida: Arena, con nombres pequeños
+- Se queda el estilo Arena (tonos crema, parques verdes, agua azul, ruta naranja con sombra). Se quita Niebla y el selector provisional.
+- Los nombres del mapa salían enormes: ahora las teselas van "retina" (las del zoom siguiente a la mitad de tamaño), con el doble de detalle y los nombres a la mitad. Además, los nombres van en un gris arena claro: sirven para ubicar la zona sin quitar protagonismo a la ruta.
+
 ### Mapa de la salida: estilo Niebla (y Arena para comparar)
 - Parques verdes, agua azul, edificios, calles y carreteras se distinguen en los dos estilos: cada tesela de OSM se repinta por tipo de cosa con la paleta del estilo, en vez de teñirlo todo de gris o sepia. Si el navegador no deja leer la tesela, se usa el filtro de antes.
 - Provisional: bajo el mapa, un selector Niebla / Arena para compararlos con tus calles de verdad; se recuerda el elegido. Arena: callejero en tonos crema y ruta naranja con sombra suave.

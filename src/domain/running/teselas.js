@@ -10,10 +10,9 @@
  */
 
 export const PALETAS = {
-  niebla: { fondo: "#EEEFF1", edificio: "#E2E4E8", calle: "#FFFFFF", carretera: "#FFFFFF",
-            parque: "#D9E8D6", agua: "#D3E2EE", texto: "#8A9099" },
+  // Arena: tonos crema. Los nombres, en gris arena claro: ubican sin distraer.
   arena: { fondo: "#F5F1EA", edificio: "#E9E3D8", calle: "#FFFFFF", carretera: "#FFF8EC",
-           parque: "#D6E9C9", agua: "#CFE4EE", texto: "#8C8378" },
+           parque: "#D6E9C9", agua: "#CFE4EE", texto: "#B3A99C" },
 };
 
 /** Luz de referencia (0-1) de cada tipo en las teselas de OSM. */
@@ -59,9 +58,10 @@ export function recolorear(datos, paleta) {
     const tipo = tipoDePixel(r, g, b);
     let out;
     if (tipo === "texto") {
-      // Letras y lineas oscuras: del color de texto (si es muy oscuro) al fondo.
+      // Letras y lineas oscuras: del color de texto (si es muy oscuro) hacia el
+      // fondo, bastante mezcladas para que no compitan con la ruta.
       const l = hsl(r, g, b).l / 0.55;
-      out = textoRgb.map((v, k) => v + (fondoRgb[k] - v) * l * 0.5);
+      out = textoRgb.map((v, k) => v + (fondoRgb[k] - v) * l * 0.7);
     } else {
       const delta = (hsl(r, g, b).l - LUZ_OSM[tipo]) * 255 * (CONTRASTE[tipo] ?? CONTRASTE.otro);
       out = colores[tipo].map(v => v + delta);
