@@ -1,19 +1,21 @@
 "use client";
 
-import { useState } from "react";
+import { useId, useState } from "react";
 import { C, CAT } from "@/design/tokens";
-import { aGpx, proyectar, tramosPorColor } from "@/domain/running/ruta";
-import { PropuestasMapa } from "@/features/ui/PropuestasMapa";
+import { aGpx, flechas, marcasKm, proyectar, tramosPorColor } from "@/domain/running/ruta";
+import { textoTiempo } from "@/domain/running/gps";
 
 /**
- * La ruta de una salida sobre OpenStreetMap, coloreada por ritmo.
+ * La ruta de una salida sobre OpenStreetMap, coloreada por ritmo, con los km
+ * marcados, flechas de sentido, salida y llegada, y los datos en una franja
+ * encima.
  *
  * Sin librerias: un mapa fijo (no se arrastra) con las teselas de OSM de
- * fondo y la ruta en SVG encima. Se dibuja en un lienzo de 360x240 que se
+ * fondo y la ruta en SVG encima. Se dibuja en un lienzo de 360x260 que se
  * escala al ancho de la pantalla. Sin cobertura no hay calles, pero la ruta
  * se ve igual.
  */
-const ANCHO = 360, ALTO = 240;
+const ANCHO = 360, ALTO = 260, FRANJA = 54;
 const COLOR = {
   objetivo: C.ok,        // a tu ritmo o mas rapido
   cerca: "#D39B12",      // hasta 30 s/km mas lento
@@ -39,12 +41,20 @@ async function descargarGpx(ruta, titulo, fecha) {
 
 export function MapaRuta({ ruta, objetivo, titulo, fecha, rutaCompleta, datos }) {
   const [sinTeselas, setSinTeselas] = useState(false);
-  const [propuestas, setPropuestas] = useState(false);
-  const m = proyectar(ruta, ANCHO, ALTO);
+  const uid = useId().replace(/:/g, "");
+  const conDatos = datos && datos.m > 0;
+  const m = proyectar(ruta, ANCHO, ALTO, 20, conDatos ? FRANJA + 8 : 20);
   if (!m) return null;
   const tramos = tramosPorColor(ruta, objetivo);
   const cats = [...new Set(tramos.map(t => t.cat))].filter(c => LEYENDA[c] && !(c === "suave" && !objetivo));
   const pct = (v, total) => (v / total * 100) + "%";
+  const xy = (q) => { const p = m.punto(q); return p.x.toFixed(1) + "," + p.y.toFixed(1); };
+  // Los km, en proporcion a la distancia medida: el "2" cae donde se contaron 2 km.
+  const marcas = marcasKm(ruta, conDatos ? datos.m : null);
+  const sentido = flechas(ruta, 3).map(f => {
+    const a = m.punto(f.a), b = m.punto(f.b), p = m.punto([f.lat, f.lon]);
+    return { x: p.x, y: p.y, ang: Math.atan2(b.y - a.y, b.x - a.x) * 180 / Math.PI };
+  });
 
   return (
     <div data-mapa>
@@ -59,18 +69,57 @@ export function MapaRuta({ ruta, objetivo, titulo, fecha, rutaCompleta, datos })
                      width: pct(256, ANCHO), height: pct(256, ALTO), userSelect: "none" }} />
         ))}
         <svg viewBox={"0 0 " + ANCHO + " " + ALTO} style={{ position: "absolute", inset: 0, width: "100%", height: "100%" }}>
+          <defs>
+            <pattern id={"meta" + uid} width="4" height="4" patternUnits="userSpaceOnUse">
+              <rect width="4" height="4" fill="#FFFFFF" />
+              <rect width="2" height="2" fill="#111111" /><rect x="2" y="2" width="2" height="2" fill="#111111" />
+            </pattern>
+          </defs>
           {/* Un borde blanco debajo: la ruta se lee sobre cualquier calle. */}
           {tramos.map((t, i) => (
-            <polyline key={"b" + i} points={t.puntos.map(q => { const p = m.punto(q); return p.x.toFixed(1) + "," + p.y.toFixed(1); }).join(" ")}
-              fill="none" stroke="#FFFFFF" strokeWidth="6" strokeLinecap="round" strokeLinejoin="round" />
+            <polyline key={"b" + i} points={t.puntos.map(xy).join(" ")} fill="none" stroke="#FFFFFF"
+              strokeWidth="8" strokeLinecap="round" strokeLinejoin="round" />
           ))}
           {tramos.map((t, i) => (
-            <polyline key={i} data-cat={t.cat} points={t.puntos.map(q => { const p = m.punto(q); return p.x.toFixed(1) + "," + p.y.toFixed(1); }).join(" ")}
-              fill="none" stroke={COLOR[t.cat]} strokeWidth="3.5" strokeLinecap="round" strokeLinejoin="round" />
+            <polyline key={i} data-cat={t.cat} points={t.puntos.map(xy).join(" ")} fill="none" stroke={COLOR[t.cat]}
+              strokeWidth="4.5" strokeLinecap="round" strokeLinejoin="round" />
           ))}
-          <circle cx={m.inicio.x} cy={m.inicio.y} r="5.5" fill="#FFFFFF" stroke={C.ok} strokeWidth="3" />
-          <circle cx={m.fin.x} cy={m.fin.y} r="5.5" fill="#171717" stroke="#FFFFFF" strokeWidth="2" />
+          {sentido.map((f, i) => (
+            <g key={"f" + i} data-flecha transform={"translate(" + f.x.toFixed(1) + "," + f.y.toFixed(1) + ") rotate(" + f.ang.toFixed(0) + ")"}>
+              <path d="M-2.4,-3 L1.7,0 L-2.4,3" fill="none" stroke="#FFFFFF" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round" />
+            </g>
+          ))}
+          {marcas.map(k => {
+            const p = m.punto([k.lat, k.lon]);
+            return (
+              <g key={"k" + k.n} data-km={k.n}>
+                <circle cx={p.x} cy={p.y} r="8.5" fill="#171717" stroke="#FFFFFF" strokeWidth="1.8" />
+                <text x={p.x} y={p.y + 3.4} textAnchor="middle" fontSize="9.5" fontWeight="800"
+                  fontFamily="-apple-system, Inter, sans-serif" fill="#FAFAF9">{k.n}</text>
+              </g>
+            );
+          })}
+          <circle cx={m.inicio.x} cy={m.inicio.y} r="6.5" fill="#2FBF71" stroke="#FFFFFF" strokeWidth="2.5" />
+          <circle cx={m.fin.x} cy={m.fin.y} r="7.5" fill={"url(#meta" + uid + ")"} stroke="#FFFFFF" strokeWidth="2.5" />
         </svg>
+        {conDatos && (
+          <div data-franja style={{ position: "absolute", left: 8, right: 8, top: 8, height: FRANJA - 6, borderRadius: 10,
+                                    background: "rgba(255,255,255,.9)", boxShadow: "0 1px 4px rgba(0,0,0,.15)",
+                                    display: "flex", justifyContent: "space-around", alignItems: "center" }}>
+            {[
+              ["Distancia", (datos.m / 1000).toFixed(2).replace(".", ","), "km"],
+              ["Tiempo", textoTiempo(datos.seg), ""],
+              ["Ritmo", datos.m >= 200 ? textoTiempo(datos.seg / datos.m * 1000) : "–", "/km"],
+            ].map(([et, v, u]) => (
+              <div key={et} style={{ textAlign: "center", lineHeight: 1.1 }}>
+                <div style={{ fontSize: 9.5, fontWeight: 700, color: "#6B6B68", letterSpacing: 0.3 }}>{et}</div>
+                <div className="mono" style={{ fontSize: 17, fontWeight: 800, color: "#171717" }}>
+                  {v}<span style={{ fontSize: 11, fontWeight: 700, color: "#6B6B68" }}>{u ? " " + u : ""}</span>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
         <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noreferrer" style={{
           position: "absolute", right: 0, bottom: 0, fontSize: 9.5, color: "#4A4A47", background: "rgba(255,255,255,.8)",
           padding: "1px 5px", borderTopLeftRadius: 6, textDecoration: "none" }}>© OpenStreetMap</a>
@@ -94,11 +143,6 @@ export function MapaRuta({ ruta, objetivo, titulo, fecha, rutaCompleta, datos })
           padding: "0 10px", minHeight: 32, background: C.card, flexShrink: 0 }}>GPX</button>
         </div>
       </div>
-      {/* Provisional: versiones del mapa para elegir, sin tocar este. */}
-      <button className="btn" data-ver-propuestas onClick={() => setPropuestas(true)} style={{
-        width: "100%", marginTop: 8, minHeight: 38, borderRadius: 10, border: "1px dashed #B9B9B5",
-        fontSize: 12.5, fontWeight: 800, color: C.textDim, background: "transparent" }}>Ver propuestas de mapa (A–F)</button>
-      {propuestas && <PropuestasMapa ruta={ruta} objetivo={objetivo} datos={datos} titulo={titulo} cerrar={() => setPropuestas(false)} />}
     </div>
   );
 }

@@ -21,10 +21,10 @@ Todo cambio que se haga en la app se anota aquí. Sin excepciones.
 
 ## [Sin publicar]
 
-### Mapa de la salida: vuelve el callejero y propuestas para elegir
-- Se deshacen los estilos nuevos: CARTO (Oscuro y Claro) ahora pide clave y salía "API KEY REQUIRED" en vez de las calles. Vuelve el mapa de OpenStreetMap de antes.
-- Debajo del mapa, "Ver propuestas de mapa (A–F)": seis versiones con tu propia ruta, todas con calles y sin clave. A es el mapa actual; las demás añaden km, sentido, datos encima, otros callejeros (Esri, OSM humanitario) o un mapa más alto. Solo para mirar: el definitivo no cambia hasta elegir.
-
+### Mapa de la salida: el elegido (C)
+- Callejero de OpenStreetMap, como antes (los estilos de CARTO se quitan: ahora piden clave y no salían las calles).
+- Ruta más gruesa con borde blanco, km marcados (según la distancia medida), flechas de sentido, salida verde y bandera de llegada.
+- Distancia, tiempo y ritmo en una franja blanca encima del mapa; se quita la línea GPS repetida debajo.
 ### Arreglado — El mapa de las carreras ya hechas
 - Al ir hacia atrás en HOY, las sesiones de running con GPS enseñan lo medido
   («GPS: 2,07 km · 14:46 · 7:08/km») y su mapa, con el botón GPX. Antes el
