@@ -46,11 +46,11 @@ test("recolorear: el parque sigue verde, el agua azul y el fondo crema", () => {
   assert.ok(fr >= fg && fg >= fb && fr - fb <= 14, "fondo crema");
 });
 
-test("las letras oscuras de OSM salen claras, cerca del fondo", () => {
+test("las letras oscuras de OSM salen suaves: claras, pero más oscuras que el fondo", () => {
   const datos = new Uint8ClampedArray([0x33, 0x33, 0x33, 255, 0x66, 0x66, 0x66, 255]);
   recolorear(datos, PALETAS.arena);
   for (const i of [0, 4]) {
     const l = (Math.max(datos[i], datos[i + 1], datos[i + 2]) + Math.min(datos[i], datos[i + 1], datos[i + 2])) / 2 / 255;
-    assert.ok(l > 0.6, "luz " + l.toFixed(2));
+    assert.ok(l > 0.55 && l < 0.88, "luz " + l.toFixed(2));
   }
 });

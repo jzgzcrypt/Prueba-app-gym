@@ -104,31 +104,51 @@ export function aPixel(lat, lon, z) {
   return { x: (lon + 180) / 360 * n, y: (0.5 - Math.log((1 + s) / (1 - s)) / (4 * Math.PI)) * n };
 }
 
+/** Tamaño al que se dibujan las teselas con `ajustado`: entre el 60 y el 95 %. */
+export const ESCALA_TESELA = { min: 0.6, max: 0.95 };
+
 /**
- * Encaja la ruta en `ancho` x `alto` px: el zoom mas cercano que cabe (hasta
- * 17), donde cae cada punto y que teselas hacen falta.
+ * Encaja la ruta en `ancho` x `alto` px: el zoom, donde cae cada punto y que
+ * teselas hacen falta ([{ z, x, y, left, top, size }]).
+ *
+ * Sin `ajustado`: el zoom entero mas cercano que cabe (hasta 17), teselas de
+ * 256 px. Con `ajustado`: el zoom exacto con el que la ruta llena el recuadro
+ * (decimal), y teselas del zoom entero que hace que se dibujen entre el 60 y el
+ * 95 % de su tamaño. Asi los nombres de las calles salen algo reducidos y
+ * nitidos, y la ruta como mucho un 26 % mas pequeña que el ajuste perfecto.
  */
-export function proyectar(ruta, ancho, alto, margen = 18, margenSup = margen, retina = false) {
+export function proyectar(ruta, ancho, alto, margen = 18, margenSup = margen, ajustado = false) {
   const pts = ruta && ruta.p ? ruta.p.filter(Boolean) : [];
   if (!pts.length) return null;
   const lats = pts.map(q => q[0]), lons = pts.map(q => q[1]);
   const n = Math.max(...lats), s = Math.min(...lats), e = Math.max(...lons), o = Math.min(...lons);
-  let z = 17;
-  for (; z > 2; z--) {
-    const a = aPixel(n, o, z), b = aPixel(s, e, z);
-    if (b.x - a.x <= ancho - 2 * margen && b.y - a.y <= alto - margen - margenSup) break;
+  const utilX = ancho - 2 * margen, utilY = alto - margen - margenSup;
+  let z, zt, k;
+  if (ajustado) {
+    const a0 = aPixel(n, o, 0), b0 = aPixel(s, e, 0);
+    const ajuste = Math.min(utilX / (b0.x - a0.x), utilY / (b0.y - a0.y));
+    const zPerfecto = Math.min(17.5, Math.log2(ajuste));
+    zt = Math.ceil(zPerfecto - Math.log2(ESCALA_TESELA.max));
+    k = 2 ** (zPerfecto - zt);
+    if (k < ESCALA_TESELA.min) { zt -= 1; k = ESCALA_TESELA.max; }
+    z = zt + Math.log2(k);
+  } else {
+    for (z = 17; z > 2; z--) {
+      const a = aPixel(n, o, z), b = aPixel(s, e, z);
+      if (b.x - a.x <= utilX && b.y - a.y <= utilY) break;
+    }
+    zt = z; k = 1;
   }
   const a = aPixel(n, o, z), b = aPixel(s, e, z);
   // Esquina superior izquierda del recuadro, con la ruta centrada.
-  const x0 = (a.x + b.x) / 2 - ancho / 2, y0 = (a.y + b.y) / 2 - (margenSup + (alto - margen - margenSup) / 2);
+  const x0 = (a.x + b.x) / 2 - ancho / 2, y0 = (a.y + b.y) / 2 - (margenSup + utilY / 2);
   const punto = (q) => { const px = aPixel(q[0], q[1], z); return { x: px.x - x0, y: px.y - y0 }; };
-  // Con `retina`, teselas del zoom siguiente dibujadas a la mitad: la misma zona
-  // con el doble de detalle, y los nombres de las calles a la mitad de tamaño.
-  const f = retina && z < 19 ? 2 : 1, zt = z + (f === 2 ? 1 : 0), lado = TESELA / f;
+  // Una tesela del zoom `zt` ocupa `lado` px en la escala del mapa.
+  const lado = TESELA * k;
   const teselas = [];
   const max = 2 ** zt;
-  for (let tx = Math.floor(x0 * f / TESELA); tx <= Math.floor((x0 + ancho) * f / TESELA); tx++) {
-    for (let ty = Math.floor(y0 * f / TESELA); ty <= Math.floor((y0 + alto) * f / TESELA); ty++) {
+  for (let tx = Math.floor(x0 / lado); tx <= Math.floor((x0 + ancho) / lado); tx++) {
+    for (let ty = Math.floor(y0 / lado); ty <= Math.floor((y0 + alto) / lado); ty++) {
       if (ty < 0 || ty >= max) continue;
       teselas.push({ z: zt, x: ((tx % max) + max) % max, y: ty, left: tx * lado - x0, top: ty * lado - y0, size: lado });
     }

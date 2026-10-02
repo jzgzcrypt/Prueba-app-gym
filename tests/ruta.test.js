@@ -152,25 +152,32 @@ test("remuestrear: un punto cada paso, con el inicio y el final", () => {
   assert.equal(r.length, 7); // 0, 10, 20, (25,5), (25,15), (25,25), final
 });
 
-test("proyectar con retina: teselas del zoom siguiente a la mitad, cubriendo todo el recuadro", () => {
-  const normal = proyectar(recta(1000), 360, 260, 20, 62);
-  const r = proyectar(recta(1000), 360, 260, 20, 62, true);
-  assert.equal(r.z, normal.z);
-  assert.ok(r.teselas.every(t => t.z === normal.z + 1 && t.size === 128));
-  assert.ok(normal.teselas.every(t => t.size === 256));
-  // Cubren el recuadro: desde antes de (0,0) hasta pasado (360,260).
-  assert.ok(Math.min(...r.teselas.map(t => t.left)) <= 0 && Math.min(...r.teselas.map(t => t.top)) <= 0);
-  assert.ok(Math.max(...r.teselas.map(t => t.left + 128)) >= 360 && Math.max(...r.teselas.map(t => t.top + 128)) >= 260);
-  // Sin huecos: cada columna y fila seguida.
-  const lefts = [...new Set(r.teselas.map(t => t.left))].sort((a, b) => a - b);
-  for (let i = 1; i < lefts.length; i++) assert.ok(Math.abs(lefts[i] - lefts[i - 1] - 128) < 1e-6);
-  // La ruta cae en el mismo sitio.
-  const q = recta(1000).p[20];
-  assert.deepEqual(r.punto(q), normal.punto(q));
-  // Cada tesela retina es un cuarto de su tesela normal, en su sitio.
-  for (const t of r.teselas) {
-    const madre = normal.teselas.find(n => n.x === t.x >> 1 && n.y === t.y >> 1);
-    assert.ok(madre, "tiene madre");
-    assert.ok(Math.abs(t.left - madre.left - (t.x & 1) * 128) < 1e-6 && Math.abs(t.top - madre.top - (t.y & 1) * 128) < 1e-6);
+test("proyectar ajustado: teselas al 60-95 %, sin huecos, y la ruta llena el recuadro", () => {
+  const util = { x: 360 - 40, y: 260 - 20 - 62 };
+  for (const metros of [400, 2000, 7000]) {
+    // Una ruta en diagonal: ocupa ancho y alto.
+    const ruta = { t0: 0, p: Array.from({ length: 41 }, (_, i) => [41.65 + metros * 0.6 * i / 40 / 111195, -0.88 + metros * 0.8 * i / 40 / 83000, i * 6, 3, 0]) };
+    const m = proyectar(ruta, 360, 260, 20, 62, true);
+    const k = m.teselas[0].size / 256;
+    assert.ok(k >= 0.6 - 1e-9 && k <= 0.95 + 1e-9, metros + " m: escala " + k);
+    assert.ok(m.teselas.every(t => t.size === m.teselas[0].size && t.z === m.teselas[0].z));
+    // Cubren el recuadro, sin huecos.
+    const lefts = [...new Set(m.teselas.map(t => t.left))].sort((a, b) => a - b);
+    const tops = [...new Set(m.teselas.map(t => t.top))].sort((a, b) => a - b);
+    for (let i = 1; i < lefts.length; i++) assert.ok(Math.abs(lefts[i] - lefts[i - 1] - k * 256) < 1e-6);
+    for (let i = 1; i < tops.length; i++) assert.ok(Math.abs(tops[i] - tops[i - 1] - k * 256) < 1e-6);
+    assert.ok(lefts[0] <= 0 && tops[0] <= 0 && lefts[lefts.length - 1] + k * 256 >= 360 && tops[tops.length - 1] + k * 256 >= 260);
+    // La ruta llena el recuadro (como mucho un 26 % por debajo del ajuste perfecto).
+    const ps = ruta.p.map(q => m.punto(q));
+    const w = Math.max(...ps.map(p => p.x)) - Math.min(...ps.map(p => p.x)), h = Math.max(...ps.map(p => p.y)) - Math.min(...ps.map(p => p.y));
+    assert.ok(Math.max(w / util.x, h / util.y) >= 0.79 && w <= util.x + 1e-6 && h <= util.y + 1e-6, metros + " m: " + w.toFixed(0) + "x" + h.toFixed(0));
+    // Cada punto cae en el mismo pixel que en su tesela.
+    const q = ruta.p[13], zt = m.teselas[0].z, px = aPixel(q[0], q[1], zt);
+    const t = m.teselas.find(t => t.x === Math.floor(px.x / 256) && t.y === Math.floor(px.y / 256));
+    const aMano = { x: t.left + (px.x - t.x * 256) * k, y: t.top + (px.y - t.y * 256) * k };
+    const p = m.punto(q);
+    assert.ok(Math.abs(p.x - aMano.x) < 1e-6 && Math.abs(p.y - aMano.y) < 1e-6);
   }
+  // Sin ajustar, como siempre: teselas enteras de 256.
+  assert.ok(proyectar(recta(1000), 360, 260, 20, 62).teselas.every(t => t.size === 256));
 });

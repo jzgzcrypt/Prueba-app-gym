@@ -23,6 +23,7 @@ Todo cambio que se haga en la app se anota aquí. Sin excepciones.
 
 ### Mapa de la salida: Arena, con nombres pequeños
 - Se queda el estilo Arena (tonos crema, parques verdes, agua azul, ruta naranja con sombra). Se quita Niebla y el selector provisional.
+- Zoom ajustado a cada salida: la ruta llena el recuadro (antes, según la salida, quedaba hasta la mitad de pequeña) y los nombres salen al 60-95 % de su tamaño, legibles sin gritar. Nombres en gris arena algo más marcado.
 - Los nombres del mapa salían enormes: ahora las teselas van "retina" (las del zoom siguiente a la mitad de tamaño), con el doble de detalle y los nombres a la mitad. Además, los nombres van en un gris arena claro: sirven para ubicar la zona sin quitar protagonismo a la ruta.
 
 ### Mapa de la salida: estilo Niebla (y Arena para comparar)
