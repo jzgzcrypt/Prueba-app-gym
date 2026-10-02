@@ -25,6 +25,7 @@ Todo cambio que se haga en la app se anota aquí. Sin excepciones.
 - Callejero de OpenStreetMap, como antes (los estilos de CARTO se quitan: ahora piden clave y no salían las calles).
 - Ruta más gruesa con borde blanco, km marcados (según la distancia medida), flechas de sentido, salida verde y bandera de llegada.
 - Distancia, tiempo y ritmo en una franja blanca encima del mapa; se quita la línea GPS repetida debajo.
+
 ### Arreglado — El mapa de las carreras ya hechas
 - Al ir hacia atrás en HOY, las sesiones de running con GPS enseñan lo medido
   («GPS: 2,07 km · 14:46 · 7:08/km») y su mapa, con el botón GPX. Antes el
