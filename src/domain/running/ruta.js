@@ -255,3 +255,91 @@ export function flechas(ruta, n = 3) {
   }
   return out;
 }
+
+// ─── DIBUJO SUAVE (estilo Niebla) ─────────────────────────────────────────
+
+/**
+ * Redondea las esquinas de una linea [[x, y]...] cortando cada vertice
+ * (Chaikin): la ruta fluye en curvas en vez de ir en angulos. Conserva el
+ * primer y el ultimo punto. `maxPaso`: antes se parten los tramos mas largos,
+ * para que la curva no se coma una esquina entera y la ruta siga por su calle.
+ */
+export function suavizar(puntos, vueltas = 3, maxPaso = Infinity) {
+  let p = [];
+  for (let i = 0; i < puntos.length; i++) {
+    if (i > 0) {
+      const a = puntos[i - 1], b = puntos[i], n = Math.ceil(Math.hypot(b[0] - a[0], b[1] - a[1]) / maxPaso);
+      for (let k = 1; k < n; k++) p.push([a[0] + (b[0] - a[0]) * k / n, a[1] + (b[1] - a[1]) * k / n]);
+    }
+    p.push(puntos[i]);
+  }
+  for (let k = 0; k < vueltas && p.length > 2; k++) {
+    const q = [p[0]];
+    for (let i = 0; i < p.length - 1; i++) {
+      const a = p[i], b = p[i + 1];
+      q.push([a[0] * 0.75 + b[0] * 0.25, a[1] * 0.75 + b[1] * 0.25], [a[0] * 0.25 + b[0] * 0.75, a[1] * 0.25 + b[1] * 0.75]);
+    }
+    q.push(p[p.length - 1]);
+    p = q;
+  }
+  return p;
+}
+
+/**
+ * La misma linea con un punto cada `paso` px (mas el ultimo). Asi el
+ * suavizado redondea igual las esquinas con puntos GPS juntos o separados.
+ */
+export function remuestrear(puntos, paso) {
+  if (puntos.length < 2) return puntos.slice();
+  const out = [puntos[0]];
+  let falta = paso;
+  for (let i = 1; i < puntos.length; i++) {
+    let a = puntos[i - 1];
+    const b = puntos[i];
+    let d = Math.hypot(b[0] - a[0], b[1] - a[1]);
+    while (d >= falta) {
+      const f = falta / d;
+      a = [a[0] + (b[0] - a[0]) * f, a[1] + (b[1] - a[1]) * f];
+      out.push(a);
+      d -= falta; falta = paso;
+    }
+    falta -= d;
+  }
+  const u = puntos[puntos.length - 1], ult = out[out.length - 1];
+  if (ult[0] !== u[0] || ult[1] !== u[1]) out.push(u);
+  return out;
+}
+
+const hexARgb = (h) => [1, 3, 5].map(i => parseInt(h.slice(i, i + 2), 16));
+/** El color a una fraccion `f` (0-1) de una escala de colores hex. */
+export function colorEn(colores, f) {
+  const x = Math.min(1, Math.max(0, f)) * (colores.length - 1);
+  const i = Math.min(colores.length - 2, Math.floor(x)), t = x - i;
+  const a = hexARgb(colores[i]), b = hexARgb(colores[i + 1]);
+  return "#" + a.map((v, k) => Math.round(v + (b[k] - v) * t).toString(16).padStart(2, "0")).join("");
+}
+
+/**
+ * Varias lineas [[x, y]...] (la ruta cortada en pausas) pintadas con un
+ * degradado del inicio al final de la salida: [{ color, puntos }]. El color
+ * va por distancia recorrida, no por posicion en el mapa, asi que en un
+ * circuito que acaba donde empezo tambien se ve el avance. `pasos` colores.
+ */
+export function degradado(lineas, colores, pasos = 32) {
+  const largo = (a, b) => Math.hypot(b[0] - a[0], b[1] - a[1]);
+  const total = lineas.reduce((s, l) => s + l.slice(1).reduce((t, q, i) => t + largo(l[i], q), 0), 0);
+  if (!total) return [];
+  const out = [];
+  let acum = 0;
+  for (const l of lineas) {
+    let actual = null;
+    for (let i = 1; i < l.length; i++) {
+      const d = largo(l[i - 1], l[i]);
+      const paso = Math.min(pasos - 1, Math.floor((acum + d / 2) / total * pasos));
+      if (!actual || actual.paso !== paso) { actual = { paso, color: colorEn(colores, (paso + 0.5) / pasos), puntos: [l[i - 1]] }; out.push(actual); }
+      actual.puntos.push(l[i]);
+      acum += d;
+    }
+  }
+  return out.map(({ color, puntos }) => ({ color, puntos }));
+}

@@ -2,13 +2,14 @@
 
 import { useId, useState } from "react";
 import { C, CAT } from "@/design/tokens";
-import { aGpx, flechas, marcasKm, proyectar, tramosPorColor } from "@/domain/running/ruta";
+import { aGpx, degradado, flechas, marcasKm, proyectar, remuestrear, suavizar, tramosPorColor } from "@/domain/running/ruta";
 import { textoTiempo } from "@/domain/running/gps";
 
 /**
- * La ruta de una salida sobre OpenStreetMap, coloreada por ritmo, con los km
- * marcados, flechas de sentido, salida y llegada, y los datos en una franja
- * encima.
+ * La ruta de una salida sobre OpenStreetMap, estilo "Niebla": el callejero en
+ * gris claro para que mande la ruta, y la ruta en curvas, con brillo y un
+ * degradado del inicio al final (o por ritmo, si hubo series). Con los km
+ * marcados, flechas de sentido, salida y llegada, y los datos encima.
  *
  * Sin librerias: un mapa fijo (no se arrastra) con las teselas de OSM de
  * fondo y la ruta en SVG encima. Se dibuja en un lienzo de 360x260 que se
@@ -23,6 +24,9 @@ const COLOR = {
   corre: CAT.running,    // rodaje sin ritmo objetivo
   recupera: "#8A8A87",   // trote o caminar entre series
 };
+// Niebla: el callejero de OSM pasado a gris suave, y el degradado de la ruta.
+const FILTRO_MAPA = "grayscale(1) contrast(0.78) brightness(1.12)";
+const FLOW = ["#FFB547", "#FC5200", "#D9184B"];
 const LEYENDA = { objetivo: "a tu ritmo", cerca: "algo más lento", suave: "suave", recupera: "recuperación" };
 
 async function descargarGpx(ruta, titulo, fecha) {
@@ -48,7 +52,12 @@ export function MapaRuta({ ruta, objetivo, titulo, fecha, rutaCompleta, datos })
   const tramos = tramosPorColor(ruta, objetivo);
   const cats = [...new Set(tramos.map(t => t.cat))].filter(c => LEYENDA[c] && !(c === "suave" && !objetivo));
   const pct = (v, total) => (v / total * 100) + "%";
-  const xy = (q) => { const p = m.punto(q); return p.x.toFixed(1) + "," + p.y.toFixed(1); };
+  const linea = (pts) => pts.map(p => p[0].toFixed(1) + "," + p[1].toFixed(1)).join(" ");
+  // Cada tramo en pixeles y con las esquinas redondeadas.
+  const curvas = tramos.map(t => ({ cat: t.cat, puntos: suavizar(remuestrear(t.puntos.map(q => { const p = m.punto(q); return [p.x, p.y]; }), 9), 3) }));
+  // Con series (varios ritmos), el color dice el ritmo; si no, el avance de la salida.
+  const porRitmo = cats.length > 1;
+  const trazos = porRitmo ? curvas.map(c => ({ color: COLOR[c.cat], puntos: c.puntos })) : degradado(curvas.map(c => c.puntos), FLOW);
   // Los km, en proporcion a la distancia medida: el "2" cae donde se contaron 2 km.
   const marcas = marcasKm(ruta, conDatos ? datos.m : null);
   const sentido = flechas(ruta, 3).map(f => {
@@ -59,14 +68,14 @@ export function MapaRuta({ ruta, objetivo, titulo, fecha, rutaCompleta, datos })
   return (
     <div data-mapa>
       <div style={{ position: "relative", width: "100%", aspectRatio: ANCHO + " / " + ALTO, overflow: "hidden",
-                    borderRadius: 12, background: "#E8E6E1", border: "1px solid " + C.cardBorder }}>
+                    borderRadius: 14, background: "#EEEFF1", border: "1px solid " + C.cardBorder }}>
         {!sinTeselas && m.teselas.map(t => (
           // eslint-disable-next-line @next/next/no-img-element
           <img key={t.z + "/" + t.x + "/" + t.y} alt="" draggable={false} loading="lazy"
             src={"https://tile.openstreetmap.org/" + t.z + "/" + t.x + "/" + t.y + ".png"}
             onError={() => setSinTeselas(true)}
             style={{ position: "absolute", left: pct(t.left, ANCHO), top: pct(t.top, ALTO),
-                     width: pct(256, ANCHO), height: pct(256, ALTO), userSelect: "none" }} />
+                     width: pct(256, ANCHO), height: pct(256, ALTO), userSelect: "none", filter: FILTRO_MAPA }} />
         ))}
         <svg viewBox={"0 0 " + ANCHO + " " + ALTO} style={{ position: "absolute", inset: 0, width: "100%", height: "100%" }}>
           <defs>
@@ -75,14 +84,19 @@ export function MapaRuta({ ruta, objetivo, titulo, fecha, rutaCompleta, datos })
               <rect width="2" height="2" fill="#111111" /><rect x="2" y="2" width="2" height="2" fill="#111111" />
             </pattern>
           </defs>
-          {/* Un borde blanco debajo: la ruta se lee sobre cualquier calle. */}
-          {tramos.map((t, i) => (
-            <polyline key={"b" + i} points={t.puntos.map(xy).join(" ")} fill="none" stroke="#FFFFFF"
+          <filter id={"brillo" + uid} x="-20%" y="-20%" width="140%" height="140%"><feGaussianBlur stdDeviation="3.2" /></filter>
+          {/* Brillo suave detras, borde blanco y la linea encima. */}
+          <g filter={"url(#brillo" + uid + ")"} opacity="0.35">
+            {curvas.map((c, i) => <polyline key={"g" + i} points={linea(c.puntos)} fill="none" stroke={porRitmo ? COLOR[c.cat] : "#FC5200"}
+              strokeWidth="10" strokeLinecap="round" strokeLinejoin="round" />)}
+          </g>
+          {curvas.map((c, i) => (
+            <polyline key={"b" + i} points={linea(c.puntos)} fill="none" stroke="#FFFFFF"
               strokeWidth="8" strokeLinecap="round" strokeLinejoin="round" />
           ))}
-          {tramos.map((t, i) => (
-            <polyline key={i} data-cat={t.cat} points={t.puntos.map(xy).join(" ")} fill="none" stroke={COLOR[t.cat]}
-              strokeWidth="4.5" strokeLinecap="round" strokeLinejoin="round" />
+          {trazos.map((t, i) => (
+            <polyline key={i} points={linea(t.puntos)} fill="none" stroke={t.color}
+              strokeWidth="5" strokeLinecap="round" strokeLinejoin="round" />
           ))}
           {sentido.map((f, i) => (
             <g key={"f" + i} data-flecha transform={"translate(" + f.x.toFixed(1) + "," + f.y.toFixed(1) + ") rotate(" + f.ang.toFixed(0) + ")"}>
@@ -93,7 +107,7 @@ export function MapaRuta({ ruta, objetivo, titulo, fecha, rutaCompleta, datos })
             const p = m.punto([k.lat, k.lon]);
             return (
               <g key={"k" + k.n} data-km={k.n}>
-                <circle cx={p.x} cy={p.y} r="8.5" fill="#171717" stroke="#FFFFFF" strokeWidth="1.8" />
+                <circle cx={p.x} cy={p.y} r="8.5" fill="#1D1F24" stroke="#FFFFFF" strokeWidth="1.8" />
                 <text x={p.x} y={p.y + 3.4} textAnchor="middle" fontSize="9.5" fontWeight="800"
                   fontFamily="-apple-system, Inter, sans-serif" fill="#FAFAF9">{k.n}</text>
               </g>
@@ -104,7 +118,8 @@ export function MapaRuta({ ruta, objetivo, titulo, fecha, rutaCompleta, datos })
         </svg>
         {conDatos && (
           <div data-franja style={{ position: "absolute", left: 8, right: 8, top: 8, height: FRANJA - 6, borderRadius: 10,
-                                    background: "rgba(255,255,255,.9)", boxShadow: "0 1px 4px rgba(0,0,0,.15)",
+                                    background: "rgba(255,255,255,.75)", boxShadow: "0 2px 10px rgba(0,0,0,.12)",
+                                    backdropFilter: "blur(6px)", WebkitBackdropFilter: "blur(6px)",
                                     display: "flex", justifyContent: "space-around", alignItems: "center" }}>
             {[
               ["Distancia", (datos.m / 1000).toFixed(2).replace(".", ","), "km"],
@@ -112,9 +127,9 @@ export function MapaRuta({ ruta, objetivo, titulo, fecha, rutaCompleta, datos })
               ["Ritmo", datos.m >= 200 ? textoTiempo(datos.seg / datos.m * 1000) : "–", "/km"],
             ].map(([et, v, u]) => (
               <div key={et} style={{ textAlign: "center", lineHeight: 1.1 }}>
-                <div style={{ fontSize: 9.5, fontWeight: 700, color: "#6B6B68", letterSpacing: 0.3 }}>{et}</div>
-                <div className="mono" style={{ fontSize: 17, fontWeight: 800, color: "#171717" }}>
-                  {v}<span style={{ fontSize: 11, fontWeight: 700, color: "#6B6B68" }}>{u ? " " + u : ""}</span>
+                <div style={{ fontSize: 9.5, fontWeight: 700, color: "#7A7F88", letterSpacing: 0.3 }}>{et}</div>
+                <div className="mono" style={{ fontSize: 17, fontWeight: 800, color: "#1D1F24" }}>
+                  {v}<span style={{ fontSize: 11, fontWeight: 700, color: "#7A7F88" }}>{u ? " " + u : ""}</span>
                 </div>
               </div>
             ))}

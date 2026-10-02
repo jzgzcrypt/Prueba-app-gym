@@ -5,7 +5,7 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import { agregarPunto, marcarTramo, nuevoRegistro, pausar } from "../src/domain/running/gps.js";
-import { aGpx, aPixel, categoria, flechas, marcasKm, proyectar, simplificar, tramosPorColor } from "../src/domain/running/ruta.js";
+import { aGpx, aPixel, categoria, flechas, marcasKm, proyectar, simplificar, tramosPorColor, suavizar, remuestrear, colorEn, degradado } from "../src/domain/running/ruta.js";
 
 const M_LAT = 111195, M_LON = M_LAT * Math.cos(41.65 * Math.PI / 180);
 const fix = (x, y, t, v = 3.5) => ({ lat: 41.65 + y / M_LAT, lon: -0.88 + x / M_LON, acc: 5, speed: v, t });
@@ -106,4 +106,48 @@ test("proyectar deja sitio arriba para la franja de datos", () => {
   const m = proyectar(recta(1000), 360, 250, 18, 54);
   const ys = recta(1000).p.map(q => m.punto(q).y);
   assert.ok(Math.min(...ys) >= 54 - 0.5 && Math.max(...ys) <= 250 - 18 + 0.5, Math.min(...ys) + " " + Math.max(...ys));
+});
+
+test("suavizar: redondea la esquina y conserva inicio y final", () => {
+  const p = suavizar([[0, 0], [100, 0], [100, 100]], 3);
+  assert.deepEqual(p[0], [0, 0]);
+  assert.deepEqual(p[p.length - 1], [100, 100]);
+  assert.ok(p.length > 10);
+  // La esquina (100, 0) ya no se toca: la curva pasa por dentro.
+  assert.ok(p.every(q => !(q[0] === 100 && q[1] === 0)));
+  assert.ok(p.some(q => q[0] > 80 && q[1] > 5 && q[1] < 20), "pasa por la curva");
+});
+
+test("colorEn: extremos y punto medio", () => {
+  assert.equal(colorEn(["#000000", "#FFFFFF"], 0), "#000000");
+  assert.equal(colorEn(["#000000", "#FFFFFF"], 1), "#ffffff");
+  assert.equal(colorEn(["#000000", "#FFFFFF"], 0.5), "#808080");
+  assert.equal(colorEn(["#FF0000", "#00FF00", "#0000FF"], 0.5), "#00ff00");
+});
+
+test("degradado: va por distancia recorrida, también en un circuito cerrado y con pausas", () => {
+  const ida = [[0, 0], [100, 0]], vuelta = [[100, 0], [100, 100], [0, 100], [0, 0]];
+  const t = degradado([ida, vuelta], ["#000000", "#FFFFFF"], 4);
+  assert.equal(t.length, 4);
+  assert.equal(t[0].color, colorEn(["#000000", "#FFFFFF"], 0.125));
+  assert.equal(t[3].color, colorEn(["#000000", "#FFFFFF"], 0.875));
+  // Los trozos se tocan: el final de uno es el principio del siguiente (dentro de cada linea).
+  assert.deepEqual(t[1].puntos[t[1].puntos.length - 1], t[2].puntos[0]);
+  assert.deepEqual(degradado([], ["#000000", "#FFFFFF"]), []);
+});
+
+test("suavizar con paso máximo: la curva se queda cerca de la esquina", () => {
+  const libre = suavizar([[0, 0], [200, 0], [200, 200]], 3);
+  const corta = suavizar([[0, 0], [200, 0], [200, 200]], 3, 14);
+  const cerca = (p) => Math.min(...p.map(q => Math.hypot(q[0] - 200, q[1])));
+  assert.ok(cerca(corta) < 6, "con paso: " + cerca(corta).toFixed(1));
+  assert.ok(cerca(libre) > 20, "sin paso: " + cerca(libre).toFixed(1));
+});
+
+test("remuestrear: un punto cada paso, con el inicio y el final", () => {
+  const r = remuestrear([[0, 0], [25, 0], [25, 3], [25, 30]], 10);
+  assert.deepEqual(r[0], [0, 0]);
+  assert.deepEqual(r[r.length - 1], [25, 30]);
+  for (let i = 1; i < r.length - 1; i++) assert.ok(Math.abs(Math.hypot(r[i][0] - r[i - 1][0], r[i][1] - r[i - 1][1]) - 10) < 3.5);
+  assert.equal(r.length, 7); // 0, 10, 20, (25,5), (25,15), (25,25), final
 });

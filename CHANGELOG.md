@@ -21,6 +21,12 @@ Todo cambio que se haga en la app se anota aquí. Sin excepciones.
 
 ## [Sin publicar]
 
+### Mapa de la salida: estilo Niebla
+- El callejero de OpenStreetMap se ve en gris claro, para que mande la ruta.
+- La ruta va en curvas, sin ángulos: se redondean las esquinas sin salirse de la calle.
+- Lleva un brillo suave y un degradado de amarillo a rojo del inicio al final de la salida (por distancia, así que se ve el avance también en un circuito). En días de series sigue coloreada por ritmo.
+- Franja de datos translúcida y marcas de km en gris oscuro.
+
 ### Mapa de la salida: el elegido (C)
 - Callejero de OpenStreetMap, como antes (los estilos de CARTO se quitan: ahora piden clave y no salían las calles).
 - Ruta más gruesa con borde blanco, km marcados (según la distancia medida), flechas de sentido, salida verde y bandera de llegada.
