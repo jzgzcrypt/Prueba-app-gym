@@ -8,10 +8,11 @@ import { mesesDelBloque, nombreMes } from "@/domain/progreso/informe";
 import { GraficoPlan } from "@/features/ui/plan-vs-real";
 import { MapaRuta } from "@/features/ui/MapaRuta";
 import { textoTiempo } from "@/domain/running/gps";
+import { tendenciaPeso } from "@/domain/nutricion/adaptativo";
 import { tablaRecords } from "@/domain/fuerza/registro";
 import { C, CAT } from "@/design/tokens";
 import { QuickFieldInput, SimpleLineChart } from "@/features/ui/charts";
-export function ProgresoScreen({ medidas, setMedidas, ritmoReal, weeks, checked, workoutWeights, workoutReps, onVerInforme, cuelloChecks, painLog, gps }) {
+export function ProgresoScreen({ medidas, setMedidas, ritmoReal, weeks, checked, workoutWeights, workoutReps, onVerInforme, cuelloChecks, painLog, gps, pesosDiarios }) {
   const [showForm, setShowForm] = useState(false);
   const [form, setForm] = useState({ peso: "", cintura: "", anchoHombro: "", cadera: "", hombro: "", cadenaPosterior: "", columna: "", caderaMov: "", foto: null });
   const [quickField, setQuickField] = useState(null); // "peso" | "cintura" | "cadera" | "hombro" | "cadenaPosterior" | "columna" | "caderaMov" | null (menu)
@@ -77,7 +78,16 @@ export function ProgresoScreen({ medidas, setMedidas, ritmoReal, weeks, checked,
     setQuickField(null);
   };
 
-  const pesoData = medidas.filter(m => m.peso != null).map(m => ({ fecha: m.fecha, v: m.peso }));
+  // El peso: cada pesaje (medidas y el de cada mañana) y su tendencia, que es
+  // la que cuenta (el de un dia lleva agua). Ultimas 8 semanas.
+  const pesoData = (() => {
+    const p = {};
+    for (const m of medidas) if (m && m.iso && m.peso != null) p[m.iso] = m.peso;
+    Object.assign(p, pesosDiarios || {});
+    const t = tendenciaPeso(p, todayLocalIso()).slice(-56);
+    if (t.length < 2) return medidas.filter(m => m.peso != null).map(m => ({ fecha: m.fecha, v: m.peso }));
+    return t.map(x => ({ fecha: x.iso.slice(8) + "/" + x.iso.slice(5, 7), v: x.peso, t: x.tendencia }));
+  })();
   const cinturaData = medidas.filter(m => m.cintura != null).map(m => ({ fecha: m.fecha, v: m.cintura }));
   const caderaData = medidas.filter(m => m.cadera != null).map(m => ({ fecha: m.fecha, v: m.cadera }));
   const hombroData = medidas.filter(m => m.hombro != null).map(m => ({ fecha: m.fecha, v: m.hombro }));

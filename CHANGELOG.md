@@ -21,6 +21,31 @@ Todo cambio que se haga en la app se anota aquí. Sin excepciones.
 
 ## [Sin publicar]
 
+### Añadido — Motor adaptativo (la idea de MacroFactor)
+- **Tu gasto real, medido**: con tu peso de cada mañana (un toque en
+  Nutrición) y lo que comes (los días cerrados con tu IA):
+  gasto = media de lo comido − cambio de peso × 7700 kcal/kg, sobre las
+  últimas 4 semanas. Con pocos datos manda la fórmula (Mifflin ×1,55); con 3
+  semanas mandan tus datos.
+- **Tendencia de peso** (media exponencial α = 0,1): un pico de agua de 1,5 kg
+  apenas la mueve. El ritmo de bajada sale de una recta sobre los pesajes.
+- **Ajuste cada lunes**: las kcal de la semana = gasto − 450 (~0,4 kg/semana;
+  en S10-S11, mantenimiento). COMER y RECORTAR siguen separados 400 kcal y la
+  media de la semana cuadra; proteína fija en 165 g. Topes: ±150 kcal/día por
+  semana, nunca menos de 1.800 ni más del 25% de déficit. La semana no cambia
+  al pesarte el lunes: usa datos hasta el domingo.
+- **Neutro**: un día sin cerrar no cuenta (no se asume nada) y un exceso es un
+  dato. Sin rojo. Nutrición dice «Tendencia 85,6 kg · −0,30 kg/sem · tu gasto
+  real 2.625 kcal» y «Esta semana: COMER 2.410 · RECORTAR 2.010 (bajas algo
+  más lento de lo previsto)». HOY y el mensaje a tu IA usan ya esas cifras.
+- Progreso › Cuerpo: el peso con cada pesaje en tenue y la línea de tendencia.
+- Precisión (simulada, gasto real conocido): error mediano 90 kcal con 3
+  semanas de datos, 50 kcal con 4.
+
+### Datos
+- Nuevo campo opcional `pesosDiarios: { iso: kg }`. Esquema v4, sin
+  migración. Entra en exportar/importar y en vaciar el día.
+
 ### Cambiado — Nutrición: tu IA lleva el día
 - La app deja de contar comidas. Por la mañana, **«Mandar mi día a la IA»**
   abre el menú de compartir de Android: eliges Claude o ChatGPT y el mensaje

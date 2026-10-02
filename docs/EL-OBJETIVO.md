@@ -173,6 +173,11 @@ Están aquí para no repetirlos.
 
 ### Lo siguiente, por orden de lo que cuesta no hacerlo
 
+Hecho el 2 de octubre: **GPS como Strava** (suma de puntos crudos, la
+distancia ya no se queda un 9% corta), **tu IA lleva el día** (mandar el día y
+cerrarlo con su total) y el **motor adaptativo** tipo MacroFactor (tu gasto
+real con el peso de cada mañana; las kcal se ajustan cada lunes).
+
 Hecho el 28 de septiembre: **nutrición IIFYM** (apuntas como caiga y la cena
 se cuadra a ojo: palmas, puños y pulgares).
 

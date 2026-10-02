@@ -6,10 +6,11 @@ import { ICON_NUTRICION } from "@/domain/assets/icons";
 import { CHEAT_MEAL, EQUIVALENCIAS, MENUS, NEAT, TIPS_NUTRICION } from "@/domain/nutricion/menus";
 import { ScreenHeader, SectionHeader } from "@/features/ui/headers";
 import { TuDiaIA } from "@/features/nutricion/TuDiaIA";
+import { TuMotor } from "@/features/nutricion/TuMotor";
 import { ListaCompra } from "@/features/nutricion/ListaCompra";
 
 export function NutricionScreen({ comida, apuntes = [], edits, esHoy,
-                                  cerrarDia, reabrirDia, pendiente, limpiarPendiente, semana,
+                                  cerrarDia, reabrirDia, pendiente, limpiarPendiente, semana, motor,
                                   diasSemana, inicioSemana, compraMarcada, marcarCompra,
                                   comidasFuera, marcarFuera }) {
   const [menuAbierto, setMenuAbierto] = useState(MENUS[0].id);
@@ -40,6 +41,7 @@ export function NutricionScreen({ comida, apuntes = [], edits, esHoy,
       <ScreenHeader icon={ICON_NUTRICION} title="NUTRICIÓN" />
 
       {/* ═══ HOY — lo único que se toca a diario: apuntar y que la cena cuadre ═══ */}
+      {motor && esHoy && <TuMotor {...motor} />}
       {comida && cerrarDia && (
         <TuDiaIA comida={comida} apuntes={apuntes} esHoy={esHoy} cerrarDia={cerrarDia} reabrirDia={reabrirDia}
                  pendiente={pendiente} limpiarPendiente={limpiarPendiente} semana={semana} />

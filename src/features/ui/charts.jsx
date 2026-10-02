@@ -27,7 +27,9 @@ export function SimpleLineChart({ data, label, unit, color, onAddData }) {
       </div>
     );
   }
-  const values = data.map(d => d.v);
+  // Si los datos traen tendencia (t), se pinta encima: es la que cuenta.
+  const conTendencia = data.some(d => d.t != null);
+  const values = data.map(d => d.v).filter(v => v != null).concat(conTendencia ? data.filter(d => d.t != null).map(d => d.t) : []);
   const min = Math.min(...values), max = Math.max(...values);
   const range = max - min || 1;
   const W = 320, H = 100, PAD = 10;
@@ -41,14 +43,21 @@ export function SimpleLineChart({ data, label, unit, color, onAddData }) {
     <div>
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", marginBottom: 8 }}>
         <span style={{ fontSize: 12.5, fontWeight: 700, color: C.text }}>{label}</span>
-        <span style={{ fontSize: 13, fontWeight: 800, color: color }}>{values[values.length-1]}{unit}</span>
+        <span style={{ fontSize: 13, fontWeight: 800, color: color }}>
+          {conTendencia ? "tendencia " + Number(data[data.length - 1].t).toFixed(1).replace(".", ",") + " " : data[data.length - 1].v}{unit}
+        </span>
       </div>
       <svg width="100%" viewBox={"0 0 " + W + " " + H} style={{ display: "block" }}>
-        <polyline points={points} fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+        {!conTendencia && <polyline points={points} fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />}
+        {conTendencia && (
+          <polyline fill="none" stroke={color} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"
+            points={data.map((d, i) => d.t == null ? null : (PAD + (i / (data.length - 1)) * (W - PAD * 2)) + "," + (H - PAD - ((d.t - min) / range) * (H - PAD * 2))).filter(Boolean).join(" ")} />
+        )}
         {data.map((d, i) => {
+          if (d.v == null) return null;
           const x = PAD + (i / (data.length - 1)) * (W - PAD * 2);
           const y = H - PAD - ((d.v - min) / range) * (H - PAD * 2);
-          return <circle key={i} cx={x} cy={y} r="3" fill={color} />;
+          return <circle key={i} cx={x} cy={y} r={conTendencia ? 2.2 : 3} fill={color} opacity={conTendencia ? 0.35 : 1} />;
         })}
       </svg>
       <div style={{ display: "flex", justifyContent: "space-between", fontSize: 10, color: "#8A8A87", marginTop: 2 }}>

@@ -89,7 +89,15 @@ export const COMIDA = {
  *  - `sinDeficit`: las dos ultimas semanas (S10-S11). El rendimiento manda
  *    sobre el peso cuando ya no queda nada que construir.
  */
-export function comidaDelDia(dia) {
+export function comidaDelDia(dia, objetivos) {
+  const base = tipoDeComida(dia);
+  // Con el motor adaptativo, las kcal de la semana salen de tu gasto real.
+  if (!objetivos || !objetivos[base.id]) return base;
+  const m = objetivos[base.id];
+  return { ...base, macros: m, kcal: m.kcal.toLocaleString("es-ES") + " kcal", ajustado: true };
+}
+
+function tipoDeComida(dia) {
   if (!dia) return COMIDA.recortar;
   if (dia.vispera || dia.sinDeficit) return COMIDA.comer;
   const esFuerte = dia.tipo === "compromiso"
