@@ -29,7 +29,7 @@ import { informeMensual, informePendiente } from "@/domain/progreso/informe";
 import { InformeScreen } from "@/features/informe/InformeScreen";
 import { ritmoDelDia } from "@/domain/running/adaptar";
 import { textoParaLibreta } from "@/domain/running/gps";
-import { simplificar } from "@/domain/running/ruta";
+import { simplificar, sinSimplificar } from "@/domain/running/ruta";
 import { resumenSemana, semanasCumplidas } from "@/domain/progreso/resumen";
 
 export default function App() {
@@ -498,7 +498,12 @@ export default function App() {
       const aj = ritmoDelDia(wDay, FLAT_DAYS, ritmoReal);
       const obj = aj ? aj.ritmo : (wDay.ritmo || null);
       const ruta = simplificar(res.traza);
-      setGps(p => sinRutasDeMas(Object.assign({}, p, { [activeWorkout]: { m: Math.round(res.total.m), seg: Math.round(res.total.seg), series, obj, ruta } })));
+      const huecos = Math.round(res.huecos || 0);
+      setGps(p => sinRutasDeMas(Object.assign({}, p, { [activeWorkout]: { m: Math.round(res.total.m), seg: Math.round(res.total.seg), series, obj, ruta, huecos } })));
+      // La traza entera de la ultima salida, aparte (no va en la copia de
+      // seguridad): para exportar el "GPX completo" y compararlo con Strava.
+      try { window.localStorage.setItem("programa7k:ultima-traza", JSON.stringify({ dia: activeWorkout, ruta: sinSimplificar(res.traza) })); }
+      catch { /* sin sitio: solo se pierde la comparacion */ }
       return true;
     };
 

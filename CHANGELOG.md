@@ -21,6 +21,29 @@ Todo cambio que se haga en la app se anota aquí. Sin excepciones.
 
 ## [Sin publicar]
 
+### Arreglado — La distancia del GPS se quedaba un 9% corta frente a Strava
+- En W2d1 la app midió 2,07 km y Strava 2,28 km en la misma ruta. Ahora se
+  mide como Strava: fixes con precisión de 20 m o mejor, sin saltos (más de
+  40 km/h, o avanzar más de lo que permite la velocidad que mide el propio
+  GPS), un punto cada 2 s o 5 m, y la **suma haversine de los puntos tal
+  cual**. Antes se promediaban 5 fixes, se sumaba a trozos de 10 m y, con
+  Doppler, se integraba la velocidad de Chrome, que llega suavizada y cuenta
+  corto. Simplificar la ruta queda solo para dibujar (a 2 m).
+- La velocidad del GPS ya solo se usa para el ritmo de ahora en pantalla.
+- Simulador con el ruido de un móvil real (el chip ya filtra: deriva suave,
+  apenas ruido de un fix a otro): ruta de 2 km con curvas a ±1,6% (p90),
+  ±1,9% sin velocidad GPS; series de 400 m a ±3,6 s/km. Los escenarios de GPS
+  "crudo" sin filtro de chip se quedan en la tabla como caso extremo.
+- **Pantalla apagada**: la web no puede grabar con el móvil bloqueado (eso
+  solo lo hace una app nativa). Si hay un hueco de más de 10 s, se une en
+  recta y al terminar se dice cuánto se perdió.
+- **GPX completo**: la traza entera de la última salida, sin simplificar,
+  para compararla con Strava (`node scripts/comparar-gpx.mjs app.gpx strava.gpx`).
+
+### Datos
+- `gps[día].huecos` (segundos sin GPS). La traza completa de la última
+  salida va aparte en `programa7k:ultima-traza`, fuera de la copia.
+
 ### Añadido — Pídele idea a tu IA para la merienda o la cena
 - En Merienda y en Cena, **«💡 Pídele idea a tu IA»** copia un mensaje con lo
   que te queda del día (tipo de día, lo que llevas comido, kcal y macros

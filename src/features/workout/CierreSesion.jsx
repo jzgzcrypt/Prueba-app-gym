@@ -16,6 +16,15 @@ import { MapaRuta } from "@/features/ui/MapaRuta";
  * progresado, o el ritmo de las series de running contra lo que pedian, o lo
  * que dice una prueba del objetivo. Sin confeti ni rachas.
  */
+/** La traza entera de la ultima salida, si es la de este dia. */
+function trazaCompleta(dayKey) {
+  try {
+    const t = JSON.parse(window.localStorage.getItem("programa7k:ultima-traza") || "null");
+    return t && t.dia === dayKey ? t.ruta : null;
+  } catch { return null; }
+}
+const mmss = (s) => Math.floor(s / 60) + ":" + String(Math.round(s % 60)).padStart(2, "0");
+
 export function CierreSesion({ dayKey, workoutWeights, workoutReps, ritmoReal, gps, onGuardarRitmo, onVolver }) {
   const day = FLAT_DAYS.find(d => claveDia(d) === dayKey);
   const [texto, setTexto] = useState(ritmoReal[dayKey] || "");
@@ -110,7 +119,12 @@ export function CierreSesion({ dayKey, workoutWeights, workoutReps, ritmoReal, g
           <div style={{ marginTop: 18, background: C.card, border: "1px solid " + C.cardBorder, borderRadius: 14, padding: "14px 16px" }}>
             {gps && gps.ruta && (
               <div style={{ marginBottom: 12 }}>
-                <MapaRuta ruta={gps.ruta} objetivo={gps.obj} titulo={day.titulo} fecha={day.isoDate} />
+                <MapaRuta ruta={gps.ruta} objetivo={gps.obj} titulo={day.titulo} fecha={day.isoDate} rutaCompleta={trazaCompleta(dayKey)} />
+              </div>
+            )}
+            {gps && gps.huecos > 10 && (
+              <div style={{ fontSize: 12.5, color: C.amber, fontWeight: 700, marginBottom: 8, lineHeight: 1.4 }}>
+                Se perdieron {mmss(gps.huecos)} con la pantalla apagada: ese tramo va en línea recta. Para que cuente entero, deja la pantalla encendida.
               </div>
             )}
             {gps && gps.m > 0 && (

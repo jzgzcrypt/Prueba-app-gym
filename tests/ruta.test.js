@@ -23,7 +23,8 @@ test("gps.js junta la traza; la pausa la corta", () => {
   reg = pausar(reg);
   reg = ele().slice(100, 120).map(p => ({ ...p, t: p.t + 60000 })).reduce(agregarPunto, reg);
   assert.equal(reg.traza.filter(x => x === null).length, 1);
-  assert.equal(reg.traza.filter(Boolean).length, 70);
+  // 50 + 20 fixes a 3,5 m/s y 1 por segundo: un punto cada 2 s (y el primero de cada tramo).
+  assert.equal(reg.traza.filter(Boolean).length, 25 + 10);
 });
 
 test("simplificar: una L se queda en sus esquinas y ocupa poco", () => {

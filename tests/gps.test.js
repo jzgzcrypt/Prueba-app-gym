@@ -6,7 +6,7 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import { FLAT_DAYS } from "../src/domain/plan/calendario.js";
 import {
-  agregarPunto, comoVa, distanciaM, entre, foto, nuevoRegistro, pausar, ritmoActual, ritmoMedio,
+  agregarPunto, comoVa, distanciaM, entre, foto, nuevoRegistro, pausar, ritmoActual, ritmoMedio, segundosEnHuecos,
   textoParaLibreta, tiempoHasta,
 } from "../src/domain/running/gps.js";
 
@@ -31,13 +31,45 @@ test("distancia: 1 km hacia el norte son 1000 m", () => {
   assert.ok(Math.abs(d - 1000) < 1, String(d));
 });
 
-test("pista a 4:45/km con ruido de ±4 m: da 4:45 ±3 s", () => {
-  const reg = correr(nuevoRegistro(), pista({ ritmo: 285, seg: 285, ruido: 4 }));
+test("pista a 4:45/km: distancia y ritmo exactos, y el ritmo de ahora", () => {
+  const reg = correr(nuevoRegistro(), pista({ ritmo: 285, seg: 285 }).map(p => ({ ...p, speed: 1000 / 285 })));
   const r = entre({ m: 0, seg: 0 }, foto(reg)).ritmo;
-  assert.ok(Math.abs(r - 285) <= 3, "ritmo medio " + r);
-  assert.ok(Math.abs(foto(reg).m - 1000) < 10, "metros " + foto(reg).m);
-  const ahora = ritmoActual(reg, 285000);
-  assert.ok(Math.abs(ahora - 285) <= 15, "ritmo de ahora " + ahora);
+  assert.ok(Math.abs(r - 285) <= 2, "ritmo medio " + r);
+  assert.ok(Math.abs(foto(reg).m - 1000) < 5, "metros " + foto(reg).m);
+  assert.ok(Math.abs(ritmoActual(reg, 285000) - 285) <= 3);
+});
+
+test("muestreo: un punto cada 2 s o cada 5 m, lo que pase antes", () => {
+  const lento = correr(nuevoRegistro(), pista({ ritmo: 400, seg: 20 }));  // 2,5 m/s: cada 2 s
+  const rapido = correr(nuevoRegistro(), pista({ ritmo: 180, seg: 20 })); // 5,6 m/s: cada fix
+  assert.equal(lento.traza.length, 11);
+  assert.equal(rapido.traza.length, 21);
+});
+
+test("filtros: precisión peor de 20 m y saltos a más de 40 km/h, fuera", () => {
+  const p = pista({ ritmo: 300, seg: 60 });
+  p[20] = { ...p[20], acc: 25 };
+  p[30] = { ...p[30], lon: p[30].lon + 30 / 83000 }; // 30 m de lado en 1 s: 108 km/h
+  const reg = correr(nuevoRegistro(), p);
+  assert.ok(Math.abs(foto(reg).m - 200) < 3, "metros " + foto(reg).m);
+  assert.ok(!reg.traza.some(q => q && q[2] === p[20].t), "el punto impreciso no esta");
+});
+
+test("una L de 1 km: la esquina no se recorta", () => {
+  const M_LON = 111195 * Math.cos(41.65 * Math.PI / 180);
+  const pts = [];
+  for (let s = 0; s <= 140; s++) { const m = s * 3.5; pts.push(m <= 500
+    ? { lat: 41.65, lon: -0.88 + m / M_LON, acc: 5, t: s * 1000 }
+    : { lat: 41.65 + (m - 500) / M_POR_GRADO, lon: -0.88 + 500 / M_LON, acc: 5, t: s * 1000 }); }
+  const reg = correr(nuevoRegistro(), pts);
+  assert.ok(Math.abs(foto(reg).m - 490) < 3, "metros " + foto(reg).m + " de 490");
+});
+
+test("huecos: más de 10 s sin fixes (pantalla apagada) se apuntan", () => {
+  const p = pista({ ritmo: 300, seg: 60 }).filter((_, i) => i < 20 || i > 45);
+  const reg = correr(nuevoRegistro(), p);
+  assert.equal(segundosEnHuecos(reg), 27, "del fix 19 al 46");
+  assert.ok(Math.abs(foto(reg).m - 200) < 3, "el hueco se une en recta: " + foto(reg).m);
 });
 
 test("salto del GPS y punto impreciso: se descartan", () => {

@@ -24,6 +24,12 @@ export const ESCENARIOS = {
   abierto: { nombre: "Cielo abierto", sig: 3, tau: 20, blanco: 1.5, pSalto: 0, pPerdida: 0.02 },
   ciudad: { nombre: "Ciudad con saltos", sig: 5, tau: 15, blanco: 3, pSalto: 0.01, pPerdida: 0.05 },
   malo: { nombre: "Señal mala", sig: 8, tau: 10, blanco: 4, pSalto: 0.03, pPerdida: 0.1 },
+  // Lo que da de verdad un movil: el chip GNSS ya filtra la posicion, asi que
+  // el error es casi todo deriva lenta y suave y muy poco ruido de un fix a
+  // otro. Los tres de arriba son GPS "crudo" (sin filtro de chip): sirven de
+  // caso extremo, pero no es lo que entrega un Android.
+  movil: { nombre: "Móvil real", chip: true, tau: 30, sigV: 0.15, blanco: 0.3, pSalto: 0.004, pPerdida: 0.02 },
+  movilCiudad: { nombre: "Móvil real, ciudad", chip: true, tau: 20, sigV: 0.25, blanco: 0.5, pSalto: 0.01, pPerdida: 0.05 },
 };
 
 /** Generador repetible (misma semilla, mismos numeros). */
@@ -58,6 +64,12 @@ export function simular(plan, esc, { semilla = 1, doppler = true } = {}) {
   const camino = ruta(total, r);
   const a = Math.exp(-1 / esc.tau);
   const k = Math.sqrt(1 - a * a) * esc.sig;
+  // Chip (movil real): el error de posicion es SUAVE. El chip integra la
+  // velocidad Doppler en un filtro, asi que de un segundo a otro el error
+  // solo cambia lo que se equivoca esa velocidad (~0,15 m/s), y a la larga
+  // vuelve a su sitio (deriva de unos metros que tarda ~tau en cambiar).
+  let vx = 0, vy = 0;
+  const av = Math.exp(-1 / 5), kv = Math.sqrt(1 - av * av) * (esc.sigV || 0.15);
   let ex = 0, ey = 0, salto = 0, sx = 0, sy = 0, m = 0, t = 0;
   const fixes = [], trozos = [];
   const punto = (mm) => {
@@ -66,7 +78,10 @@ export function simular(plan, esc, { semilla = 1, doppler = true } = {}) {
     return { x: p.x + f * (q.x - p.x), y: p.y + f * (q.y - p.y) };
   };
   const fix = (v) => {
-    ex = a * ex + k * r.g(); ey = a * ey + k * r.g();
+    if (esc.chip) {
+      vx = av * vx + kv * r.g(); vy = av * vy + kv * r.g();
+      ex += vx - ex / esc.tau; ey += vy - ey / esc.tau;
+    } else { ex = a * ex + k * r.g(); ey = a * ey + k * r.g(); }
     if (salto > 0) salto--;
     else if (r.u() < esc.pSalto) { salto = 2 + Math.floor(r.u() * 7); const ang = r.u() * 2 * Math.PI, mag = 20 + r.u() * 40; sx = Math.cos(ang) * mag; sy = Math.sin(ang) * mag; }
     if (r.u() < esc.pPerdida) return;
@@ -132,7 +147,7 @@ const p90 = (a) => [...a].map(Math.abs).sort((x, y) => x - y)[Math.floor(a.lengt
 /** Error (%) de distancia en carreras continuas y (s/km) en series, para un escenario. */
 export function evaluar(gps, esc, { vueltas = 40, doppler = true } = {}) {
   const out = {};
-  for (const largo of [400, 1000, 3000, 7000]) {
+  for (const largo of [400, 1000, 2000, 7000]) {
     const e = [];
     for (let k = 0; k < vueltas; k++) e.push(medir(gps, simular(continua(largo), esc, { semilla: 11 + k * 7919, doppler }))[0].errPct);
     out[largo] = { sesgo: media(e), p90: p90(e) };
@@ -153,11 +168,11 @@ async function main() {
   console.log("Error de distancia: p90 (sesgo), en %.  Series 6x400 a 4:35: p90 del error de ritmo en s/km.\n");
   for (const doppler of [true, false]) {
     console.log(doppler ? "── Con velocidad Doppler (Android normal)" : "── Sin velocidad Doppler");
-    console.log("Escenario            |    400 m    |    1 km     |    3 km     |    7 km     | series 400 m");
+    console.log("Escenario            |    400 m    |    1 km     |    2 km     |    7 km     | series 400 m");
     for (const esc of Object.values(ESCENARIOS)) {
       const r = evaluar(gps, esc, { doppler });
       const c = (k) => (r[k].p90.toFixed(1) + "% (" + f(r[k].sesgo) + ")").padStart(11);
-      console.log(esc.nombre.padEnd(20), "|", c(400), "|", c(1000), "|", c(3000), "|", c(7000), "|",
+      console.log(esc.nombre.padEnd(20), "|", c(400), "|", c(1000), "|", c(2000), "|", c(7000), "|",
         ("±" + r.series.p90.toFixed(1) + " s/km (" + f(r.series.sesgo) + ")").padStart(18));
     }
     console.log();

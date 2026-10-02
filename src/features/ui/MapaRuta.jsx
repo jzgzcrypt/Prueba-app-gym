@@ -36,7 +36,7 @@ async function descargarGpx(ruta, titulo, fecha) {
   URL.revokeObjectURL(url);
 }
 
-export function MapaRuta({ ruta, objetivo, titulo, fecha }) {
+export function MapaRuta({ ruta, objetivo, titulo, fecha, rutaCompleta }) {
   const [sinTeselas, setSinTeselas] = useState(false);
   const m = proyectar(ruta, ANCHO, ALTO);
   if (!m) return null;
@@ -81,9 +81,16 @@ export function MapaRuta({ ruta, objetivo, titulo, fecha }) {
             </span>
           ))}
         </div>
-        <button className="btn" onClick={() => descargarGpx(ruta, titulo, fecha)} style={{
+        <div style={{ display: "flex", gap: 6, flexShrink: 0 }}>
+          {rutaCompleta && (
+            <button className="btn" onClick={() => descargarGpx(rutaCompleta, titulo, fecha + "-completo")} style={{
+              fontSize: 11.5, fontWeight: 800, color: C.textDim, border: "1px solid #D4D4D1", borderRadius: 8,
+              padding: "0 10px", minHeight: 32, background: C.card }}>GPX completo</button>
+          )}
+          <button className="btn" onClick={() => descargarGpx(ruta, titulo, fecha)} style={{
           fontSize: 11.5, fontWeight: 800, color: C.text, border: "1px solid #D4D4D1", borderRadius: 8,
           padding: "0 10px", minHeight: 32, background: C.card, flexShrink: 0 }}>GPX</button>
+        </div>
       </div>
     </div>
   );

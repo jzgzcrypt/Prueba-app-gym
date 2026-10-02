@@ -45,7 +45,19 @@ function dp(pts, tol, kLon) {
  * le pone la velocidad media del trozo que representa, para colorear bien.
  * Los cambios de serie a recuperacion y las pausas se respetan.
  */
-export function simplificar(traza, tolM = 3) {
+/**
+ * La traza entera, sin quitar ni un punto, en el mismo formato que la ruta
+ * guardada: para el "GPX completo" con el que comparar con Strava.
+ */
+export function sinSimplificar(traza) {
+  const puntos = (traza || []).filter(Boolean);
+  if (puntos.length < 2) return null;
+  const t0 = puntos[0][2];
+  const r5 = (x) => Math.round(x * 1e6) / 1e6;
+  return { t0, p: traza.map(q => q ? [r5(q[0]), r5(q[1]), Math.round((q[2] - t0) / 1000), q[3] == null ? null : Math.round(q[3] * 10), q[4] || 0] : null) };
+}
+
+export function simplificar(traza, tolM = 2) {
   const puntos = (traza || []).filter(Boolean);
   if (puntos.length < 2) return null;
   const t0 = puntos[0][2];

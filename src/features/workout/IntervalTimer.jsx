@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useRef } from "react";
 import { C, CAT } from "@/design/tokens";
-import { comoVa, entre, foto, ritmoActual, ritmoMedio } from "@/domain/running/gps";
+import { comoVa, entre, foto, ritmoActual, ritmoMedio, segundosEnHuecos } from "@/domain/running/gps";
 import { avisoGps, useGps } from "@/features/workout/useGps";
 import { decir, guardarVoz, leerVoz, ritmoHablado, textoRitmo, usePantallaEncendida } from "@/features/workout/voz";
 
@@ -70,7 +70,7 @@ export function IntervalTimer({ intervalos, ritmo, resultadoRef }) {
   const guardarResultado = () => {
     if (!resultadoRef) return;
     const lista = Object.keys(medidosRef.current).sort((a, b) => a - b).map(k => medidosRef.current[k]);
-    resultadoRef.current = { tramos: lista, total: foto(gps.regRef.current), traza: gps.regRef.current.traza };
+    resultadoRef.current = { tramos: lista, total: foto(gps.regRef.current), traza: gps.regRef.current.traza, huecos: segundosEnHuecos(gps.regRef.current) };
   };
   /** Cierra el tramo `i`: lo mide, cortando en este instante exacto. */
   const cerrarTramo = (i) => {
@@ -198,8 +198,6 @@ export function IntervalTimer({ intervalos, ritmo, resultadoRef }) {
   // Ritmo de ahora y metros del tramo en curso (solo en los tramos corridos).
   const rAhora = corriendo && esCorrer ? ritmoActual(gps.reg, Date.now()) : null;
   const mTramo = corriendo && esCorrer && inicioTramoRef.current.idx === idx ? Math.max(0, Math.round(foto(gps.reg, Date.now()).m - inicioTramoRef.current.foto.m)) : null;
-  // Sin velocidad Doppler (algunos moviles), las series cortas salen con ±10-20 s/km: se dice.
-  const aproximado = corriendo && gps.reg.modo === "posicion";
   const como = actual && actual.tipo === "rapido" ? comoVa(rAhora, ritmo) : null;
 
   return (
@@ -239,7 +237,6 @@ export function IntervalTimer({ intervalos, ritmo, resultadoRef }) {
           )}
         </div>
       )}
-      {aproximado && <div style={{ padding: "6px 16px 0", fontSize: 11, color: "#8A8A87" }}>Tu móvil no da velocidad GPS: el ritmo de las series es aproximado.</div>}
       {series.length > 0 && <div style={{ padding: "0 16px" }}><ListaSeries /></div>}
       {!corriendo && gps.estado === "ok" && gps.precision != null && (
         <div data-gps-listo style={{ padding: "10px 16px 0", fontSize: 12, fontWeight: 800, color: C.ok }}>GPS listo · ±{Math.round(gps.precision)} m</div>

@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import { C } from "@/design/tokens";
-import { comoVa, foto, ritmoActual, tiempoHasta, textoTiempo } from "@/domain/running/gps";
+import { comoVa, foto, ritmoActual, tiempoHasta, textoTiempo, segundosEnHuecos } from "@/domain/running/gps";
 import { avisoGps, useGps } from "@/features/workout/useGps";
 import { textoRitmo, usePantallaEncendida } from "@/features/workout/voz";
 
@@ -48,7 +48,7 @@ export function CarreraGps({ day, resultadoRef }) {
         pruebaRef.current = tp; setTiempoPrueba(tp);
         try { if (navigator.vibrate) navigator.vibrate([300, 120, 300]); } catch { /* sin vibracion */ }
       }
-      if (resultadoRef) resultadoRef.current = { tramos: [], total: foto(reg), tiempoPrueba: pruebaRef.current, traza: reg.traza };
+      if (resultadoRef) resultadoRef.current = { tramos: [], total: foto(reg), tiempoPrueba: pruebaRef.current, traza: reg.traza, huecos: segundosEnHuecos(reg) };
     }, 1000);
     return () => clearInterval(t);
   }, [corriendo]);
@@ -58,7 +58,7 @@ export function CarreraGps({ day, resultadoRef }) {
     if (corriendo) {
       c.acumulado += Date.now() - c.desde; c.desde = null;
       gps.pausar(); setCorriendo(false);
-      if (resultadoRef) resultadoRef.current = { tramos: [], total: foto(gps.regRef.current), tiempoPrueba: pruebaRef.current, traza: gps.regRef.current.traza };
+      if (resultadoRef) resultadoRef.current = { tramos: [], total: foto(gps.regRef.current), tiempoPrueba: pruebaRef.current, traza: gps.regRef.current.traza, huecos: segundosEnHuecos(gps.regRef.current) };
     } else {
       c.desde = Date.now();
       gps.iniciar(); setCorriendo(true);
@@ -98,7 +98,6 @@ export function CarreraGps({ day, resultadoRef }) {
         </div>
       </div>
 
-      {corriendo && gps.reg.modo === "posicion" && <div style={{ padding: "8px 16px 0", fontSize: 11, color: "#8A8A87" }}>Tu móvil no da velocidad GPS: el ritmo es algo menos preciso.</div>}
       {!corriendo && gps.estado === "ok" && gps.precision != null && (
         <div data-gps-listo style={{ padding: "10px 16px 0", fontSize: 12, fontWeight: 800, color: C.ok }}>GPS listo · ±{Math.round(gps.precision)} m</div>
       )}

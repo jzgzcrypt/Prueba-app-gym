@@ -2,36 +2,43 @@
  * Distancia y ritmo con el GPS del movil, sin Strava ni mapas.
  *
  * El navegador da fixes { lat, lon, acc (m), speed (m/s o null), t (ms) }
- * cada ~1 s. Aqui se limpian y se convierten en metros y ritmo. Todo puro: se
- * mide con el simulador (node scripts/sim-gps.mjs), sin movil.
+ * cada ~1 s (enableHighAccuracy, maximumAge 0: GNSS puro, lo maximo que da
+ * Chrome; la web no deja pedir otro intervalo).
  *
- * Dos formas de medir, y se usa la mejor que haya en cada fix:
- *  1. Velocidad Doppler (coords.speed; Chrome en Android la da con GPS). El
- *     GPS la mide por el cambio de frecuencia de los satelites: ±0,1-0,2 m/s
- *     y sin la deriva de la posicion. La distancia es esa velocidad
- *     integrada en el tiempo, como hacen Strava y los relojes. Se descartan
- *     los picos imposibles.
- *  2. Sin Doppler, la posicion: se tiran los fixes imprecisos y los saltos
- *     (mas de 25 km/h desde el ultimo bueno), se promedian los 5 ultimos y la
- *     distancia se suma a trozos de 10 m. Sumar fix a fix con ruido infla la
- *     distancia un 25-180%.
- * (Se probo un filtro de Kalman para la posicion: con los saltos del GPS en
- * ciudad salia peor que esto. Ver CHANGELOG.)
+ * Como se mide, igual que Strava:
+ *  1. Un fix vale si su precision es de 20 m o mejor y no implica ir a mas
+ *     de 40 km/h desde el ultimo punto bueno, ni bastante mas rapido de lo
+ *     que el propio GPS mide que vas (eso es un salto del GPS).
+ *  2. Un fix bueno entra en la traza si han pasado 2 s o se ha movido 5 m
+ *     desde el ultimo punto guardado, lo que pase antes.
+ *  3. La distancia es la suma haversine entre puntos consecutivos de esa
+ *     traza, tal cual. Nada de promediar ni simplificar antes de sumar: eso
+ *     recorta las curvas y la distancia sale corta (la version anterior se
+ *     quedaba un 9% por debajo de Strava). Simplificar es solo para dibujar.
+ *  4. Unica salvaguarda: parado (Doppler < 0,5 m/s y moverse menos que la
+ *     precision del fix) no suma el temblor del GPS.
+ * La velocidad Doppler (coords.speed) solo se usa para el ritmo "de ahora"
+ * en pantalla: Chrome la da suavizada y, integrada, cuenta corto.
+ *
+ * Todo puro: se mide con el simulador (node scripts/sim-gps.mjs), sin movil.
  */
 import { secondsToRitmo } from "./ritmo.js";
 
-/** Peor precision que se acepta para la posicion. */
-export const PRECISION_MAX_M = 25;
-/** Mas rapido que esto (25 km/h) no se corre: es un salto del GPS. */
-export const VELOCIDAD_MAX_MS = 7;
-/** Cambio de velocidad creible entre fixes (m/s por segundo). */
-const ACELERACION_MAX = 2.5;
-/** Por debajo, parado: el Doppler de un movil quieto no es cero, es ruido. */
-const PARADO_MS = 0.3;
-/** Fixes que se promedian para la posicion (~5 s). */
-export const SUAVIZADO = 5;
-/** Trozo minimo para sumar distancia con la posicion. */
-export const TRAMO_MIN_M = 10;
+/** Peor precision que se acepta (m). */
+export const PRECISION_MAX_M = 20;
+/** 40 km/h: mas rapido que esto entre dos puntos es un salto del GPS. */
+export const VELOCIDAD_MAX_MS = 40 / 3.6;
+/** Un punto nuevo en la traza cada 2 s o cada 5 m, lo que pase antes. */
+export const MUESTREO_S = 2;
+export const MUESTREO_M = 5;
+/** Margen sobre lo que permite el Doppler antes de llamarlo salto. */
+const MARGEN_SALTO = { ms: 0.5, m: 3 };
+/** Tras tantos segundos rechazando, se vuelve a fiar del GPS. */
+const ATASCO_S = 20;
+/** Parado: Doppler por debajo de esto (m/s). */
+const PARADO_MS = 0.5;
+/** Mas de esto sin fixes es un hueco (pantalla apagada, tunel). */
+export const HUECO_S = 10;
 /** Suavizado del ritmo "de ahora" (s). */
 const TAU_AHORA = 8;
 
@@ -47,17 +54,17 @@ export function distanciaM(a, b) {
 
 /**
  * Un registro vacio.
- *  m, seg: metros y segundos en movimiento (sin pausas).
- *  linea: [{ t, s, m }] un punto por fix, para tiempoHasta.
- *  ultimo: el ultimo fix (null tras una pausa: el siguiente solo ancla).
- *  pos: el ultimo fix de posicion bueno; buf, suave, ancla: la posicion promediada.
- *  vDoppler: la ultima velocidad Doppler buena; vAhora: la suavizada para mostrar.
- *  traza: la ruta para el mapa, [lat, lon, t, v, k] por fix bueno y null en
- *  cada pausa (ver ruta.js); k lo pone marcarTramo (0 corre, 1 recupera).
+ *  m, seg: metros (suma de la traza) y segundos con el GPS en marcha.
+ *  ultimo: el ultimo fix recibido (null tras una pausa).
+ *  pos: el ultimo punto guardado en la traza; pendiente: metros desde ese
+ *    punto hasta el ultimo fix bueno aun no guardado (para cortar series).
+ *  traza: [lat, lon, t, v, k] por punto guardado y null en cada pausa.
+ *  linea: [{ t, s, m }] por punto guardado, para tiempoHasta.
+ *  huecos: segundos sin fixes de cada hueco (pantalla apagada).
  */
 export function nuevoRegistro() {
-  return { m: 0, seg: 0, ultimo: null, pos: null, buf: [], suave: null, ancla: null, linea: [],
-           vDoppler: null, rechazosV: 0, vAhora: null, segActivo: 0, modo: null, traza: [], k: 0 };
+  return { m: 0, seg: 0, ultimo: null, pos: null, pendiente: 0, traza: [], linea: [], k: 0,
+           vDoppler: null, vAhora: null, segActivo: 0, huecos: [] };
 }
 
 /** El temporizador avisa de si ahora se corre (0) o se recupera (1): el mapa lo pinta distinto. */
@@ -65,115 +72,84 @@ export function marcarTramo(reg, k) {
   return reg.k === k ? reg : { ...reg, k };
 }
 
-function promedio(buf) {
-  const n = buf.length;
-  // La posicion promediada es la de hace ~2 s: lleva ese tiempo (la media).
-  return { lat: buf.reduce((a, p) => a + p.lat, 0) / n, lon: buf.reduce((a, p) => a + p.lon, 0) / n,
-           t: buf.reduce((a, p) => a + p.t, 0) / n };
-}
+const precisionOk = (p) => p.lat != null && p.lon != null && p.acc != null && p.acc <= PRECISION_MAX_M;
+const dopplerDe = (p) => (p.speed != null && Number.isFinite(p.speed) && p.speed >= 0 && p.speed <= VELOCIDAD_MAX_MS ? p.speed : null);
 
-/** Velocidad Doppler creible, o null. */
-function dopplerValido(reg, p, dt) {
-  const s = p.speed;
-  if (s == null || !Number.isFinite(s) || s < 0 || s > VELOCIDAD_MAX_MS) return null;
-  // Un pico: cambio imposible respecto a la ultima buena. Tras 3 seguidos,
-  // el cambio era de verdad (arrancar tras un semaforo) y se acepta.
-  if (reg.vDoppler != null && Math.abs(s - reg.vDoppler) > ACELERACION_MAX * Math.max(1, dt) && reg.rechazosV < 3) return null;
-  return s < PARADO_MS ? 0 : s;
-}
-
-/** ¿Vale este fix para la posicion? */
-function posicionValida(reg, p) {
-  if (p.lat == null || p.acc == null || p.acc > PRECISION_MAX_M) return false;
-  if (!reg.pos) return true;
-  const dt = (p.t - reg.pos.t) / 1000;
-  return dt > 0 && distanciaM(reg.pos, p) / dt <= VELOCIDAD_MAX_MS;
+/** El ritmo de ahora sin Doppler: lo recorrido en la traza en los ultimos ~20 s. */
+function velocidadDeLinea(linea) {
+  if (linea.length < 2) return null;
+  const fin = linea[linea.length - 1];
+  let ini = fin;
+  for (let i = linea.length - 1; i >= 0 && fin.t - linea[i].t <= 20000; i--) ini = linea[i];
+  return fin.t - ini.t >= 8000 ? (fin.m - ini.m) / ((fin.t - ini.t) / 1000) : null;
 }
 
 /**
- * Suma un fix al registro. Devuelve un registro nuevo (o el mismo si el fix
- * no aporta nada). El primero, o el primero tras una pausa, solo ancla.
+ * Suma un fix al registro. Devuelve un registro nuevo (o el mismo si no
+ * aporta nada). El primero, o el primero tras una pausa, solo ancla.
  */
 export function agregarPunto(reg, p) {
   if (!p || p.t == null) return reg;
+  const vd = dopplerDe(p);
   if (!reg.ultimo) {
-    const okPos = posicionValida({ pos: null }, p);
-    const vd = dopplerValido({ vDoppler: null }, p, 1);
-    if (!okPos && vd == null) return reg;
-    const buf = okPos ? [p] : [];
-    const suave = okPos ? promedio(buf) : null;
-    const traza = okPos ? [...(reg.traza || []), [p.lat, p.lon, p.t, vd, reg.k || 0]] : (reg.traza || []);
-    return { ...reg, ultimo: p, pos: okPos ? p : null, buf, suave, ancla: suave, vDoppler: vd, rechazosV: 0,
-             vAhora: null, segActivo: 0, modo: null, traza,
-             linea: reg.linea.length ? reg.linea : [{ t: p.t, s: reg.seg, m: reg.m }] };
+    if (!precisionOk(p)) return reg;
+    return { ...reg, ultimo: p, pos: p, pendiente: 0, vDoppler: vd, vAhora: null, segActivo: 0,
+             traza: [...reg.traza, [p.lat, p.lon, p.t, vd, reg.k || 0]],
+             linea: [...reg.linea, { t: p.t, s: reg.seg, m: reg.m }] };
   }
   const dt = (p.t - reg.ultimo.t) / 1000;
   if (dt <= 0) return reg;
-
-  // Posicion: promedio de los ultimos fixes buenos.
-  let { pos, buf, suave, ancla } = reg;
-  let dPos = 0, posNueva = false;
-  if (posicionValida(reg, p)) {
-    posNueva = true;
-    pos = p;
-    buf = [...buf, p].slice(-SUAVIZADO);
-    suave = promedio(buf);
-    if (!ancla) ancla = suave;
-    const d = distanciaM(ancla, suave);
-    if (d >= TRAMO_MIN_M) { dPos = d; ancla = suave; }
-  }
-
-  // Distancia: Doppler si lo hay; si no, la posicion.
-  const vd = dopplerValido(reg, p, dt);
-  const rechazosV = p.speed != null && vd == null ? reg.rechazosV + 1 : 0;
-  let m = reg.m, modo, vMedida;
-  if (vd != null || (p.speed != null && reg.vDoppler != null)) {
-    // Con un pico descartado se sigue con la ultima velocidad buena.
-    const v = vd != null ? vd : reg.vDoppler;
-    const vPrev = reg.vDoppler != null ? reg.vDoppler : v;
-    m += (vPrev + v) / 2 * dt;
-    if (suave) ancla = suave; // la posicion queda al dia por si el Doppler falta luego
-    modo = "doppler"; vMedida = v;
-  } else {
-    m += dPos;
-    modo = "posicion";
-    vMedida = null;
-  }
   const seg = reg.seg + dt;
-  // La linea (para tiempoHasta): con Doppler, un punto por fix; con posicion,
-  // uno por trozo, con el tiempo de la posicion promediada (va ~2 s por detras).
-  let linea = reg.linea;
-  if (modo === "doppler") linea = [...linea, { t: p.t, s: seg, m }];
-  else if (dPos > 0) linea = [...linea, { t: suave.t, s: seg - (p.t - suave.t) / 1000, m }];
-  if (vMedida == null) {
-    // Sin Doppler, la velocidad sale de la linea de los ultimos ~20 s.
-    const l = linea, fin = l[l.length - 1];
-    // (callado mas de 10 s: no se inventa)
-    let ini = l[l.length - 1];
-    for (let i = l.length - 1; i >= 0 && fin.t - l[i].t <= 20000; i--) ini = l[i];
-    vMedida = fin.t - ini.t >= 8000 ? (fin.m - ini.m) / ((fin.t - ini.t) / 1000) : null;
+  const huecos = dt > HUECO_S ? [...reg.huecos, Math.round(dt)] : reg.huecos;
+  let { m, pos, pendiente, traza, linea } = reg;
+
+  if (precisionOk(p)) {
+    const d = distanciaM(pos, p);
+    const dtp = (p.t - pos.t) / 1000;
+    // Un salto: mas de 40 km/h, o avanzar mas de lo que permite la velocidad
+    // que el propio GPS mide (Doppler), con margen. Lo segundo pilla los
+    // rebotes en edificios de 20-40 m, que a 40 km/h aun colarian. Si lleva
+    // 20 s rechazando, el que se equivoca es el filtro: se vuelve a fiar.
+    // Sin Doppler, la referencia es la velocidad de la propia traza (8 s).
+    const vRef = vd != null ? vd : reg.vDoppler != null ? reg.vDoppler : reg.vAhora;
+    const atascado = dtp > ATASCO_S;
+    const salto = dtp > 0 && (d / dtp > VELOCIDAD_MAX_MS ||
+      (!atascado && vRef != null && d > vRef * dtp + MARGEN_SALTO.ms * dtp + MARGEN_SALTO.m));
+    // Parado: no se suma el temblor. El punto guardado no se mueve, asi que
+    // si en realidad avanzas, esa distancia entra entera con el siguiente.
+    const parado = vd != null ? vd < PARADO_MS && d < Math.max(p.acc, MUESTREO_M) : d < p.acc / 2;
+    if (!salto && !parado) {
+      if (dtp >= MUESTREO_S || d >= MUESTREO_M) {
+        m += d; pos = p; pendiente = 0;
+        traza = [...traza, [p.lat, p.lon, p.t, vd != null ? vd : d / dtp, reg.k || 0]];
+        linea = [...linea, { t: p.t, s: seg, m }];
+      } else {
+        pendiente = d;
+      }
+    } else if (parado) {
+      pendiente = 0;
+    }
   }
+
+  // Ritmo de ahora: con Doppler si lo hay; si no, con la traza.
+  const vMedida = vd != null ? vd : velocidadDeLinea(linea);
   const w = 1 - Math.exp(-dt / TAU_AHORA);
   const vAhora = vMedida == null ? reg.vAhora : reg.vAhora == null ? vMedida : reg.vAhora + w * (vMedida - reg.vAhora);
-  // Para el mapa, la posicion promediada (dibuja una linea limpia, sin zigzag).
-  const traza = posNueva ? [...(reg.traza || []), [suave.lat, suave.lon, suave.t, vMedida, reg.k || 0]] : (reg.traza || []);
-  return { ...reg, ultimo: p, pos, buf, suave, ancla, vDoppler: vd != null ? vd : reg.vDoppler, rechazosV,
-           m, seg, modo, vAhora, segActivo: reg.segActivo + dt, linea, traza };
+  return { ...reg, ultimo: p, m, seg, pos, pendiente, traza, linea, huecos,
+           vDoppler: vd != null ? vd : reg.vDoppler, vAhora, segActivo: reg.segActivo + dt };
 }
 
 /**
- * Foto del registro para medir un tramo: { m, seg }.
- * Sin Doppler suma lo que va desde el ultimo trozo hasta el ultimo fix bueno
- * (no el promediado, que va ~2 s por detras). Con `ahoraT` estira hasta ese
- * instante con la ultima velocidad (hasta 3 s): el temporizador corta entre
- * dos fixes, y a 4:35 un segundo son 3,6 m.
+ * Foto del registro para medir un tramo: { m, seg }. Suma lo que va del
+ * ultimo punto guardado al ultimo fix bueno y, con `ahoraT`, estira hasta
+ * ese instante con la velocidad de ahora (hasta 2 s): el temporizador corta
+ * entre dos fixes, y a 4:35 un segundo son 3,6 m.
  */
 export function foto(reg, ahoraT) {
-  let m = reg.m, seg = reg.seg;
-  if (reg.ultimo && reg.modo === "posicion" && reg.ancla && reg.pos) m += distanciaM(reg.ancla, reg.pos);
+  let m = reg.m + (reg.pendiente || 0), seg = reg.seg;
   if (reg.ultimo && ahoraT != null) {
-    const extra = Math.min(3, Math.max(0, (ahoraT - reg.ultimo.t) / 1000));
-    const v = reg.modo === "doppler" ? reg.vDoppler : reg.vAhora;
+    const extra = Math.min(2, Math.max(0, (ahoraT - reg.ultimo.t) / 1000));
+    const v = reg.vDoppler != null ? reg.vDoppler : reg.vAhora;
     m += (v || 0) * extra; seg += extra;
   }
   return { m, seg };
@@ -182,9 +158,12 @@ export function foto(reg, ahoraT) {
 /** Pausa: el siguiente fix vuelve a anclar, asi no se cuenta el hueco. */
 export function pausar(reg) {
   const f = foto(reg);
-  const traza = reg.traza && reg.traza.length && reg.traza[reg.traza.length - 1] !== null ? [...reg.traza, null] : reg.traza;
-  return { ...reg, m: f.m, ultimo: null, pos: null, buf: [], suave: null, ancla: null, vDoppler: null, vAhora: null, modo: null, traza };
+  const traza = reg.traza.length && reg.traza[reg.traza.length - 1] !== null ? [...reg.traza, null] : reg.traza;
+  return { ...reg, m: f.m, pendiente: 0, ultimo: null, pos: null, vDoppler: null, vAhora: null, traza };
 }
+
+/** Segundos perdidos en huecos (pantalla apagada). */
+export const segundosEnHuecos = (reg) => (reg.huecos || []).reduce((a, b) => a + b, 0);
 
 /**
  * Ritmo de ahora (s/km), suavizado unos 8 s. null si aun no hay 8 s de
@@ -193,7 +172,7 @@ export function pausar(reg) {
  */
 export function ritmoActual(reg, ahoraT) {
   if (!reg.ultimo || reg.vAhora == null || reg.segActivo < 8) return null;
-  if (ahoraT != null && ahoraT - reg.ultimo.t > 10000) return null;
+  if (ahoraT != null && ahoraT - reg.ultimo.t > HUECO_S * 1000) return null;
   if (reg.vAhora < 1) return null;
   return 1000 / reg.vAhora;
 }
