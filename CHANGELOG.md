@@ -22,6 +22,7 @@ Todo cambio que se haga en la app se anota aquí. Sin excepciones.
 ## [Sin publicar]
 
 ### Mapa de la salida: estilo Niebla (y Arena para comparar)
+- Parques verdes, agua azul, edificios, calles y carreteras se distinguen en los dos estilos: cada tesela de OSM se repinta por tipo de cosa con la paleta del estilo, en vez de teñirlo todo de gris o sepia. Si el navegador no deja leer la tesela, se usa el filtro de antes.
 - Provisional: bajo el mapa, un selector Niebla / Arena para compararlos con tus calles de verdad; se recuerda el elegido. Arena: callejero en tonos crema y ruta naranja con sombra suave.
 - El callejero de OpenStreetMap se ve en gris claro, para que mande la ruta.
 - La ruta va en curvas, sin ángulos: se redondean las esquinas sin salirse de la calle.

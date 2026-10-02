@@ -1,17 +1,20 @@
 "use client";
 
-import { useEffect, useId, useState } from "react";
+import { useEffect, useId, useRef, useState } from "react";
 import { C, CAT } from "@/design/tokens";
 import { aGpx, degradado, flechas, marcasKm, proyectar, remuestrear, suavizar, tramosPorColor } from "@/domain/running/ruta";
 import { textoTiempo } from "@/domain/running/gps";
+import { PALETAS, recolorear } from "@/domain/running/teselas";
 
 /**
  * La ruta de una salida sobre OpenStreetMap, en curvas, con los km marcados,
  * flechas de sentido, salida y llegada, y los datos encima. Dos estilos, de
  * momento a elegir con un selector bajo el mapa:
- *  - Niebla: callejero en gris claro, ruta con brillo y degradado del inicio
+ *  - Niebla: callejero en grises frios, ruta con brillo y degradado del inicio
  *    al final;
  *  - Arena: callejero en tonos crema, ruta naranja con sombra suave.
+ * En los dos, cada tesela se repinta por tipo (parques verdes, agua azul,
+ * edificios, calles: ver teselas.js); si el navegador no deja, filtro CSS.
  * Con series (varios ritmos), en los dos el color de la ruta dice el ritmo.
  *
  * Sin librerias: un mapa fijo (no se arrastra) con las teselas de OSM de
@@ -29,13 +32,13 @@ const COLOR = {
 };
 export const ESTILOS_MAPA = {
   niebla: {
-    nombre: "Niebla", fondo: "#EEEFF1", filtro: "grayscale(1) contrast(0.78) brightness(1.12)",
+    nombre: "Niebla", paleta: PALETAS.niebla, fondo: PALETAS.niebla.fondo, filtro: "grayscale(1) contrast(0.78) brightness(1.12)",
     flow: ["#FFB547", "#FC5200", "#D9184B"], brillo: "#FC5200", sombra: false,
     km: { fondo: "#1D1F24", borde: "#FFFFFF", texto: "#FAFAF9" },
     panel: "rgba(255,255,255,.75)", tinta: "#1D1F24", tenue: "#7A7F88",
   },
   arena: {
-    nombre: "Arena", fondo: "#F5F1EA", filtro: "grayscale(0.55) sepia(0.3) contrast(0.8) brightness(1.08)",
+    nombre: "Arena", paleta: PALETAS.arena, fondo: PALETAS.arena.fondo, filtro: "grayscale(0.55) sepia(0.3) contrast(0.8) brightness(1.08)",
     flow: null, linea: "#F2542D", brillo: null, sombra: true,
     km: { fondo: "#FFFFFF", borde: "#F2542D", texto: "#F2542D" },
     panel: "rgba(255,255,255,.82)", tinta: "#2B2622", tenue: "#8C8378",
@@ -45,6 +48,39 @@ const CLAVE_ESTILO = "programa7k:estilo-mapa";
 const leerEstilo = () => { try { const e = window.localStorage.getItem(CLAVE_ESTILO); return ESTILOS_MAPA[e] ? e : "niebla"; } catch { return "niebla"; } };
 const guardarEstilo = (e) => { try { window.localStorage.setItem(CLAVE_ESTILO, e); } catch { /* solo esta sesion */ } };
 const LEYENDA = { objetivo: "a tu ritmo", cerca: "algo más lento", suave: "suave", recupera: "recuperación" };
+
+/**
+ * Una tesela de OSM repintada con la paleta del estilo. Se pide con CORS para
+ * poder leer sus pixeles; si no se puede, la imagen normal con el filtro CSS.
+ */
+function TeselaPintada({ src, paleta, filtro, style, onError }) {
+  const lienzo = useRef(null);
+  const [respaldo, setRespaldo] = useState(false);
+  useEffect(() => {
+    if (respaldo) return;
+    let vivo = true;
+    const img = new Image();
+    img.crossOrigin = "anonymous";
+    img.onload = () => {
+      if (!vivo || !lienzo.current) return;
+      try {
+        const c = lienzo.current, ctx = c.getContext("2d", { willReadFrequently: true });
+        ctx.drawImage(img, 0, 0, c.width, c.height);
+        const datos = ctx.getImageData(0, 0, c.width, c.height);
+        recolorear(datos.data, paleta);
+        ctx.putImageData(datos, 0, 0);
+      } catch { setRespaldo(true); }
+    };
+    img.onerror = () => { if (vivo) setRespaldo(true); };
+    img.src = src;
+    return () => { vivo = false; };
+  }, [src, paleta, respaldo]);
+  if (respaldo) {
+    // eslint-disable-next-line @next/next/no-img-element
+    return <img alt="" draggable={false} loading="lazy" src={src} onError={onError} style={{ ...style, filter: filtro }} />;
+  }
+  return <canvas ref={lienzo} width={256} height={256} data-tesela style={style} />;
+}
 
 async function descargarGpx(ruta, titulo, fecha) {
   const nombre = "carrera-" + fecha + ".gpx";
@@ -92,12 +128,11 @@ export function MapaRuta({ ruta, objetivo, titulo, fecha, rutaCompleta, datos })
       <div style={{ position: "relative", width: "100%", aspectRatio: ANCHO + " / " + ALTO, overflow: "hidden",
                     borderRadius: 14, background: E.fondo, border: "1px solid " + C.cardBorder }}>
         {!sinTeselas && m.teselas.map(t => (
-          // eslint-disable-next-line @next/next/no-img-element
-          <img key={t.z + "/" + t.x + "/" + t.y} alt="" draggable={false} loading="lazy"
+          <TeselaPintada key={t.z + "/" + t.x + "/" + t.y}
             src={"https://tile.openstreetmap.org/" + t.z + "/" + t.x + "/" + t.y + ".png"}
-            onError={() => setSinTeselas(true)}
+            paleta={E.paleta} filtro={E.filtro} onError={() => setSinTeselas(true)}
             style={{ position: "absolute", left: pct(t.left, ANCHO), top: pct(t.top, ALTO),
-                     width: pct(256, ANCHO), height: pct(256, ALTO), userSelect: "none", filter: E.filtro }} />
+                     width: pct(256, ANCHO), height: pct(256, ALTO), userSelect: "none" }} />
         ))}
         <svg viewBox={"0 0 " + ANCHO + " " + ALTO} style={{ position: "absolute", inset: 0, width: "100%", height: "100%" }}>
           <defs>
