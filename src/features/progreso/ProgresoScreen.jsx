@@ -594,7 +594,7 @@ function TusSalidas({ gps }) {
               {(g.m / 1000).toFixed(2).replace(".", ",")} km · {textoTiempo(g.seg)} {abierta === k ? "▾" : "›"}
             </span>
           </button>
-          {abierta === k && <div style={{ paddingBottom: 12 }}><MapaRuta ruta={g.ruta} objetivo={g.obj} titulo={day.titulo} fecha={day.isoDate} /></div>}
+          {abierta === k && <div style={{ paddingBottom: 12 }}><MapaRuta ruta={g.ruta} objetivo={g.obj} titulo={day.titulo} fecha={day.isoDate} datos={g} /></div>}
         </div>
       ))}
     </div>

@@ -108,7 +108,7 @@ export function aPixel(lat, lon, z) {
  * Encaja la ruta en `ancho` x `alto` px: el zoom mas cercano que cabe (hasta
  * 17), donde cae cada punto y que teselas hacen falta.
  */
-export function proyectar(ruta, ancho, alto, margen = 18) {
+export function proyectar(ruta, ancho, alto, margen = 18, margenSup = margen) {
   const pts = ruta && ruta.p ? ruta.p.filter(Boolean) : [];
   if (!pts.length) return null;
   const lats = pts.map(q => q[0]), lons = pts.map(q => q[1]);
@@ -116,11 +116,11 @@ export function proyectar(ruta, ancho, alto, margen = 18) {
   let z = 17;
   for (; z > 2; z--) {
     const a = aPixel(n, o, z), b = aPixel(s, e, z);
-    if (b.x - a.x <= ancho - 2 * margen && b.y - a.y <= alto - 2 * margen) break;
+    if (b.x - a.x <= ancho - 2 * margen && b.y - a.y <= alto - margen - margenSup) break;
   }
   const a = aPixel(n, o, z), b = aPixel(s, e, z);
   // Esquina superior izquierda del recuadro, con la ruta centrada.
-  const x0 = (a.x + b.x) / 2 - ancho / 2, y0 = (a.y + b.y) / 2 - alto / 2;
+  const x0 = (a.x + b.x) / 2 - ancho / 2, y0 = (a.y + b.y) / 2 - (margenSup + (alto - margen - margenSup) / 2);
   const punto = (q) => { const px = aPixel(q[0], q[1], z); return { x: px.x - x0, y: px.y - y0 }; };
   const teselas = [];
   const max = 2 ** z;
@@ -192,4 +192,66 @@ ${segmentos.map(s => "    <trkseg>\n" + s.join("\n") + "\n    </trkseg>").join("
   </trk>
 </gpx>
 `;
+}
+
+// ─── A LO LARGO DE LA RUTA ────────────────────────────────────────────────
+
+const distLL = (a, b) => {
+  const kLon = M_LAT * Math.cos(rad((a[0] + b[0]) / 2));
+  return Math.hypot((b[0] - a[0]) * M_LAT, (b[1] - a[1]) * kLon);
+};
+
+/** Los tramos seguidos de la ruta (cortados en cada pausa), con su distancia acumulada. */
+function recorrido(ruta) {
+  const segs = [];
+  let prev = null, acum = 0;
+  for (const q of (ruta && ruta.p) || []) {
+    if (!q) { prev = null; continue; }
+    if (prev) { const d = distLL(prev, q); segs.push({ a: prev, b: q, desde: acum, d }); acum += d; }
+    prev = q;
+  }
+  return { segs, total: acum };
+}
+
+/** El punto a `metros` del inicio, y el tramo en el que cae. */
+function puntoA({ segs }, metros) {
+  for (const s of segs) {
+    if (metros <= s.desde + s.d) {
+      const f = s.d ? (metros - s.desde) / s.d : 0;
+      return { lat: s.a[0] + f * (s.b[0] - s.a[0]), lon: s.a[1] + f * (s.b[1] - s.a[1]), a: s.a, b: s.b };
+    }
+  }
+  return null;
+}
+
+/**
+ * Las marcas de cada km: [{ n, lat, lon }]. Se reparten en proporcion a la
+ * distancia MEDIDA (`metrosMedidos`), no a la del trazado simplificado, para
+ * que el "2" caiga donde la app conto 2 km.
+ */
+export function marcasKm(ruta, metrosMedidos) {
+  const r = recorrido(ruta);
+  if (!r.total) return [];
+  const escala = metrosMedidos > 0 ? r.total / metrosMedidos : 1;
+  const out = [];
+  for (let n = 1; n * 1000 * escala < r.total; n++) {
+    const p = puntoA(r, n * 1000 * escala);
+    if (p) out.push({ n, lat: p.lat, lon: p.lon });
+  }
+  return out;
+}
+
+/**
+ * Donde poner las flechas de sentido: `n` puntos repartidos por la ruta, con
+ * el tramo (a → b) en el que caen para orientarlas.
+ */
+export function flechas(ruta, n = 3) {
+  const r = recorrido(ruta);
+  if (!r.total) return [];
+  const out = [];
+  for (let i = 1; i <= n; i++) {
+    const p = puntoA(r, r.total * i / (n + 1));
+    if (p) out.push(p);
+  }
+  return out;
 }

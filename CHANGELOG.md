@@ -21,6 +21,13 @@ Todo cambio que se haga en la app se anota aquí. Sin excepciones.
 
 ## [Sin publicar]
 
+### Mapa de la salida, más claro
+- Cuatro estilos para elegir con pestañas bajo el mapa: **Oscuro** (por defecto, tipo Strava), **Claro**, **Satélite** y **Callejero**. El que elijas se recuerda.
+- Marcas de km (1, 2, 3…) colocadas según la distancia medida.
+- Ruta más gruesa con borde, flechas de sentido, salida verde y llegada con bandera de cuadros.
+- Franja de datos encima del mapa: distancia, tiempo y ritmo. Se quita la línea GPS repetida debajo.
+- Las salidas antiguas se quedan como están.
+
 ### Arreglado — El mapa de las carreras ya hechas
 - Al ir hacia atrás en HOY, las sesiones de running con GPS enseñan lo medido
   («GPS: 2,07 km · 14:46 · 7:08/km») y su mapa, con el botón GPX. Antes el

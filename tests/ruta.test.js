@@ -5,7 +5,7 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import { agregarPunto, marcarTramo, nuevoRegistro, pausar } from "../src/domain/running/gps.js";
-import { aGpx, aPixel, categoria, proyectar, simplificar, tramosPorColor } from "../src/domain/running/ruta.js";
+import { aGpx, aPixel, categoria, flechas, marcasKm, proyectar, simplificar, tramosPorColor } from "../src/domain/running/ruta.js";
 
 const M_LAT = 111195, M_LON = M_LAT * Math.cos(41.65 * Math.PI / 180);
 const fix = (x, y, t, v = 3.5) => ({ lat: 41.65 + y / M_LAT, lon: -0.88 + x / M_LON, acc: 5, speed: v, t });
@@ -76,4 +76,34 @@ test("GPX: un trkseg por tramo sin pausa, con tiempos ISO", () => {
   assert.equal((g.match(/<trkseg>/g) || []).length, 2);
   assert.match(g, /<time>2026-10-22T16:00:00\.000Z<\/time>/);
   assert.match(g, /Series &lt;6x400&gt;/);
+});
+
+const recta = (metros) => ({ t0: 0, p: Array.from({ length: 51 }, (_, i) => [41.65 + (metros * i / 50) / 111195, -0.88, i * 6, 35, 0]) });
+
+test("marcas de km: en una recta de 2,5 km, en el 1000 y el 2000", () => {
+  const m = marcasKm(recta(2500), 2500);
+  assert.deepEqual(m.map(x => x.n), [1, 2]);
+  assert.ok(Math.abs((m[0].lat - 41.65) * 111195 - 1000) < 1);
+  assert.ok(Math.abs((m[1].lat - 41.65) * 111195 - 2000) < 1);
+});
+
+test("marcas de km: si la app midió más que el trazado, se reparten en proporción", () => {
+  const m = marcasKm(recta(2000), 2200); // trazado 2000, medido 2200: el km 1 cae al 45%
+  assert.deepEqual(m.map(x => x.n), [1, 2]);
+  assert.ok(Math.abs((m[0].lat - 41.65) * 111195 - 1000 * 2000 / 2200) < 1);
+});
+
+test("flechas: repartidas y orientadas según el tramo en que caen", () => {
+  const M_LON = 111195 * Math.cos(41.65 * Math.PI / 180);
+  const ele = { t0: 0, p: [[41.65, -0.88, 0, 30, 0], [41.65, -0.88 + 500 / M_LON, 100, 30, 0], [41.65 + 500 / 111195, -0.88 + 500 / M_LON, 200, 30, 0]] };
+  const f = flechas(ele, 3);
+  assert.equal(f.length, 3);
+  assert.equal(f[0].b[1] > f[0].a[1], true, "la primera va hacia el este");
+  assert.equal(f[2].b[0] > f[2].a[0], true, "la última va hacia el norte");
+});
+
+test("proyectar deja sitio arriba para la franja de datos", () => {
+  const m = proyectar(recta(1000), 360, 250, 18, 54);
+  const ys = recta(1000).p.map(q => m.punto(q).y);
+  assert.ok(Math.min(...ys) >= 54 - 0.5 && Math.max(...ys) <= 250 - 18 + 0.5, Math.min(...ys) + " " + Math.max(...ys));
 });

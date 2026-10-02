@@ -119,7 +119,7 @@ export function CierreSesion({ dayKey, workoutWeights, workoutReps, ritmoReal, g
           <div style={{ marginTop: 18, background: C.card, border: "1px solid " + C.cardBorder, borderRadius: 14, padding: "14px 16px" }}>
             {gps && gps.ruta && (
               <div style={{ marginBottom: 12 }}>
-                <MapaRuta ruta={gps.ruta} objetivo={gps.obj} titulo={day.titulo} fecha={day.isoDate} rutaCompleta={trazaCompleta(dayKey)} />
+                <MapaRuta ruta={gps.ruta} objetivo={gps.obj} titulo={day.titulo} fecha={day.isoDate} rutaCompleta={trazaCompleta(dayKey)} datos={gps} />
               </div>
             )}
             {gps && gps.huecos > 10 && (
@@ -127,10 +127,10 @@ export function CierreSesion({ dayKey, workoutWeights, workoutReps, ritmoReal, g
                 Se perdieron {mmss(gps.huecos)} con la pantalla apagada: ese tramo va en línea recta. Para que cuente entero, deja la pantalla encendida.
               </div>
             )}
-            {gps && gps.m > 0 && (
+            {gps && gps.m > 0 && (!gps.ruta || (gps.series && gps.series.length > 0)) && (
               <div className="mono" style={{ fontSize: 12.5, fontWeight: 700, color: C.textDim, marginBottom: 10 }}>
-                GPS: {(gps.m / 1000).toFixed(2).replace(".", ",")} km · {textoTiempo(gps.seg)}
-                {gps.series && gps.series.length > 0 ? " · series " + gps.series.map(textoTiempo).join(" ") : ""}
+                {gps.ruta ? "" : "GPS: " + (gps.m / 1000).toFixed(2).replace(".", ",") + " km · " + textoTiempo(gps.seg)}
+                {gps.series && gps.series.length > 0 ? (gps.ruta ? "Series: " : " · series ") + gps.series.map(textoTiempo).join(" ") : ""}
               </div>
             )}
             <div style={{ fontSize: 10, fontWeight: 800, color: C.textDim, letterSpacing: 0.5, marginBottom: 6 }}>{apuntar.label}</div>
