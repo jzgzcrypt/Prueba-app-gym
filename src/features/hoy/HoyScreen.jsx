@@ -3,6 +3,16 @@
 import { useState } from "react";
 import { C, CAT, R, SP, TAP_MIN, TYPE } from "@/design/tokens";
 import { AvisoRitmo, LecturaSesion, queApuntar } from "@/features/ui/lectura";
+import { MapaRuta } from "@/features/ui/MapaRuta";
+import { textoTiempo } from "@/domain/running/gps";
+
+/** La traza entera guardada de la ultima salida, si es la de este dia (para el GPX completo). */
+function trazaCompletaDe(dayKey) {
+  try {
+    const t = JSON.parse(window.localStorage.getItem("programa7k:ultima-traza") || "null");
+    return t && t.dia === dayKey ? t.ruta : null;
+  } catch { return null; }
+}
 import { TarjetaResumen } from "@/features/ui/resumen";
 import { TarjetaCalendario } from "@/features/ui/calendario";
 import { LineaPlan } from "@/features/ui/plan-vs-real";
@@ -285,6 +295,19 @@ export function HoyScreen(props) {
                 )}
                 {props.ritmoReal[dayKey] && !props.editingRitmo[dayKey] && (
                   <LecturaSesion day={day} texto={props.ritmoReal[dayKey]} ritmoReal={props.ritmoReal} />
+                )}
+
+                {/* La salida con GPS de ese dia: lo medido y su mapa, tambien dias despues. */}
+                {props.gpsDelDia && props.gpsDelDia.m > 0 && (
+                  <div data-salida style={{ marginTop: 12 }}>
+                    <div className="mono" style={{ fontSize: 12.5, fontWeight: 700, color: C.textDim, marginBottom: 8 }}>
+                      GPS: {(props.gpsDelDia.m / 1000).toFixed(2).replace(".", ",")} km · {textoTiempo(props.gpsDelDia.seg)}
+                      {props.gpsDelDia.m >= 500 ? " · " + textoTiempo(props.gpsDelDia.seg / props.gpsDelDia.m * 1000) + "/km" : ""}
+                    </div>
+                    {props.gpsDelDia.ruta && (
+                      <MapaRuta ruta={props.gpsDelDia.ruta} objetivo={props.gpsDelDia.obj} titulo={day.titulo} fecha={day.isoDate} rutaCompleta={trazaCompletaDe(dayKey)} />
+                    )}
+                  </div>
                 )}
 
                 {day.weekN <= 3 && (

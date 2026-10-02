@@ -21,6 +21,11 @@ Todo cambio que se haga en la app se anota aquí. Sin excepciones.
 
 ## [Sin publicar]
 
+### Arreglado — El mapa de las carreras ya hechas
+- Al ir hacia atrás en HOY, las sesiones de running con GPS enseñan lo medido
+  («GPS: 2,07 km · 14:46 · 7:08/km») y su mapa, con el botón GPX. Antes el
+  mapa solo salía al terminar la sesión y en Progreso › Tus salidas.
+
 ### Añadido — Motor adaptativo (la idea de MacroFactor)
 - **Tu gasto real, medido**: con tu peso de cada mañana (un toque en
   Nutrición) y lo que comes (los días cerrados con tu IA):

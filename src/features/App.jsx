@@ -611,7 +611,7 @@ export default function App() {
         )}
 
         {screen === "hoy" && (
-          <HoyScreen day={currentDay} dayKey={dayKey} isToday={isToday} flatIdx={flatIdx}
+          <HoyScreen day={currentDay} dayKey={dayKey} isToday={isToday} flatIdx={flatIdx} gpsDelDia={gps[dayKey]}
             goDay={goDay} goToday={goToday} onJumpDay={jumpToDay}
             isFuerzaDay={isFuerzaDay} isRunDay={isRunDay} isCompromisoDay={isCompromisoDay} mov={mov}
             comida={comida} vaciarDia={vaciarDia}
