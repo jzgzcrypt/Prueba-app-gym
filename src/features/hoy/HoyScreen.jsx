@@ -17,9 +17,6 @@ import { GuerreroBlock, HabitBlock, ListBlock, MagiaBlock, MoveDayBlock, PainBlo
 import { progresoMagia } from "@/domain/habilidades/magia";
 import { WeekDots } from "@/features/ui/WeekDots";
 import { destinoDe, llegadasA } from "@/lib/estado/mover-sesion";
-import { PROTEINA_DIARIA } from "@/domain/nutricion/dias";
-import { macrosDelDia, restoDelDia } from "@/domain/nutricion/iifym";
-import { platoCena, textoPorcion } from "@/domain/nutricion/plato";
 export function HoyScreen(props) {
   const { day, dayKey, isToday, flatIdx, goDay, goToday, isFuerzaDay, isRunDay, isCompromisoDay, mov,
           comida, vaciarDia, cosasEnElDia, apuntesComida,
@@ -27,13 +24,9 @@ export function HoyScreen(props) {
     notes, noteInput, setNoteInput, editingNote, setEditingNote, saveNote, openCatalogo,
     expandedBlock, setExpandedBlock, magiaRepaso, bloquesHistorial } = props;
 
-  // Lo que llevas comido hoy, para que la tira de comida diga algo util en
-  // vez de repetir siempre el mismo numero.
-  const llevaComido = Math.round(macrosDelDia(apuntesComida).kcal);
-  // La respuesta a "¿que ceno?" sin entrar en Nutricion: el plato a ojo.
-  const cenado = (apuntesComida || []).some(ap => ap && ap.comida === "cena");
-  const cena = comida && llevaComido > 0 && !cenado ? platoCena(restoDelDia(comida.macros, apuntesComida)).porciones : null;
-  const textoCena = cena ? ["prot", "hc", "verdura", "grasa"].filter(k => cena[k] > 0).map(k => textoPorcion(cena[k], k)).join(" · ") : null;
+  // El dia de comida: o esta cerrado (lo trajo tu IA) o toca mandarselo.
+  const diaCerrado = (apuntesComida || []).filter(ap => ap && ap.comida === "dia").slice(-1)[0] || null;
+  const enObjetivo = diaCerrado && comida && Math.abs(diaCerrado.kcal - comida.macros.kcal) <= comida.macros.kcal * 0.1;
 
   const frase = getFraseHoy(flatIdx);
   // Cuanto falta para el dia del objetivo. Es el dato que de verdad empuja.
@@ -163,17 +156,17 @@ export function HoyScreen(props) {
               {comida.etiqueta}
             </div>
             <div style={{ flexGrow: 1, minWidth: 0 }}>
-              {llevaComido > 0 ? (
+              {diaCerrado ? (
                 <>
                   <div style={{ ...TYPE.bodyStrong, color: C.text }}>
-                    {llevaComido} de {comida.macros.kcal} kcal · quedan {comida.macros.kcal - llevaComido}
+                    {Math.round(diaCerrado.kcal)} / {comida.macros.kcal} kcal {enObjetivo ? "✓" : ""} · proteína {Math.round(diaCerrado.prot)} g
                   </div>
-                  <div style={{ fontSize: 11.5, color: C.textDim, marginTop: 1 }}>{textoCena ? "Cena: " + textoCena : cenado ? "Día apuntado" : "Toca para ver qué cenar"}</div>
+                  <div style={{ fontSize: 11.5, color: C.textDim, marginTop: 1 }}>Día cerrado con tu IA</div>
                 </>
               ) : (
                 <>
-                  <div style={{ ...TYPE.bodyStrong, color: C.text }}>{comida.kcal} · proteína {PROTEINA_DIARIA}</div>
-                  <div style={{ fontSize: 11.5, color: C.textDim, marginTop: 1 }}>{comida.detalle}</div>
+                  <div style={{ ...TYPE.bodyStrong, color: C.text }}>{comida.macros.kcal} kcal · {comida.macros.prot} g proteína</div>
+                  <div style={{ fontSize: 11.5, color: C.textDim, marginTop: 1 }}>Toca para mandar tu día a tu IA</div>
                 </>
               )}
             </div>

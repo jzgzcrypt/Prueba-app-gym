@@ -29,6 +29,7 @@ import { informeMensual, informePendiente } from "@/domain/progreso/informe";
 import { InformeScreen } from "@/features/informe/InformeScreen";
 import { ritmoDelDia } from "@/domain/running/adaptar";
 import { textoParaLibreta } from "@/domain/running/gps";
+import { leerTotalDelDia, semanaNutricion } from "@/domain/nutricion/ia-dia";
 import { simplificar, sinSimplificar } from "@/domain/running/ruta";
 import { resumenSemana, semanasCumplidas } from "@/domain/progreso/resumen";
 
@@ -36,6 +37,17 @@ export default function App() {
   const todayIdx = findTodayIndex();
   const [flatIdx, setFlatIdx] = useState(todayIdx);
   const [screen, setScreen] = useState("hoy");
+  // Lo que llega compartido desde tu IA (share target): el resumen del dia.
+  const [compartido, setCompartido] = useState(null);
+  useEffect(() => {
+    try {
+      const q = new URLSearchParams(window.location.search);
+      const texto = [q.get("title"), q.get("text"), q.get("url")].filter(Boolean).join("\n");
+      if (!texto) return;
+      window.history.replaceState(null, "", window.location.pathname);
+      if (leerTotalDelDia(texto)) { setCompartido(texto); setScreen("nutricion"); }
+    } catch { /* sin URL que leer */ }
+  }, []);
   const [weekIdx, setWeekIdx] = useState(FLAT_DAYS[todayIdx].weekIdx);
   const [checked, setChecked] = useState({});
   const [cuelloChecks, setCuelloChecks] = useState({});
@@ -299,16 +311,16 @@ export default function App() {
     return cuantas;
   };
 
-  // Apuntar y desapuntar comida del dia que se esta viendo. Se anade al final
-  // porque el orden en que comes es el orden en que lo apuntas.
-  const apuntarComida = (apunte) => apuntarVarias([apunte]);
-  const apuntarVarias = (nuevos) => setComidasLog(p =>
-    Object.assign({}, p, { [dayKey]: (p[dayKey] || []).concat(nuevos) }));
-
-  // Deshacer una comida entera del menu, o un apunte suelto por su posicion.
-  const deshacerComida = (comidaId, indice) => setComidasLog(p =>
-    Object.assign({}, p, { [dayKey]: (p[dayKey] || []).filter((ap, j) =>
-      comidaId ? ap.comida !== comidaId : j !== indice) }));
+  // Tu IA lleva el dia: por la noche se cierra con su total (sustituye lo de
+  // ese dia: el total ya lo incluye todo). Reabrir lo quita.
+  const cerrarDia = (total) => setComidasLog(p => Object.assign({}, p, {
+    [dayKey]: [{ comida: "dia", origen: "texto", texto: "Día cerrado con tu IA",
+                 kcal: total.kcal, prot: total.prot, hc: total.hc, grasa: total.grasa }] }));
+  const reabrirDia = () => setComidasLog(p => Object.assign({}, p, { [dayKey]: (p[dayKey] || []).filter(ap => ap && ap.comida !== "dia") }));
+  const semanaComida = (() => {
+    const w = WEEKS.find(x => x.days.some(d => claveDia(d) === dayKey));
+    return w ? semanaNutricion({ dias: w.days, comidasLog, objetivoDe: d => comidaDelDia(d).macros, hoyIso: todayLocalIso(), claveDe: claveDia }) : null;
+  })();
 
   /** Marcar que una comida de un dia de la semana la haces fuera. */
   const marcarFuera = (comidaId, dayIdx) => setComidasFuera(p => {
@@ -333,28 +345,6 @@ export default function App() {
   const responderRepaso = (id, respuesta) => setMagiaRepaso(p =>
     Object.assign({}, p, { [id]: responder(p[id], respuesta, todayLocalIso()) }));
 
-  // ─── Editar la dieta ───────────────────────────────────────────────────
-  //
-  // Una sola accion para las tres cosas que se pueden hacer con una comida:
-  // dejarla con otros ingredientes (una lista), quitarla del menu (null) y
-  // devolverla a como estaba (undefined). Menos superficie, menos que romper.
-  const guardarComidaDelMenu = (tipoDia, comidaId, ingredientes) => setMenuEditado(p => {
-    const delTipo = Object.assign({}, p[tipoDia]);
-    if (ingredientes === undefined) delete delTipo[comidaId];
-    else delTipo[comidaId] = ingredientes;
-    return Object.assign({}, p, { [tipoDia]: delTipo });
-  });
-
-  /** Volver al menu de partida entero, para ese tipo de dia. */
-  const restaurarMenu = (tipoDia) => setMenuEditado(p =>
-    Object.assign({}, p, { [tipoDia]: {} }));
-
-  // Cambiar un alimento del menu por un equivalente, o volver al original.
-  const cambiarAlimento = (clave, nuevoId) => setCambiosMenu(p => {
-    const delDia = Object.assign({}, p[dayKey]);
-    if (nuevoId) delDia[clave] = nuevoId; else delete delDia[clave];
-    return Object.assign({}, p, { [dayKey]: delDia });
-  });
 
   const toggleCheck = (key) => setChecked(p => Object.assign({}, p, { [key]: !p[key] }));
   const toggleCuello = (m) => setCuelloChecks(p => Object.assign({}, p, { [dayKey + "-" + m]: !p[dayKey + "-" + m] }));
@@ -648,10 +638,9 @@ export default function App() {
 
         {screen === "nutricion" && (
           <NutricionScreen comida={comida} apuntes={comidasLog[dayKey] || []}
-            cambios={cambiosMenu[dayKey]} apuntarComida={apuntarComida} apuntarVarias={apuntarVarias}
-            deshacerComida={deshacerComida} cambiarAlimento={cambiarAlimento}
-            edits={menuEditado} guardarComidaDelMenu={guardarComidaDelMenu} restaurarMenu={restaurarMenu}
-            esHoy={isToday}
+            edits={menuEditado} esHoy={isToday}
+            cerrarDia={cerrarDia} reabrirDia={reabrirDia} semana={semanaComida}
+            pendiente={compartido} limpiarPendiente={() => setCompartido(null)}
             diasSemana={WEEKS[currentDay.weekIdx] ? WEEKS[currentDay.weekIdx].days : null}
             inicioSemana={WEEKS[currentDay.weekIdx] ? claveDia(WEEKS[currentDay.weekIdx].days[0]) : ""}
             compraMarcada={compraMarcada} marcarCompra={marcarCompra}

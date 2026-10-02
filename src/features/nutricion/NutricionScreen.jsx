@@ -5,13 +5,11 @@ import { C, CAT, R, SP, TAP_MIN, TYPE } from "@/design/tokens";
 import { ICON_NUTRICION } from "@/domain/assets/icons";
 import { CHEAT_MEAL, EQUIVALENCIAS, MENUS, NEAT, TIPS_NUTRICION } from "@/domain/nutricion/menus";
 import { ScreenHeader, SectionHeader } from "@/features/ui/headers";
-import { TuDia } from "@/features/nutricion/TuDia";
+import { TuDiaIA } from "@/features/nutricion/TuDiaIA";
 import { ListaCompra } from "@/features/nutricion/ListaCompra";
 
-// (App aun pasa cambios, apuntarComida, cambiarAlimento, guardarComidaDelMenu y
-// restaurarMenu: eran del menu en gramos, que ya no se pinta.)
-export function NutricionScreen({ comida, apuntes = [], apuntarVarias,
-                                  deshacerComida, edits, esHoy,
+export function NutricionScreen({ comida, apuntes = [], edits, esHoy,
+                                  cerrarDia, reabrirDia, pendiente, limpiarPendiente, semana,
                                   diasSemana, inicioSemana, compraMarcada, marcarCompra,
                                   comidasFuera, marcarFuera }) {
   const [menuAbierto, setMenuAbierto] = useState(MENUS[0].id);
@@ -42,9 +40,9 @@ export function NutricionScreen({ comida, apuntes = [], apuntarVarias,
       <ScreenHeader icon={ICON_NUTRICION} title="NUTRICIÓN" />
 
       {/* ═══ HOY — lo único que se toca a diario: apuntar y que la cena cuadre ═══ */}
-      {comida && apuntarVarias && (
-        <TuDia comida={comida} apuntes={apuntes} apuntarVarias={apuntarVarias}
-               deshacerComida={deshacerComida} esHoy={esHoy} />
+      {comida && cerrarDia && (
+        <TuDiaIA comida={comida} apuntes={apuntes} esHoy={esHoy} cerrarDia={cerrarDia} reabrirDia={reabrirDia}
+                 pendiente={pendiente} limpiarPendiente={limpiarPendiente} semana={semana} />
       )}
 
       <div style={{ ...TYPE.sectionLabel, color: C.textDim, padding: SP.lg + "px " + SP.xl + "px " + SP.sm + "px" }}>Para consultar</div>

@@ -21,6 +21,26 @@ Todo cambio que se haga en la app se anota aquí. Sin excepciones.
 
 ## [Sin publicar]
 
+### Cambiado — Nutrición: tu IA lleva el día
+- La app deja de contar comidas. Por la mañana, **«Mandar mi día a la IA»**
+  abre el menú de compartir de Android: eliges Claude o ChatGPT y el mensaje
+  va escrito con el objetivo de hoy (COMER/RECORTAR, kcal y macros) y las
+  reglas. Durante el día le cuentas lo que comes; ella lleva la cuenta y te
+  propone la cena. Cada respuesta acaba en `TOTAL DEL DÍA | kcal | P | HC | G`.
+- **Cerrar el día sin copiar ni pegar**: en la IA, mantener pulsada su
+  respuesta → Compartir → 7K (la app instalada recibe el texto). O pegarla.
+  Se confirma «1980 / 2100 kcal» y queda una frase de coach, sin culpa.
+- **Tu semana** en 7 puntos (verde a ±10%, ámbar fuera, hueco sin cerrar) y la
+  proteína media. HOY dice «2100 kcal · 165 g» o «1980 / 2100 ✓».
+- Lector general del total (línea con `|`, «**Total del día:** 2080 kcal · P
+  160…», tablas, millares «2.010»); si no hay total, suma las líneas.
+
+### Eliminado
+- Las tarjetas de desayuno/comida/merienda/cena, la cantina, «Escribir»,
+  «Con tu IA» con pegado por comida, «Pídele idea» y el plato a ojo de la
+  pantalla (el dominio se queda, con sus tests). La compra y los menús de
+  2022 siguen, plegados.
+
 ### Arreglado — La distancia del GPS se quedaba un 9% corta frente a Strava
 - En W2d1 la app midió 2,07 km y Strava 2,28 km en la misma ruta. Ahora se
   mide como Strava: fixes con precisión de 20 m o mejor, sin saltos (más de
