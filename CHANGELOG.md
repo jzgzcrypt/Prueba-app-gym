@@ -21,12 +21,9 @@ Todo cambio que se haga en la app se anota aquí. Sin excepciones.
 
 ## [Sin publicar]
 
-### Mapa de la salida, más claro
-- Cuatro estilos para elegir con pestañas bajo el mapa: **Oscuro** (por defecto, tipo Strava), **Claro**, **Satélite** y **Callejero**. El que elijas se recuerda.
-- Marcas de km (1, 2, 3…) colocadas según la distancia medida.
-- Ruta más gruesa con borde, flechas de sentido, salida verde y llegada con bandera de cuadros.
-- Franja de datos encima del mapa: distancia, tiempo y ritmo. Se quita la línea GPS repetida debajo.
-- Las salidas antiguas se quedan como están.
+### Mapa de la salida: vuelve el callejero y propuestas para elegir
+- Se deshacen los estilos nuevos: CARTO (Oscuro y Claro) ahora pide clave y salía "API KEY REQUIRED" en vez de las calles. Vuelve el mapa de OpenStreetMap de antes.
+- Debajo del mapa, "Ver propuestas de mapa (A–F)": seis versiones con tu propia ruta, todas con calles y sin clave. A es el mapa actual; las demás añaden km, sentido, datos encima, otros callejeros (Esri, OSM humanitario) o un mapa más alto. Solo para mirar: el definitivo no cambia hasta elegir.
 
 ### Arreglado — El mapa de las carreras ya hechas
 - Al ir hacia atrás en HOY, las sesiones de running con GPS enseñan lo medido

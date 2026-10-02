@@ -300,12 +300,10 @@ export function HoyScreen(props) {
                 {/* La salida con GPS de ese dia: lo medido y su mapa, tambien dias despues. */}
                 {props.gpsDelDia && props.gpsDelDia.m > 0 && (
                   <div data-salida style={{ marginTop: 12 }}>
-                    {!props.gpsDelDia.ruta && (
-                      <div className="mono" style={{ fontSize: 12.5, fontWeight: 700, color: C.textDim, marginBottom: 8 }}>
-                        GPS: {(props.gpsDelDia.m / 1000).toFixed(2).replace(".", ",")} km · {textoTiempo(props.gpsDelDia.seg)}
-                        {props.gpsDelDia.m >= 500 ? " · " + textoTiempo(props.gpsDelDia.seg / props.gpsDelDia.m * 1000) + "/km" : ""}
-                      </div>
-                    )}
+                    <div className="mono" style={{ fontSize: 12.5, fontWeight: 700, color: C.textDim, marginBottom: 8 }}>
+                      GPS: {(props.gpsDelDia.m / 1000).toFixed(2).replace(".", ",")} km · {textoTiempo(props.gpsDelDia.seg)}
+                      {props.gpsDelDia.m >= 500 ? " · " + textoTiempo(props.gpsDelDia.seg / props.gpsDelDia.m * 1000) + "/km" : ""}
+                    </div>
                     {props.gpsDelDia.ruta && (
                       <MapaRuta ruta={props.gpsDelDia.ruta} objetivo={props.gpsDelDia.obj} titulo={day.titulo} fecha={day.isoDate} rutaCompleta={trazaCompletaDe(dayKey)} datos={props.gpsDelDia} />
                     )}
