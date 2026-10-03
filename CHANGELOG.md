@@ -21,6 +21,9 @@ Todo cambio que se haga en la app se anota aquí. Sin excepciones.
 
 ## [Sin publicar]
 
+### Mapa: parciales de cada km en los rodajes
+- En un rodaje continuo, al lado de cada marca de km sale el tiempo de ese km, y debajo del mapa la lista "Parciales" (km 1, km 2… y el trozo final si pasa de 100 m, con su ritmo). Tiempo en movimiento: las pausas no cuentan. En sesiones con series sigue el ritmo de cada tramo.
+
 ### Mapa: vuelven los tramos y el ritmo de cada uno
 - Arreglado: en sesiones sin ritmo objetivo (fartlek, rodaje con caminatas) toda la ruta salía en naranja. Vuelve la recuperación en gris y lo corrido en naranja, con leyenda "corriendo · recuperación".
 - En sesiones con recuperaciones, cada tramo corrido lleva su ritmo encima en el mapa, y debajo una lista "Tramos corriendo" con tiempo, metros y ritmo de cada uno (las pausas no cuentan).

@@ -398,3 +398,33 @@ export function tramosCorridos(ruta) {
   }
   return out;
 }
+
+/**
+ * Los parciales de cada km de un rodaje: [{ n, seg, lat, lon }] y, si el
+ * trozo final mide 100 m o mas, { n: null, metros, seg }. Los km se reparten
+ * como en `marcasKm` (en proporcion a la distancia medida), asi el parcial cae
+ * en su marca. El tiempo es en movimiento: las pausas no cuentan.
+ */
+export function parcialesKm(ruta, metrosMedidos) {
+  const r = recorrido(ruta);
+  if (!r.total) return [];
+  // Tiempo en movimiento acumulado al principio de cada segmento.
+  let t = 0;
+  const segs = r.segs.map(s => { const dt = Math.max(0, s.b[2] - s.a[2]); const out = { ...s, t, dt }; t += dt; return out; });
+  if (t <= 0) return [];
+  const tiempoEn = (metros) => {
+    for (const s of segs) if (metros <= s.desde + s.d) return s.t + (s.d ? (metros - s.desde) / s.d : 0) * s.dt;
+    return t;
+  };
+  const escala = metrosMedidos > 0 ? r.total / metrosMedidos : 1;
+  const out = [];
+  let antes = 0, n = 1;
+  for (; n * 1000 * escala < r.total; n++) {
+    const d = n * 1000 * escala, ahora = tiempoEn(d), p = puntoA(r, d);
+    out.push({ n, seg: ahora - antes, lat: p.lat, lon: p.lon });
+    antes = ahora;
+  }
+  const resto = r.total / escala - (n - 1) * 1000;
+  if (resto >= 100) out.push({ n: null, metros: Math.round(resto), seg: t - antes });
+  return out;
+}

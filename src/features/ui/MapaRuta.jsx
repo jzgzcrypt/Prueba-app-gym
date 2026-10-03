@@ -2,7 +2,7 @@
 
 import { useEffect, useId, useRef, useState } from "react";
 import { C } from "@/design/tokens";
-import { aGpx, flechas, marcasKm, proyectar, remuestrear, suavizar, tramosCorridos, tramosPorColor } from "@/domain/running/ruta";
+import { aGpx, flechas, marcasKm, proyectar, remuestrear, suavizar, parcialesKm, tramosCorridos, tramosPorColor } from "@/domain/running/ruta";
 import { textoTiempo } from "@/domain/running/gps";
 import { PALETAS, recolorear } from "@/domain/running/teselas";
 
@@ -102,6 +102,8 @@ export function MapaRuta({ ruta, objetivo, titulo, fecha, rutaCompleta, datos })
   const trazos = curvas.map(c => ({ cat: c.cat, color: porRitmo ? COLOR[c.cat] : E.linea, puntos: c.puntos }));
   // El ritmo de cada tramo corrido, en sesiones con recuperaciones.
   const corridos = tramosCorridos(ruta);
+  // En un rodaje continuo, el tiempo de cada km (los parciales).
+  const parciales = corridos.length ? [] : parcialesKm(ruta, conDatos ? datos.m : null);
   // Los km, en proporcion a la distancia medida: el "2" cae donde se contaron 2 km.
   const marcas = marcasKm(ruta, conDatos ? datos.m : null);
   const sentido = flechas(ruta, 3).map(f => {
@@ -153,6 +155,18 @@ export function MapaRuta({ ruta, objetivo, titulo, fecha, rutaCompleta, datos })
                 <circle cx={p.x} cy={p.y} r="8.5" fill={E.km.fondo} stroke={E.km.borde} strokeWidth="1.8" />
                 <text x={p.x} y={p.y + 3.4} textAnchor="middle" fontSize="9.5" fontWeight="800"
                   fontFamily="-apple-system, Inter, sans-serif" fill={E.km.texto}>{k.n}</text>
+              </g>
+            );
+          })}
+          {parciales.filter(k => k.n).map(k => {
+            const p = m.punto([k.lat, k.lon]), texto = textoTiempo(k.seg), w = texto.length * 5.6 + 8;
+            // A la derecha del circulo; si se sale del mapa, a la izquierda.
+            const x = p.x + 11 + w > ANCHO - 4 ? p.x - 11 - w / 2 : p.x + 11 + w / 2;
+            const y = conDatos && p.y - 7 < FRANJA + 2 ? FRANJA + 9 : p.y;
+            return (
+              <g key={"p" + k.n} data-parcial={k.n} transform={"translate(" + x.toFixed(1) + "," + y.toFixed(1) + ")"}>
+                <rect x={-w / 2} y="-7" width={w} height="14" rx="7" fill="#FFFFFF" stroke={E.linea} strokeWidth="1.3" />
+                <text y="3.4" textAnchor="middle" fontSize="9.5" fontWeight="800" fontFamily="ui-monospace, Menlo, monospace" fill={E.tinta}>{texto}</text>
               </g>
             );
           })}
@@ -212,6 +226,18 @@ export function MapaRuta({ ruta, objetivo, titulo, fecha, rutaCompleta, datos })
           padding: "0 10px", minHeight: 32, background: C.card, flexShrink: 0 }}>GPX</button>
         </div>
       </div>
+      {parciales.length > 0 && (
+        <div data-parciales style={{ marginTop: 10 }}>
+          <div style={{ fontSize: 10.5, fontWeight: 800, color: C.textDim, letterSpacing: 0.6, marginBottom: 4 }}>PARCIALES</div>
+          {parciales.map((k, i) => (
+            <div key={i} className="mono" style={{ display: "flex", justifyContent: "space-between", fontSize: 12.5, color: C.textDim,
+                                                   padding: "3px 0", borderTop: i ? "1px solid " + C.cardBorder : "none" }}>
+              <span>{k.n ? <>km <b style={{ color: C.text }}>{k.n}</b></> : (k.metros / 1000).toFixed(2).replace(".", ",") + " km"}</span>
+              <span><b style={{ color: C.text }}>{textoTiempo(k.seg)}</b>{k.n ? "" : " (" + textoTiempo(k.seg / k.metros * 1000) + "/km)"}</span>
+            </div>
+          ))}
+        </div>
+      )}
       {corridos.length > 0 && (
         <div data-tramos style={{ marginTop: 10 }}>
           <div style={{ fontSize: 10.5, fontWeight: 800, color: C.textDim, letterSpacing: 0.6, marginBottom: 4 }}>TRAMOS CORRIENDO</div>

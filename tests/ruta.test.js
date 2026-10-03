@@ -5,7 +5,7 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import { agregarPunto, marcarTramo, nuevoRegistro, pausar } from "../src/domain/running/gps.js";
-import { aGpx, aPixel, categoria, flechas, marcasKm, proyectar, simplificar, tramosPorColor, suavizar, remuestrear, colorEn, degradado, tramosCorridos } from "../src/domain/running/ruta.js";
+import { aGpx, aPixel, categoria, flechas, marcasKm, proyectar, simplificar, tramosPorColor, suavizar, remuestrear, colorEn, degradado, tramosCorridos, parcialesKm } from "../src/domain/running/ruta.js";
 
 const M_LAT = 111195, M_LON = M_LAT * Math.cos(41.65 * Math.PI / 180);
 const fix = (x, y, t, v = 3.5) => ({ lat: 41.65 + y / M_LAT, lon: -0.88 + x / M_LON, acc: 5, speed: v, t });
@@ -220,4 +220,28 @@ test("tramos corridos: una pausa no suma tiempo y los de menos de 50 m no cuenta
   assert.equal(conPausa.length, 1);
   assert.ok(conPausa[0].seg <= 66, "seg " + conPausa[0].seg);
   assert.equal(tramosCorridos(sesion([[30, 8, 0], [200, 90, 1], [250, 60, 0]])).length, 1);
+});
+
+test("parciales: 2,5 km a 6:00 dan km 1 y km 2 de 6:00 y un final de 500 m", () => {
+  const p = parcialesKm(sesion([[2500, 900, 0]]), 2500);
+  assert.equal(p.length, 3);
+  assert.deepEqual(p.map(x => x.n), [1, 2, null]);
+  assert.ok(Math.abs(p[0].seg - 360) <= 4 && Math.abs(p[1].seg - 360) <= 4, p[0].seg + " " + p[1].seg);
+  assert.ok(Math.abs(p[2].metros - 500) <= 10 && Math.abs(p[2].seg - 180) <= 4);
+});
+
+test("parciales: cada km con su tiempo, y una pausa no cuenta", () => {
+  const p = parcialesKm(sesion([[1000, 400, 0], [1000, 330, 0]]), 2000);
+  assert.ok(Math.abs(p[0].seg - 400) <= 4 && Math.abs(p[1].seg - 330) <= 4, p.map(x => x.seg).join(" "));
+  const conPausa = parcialesKm(sesion([[1000, 400, 0], [500, 160, 0]], 30), 1500);
+  // Sin los 5 min de la pausa (el tramo de 10 m donde se pausa tampoco cuenta).
+  assert.ok(Math.abs(conPausa[0].seg - 400) <= 10, "pausa: " + conPausa[0].seg);
+  assert.deepEqual(parcialesKm(null, 1000), []);
+});
+
+test("parciales: caen donde las marcas de km, también con la distancia medida", () => {
+  const r = sesion([[2000, 700, 0]]);
+  const p = parcialesKm(r, 2200), m = marcasKm(r, 2200);
+  assert.deepEqual(p.filter(x => x.n).map(x => [x.n, x.lat, x.lon]), m.map(x => [x.n, x.lat, x.lon]));
+  assert.ok(Math.abs(p[p.length - 1].metros - 200) <= 10, "final " + p[p.length - 1].metros);
 });
