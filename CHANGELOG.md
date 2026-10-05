@@ -21,12 +21,10 @@ Todo cambio que se haga en la app se anota aquí. Sin excepciones.
 
 ## [Sin publicar]
 
-### Nutrición: tu IA lleva el día, la app solo copia y pega
-- Fuera palmas, puños y comidas por separado: la pantalla es lo que te queda y dos botones. "1 · Copiar mi prompt del día" (tus kcal y macros de hoy, para Claude o ChatGPT) y "2 · Pegar lo que dice mi IA" (lee su línea TOTAL DEL DÍA y se guarda sola; pegar otra vez la sustituye).
-- El prompt pide a la IA que, tras cada cosa que le cuentes, diga lo que llevas y lo que queda, y te proponga 2 opciones para cuadrar la merienda o la cena.
-- Arriba, "Te quedan X kcal · Y g de proteína" con barra; en HOY, lo mismo.
-- El motor adaptativo usa ese total del día.
-- Se quitan de la pantalla los menús de 2022, pasos, comida libre y trucos; la compra queda plegada al final.
+### Nutrición, lo mínimo: kcal y proteína de hoy, y tu peso
+- Sin apuntar comidas ni IA: la pantalla dice qué toca hoy (COMER o RECORTAR, kcal y proteína en grande) y el peso de cada mañana.
+- Las kcal de la semana se ajustan solo con el peso: cada lunes, con la recta de las dos últimas semanas (al menos 8 pesajes), si bajas más lento de 0,25 kg/sem se quitan 100 kcal/día; si bajas más rápido de 0,6, se suman 100. Tope ±300 y nunca por debajo de 1.800.
+- Fuera el copiar y pegar con la IA, la lista de la compra y los menús de 2022 de la pantalla. Lo apuntado antes sigue guardado.
 
 ### Mapa: parciales de cada km en los rodajes
 - En un rodaje continuo, al lado de cada marca de km sale el tiempo de ese km, y debajo del mapa la lista "Parciales" (km 1, km 2… y el trozo final si pasa de 100 m, con su ritmo). Tiempo en movimiento: las pausas no cuentan. En sesiones con series sigue el ritmo de cada tramo.

@@ -148,3 +148,45 @@ export function programaDeLaSemana({ pesos, ingestas, lunesIso, tiposDe, sinDefi
   const prog = programaSemanal({ gasto: g.gasto, dias: tiposDe(lunesIso), anterior: progAntes ? progAntes.media : null, sinDeficit: sinDeficitDe(lunesIso) });
   return { ...prog, gasto: g, ajustado: g.confianza > 0 };
 }
+
+// ─── AJUSTE SOLO CON EL PESO ──────────────────────────────────────────────
+//
+// Sin apuntar comidas no se puede medir el gasto real, pero si lo que de
+// verdad importa: si bajas al ritmo previsto. Es lo que hace un entrenador con
+// quien no apunta: cada lunes mira la recta del peso de las dos ultimas
+// semanas y mueve las kcal 100 arriba o abajo. Lento pero seguro, y sin
+// pedirte nada mas que pesarte.
+
+/** Ritmo de bajada aceptado (kg/semana) y paso del ajuste. */
+export const RITMO_PESO = { lento: -0.25, rapido: -0.6, paso: 100, tope: 300, pesajesMin: 8 };
+
+/**
+ * El ajuste acumulado de kcal/dia para la semana del lunes `lunesIso`,
+ * revisando cada lunes desde dos semanas despues de `inicioIso`.
+ * Devuelve { ajuste, cambio (el de este lunes), motivo ("lento" | "rapido" |
+ * "ritmo" | null si no hay pesajes), kgSemana, pesajes }.
+ */
+export function ajustePorPeso({ pesos, lunesIso, inicioIso }) {
+  let ajuste = 0, ultimo = { cambio: 0, motivo: null, kgSemana: null, pesajes: 0 };
+  for (let n = aDia(inicioIso) + 14; n <= aDia(lunesIso); n += 7) {
+    const desde = aIso(n - 14), hasta = aIso(n - 1);
+    const pesados = Object.keys(pesos || {}).filter(k => k >= desde && k <= hasta && Number.isFinite(pesos[k]));
+    const ritmo = pesados.length >= RITMO_PESO.pesajesMin ? pendiente(pesados.map(iso => ({ x: aDia(iso), y: pesos[iso] }))) : null;
+    let cambio = 0, motivo = null;
+    const kgSemana = ritmo == null ? null : Math.round(ritmo * 7 * 100) / 100;
+    if (kgSemana != null) {
+      motivo = kgSemana > RITMO_PESO.lento ? "lento" : kgSemana < RITMO_PESO.rapido ? "rapido" : "ritmo";
+      const propuesto = motivo === "lento" ? -RITMO_PESO.paso : motivo === "rapido" ? RITMO_PESO.paso : 0;
+      const nuevo = Math.max(-RITMO_PESO.tope, Math.min(RITMO_PESO.tope, ajuste + propuesto));
+      cambio = nuevo - ajuste; ajuste = nuevo;
+    }
+    if (aIso(n) === lunesIso) ultimo = { cambio, motivo, kgSemana, pesajes: pesados.length };
+  }
+  return { ajuste, ...ultimo };
+}
+
+/** Los objetivos de COMER y RECORTAR con el ajuste (sin bajar de 1.800). */
+export function objetivosConAjuste(base, ajuste) {
+  const kcal = (k) => Math.max(TOPE.minimo, base[k].kcal + ajuste);
+  return { comer: macrosDe(kcal("comer"), "comer"), recortar: macrosDe(kcal("recortar"), "recortar") };
+}

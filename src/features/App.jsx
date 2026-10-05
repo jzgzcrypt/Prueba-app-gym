@@ -8,7 +8,7 @@ import { ICON_CUELLO, ICON_MOVILIDAD, ICON_NUTRICION } from "@/domain/assets/ico
 import { NUTRICION } from "@/domain/nutricion/nutricion";
 import { BLOQUE, FECHA_FIN, FECHA_INICIO, FLAT_DAYS, WEEKS, claveDia, findTodayIndex, todayLocalIso } from "@/domain/plan/calendario";
 import { getCuelloEj } from "@/domain/salud/cuello";
-import { comidaDelDia } from "@/domain/nutricion/dias";
+import { OBJETIVO_MACROS, comidaDelDia } from "@/domain/nutricion/dias";
 import { getMovilidadDelDia } from "@/domain/salud/movilidad";
 import { CoachScreen } from "@/features/coach/CoachScreen";
 import { EjerciciosScreen } from "@/features/ejercicios/EjerciciosScreen";
@@ -29,8 +29,7 @@ import { informeMensual, informePendiente } from "@/domain/progreso/informe";
 import { InformeScreen } from "@/features/informe/InformeScreen";
 import { ritmoDelDia } from "@/domain/running/adaptar";
 import { textoParaLibreta } from "@/domain/running/gps";
-import { ingestaDelDia } from "@/domain/nutricion/apuntar";
-import { gastoPorFormula, programaDeLaSemana, sumarDiasIso, tendenciaPeso } from "@/domain/nutricion/adaptativo";
+import { ajustePorPeso, objetivosConAjuste, tendenciaPeso } from "@/domain/nutricion/adaptativo";
 import { simplificar, sinSimplificar } from "@/domain/running/ruta";
 import { resumenSemana, semanasCumplidas } from "@/domain/progreso/resumen";
 
@@ -274,35 +273,21 @@ export default function App() {
   const mov = getMovilidadDelDia(currentDay);
   // La fase del cuello sale de los dias practicados, no de la semana del bloque.
   const cuelloEj = getCuelloEj(cuelloChecks, cuelloFaseManual);
-  // ─── Motor adaptativo: tu gasto real y las kcal de esta semana ─────────
-  // Pesos: los de cada mañana y los de las medidas. Ingestas: el total del
-  // dia que trae tu IA (o, en dias antiguos, 3 comidas apuntadas); un dia sin
-  // datos no cuenta: no se asume nada.
+  // ─── Motor: las kcal de la semana se ajustan solo con tu peso ──────────
+  // Pesos: los de cada mañana y los de las medidas. Cada lunes, si bajas mas
+  // lento o mas rapido de lo previsto, COMER y RECORTAR se mueven 100 kcal.
   const pesosTodos = (() => {
     const p = {};
     for (const m of medidas) if (m && m.iso && m.peso != null) p[m.iso] = m.peso;
     return Object.assign(p, pesosDiarios);
   })();
-  const ingestas = (() => {
-    const out = {};
-    for (const k of Object.keys(comidasLog)) {
-      const kcal = ingestaDelDia(comidasLog[k]);
-      if (kcal) out[k] = kcal;
-    }
-    return out;
-  })();
   const semanaDe = (iso) => WEEKS.find(w => w.days.some(d => d.isoDate === iso));
   const lunesActual = (semanaDe(currentDay.isoDate) || { days: [currentDay] }).days[0].isoDate;
   const tendenciaHoy = (() => { const t = tendenciaPeso(pesosTodos, todayLocalIso()); return t.length ? t[t.length - 1] : null; })();
-  const programa = programaDeLaSemana({
-    pesos: pesosTodos, ingestas, lunesIso: lunesActual,
-    tiposDe: (lunes) => { const w = semanaDe(lunes); return w ? w.days.map(d => comidaDelDia(d).id) : Array(7).fill("recortar"); },
-    sinDeficitDe: (lunes) => { const w = semanaDe(lunes); return !!(w && w.days.some(d => d.sinDeficit)); },
-    // La formula con el peso de antes del lunes: la semana no cambia al pesarte hoy.
-    previo: (() => { const t = tendenciaPeso(pesosTodos, sumarDiasIso(lunesActual, -1)); return gastoPorFormula({ peso: t.length ? t[t.length - 1].tendencia : 86 }); })(),
-  });
-  const objetivosSemana = programa.ajustado ? programa.objetivos : null;
+  const ajusteSemana = ajustePorPeso({ pesos: pesosTodos, lunesIso: lunesActual, inicioIso: WEEKS[0].days[0].isoDate });
+  const objetivosSemana = ajusteSemana.ajuste ? objetivosConAjuste(OBJETIVO_MACROS, ajusteSemana.ajuste) : null;
   const comida = comidaDelDia(currentDay, objetivosSemana);
+  const programa = { ...ajusteSemana, objetivos: objetivosConAjuste(OBJETIVO_MACROS, ajusteSemana.ajuste) };
   const guardarPeso = (kg) => setPesosDiarios(p => Object.assign({}, p, { [todayLocalIso()]: kg }));
   const mainDone = currentDay.tipo === "libre" ? true : !!checked[dayKey];
   const isCompromisoDay = currentDay.tipo === "compromiso";
@@ -331,26 +316,6 @@ export default function App() {
     });
     return cuantas;
   };
-
-  // Guardar el total del dia que trae tu IA ("dia"): sustituye al anterior,
-  // porque la IA siempre da el del dia entero. Con null, se borra.
-  const apuntar = (comidaId, apunte) => setComidasLog(p => {
-    const resto = (p[dayKey] || []).filter(ap => ap && ap.comida !== comidaId);
-    return Object.assign({}, p, { [dayKey]: apunte ? resto.concat([apunte]) : resto });
-  });
-
-  /** Marcar que una comida de un dia de la semana la haces fuera. */
-  const marcarFuera = (comidaId, dayIdx) => setComidasFuera(p => {
-    const actuales = (p && p[comidaId]) || [];
-    const nuevos = actuales.includes(dayIdx)
-      ? actuales.filter(d => d !== dayIdx)
-      : actuales.concat([dayIdx]).sort((a, b) => a - b);
-    return Object.assign({}, p, { [comidaId]: nuevos });
-  });
-
-  /** Tachar y destachar de la lista de la compra. */
-  const marcarCompra = (clave) => setCompraMarcada(p =>
-    Object.assign({}, p, { [clave]: !p[clave] }));
 
   // ─── Magia: repaso espaciado ───────────────────────────────────────────
   //
@@ -601,7 +566,7 @@ export default function App() {
             goDay={goDay} goToday={goToday} onJumpDay={jumpToDay}
             isFuerzaDay={isFuerzaDay} isRunDay={isRunDay} isCompromisoDay={isCompromisoDay} mov={mov}
             comida={comida} vaciarDia={vaciarDia}
-            apuntesComida={comidasLog[dayKey] || []} irANutricion={() => setScreen("nutricion")}
+            irANutricion={() => setScreen("nutricion")}
             cosasEnElDia={cuantoHayEn({ checked, cuelloChecks, notes, painLog, magiaLog, guerreroLog, workoutWeights, workoutReps, workoutProgress, ritmoReal, ritmoTramos, gps, pesosDiarios, sensaciones, postponed, comidasLog, cambiosMenu }, dayKey)}
             cuelloEj={cuelloEj} cuelloChecks={cuelloChecks} toggleCuello={toggleCuello}
             checked={checked} toggleCheck={toggleCheck} mainDone={mainDone}
@@ -655,14 +620,8 @@ export default function App() {
         )}
 
         {screen === "nutricion" && (
-          <NutricionScreen comida={comida} apuntes={comidasLog[dayKey] || []}
-            edits={menuEditado} esHoy={isToday}
-            apuntar={apuntar}
-            motor={{ pesoHoy: pesosDiarios[todayLocalIso()] ?? null, guardarPeso, tendencia: tendenciaHoy, programa }}
-            diasSemana={WEEKS[currentDay.weekIdx] ? WEEKS[currentDay.weekIdx].days : null}
-            inicioSemana={WEEKS[currentDay.weekIdx] ? claveDia(WEEKS[currentDay.weekIdx].days[0]) : ""}
-            compraMarcada={compraMarcada} marcarCompra={marcarCompra}
-            comidasFuera={comidasFuera} marcarFuera={marcarFuera} />
+          <NutricionScreen comida={comida} esHoy={isToday}
+            motor={{ pesoHoy: pesosDiarios[todayLocalIso()] ?? null, guardarPeso, tendencia: tendenciaHoy, programa }} />
         )}
 
         {screen === "progreso" && (

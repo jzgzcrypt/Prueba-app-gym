@@ -4,7 +4,7 @@
  */
 import test from "node:test";
 import assert from "node:assert/strict";
-import { estimarGasto, gastoPorFormula, programaDeLaSemana, programaSemanal, sumarDiasIso, tendenciaPeso, TOPE } from "../src/domain/nutricion/adaptativo.js";
+import { ajustePorPeso, estimarGasto, gastoPorFormula, objetivosConAjuste, programaDeLaSemana, programaSemanal, sumarDiasIso, tendenciaPeso, TOPE } from "../src/domain/nutricion/adaptativo.js";
 
 let semilla = 1;
 const azar = () => { semilla = (semilla * 16807) % 2147483647; return semilla / 2147483647; };
@@ -98,4 +98,43 @@ test("sumar días a una fecha", () => {
   assert.equal(sumarDiasIso("2026-10-05", -1), "2026-10-04");
   assert.equal(sumarDiasIso("2026-10-31", 1), "2026-11-01");
   assert.equal(sumarDiasIso("2026-09-01", 28), "2026-09-29");
+});
+
+// Pesos diarios desde el 21-sep bajando `kgSem` por semana, con algo de agua.
+function pesosBajando(kgSem, dias = 42, salta = 0) {
+  semilla = 99; const out = {};
+  for (let i = 0; i < dias; i++) if (azar() >= salta) out[sumarDiasIso("2026-09-21", i)] = Math.round((86 + kgSem * i / 7 + 0.3 * gauss()) * 10) / 10;
+  return out;
+}
+const INICIO = "2026-09-21";
+
+test("ajuste por peso: si bajas lento, −100 cada lunes hasta el tope", () => {
+  const pesos = pesosBajando(-0.05);
+  const a = ajustePorPeso({ pesos, lunesIso: "2026-10-05", inicioIso: INICIO });
+  assert.equal(a.motivo, "lento");
+  assert.equal(a.cambio, -100);
+  assert.equal(a.ajuste, -100);
+  assert.equal(ajustePorPeso({ pesos, lunesIso: "2026-10-26", inicioIso: INICIO }).ajuste, -300, "tope a las 4 semanas");
+});
+
+test("ajuste por peso: si bajas muy rápido, +100; al ritmo previsto, nada", () => {
+  const rapido = ajustePorPeso({ pesos: pesosBajando(-0.9), lunesIso: "2026-10-05", inicioIso: INICIO });
+  assert.equal(rapido.motivo, "rapido");
+  assert.equal(rapido.ajuste, 100);
+  const bien = ajustePorPeso({ pesos: pesosBajando(-0.4), lunesIso: "2026-10-12", inicioIso: INICIO });
+  assert.equal(bien.motivo, "ritmo");
+  assert.equal(bien.ajuste, 0);
+  assert.ok(bien.kgSemana < -0.25 && bien.kgSemana > -0.6, "kg/sem " + bien.kgSemana);
+});
+
+test("ajuste por peso: con pocos pesajes no se toca, y las kcal nunca bajan de 1.800", () => {
+  const pocos = ajustePorPeso({ pesos: pesosBajando(-0.05, 42, 0.7), lunesIso: "2026-10-05", inicioIso: INICIO });
+  assert.equal(pocos.motivo, null);
+  assert.equal(pocos.ajuste, 0);
+  assert.equal(ajustePorPeso({ pesos: {}, lunesIso: "2026-09-28", inicioIso: INICIO }).ajuste, 0, "la primera semana no hay ajuste");
+  const base = { comer: { kcal: 2500 }, recortar: { kcal: 2000 } };
+  const o = objetivosConAjuste(base, -300);
+  assert.equal(o.comer.kcal, 2200);
+  assert.equal(o.recortar.kcal, 1800);
+  assert.equal(o.comer.prot, 165);
 });

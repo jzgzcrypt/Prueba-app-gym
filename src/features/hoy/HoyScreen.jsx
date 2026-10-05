@@ -3,7 +3,6 @@
 import { useState } from "react";
 import { C, CAT, R, SP, TAP_MIN, TYPE } from "@/design/tokens";
 import { AvisoRitmo, LecturaSesion, queApuntar } from "@/features/ui/lectura";
-import { resumenDia } from "@/domain/nutricion/apuntar";
 import { MapaRuta } from "@/features/ui/MapaRuta";
 import { textoTiempo } from "@/domain/running/gps";
 
@@ -30,13 +29,12 @@ import { WeekDots } from "@/features/ui/WeekDots";
 import { destinoDe, llegadasA } from "@/lib/estado/mover-sesion";
 export function HoyScreen(props) {
   const { day, dayKey, isToday, flatIdx, goDay, goToday, isFuerzaDay, isRunDay, isCompromisoDay, mov,
-          comida, vaciarDia, cosasEnElDia, apuntesComida,
+          comida, vaciarDia, cosasEnElDia,
     cuelloEj, cuelloChecks, toggleCuello, checked, toggleCheck, mainDone, workoutProgress, onStartWorkout,
     notes, noteInput, setNoteInput, editingNote, setEditingNote, saveNote, openCatalogo,
     expandedBlock, setExpandedBlock, magiaRepaso, bloquesHistorial } = props;
 
-  // El dia de comida: lo que te queda, con lo apuntado hasta ahora.
-  const resComida = comida ? resumenDia(apuntesComida, comida.macros) : null;
+
 
   const frase = getFraseHoy(flatIdx);
   // Cuanto falta para el dia del objetivo. Es el dato que de verdad empuja.
@@ -167,13 +165,7 @@ export function HoyScreen(props) {
             </div>
             <div style={{ flexGrow: 1, minWidth: 0 }}>
               <div style={{ ...TYPE.bodyStrong, color: C.text }}>
-                {resComida.llevas.kcal > 0
-                  ? (resComida.quedan.kcal >= 0 ? "Te quedan " + resComida.quedan.kcal.toLocaleString("es-ES") + " kcal" : "Te has pasado " + (-resComida.quedan.kcal).toLocaleString("es-ES") + " kcal")
-                    + " · " + (resComida.quedan.prot > 0 ? resComida.quedan.prot + " g proteína" : "proteína ✓")
-                  : comida.macros.kcal.toLocaleString("es-ES") + " kcal · " + comida.macros.prot + " g proteína"}
-              </div>
-              <div style={{ fontSize: 11.5, color: C.textDim, marginTop: 1 }}>
-                {resComida.llevas.kcal > 0 ? "Toca para pegar lo nuevo de tu IA" : "Toca para copiar el prompt del día"}
+                {comida.macros.kcal.toLocaleString("es-ES")} kcal · {comida.macros.prot} g proteína
               </div>
             </div>
             <span style={{ color: C.textFaint, fontSize: 16, flexShrink: 0 }}>›</span>
