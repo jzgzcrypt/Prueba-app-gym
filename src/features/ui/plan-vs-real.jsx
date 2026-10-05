@@ -24,12 +24,12 @@ export function LineaPlan({ ritmoReal, onVer }) {
   const color = !r.ultimo ? C.textDim : r.diferencia <= 5 ? C.ok : C.amber;
   return (
     <button className="btn" onClick={onVer} style={{
-      width: "100%", display: "flex", alignItems: "center", gap: 10, padding: "11px 14px", minHeight: 44,
-      background: C.card, border: "1px solid " + C.cardBorder, borderRadius: 12, textAlign: "left",
+      width: "100%", display: "flex", alignItems: "center", gap: 10, padding: "12px 16px", minHeight: 48,
+      background: "#fff", borderRadius: 18, textAlign: "left", boxShadow: "0 1px 2px rgba(0,0,0,.04), 0 8px 24px rgba(0,0,0,.05)",
     }}>
-      <span style={{ fontSize: 10.5, fontWeight: 800, color: C.textDim, letterSpacing: 0.6, flexShrink: 0 }}>TÚ vs PLAN</span>
-      <span style={{ flex: 1, fontSize: 13, fontWeight: 800, color }}>{texto}</span>
-      <span style={{ color: C.textFaint, fontSize: 16 }}>›</span>
+      <span style={{ fontSize: 12, fontWeight: 700, color: C.textDim, flexShrink: 0 }}>Tú vs plan</span>
+      <span style={{ flex: 1, fontSize: 14, fontWeight: 700, color }}>{texto}</span>
+      <span style={{ color: "#C7C7CC", fontSize: 18 }}>›</span>
     </button>
   );
 }

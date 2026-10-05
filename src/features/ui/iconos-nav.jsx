@@ -11,9 +11,9 @@
  * Trazo de 1.8 sobre 24x24, que es lo que se lee a ese tamaño.
  */
 const base = (activo) => ({
-  width: 21, height: 21, viewBox: "0 0 24 24", fill: "none",
+  width: 24, height: 24, viewBox: "0 0 24 24", fill: "none",
   stroke: "currentColor", strokeWidth: 1.8, strokeLinecap: "round", strokeLinejoin: "round",
-  opacity: activo ? 1 : 0.55,
+  opacity: activo ? 1 : 0.85,
 });
 
 export function IconoNav({ nombre, activo }) {

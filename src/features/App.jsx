@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
-import { C, R, SP, TAP_MIN } from "@/design/tokens";
+import { C, R, SP, TAP_MIN, A } from "@/design/tokens";
 import { storage, CLAVE_DATOS, VERSION_ESQUEMA, migrar } from "@/lib/storage";
 import { cuantoHayEn, limpiarDia } from "@/lib/estado/limpiar-dia";
 import { ICON_CUELLO, ICON_MOVILIDAD, ICON_NUTRICION } from "@/domain/assets/icons";
@@ -563,6 +563,7 @@ export default function App() {
 
         {screen === "hoy" && (
           <HoyScreen day={currentDay} dayKey={dayKey} isToday={isToday} flatIdx={flatIdx} gpsDelDia={gps[dayKey]}
+            ultimaSalida={(() => { const k = Object.keys(gps).filter(c => gps[c] && gps[c].ruta && c <= dayKey).sort().pop(); return k ? gps[k] : null; })()}
             goDay={goDay} goToday={goToday} onJumpDay={jumpToDay}
             isFuerzaDay={isFuerzaDay} isRunDay={isRunDay} isCompromisoDay={isCompromisoDay} mov={mov}
             comida={comida} vaciarDia={vaciarDia}
@@ -656,28 +657,29 @@ export default function App() {
         </div>
       )}
 
-      <div style={{ position: "fixed", bottom: 0, left: 0, right: 0, background: "#FFFFFF", borderTop: "1px solid " + C.divider, paddingBottom: "max(8px, env(safe-area-inset-bottom))" }}>
+      <div style={{ position: "fixed", bottom: 0, left: 0, right: 0, background: "rgba(249,249,251,.94)", borderTop: "1px solid #E5E5EA",
+                    backdropFilter: "blur(20px)", WebkitBackdropFilter: "blur(20px)", paddingBottom: "max(8px, env(safe-area-inset-bottom))" }}>
         <div style={{ maxWidth: 480, margin: "0 auto", display: "flex" }}>
           {[
-            { k: "hoy", label: "HOY" },
-            { k: "semana", label: "SEMANA" },
-            { k: "ejercicios", label: "EJERCICIOS" },
-            { k: "nutricion", label: "NUTRICIÓN" },
-            { k: "progreso", label: "PROGRESO" },
-            { k: "coach", label: "COACH" },
+            { k: "hoy", label: "Hoy" },
+            { k: "semana", label: "Semana" },
+            { k: "ejercicios", label: "Ejercicios" },
+            { k: "nutricion", label: "Nutrición" },
+            { k: "progreso", label: "Progreso" },
+            { k: "coach", label: "Coach" },
           ].map(t => {
             const active = screen === t.k;
+            const color = active ? A.azul : A.gris;
             return (
               <button key={t.k} className="btn" onClick={() => { setScreen(t.k); if (t.k === "semana") setWeekIdx(currentDay.weekIdx); }}
                 style={{
                   flex: 1, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center",
-                  gap: 3, minHeight: TAP_MIN, padding: "8px 2px 6px", position: "relative",
+                  gap: 2, minHeight: TAP_MIN, padding: "8px 2px 4px",
                 }}>
-                {active && <div style={{ position: "absolute", top: 0, left: "30%", right: "30%", height: 2, background: C.accent, borderRadius: 1 }} />}
-                <span style={{ color: active ? C.accent : C.textFaint, display: "flex" }}>
-                  <IconoNav nombre={t.k} activo={active} />
+                <span style={{ color, display: "flex" }}>
+                  <IconoNav nombre={t.k} activo />
                 </span>
-                <span style={{ fontSize: 9, fontWeight: 800, letterSpacing: 0.2, color: active ? C.accent : C.textFaint }}>{t.label}</span>
+                <span style={{ fontSize: 10, fontWeight: 600, color }}>{t.label}</span>
               </button>
             );
           })}

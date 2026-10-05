@@ -4,8 +4,8 @@ import { claveDia, todayLocalIso } from "@/domain/plan/calendario";
 import { destinoDe, llegadasA, moverSesion } from "@/lib/estado/mover-sesion";
 
 import { useState } from "react";
-import { C, CAT, R, SP, TAP_MIN, TYPE } from "@/design/tokens";
-import { ICON_CUELLO, ICON_GUERRERO, ICON_MAGIA } from "@/domain/assets/icons";
+import { A, C, CARD, CAT, R, SP, TAP_MIN, TYPE } from "@/design/tokens";
+import { Chevron, IconoCaja } from "@/features/ui/aire";
 import { getPilarGuerreroDelDia } from "@/domain/habilidades/guerrero";
 import { magiaDeHoy, progresoMagia } from "@/domain/habilidades/magia";
 import { ESCALERA } from "@/domain/habilidades/repaso";
@@ -25,17 +25,18 @@ export function PainBlock({ dayKey, expandedBlock, toggleBlock, painLog, setPain
   };
 
   return (
-    <div style={{ background: C.card, border: "1px solid " + C.cardBorder, borderRadius: R.xl, overflow: "hidden" }}>
+    <div style={{ ...CARD, overflow: "hidden" }}>
       <div onClick={() => toggleBlock("molestias")} className="block" style={{
-        display: "flex", alignItems: "center", gap: SP.md, padding: "13px " + SP.lg + "px", minHeight: TAP_MIN, cursor: "pointer",
+        display: "flex", alignItems: "center", gap: SP.md, padding: "11px " + SP.lg + "px", minHeight: 60, cursor: "pointer",
       }}>
-        <span style={{ ...TYPE.cardTitle, color: C.text, flex: 1 }}>Molestias</span>
+        <IconoCaja nombre="dolor" tono="rojo" />
+        <span style={{ fontSize: 15.5, fontWeight: 600, color: C.text, flex: 1 }}>Molestias</span>
         {anyRecorded && (
           <span style={{ fontSize: 11.5, fontWeight: 700, color: maxLevel >= 4 ? CAT.running : maxLevel >= 2 ? C.amber : C.ok }}>
             máx {maxLevel}/5
           </span>
         )}
-        <span style={{ fontSize: 14, color: C.textFaint, transform: isOpen ? "rotate(90deg)" : "none", transition: "transform 0.2s ease" }}>&rsaquo;</span>
+        <Chevron abierto={isOpen} />
       </div>
       {isOpen && (
         <div className="expand-in" style={{ padding: "0 " + SP.lg + "px " + SP.lg + "px", borderTop: "1px solid " + C.divider, paddingTop: SP.md }}>
@@ -68,46 +69,42 @@ export function HabitBlock({ cuelloEj, cM, cT, cN, cuelloTotal, toggleCuello, ex
   const isOpen = expandedBlock === "cuello";
   const allDone = cuelloTotal === 3;
   return (
-    <div style={{
-      background: C.card, border: "1px solid " + C.cardBorder, borderLeft: "3px solid " + CAT.cuello, borderRadius: R.xl, overflow: "hidden",
-    }}>
+    <div style={{ ...CARD, overflow: "hidden" }}>
       <div onClick={() => toggleBlock("cuello")} className="block" style={{
-        display: "flex", alignItems: "center", gap: SP.md, padding: "13px " + SP.lg + "px", minHeight: TAP_MIN, cursor: "pointer",
+        display: "flex", alignItems: "center", gap: SP.md, padding: "11px " + SP.lg + "px", minHeight: 60, cursor: "pointer",
       }}>
-        <img src={ICON_CUELLO} alt="" style={{ width: 19, height: 19, objectFit: "contain", flexShrink: 0 }} />
+        <IconoCaja nombre="cuello" tono="azul" />
         <div style={{ flex: 1 }}>
-          <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
-            <span style={{ ...TYPE.cardTitle, color: C.text }}>Cuello</span>
-            <span style={{ fontSize: 8.5, fontWeight: 800, color: CAT.cuello, background: CAT.cuello + "16", padding: "2px 6px", borderRadius: R.sm, letterSpacing: 0.3 }}>BASE DIARIA</span>
-          </div>
+          <div style={{ fontSize: 15.5, fontWeight: 600, color: C.text }}>Cuello</div>
+          <div style={{ fontSize: 12.5, color: C.textDim, marginTop: 1 }}>Base diaria · {cuelloTotal} de 3</div>
         </div>
         <div style={{ display: "flex", gap: 4 }}>
           {[cM, cT, cN].map((v, i) => (
-            <div key={i} style={{ width: 8, height: 8, borderRadius: "50%", background: v ? CAT.cuello : "transparent", border: "1.5px solid " + CAT.cuello }} />
+            <div key={i} style={{ width: 9, height: 9, borderRadius: "50%", background: v ? A.azul : "transparent", border: "1.8px solid " + A.azul }} />
           ))}
         </div>
-        <span style={{ fontSize: 14, color: C.textFaint, transform: isOpen ? "rotate(90deg)" : "none", transition: "transform 0.2s ease" }}>&rsaquo;</span>
+        <Chevron abierto={isOpen} />
       </div>
       {isOpen && (
-        <div className="expand-in" style={{ padding: "0 " + SP.lg + "px " + SP.lg + "px", borderTop: "1px solid #D8E5EC", paddingTop: SP.md }}>
+        <div className="expand-in" style={{ padding: "0 " + SP.lg + "px " + SP.lg + "px", borderTop: "1px solid " + C.divider, paddingTop: SP.md }}>
           {cuelloEj.contexto && (
             <div style={{ fontSize: 12, color: "#4A4A47", lineHeight: 1.5, marginBottom: 10 }}>{cuelloEj.contexto}</div>
           )}
           <div style={{ marginTop: 4, marginBottom: 4 }}>
             {cuelloEj.pasos.map((p, i) => (
               <div key={i} style={{ display: "flex", gap: 8, marginBottom: 6 }}>
-                <span style={{ fontSize: 11.5, fontWeight: 800, color: CAT.cuello, flexShrink: 0 }}>{i+1}.</span>
+                <span style={{ fontSize: 11.5, fontWeight: 800, color: A.azul, flexShrink: 0 }}>{i+1}.</span>
                 <span style={{ fontSize: 12.5, color: "#4A4A47", lineHeight: 1.45 }}>{p}</span>
               </div>
             ))}
           </div>
-          <div style={{ background: "#FFFFFF", borderRadius: 10, padding: "9px 12px", marginBottom: 10 }}>
+          <div style={{ background: C.surfaceMuted, borderRadius: 12, padding: "9px 12px", marginBottom: 10 }}>
             <div style={{ fontSize: 9.5, fontWeight: 800, color: "#787774", letterSpacing: 0.5, marginBottom: 2 }}>CÓMO DEBE SENTIRSE</div>
             <div style={{ fontSize: 12, color: "#4A4A47", lineHeight: 1.4 }}>{cuelloEj.sensacion}</div>
           </div>
           {cuelloEj.aplicacion && (
-            <div style={{ background: CAT.cuello + "0D", border: "1px solid " + CAT.cuello + "25", borderRadius: 10, padding: "9px 12px", marginBottom: 10 }}>
-              <div style={{ fontSize: 9.5, fontWeight: 800, color: CAT.cuello, letterSpacing: 0.5, marginBottom: 2 }}>PARA QUÉ TE SIRVE ESTO</div>
+            <div style={{ background: A.fondo.azul, border: "none", borderRadius: 10, padding: "9px 12px", marginBottom: 10 }}>
+              <div style={{ fontSize: 9.5, fontWeight: 800, color: A.azul, letterSpacing: 0.5, marginBottom: 2 }}>PARA QUÉ TE SIRVE ESTO</div>
               <div style={{ fontSize: 12, color: "#4A4A47", lineHeight: 1.4 }}>{cuelloEj.aplicacion}</div>
             </div>
           )}
@@ -117,7 +114,7 @@ export function HabitBlock({ cuelloEj, cM, cT, cN, cuelloTotal, toggleCuello, ex
               return (
                 <button key={k} className="block" onClick={() => toggleCuello(k)} style={{
                   flex: 1, padding: "12px 6px", borderRadius: 10, textAlign: "center",
-                  background: val ? CAT.cuello : "#FFFFFF", border: val ? "none" : "1px solid #D8E5EC",
+                  background: val ? A.azul : C.surfaceMuted, border: "none",
                 }}>
                   <div style={{ fontSize: 15, marginBottom: 2, color: val ? "#FAFAF9" : "#D8E5EC" }}>{val ? "✓" : "○"}</div>
                   <div style={{ fontSize: 8.5, fontWeight: 800, color: val ? "#FAFAF9" : "#787774", letterSpacing: 0, lineHeight: 1.2 }}>{label}</div>
@@ -126,7 +123,7 @@ export function HabitBlock({ cuelloEj, cM, cT, cN, cuelloTotal, toggleCuello, ex
             })}
           </div>
           {allDone && (
-            <div style={{ fontSize: 11, color: CAT.cuello, fontWeight: 700, marginTop: 8, textAlign: "center" }}>Hecho. Eso es lo único que tiene que pasar sí o sí hoy.</div>
+            <div style={{ fontSize: 11, color: A.azul, fontWeight: 700, marginTop: 8, textAlign: "center" }}>Hecho. Eso es lo único que tiene que pasar sí o sí hoy.</div>
           )}
         </div>
       )}
@@ -140,37 +137,34 @@ export function GuerreroBlock({ day, dayKey, guerreroLog, setGuerreroLog, expand
   const pilarDia = getPilarGuerreroDelDia(day.weekN, day.dayIdx);
   const practicadoHoy = !!guerreroLog[dayKey];
   const enPausa = habitoEnPausa(day.weekN);
-  const colorGuerrero = "#3A3A38"; // gris carbon — serio, distinto de todo lo demas
+  const colorGuerrero = "#3A3A3C";
 
   return (
-    <div style={{ background: C.card, border: "1px solid " + C.cardBorder, borderLeft: "3px solid " + C.textDim, borderRadius: R.xl, overflow: "hidden", opacity: enPausa ? 0.6 : 1 }}>
+    <div style={{ ...CARD, overflow: "hidden", opacity: enPausa ? 0.6 : 1 }}>
       <div onClick={() => toggleBlock("guerrero")} className="block" style={{
-        display: "flex", alignItems: "center", gap: SP.md, padding: "13px " + SP.lg + "px", minHeight: TAP_MIN, cursor: "pointer",
+        display: "flex", alignItems: "center", gap: SP.md, padding: "11px " + SP.lg + "px", minHeight: 60, cursor: "pointer",
       }}>
-        <img src={ICON_GUERRERO} alt="" style={{ width: 19, height: 19, objectFit: "contain", flexShrink: 0 }} />
+        <IconoCaja nombre="escudo" tono="gris" />
         <div style={{ flex: 1 }}>
-          <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
-            <span style={{ ...TYPE.cardTitle, color: C.text }}>Guerrero</span>
-            <span style={{ fontSize: 8.5, fontWeight: 800, color: colorGuerrero, background: colorGuerrero + "14", padding: "2px 6px", borderRadius: R.sm, letterSpacing: 0.3 }}>{enPausa ? "EN PAUSA" : "HABILIDAD"}</span>
-          </div>
-          <div style={{ fontSize: 10, color: C.textDim, marginTop: 2 }}>{enPausa ? "En pausa hasta semana 6 — sin exigencia estas semanas" : "Al llegar a casa, antes de sentarte"}</div>
+          <div style={{ fontSize: 15.5, fontWeight: 600, color: C.text }}>Guerrero</div>
+          <div style={{ fontSize: 12.5, color: C.textDim, marginTop: 1 }}>{enPausa ? "En pausa hasta semana 6 — sin exigencia estas semanas" : "Al llegar a casa, antes de sentarte"}</div>
         </div>
-        {practicadoHoy && <span style={{ fontSize: 13, color: colorGuerrero }}>✓</span>}
-        <span style={{ fontSize: 14, color: C.textFaint, transform: isOpen ? "rotate(90deg)" : "none", transition: "transform 0.2s ease" }}>&rsaquo;</span>
+        {practicadoHoy && <span style={{ fontSize: 13, fontWeight: 800, color: A.verde }}>✓</span>}
+        <Chevron abierto={isOpen} />
       </div>
       {isOpen && (
-        <div className="expand-in" style={{ padding: "0 " + SP.lg + "px " + SP.lg + "px", borderTop: "1px solid #DCDAD6", paddingTop: SP.md }}>
+        <div className="expand-in" style={{ padding: "0 " + SP.lg + "px " + SP.lg + "px", borderTop: "1px solid " + C.divider, paddingTop: SP.md }}>
           <div style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 4 }}>
             <span style={{ fontSize: 9.5, fontWeight: 800, color: colorGuerrero, letterSpacing: 0.5 }}>{pilarDia.nombre.toUpperCase()} · NIVEL {pilarDia.nivel}</span>
           </div>
           <div style={{ fontSize: 15, fontWeight: 800, color: C.text, marginBottom: 6 }}>{pilarDia.nivelNombre}</div>
 
-          <div style={{ background: "#FFFFFF", borderRadius: 10, padding: "10px 12px", marginBottom: 10 }}>
+          <div style={{ background: C.surfaceMuted, borderRadius: 12, padding: "10px 12px", marginBottom: 10 }}>
             <div style={{ fontSize: 9.5, fontWeight: 800, color: "#787774", letterSpacing: 0.5, marginBottom: 3 }}>QUÉ NECESITAS</div>
             <div style={{ fontSize: 12, color: "#4A4A47", lineHeight: 1.4 }}>{pilarDia.necesitas}</div>
           </div>
 
-          <div style={{ background: "#FFFFFF", borderRadius: 10, padding: "10px 12px", marginBottom: 10 }}>
+          <div style={{ background: C.surfaceMuted, borderRadius: 12, padding: "10px 12px", marginBottom: 10 }}>
             <div style={{ fontSize: 9.5, fontWeight: 800, color: colorGuerrero, letterSpacing: 0.5, marginBottom: 6 }}>MÉTODO</div>
             {pilarDia.metodo.map((paso, i) => (
               <div key={i} style={{ display: "flex", gap: 8, marginBottom: 6 }}>
@@ -199,7 +193,7 @@ export function GuerreroBlock({ day, dayKey, guerreroLog, setGuerreroLog, expand
 
           <button className="block" onClick={() => setGuerreroLog(p => Object.assign({}, p, { [dayKey]: !p[dayKey] }))} style={{
             width: "100%", padding: "12px 6px", borderRadius: 10, textAlign: "center",
-            background: practicadoHoy ? colorGuerrero : "#FFFFFF", border: practicadoHoy ? "none" : "1px solid #DCDAD6",
+            background: practicadoHoy ? colorGuerrero : C.surfaceMuted, border: "none",
           }}>
             <div style={{ fontSize: 15, marginBottom: 2, color: practicadoHoy ? "#FAFAF9" : "#C7C5C1" }}>{practicadoHoy ? "✓" : "○"}</div>
             <div style={{ fontSize: 9, fontWeight: 800, color: practicadoHoy ? "#FAFAF9" : "#787774" }}>PRACTICADO HOY</div>
@@ -218,7 +212,7 @@ export function MagiaBlock({ day, magiaRepaso, dominarTruco, responderRepaso,
   const { actual, repasos } = magiaDeHoy(magiaRepaso, hoy);
   const progreso = progresoMagia(magiaRepaso);
   const enPausa = habitoEnPausa(day.weekN);
-  const colorMagia = "#6B4C8A"; // ciruela — distinto de todo lo demas
+  const colorMagia = A.morado;
 
   if (!actual && !repasos.length) return null;
 
@@ -227,19 +221,14 @@ export function MagiaBlock({ day, magiaRepaso, dominarTruco, responderRepaso,
     : actual ? "Le das caña a " + actual.nombre : "Todo al día";
 
   return (
-    <div style={{ background: C.card, border: "1px solid " + C.cardBorder, borderLeft: "3px solid #6B4C8A", borderRadius: R.xl, overflow: "hidden", opacity: enPausa ? 0.6 : 1 }}>
+    <div style={{ ...CARD, overflow: "hidden", opacity: enPausa ? 0.6 : 1 }}>
       <div onClick={() => toggleBlock("magia")} className="block" style={{
-        display: "flex", alignItems: "center", gap: SP.md, padding: "13px " + SP.lg + "px", minHeight: TAP_MIN, cursor: "pointer",
+        display: "flex", alignItems: "center", gap: SP.md, padding: "11px " + SP.lg + "px", minHeight: 60, cursor: "pointer",
       }}>
-        <img src={ICON_MAGIA} alt="" style={{ width: 19, height: 19, objectFit: "contain", flexShrink: 0 }} />
+        <IconoCaja nombre="magia" tono="morado" />
         <div style={{ flex: 1, minWidth: 0 }}>
-          <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
-            <span style={{ ...TYPE.cardTitle, color: C.text }}>Magia</span>
-            <span style={{ fontSize: 8.5, fontWeight: 800, color: colorMagia, background: colorMagia + "16", padding: "2px 6px", borderRadius: R.sm, letterSpacing: 0.3 }}>
-              {progreso.dominados}/{progreso.total}
-            </span>
-          </div>
-          <div style={{ fontSize: 10, color: C.textDim, marginTop: 2 }}>
+          <div style={{ fontSize: 15.5, fontWeight: 600, color: C.text }}>Magia <span style={{ fontSize: 12.5, fontWeight: 600, color: A.morado }}>{progreso.dominados}/{progreso.total}</span></div>
+          <div style={{ fontSize: 12.5, color: C.textDim, marginTop: 1 }}>
             {enPausa ? "En pausa hasta semana 6 — sin exigencia estas semanas" : resumen}
           </div>
         </div>
@@ -249,11 +238,11 @@ export function MagiaBlock({ day, magiaRepaso, dominarTruco, responderRepaso,
             {repasos.length}
           </span>
         )}
-        <span style={{ fontSize: 14, color: C.textFaint, transform: isOpen ? "rotate(90deg)" : "none", transition: "transform 0.2s ease" }}>&rsaquo;</span>
+        <Chevron abierto={isOpen} />
       </div>
 
       {isOpen && (
-        <div className="expand-in" style={{ padding: "0 " + SP.lg + "px " + SP.lg + "px", borderTop: "1px solid #E2D5EC", paddingTop: SP.md }}>
+        <div className="expand-in" style={{ padding: "0 " + SP.lg + "px " + SP.lg + "px", borderTop: "1px solid " + C.divider, paddingTop: SP.md }}>
 
           {/* ─── LOS REPASOS: primero, que son treinta segundos cada uno ─── */}
           {repasos.length > 0 && (
@@ -265,7 +254,7 @@ export function MagiaBlock({ day, magiaRepaso, dominarTruco, responderRepaso,
                 Sácalo una vez. Si te sale, tarda más en volver; si no, vuelve pronto.
               </div>
               {repasos.map(t => (
-                <div key={t.id} style={{ background: "#FFFFFF", border: "1px solid #E2D5EC", borderRadius: 10,
+                <div key={t.id} style={{ background: C.surfaceMuted, border: "none", borderRadius: 12,
                                          padding: "10px 12px", marginBottom: 6 }}>
                   <div style={{ fontSize: 13.5, fontWeight: 700, color: C.text }}>{t.nombre}</div>
                   <div style={{ fontSize: 11.5, color: "#4A4A47", lineHeight: 1.4, marginTop: 3 }}>{t.dominio}</div>
@@ -295,12 +284,12 @@ export function MagiaBlock({ day, magiaRepaso, dominarTruco, responderRepaso,
               <div style={{ fontSize: 15, fontWeight: 800, color: C.text, marginBottom: 6 }}>{actual.nombre}</div>
               <div style={{ fontSize: 12.5, color: "#4A4A47", lineHeight: 1.5, marginBottom: 12 }}>{actual.descripcion}</div>
 
-              <div style={{ background: "#FFFFFF", borderRadius: 10, padding: "10px 12px", marginBottom: 10 }}>
+              <div style={{ background: C.surfaceMuted, borderRadius: 12, padding: "10px 12px", marginBottom: 10 }}>
                 <div style={{ fontSize: 9.5, fontWeight: 800, color: "#787774", letterSpacing: 0.5, marginBottom: 3 }}>QUÉ NECESITAS</div>
                 <div style={{ fontSize: 12, color: "#4A4A47", lineHeight: 1.4 }}>{actual.necesitas}</div>
               </div>
 
-              <div style={{ background: "#FFFFFF", borderRadius: 10, padding: "10px 12px", marginBottom: 10 }}>
+              <div style={{ background: C.surfaceMuted, borderRadius: 12, padding: "10px 12px", marginBottom: 10 }}>
                 <div style={{ fontSize: 9.5, fontWeight: 800, color: colorMagia, letterSpacing: 0.5, marginBottom: 6 }}>MÉTODO</div>
                 {actual.metodo.map((paso, i) => (
                   <div key={i} style={{ display: "flex", gap: 8, marginBottom: 6 }}>
@@ -310,7 +299,7 @@ export function MagiaBlock({ day, magiaRepaso, dominarTruco, responderRepaso,
                 ))}
               </div>
 
-              <div style={{ background: "#FFFFFF", borderRadius: 10, padding: "10px 12px", marginBottom: 10 }}>
+              <div style={{ background: C.surfaceMuted, borderRadius: 12, padding: "10px 12px", marginBottom: 10 }}>
                 <div style={{ fontSize: 9.5, fontWeight: 800, color: "#787774", letterSpacing: 0.5, marginBottom: 3 }}>CÓMO PRESENTARLO</div>
                 <div style={{ fontSize: 12, color: "#4A4A47", lineHeight: 1.4 }}>{actual.presentacion}</div>
               </div>
@@ -331,7 +320,7 @@ export function MagiaBlock({ day, magiaRepaso, dominarTruco, responderRepaso,
           )}
 
           {!actual && (
-            <div style={{ background: "#FFFFFF", borderRadius: 10, padding: "12px 14px" }}>
+            <div style={{ background: C.surfaceMuted, borderRadius: 12, padding: "12px 14px" }}>
               <div style={{ fontSize: 13, fontWeight: 700, color: C.text }}>Los {progreso.total} trucos, dominados</div>
               <div style={{ fontSize: 12, color: "#4A4A47", lineHeight: 1.45, marginTop: 3 }}>
                 Ya solo quedan los repasos, que es exactamente donde querías llegar.
@@ -350,23 +339,26 @@ export function MagiaBlock({ day, magiaRepaso, dominarTruco, responderRepaso,
   );
 }
 
-export function ListBlock({ id, expandedBlock, toggleBlock, icon, accent, title, statusText, statusDone, children }) {
+export function ListBlock({ id, expandedBlock, toggleBlock, icono, tono = "gris", title, sub, statusText, statusDone, children }) {
   const isOpen = expandedBlock === id;
   return (
-    <div style={{ background: C.card, border: "1px solid " + C.cardBorder, borderRadius: R.xl, overflow: "hidden" }}>
+    <div style={{ ...CARD, overflow: "hidden" }}>
       <div onClick={() => toggleBlock(id)} className="block" style={{
-        display: "flex", alignItems: "center", gap: SP.md, padding: "13px " + SP.lg + "px",
-        minHeight: TAP_MIN, cursor: "pointer",
+        display: "flex", alignItems: "center", gap: SP.md, padding: "11px " + SP.lg + "px",
+        minHeight: 60, cursor: "pointer",
       }}>
-        {icon && <img src={icon} alt="" style={{ width: 19, height: 19, objectFit: "contain", flexShrink: 0 }} />}
-        <span style={{ ...TYPE.cardTitle, color: C.text, flex: 1 }}>{title}</span>
+        {icono && <IconoCaja nombre={icono} tono={tono} />}
+        <div style={{ flex: 1, minWidth: 0 }}>
+          <div style={{ fontSize: 15.5, fontWeight: 600, color: C.text }}>{title}</div>
+          {sub && <div style={{ fontSize: 12.5, color: C.textDim, marginTop: 1 }}>{sub}</div>}
+        </div>
         {statusText && (
           <span style={{
-            fontSize: 11.5, fontWeight: 700, color: statusDone ? C.ok : C.textDim,
+            fontSize: 12.5, fontWeight: 700, color: statusDone ? A.verde : C.textDim,
             marginRight: 2, fontVariantNumeric: "tabular-nums",
           }}>{statusDone ? "✓ " + statusText : statusText}</span>
         )}
-        <span style={{ fontSize: 14, color: C.textFaint, transform: isOpen ? "rotate(90deg)" : "none", transition: "transform 0.2s ease" }}>&rsaquo;</span>
+        <Chevron abierto={isOpen} />
       </div>
       {isOpen && (
         <div className="expand-in" style={{ padding: "0 " + SP.lg + "px " + SP.lg + "px", borderTop: "1px solid " + C.divider, paddingTop: SP.md }}>
@@ -396,7 +388,7 @@ export function MoveDayBlock({ dayKey, day, week, postponed, setPostponed }) {
   if (destino) {
     const diaDestino = week.days.find(d => claveDia(d) === destino);
     return (
-      <div style={{ background: "#FBF0EF", border: "1px solid #E8C9C6", borderRadius: 12, padding: "10px 14px" }}>
+      <div style={{ ...CARD, background: A.fondo.naranja, padding: "12px 16px" }}>
         <div style={{ fontSize: 12, fontWeight: 700, color: "#171717" }}>
           Movida a {diaDestino ? diaDestino.dow + " " + diaDestino.date : destino}
         </div>
@@ -411,7 +403,7 @@ export function MoveDayBlock({ dayKey, day, week, postponed, setPostponed }) {
   return (
     <div style={{ background: "transparent", borderRadius: 12, overflow: "hidden" }}>
       <button onClick={() => { setOpen(!open); setError(null); }} style={{ padding: "6px 4px", cursor: "pointer" }}>
-        <div style={{ fontSize: 11.5, fontWeight: 600, color: "#A8A8A5" }}>¿Mover a otro día? &rsaquo;</div>
+        <div style={{ fontSize: 13, fontWeight: 600, color: A.azul }}>¿Mover a otro día? &rsaquo;</div>
       </button>
       {open && (
         <div style={{ padding: "4px 0 0", display: "flex", flexDirection: "column", gap: 6 }}>
@@ -422,7 +414,7 @@ export function MoveDayBlock({ dayKey, day, week, postponed, setPostponed }) {
             const ocupado = llegadasA(postponed, claveDia(d)).length > 0;
             return (
               <button key={claveDia(d)} className="btn" onClick={() => mover(d)} style={{
-                textAlign: "left", padding: "10px 12px", background: "#F2F2F0", borderRadius: 10,
+                textAlign: "left", padding: "12px 14px", background: C.card, borderRadius: 14,
                 fontSize: 13, fontWeight: 600, color: ocupado ? "#A8A8A5" : C.text,
               }}>
                 Mover a {d.dow} ({d.date}){ocupado && " — ya ha recibido una sesión"}

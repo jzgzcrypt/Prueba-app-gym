@@ -1,18 +1,25 @@
 "use client";
 
 import { C, SP, TYPE } from "@/design/tokens";
-export function ScreenHeader({ icon, title, subtitle }) {
+
+/**
+ * Cabecera de pantalla del estilo Aire: una linea pequeña en gris encima
+ * (fecha o contexto) y el titulo grande. `derecha`: algo pequeño alineado al
+ * titulo (un enlace, una cifra). `icon` se ignora: los dibujos de antes no
+ * casan con el estilo.
+ */
+export function ScreenHeader({ title, subtitle, derecha }) {
   return (
-    <div style={{ marginBottom: SP.xl }}>
-      <div style={{ display: "flex", alignItems: "center", gap: SP.md }}>
-        {icon && <img src={icon} alt="" style={{ width: 26, height: 26, objectFit: "contain" }} />}
+    <div style={{ marginBottom: SP.md }}>
+      {subtitle && <div style={{ fontSize: 14, fontWeight: 600, color: C.textDim }}>{subtitle}</div>}
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-end", gap: SP.sm }}>
         <div style={{ ...TYPE.screenTitle, color: C.text }}>{title}</div>
+        {derecha && <div style={{ marginBottom: 7, flexShrink: 0 }}>{derecha}</div>}
       </div>
-      {subtitle && <div style={{ fontSize: 12, color: C.textDim, fontWeight: 600, marginTop: 3, marginLeft: icon ? 38 : 0 }}>{subtitle}</div>}
     </div>
   );
 }
 
 export function SectionHeader({ children }) {
-  return <div style={{ ...TYPE.sectionLabel, color: C.textFaint, marginBottom: SP.sm }}>{children}</div>;
+  return <div style={{ fontSize: 13, fontWeight: 700, color: C.textDim, margin: "18px 4px 8px" }}>{children}</div>;
 }

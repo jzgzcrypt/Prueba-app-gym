@@ -22,7 +22,7 @@ import { PALETAS, recolorear } from "@/domain/running/teselas";
  * escala al ancho de la pantalla. Sin cobertura no hay calles, pero la ruta
  * se ve igual.
  */
-const ANCHO = 360, ALTO = 260, FRANJA = 54;
+const ANCHO = 360, ALTO_BASE = 260, FRANJA = 54;
 const COLOR = {
   objetivo: C.ok,        // a tu ritmo o mas rapido
   cerca: "#D39B12",      // hasta 30 s/km mas lento
@@ -85,10 +85,16 @@ async function descargarGpx(ruta, titulo, fecha) {
   URL.revokeObjectURL(url);
 }
 
-export function MapaRuta({ ruta, objetivo, titulo, fecha, rutaCompleta, datos }) {
+/**
+ * `mini`: solo el mapa, sin franja de datos, leyenda, GPX ni listas, para
+ * meterlo de portada en una tarjeta (HOY). `alto`: alto del lienzo (360 de
+ * ancho). `etiqueta`: una pastilla arriba a la izquierda.
+ */
+export function MapaRuta({ ruta, objetivo, titulo, fecha, rutaCompleta, datos, mini = false, alto, etiqueta }) {
+  const ALTO = alto || ALTO_BASE;
   const [sinTeselas, setSinTeselas] = useState(false);
   const uid = useId().replace(/:/g, "");
-  const conDatos = datos && datos.m > 0;
+  const conDatos = !mini && datos && datos.m > 0;
   const m = proyectar(ruta, ANCHO, ALTO, 20, conDatos ? FRANJA + 8 : 20, true);
   if (!m) return null;
   const tramos = tramosPorColor(ruta, objetivo);
@@ -114,7 +120,7 @@ export function MapaRuta({ ruta, objetivo, titulo, fecha, rutaCompleta, datos })
   return (
     <div data-mapa>
       <div style={{ position: "relative", width: "100%", aspectRatio: ANCHO + " / " + ALTO, overflow: "hidden",
-                    borderRadius: 14, background: E.fondo, border: "1px solid " + C.cardBorder }}>
+                    borderRadius: mini ? 0 : 16, background: E.fondo }}>
         {!sinTeselas && m.teselas.map(t => (
           <TeselaPintada key={t.z + "/" + t.x + "/" + t.y}
             src={"https://tile.openstreetmap.org/" + t.z + "/" + t.x + "/" + t.y + ".png"}
@@ -206,7 +212,12 @@ export function MapaRuta({ ruta, objetivo, titulo, fecha, rutaCompleta, datos })
         <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noreferrer" style={{
           position: "absolute", right: 0, bottom: 0, fontSize: 9.5, color: "#4A4A47", background: "rgba(255,255,255,.8)",
           padding: "1px 5px", borderTopLeftRadius: 6, textDecoration: "none" }}>© OpenStreetMap</a>
+        {etiqueta && (
+          <div style={{ position: "absolute", left: 10, top: 10, fontSize: 12, fontWeight: 700, color: "#1C1C1E",
+                        background: "rgba(255,255,255,.92)", borderRadius: 999, padding: "5px 10px" }}>{etiqueta}</div>
+        )}
       </div>
+      {!mini && <>
       <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 8, marginTop: 8 }}>
         <div style={{ display: "flex", flexWrap: "wrap", gap: "4px 10px" }}>
           {cats.length > 1 && cats.map(c => (
@@ -250,6 +261,7 @@ export function MapaRuta({ ruta, objetivo, titulo, fecha, rutaCompleta, datos })
           ))}
         </div>
       )}
+      </>}
     </div>
   );
 }

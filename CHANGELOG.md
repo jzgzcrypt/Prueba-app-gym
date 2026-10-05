@@ -21,6 +21,10 @@ Todo cambio que se haga en la app se anota aquí. Sin excepciones.
 
 ## [Sin publicar]
 
+### Nuevo aspecto "Aire" (1/6): base y HOY
+- Estilo elegido pantalla a pantalla: fondo gris muy claro, tarjetas blancas redondeadas con sombra suave, tipografía Inter, títulos grandes, azul para las acciones e iconos de línea (sin emoticonos ni dibujos). Barra inferior de cristal.
+- HOY (opción B): la fecha y los días que faltan para el 7K, la semana en círculos (check en lo hecho, azul el día que miras), la sesión como tarjeta grande con el mapa de tu última salida, sus datos y "Empezar sesión", y los hábitos en 4 cuadros (comida, cuello, magia, guerrero) que se abren al tocarlos. Avisos, calendario y resumen semanal con el mismo estilo.
+
 ### Nutrición, lo mínimo: kcal y proteína de hoy, y tu peso
 - Sin apuntar comidas ni IA: la pantalla dice qué toca hoy (COMER o RECORTAR, kcal y proteína en grande) y el peso de cada mañana.
 - Las kcal de la semana se ajustan solo con el peso: cada lunes, con la recta de las dos últimas semanas (al menos 8 pesajes), si bajas más lento de 0,25 kg/sem se quitan 100 kcal/día; si bajas más rápido de 0,6, se suman 100. Tope ±300 y nunca por debajo de 1.800.
