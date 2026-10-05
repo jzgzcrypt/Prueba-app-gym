@@ -167,13 +167,13 @@ export function HoyScreen(props) {
             </div>
             <div style={{ flexGrow: 1, minWidth: 0 }}>
               <div style={{ ...TYPE.bodyStrong, color: C.text }}>
-                {resComida.hechas
+                {resComida.llevas.kcal > 0
                   ? (resComida.quedan.kcal >= 0 ? "Te quedan " + resComida.quedan.kcal.toLocaleString("es-ES") + " kcal" : "Te has pasado " + (-resComida.quedan.kcal).toLocaleString("es-ES") + " kcal")
                     + " · " + (resComida.quedan.prot > 0 ? resComida.quedan.prot + " g proteína" : "proteína ✓")
                   : comida.macros.kcal.toLocaleString("es-ES") + " kcal · " + comida.macros.prot + " g proteína"}
               </div>
               <div style={{ fontSize: 11.5, color: C.textDim, marginTop: 1 }}>
-                {resComida.siguiente ? "Toca para apuntar " + ({ desayuno: "el desayuno", comida: "la comida", merienda: "la merienda", cena: "la cena" })[resComida.siguiente] + " y ver qué comer" : "Día apuntado ✓"}
+                {resComida.llevas.kcal > 0 ? "Toca para pegar lo nuevo de tu IA" : "Toca para copiar el prompt del día"}
               </div>
             </div>
             <span style={{ color: C.textFaint, fontSize: 16, flexShrink: 0 }}>›</span>

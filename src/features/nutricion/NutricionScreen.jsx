@@ -12,10 +12,10 @@ import { ListaCompra } from "@/features/nutricion/ListaCompra";
  * NUTRICION: tu dia de comida y poco mas.
  *
  * Arriba el peso de hoy (el motor que ajusta las kcal de la semana); luego
- * lo que te queda, las cuatro comidas para apuntar y que comer ahora. La
+ * lo que te queda, con el prompt para tu IA y su respuesta pegada. La
  * compra, plegada al final.
  */
-export function NutricionScreen({ comida, apuntes = [], log = {}, apuntar, edits, esHoy, motor,
+export function NutricionScreen({ comida, apuntes = [], apuntar, edits, esHoy, motor,
                                   diasSemana, inicioSemana, compraMarcada, marcarCompra,
                                   comidasFuera, marcarFuera }) {
   const [verCompra, setVerCompra] = useState(false);
@@ -25,7 +25,7 @@ export function NutricionScreen({ comida, apuntes = [], log = {}, apuntar, edits
       <ScreenHeader icon={ICON_NUTRICION} title="NUTRICIÓN" />
 
       {motor && esHoy && <TuMotor {...motor} />}
-      {comida && apuntar && <TuDia comida={comida} apuntes={apuntes} log={log} apuntar={apuntar} esHoy={esHoy} />}
+      {comida && apuntar && <TuDia comida={comida} apuntes={apuntes} apuntar={apuntar} esHoy={esHoy} />}
 
       {diasSemana && marcarCompra && (
         <div style={{ padding: SP.lg + "px " + SP.xl + "px 0" }}>

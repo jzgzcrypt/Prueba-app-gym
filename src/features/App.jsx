@@ -275,9 +275,9 @@ export default function App() {
   // La fase del cuello sale de los dias practicados, no de la semana del bloque.
   const cuelloEj = getCuelloEj(cuelloChecks, cuelloFaseManual);
   // ─── Motor adaptativo: tu gasto real y las kcal de esta semana ─────────
-  // Pesos: los de cada mañana y los de las medidas. Ingestas: los dias con
-  // al menos 3 comidas apuntadas (o cerrados con tu IA, los de antes); un dia
-  // a medias no cuenta: no se asume nada.
+  // Pesos: los de cada mañana y los de las medidas. Ingestas: el total del
+  // dia que trae tu IA (o, en dias antiguos, 3 comidas apuntadas); un dia sin
+  // datos no cuenta: no se asume nada.
   const pesosTodos = (() => {
     const p = {};
     for (const m of medidas) if (m && m.iso && m.peso != null) p[m.iso] = m.peso;
@@ -332,8 +332,8 @@ export default function App() {
     return cuantas;
   };
 
-  // Apuntar una comida del dia: sustituye lo que hubiera en esa comida
-  // (asi se corrige: se rehace entera). Con null, se borra.
+  // Guardar el total del dia que trae tu IA ("dia"): sustituye al anterior,
+  // porque la IA siempre da el del dia entero. Con null, se borra.
   const apuntar = (comidaId, apunte) => setComidasLog(p => {
     const resto = (p[dayKey] || []).filter(ap => ap && ap.comida !== comidaId);
     return Object.assign({}, p, { [dayKey]: apunte ? resto.concat([apunte]) : resto });
@@ -657,7 +657,7 @@ export default function App() {
         {screen === "nutricion" && (
           <NutricionScreen comida={comida} apuntes={comidasLog[dayKey] || []}
             edits={menuEditado} esHoy={isToday}
-            log={comidasLog} apuntar={apuntar}
+            apuntar={apuntar}
             motor={{ pesoHoy: pesosDiarios[todayLocalIso()] ?? null, guardarPeso, tendencia: tendenciaHoy, programa }}
             diasSemana={WEEKS[currentDay.weekIdx] ? WEEKS[currentDay.weekIdx].days : null}
             inicioSemana={WEEKS[currentDay.weekIdx] ? claveDia(WEEKS[currentDay.weekIdx].days[0]) : ""}

@@ -21,12 +21,11 @@ Todo cambio que se haga en la app se anota aquí. Sin excepciones.
 
 ## [Sin publicar]
 
-### Nutrición: apuntar en la app y que te diga qué comer
-- Fuera el ida y vuelta con la IA. La pantalla es tu día: arriba lo que te queda (kcal y proteína, con barra), las cuatro comidas y qué comer ahora.
-- Cada comida se apunta con un toque, sin escribir frases: "lo de siempre" (lo más apuntado en esa comida), "a ojo" (palmas, puños, pulgares y extras: pan, bebida, postre, picoteo) o "sé las kcal" (el número de una etiqueta). Una comida se rehace o se borra entera.
-- "Qué comer ahora": las raciones de la siguiente comida y tres ideas de platos normales, ajustadas a lo que queda; "Me lo como" la apunta.
-- El motor adaptativo cuenta los días con al menos 3 comidas apuntadas (y los cerrados con la IA de antes).
-- HOY dice lo que te queda y qué comida toca apuntar.
+### Nutrición: tu IA lleva el día, la app solo copia y pega
+- Fuera palmas, puños y comidas por separado: la pantalla es lo que te queda y dos botones. "1 · Copiar mi prompt del día" (tus kcal y macros de hoy, para Claude o ChatGPT) y "2 · Pegar lo que dice mi IA" (lee su línea TOTAL DEL DÍA y se guarda sola; pegar otra vez la sustituye).
+- El prompt pide a la IA que, tras cada cosa que le cuentes, diga lo que llevas y lo que queda, y te proponga 2 opciones para cuadrar la merienda o la cena.
+- Arriba, "Te quedan X kcal · Y g de proteína" con barra; en HOY, lo mismo.
+- El motor adaptativo usa ese total del día.
 - Se quitan de la pantalla los menús de 2022, pasos, comida libre y trucos; la compra queda plegada al final.
 
 ### Mapa: parciales de cada km en los rodajes

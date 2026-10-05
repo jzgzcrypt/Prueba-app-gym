@@ -3,7 +3,7 @@
  *
  * Las formulas de gasto (Mifflin, Harris…) aciertan "de media", pero tu gasto
  * real puede estar 300 kcal arriba o abajo. En vez de fiarse de la formula, se
- * mide: con lo que comes (los dias apuntados en la app) y tu peso de cada mañana.
+ * mide: con lo que comes (el total del dia que trae tu IA) y tu peso de cada mañana.
  *
  *   gasto = lo que comes de media − lo que cambia tu peso × 7700 kcal/kg
  *
