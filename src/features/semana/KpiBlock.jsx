@@ -2,7 +2,8 @@
 
 import { WEEKS, claveDia } from "@/domain/plan/calendario";
 import { useState } from "react";
-import { C, CAT, GRUPO_COLOR, R, SP, TYPE } from "@/design/tokens";
+import { C, CARD, CAT, GRUPO_COLOR, R, SP, TYPE } from "@/design/tokens";
+import { Chevron, IconoCaja } from "@/features/ui/aire";
 import { GRUPO_ENFOQUE } from "@/domain/fuerza/enfoque";
 import { parseSeries } from "@/domain/fuerza/series";
 export function KpiBlock({ title, isOpen, onToggle, weeks, checked, workoutWeights, ritmoReal, isAcumulado, currentWeekN, noCollapse }) {
@@ -90,22 +91,23 @@ export function KpiBlock({ title, isOpen, onToggle, weeks, checked, workoutWeigh
   }
 
   return (
-    <div style={{ background: C.card, border: "1px solid " + C.cardBorder, borderRadius: 14, overflow: "hidden", marginTop: 4 }}>
+    <div style={{ ...CARD, overflow: "hidden" }}>
       {noCollapse ? (
-        <div style={{ padding: "13px 14px" }}>
-          <span style={{ fontSize: 13, fontWeight: 800, color: C.text, letterSpacing: 0.3 }}>{title}</span>
+        <div style={{ padding: "14px 16px" }}>
+          <span style={{ fontSize: 16, fontWeight: 700, color: C.text }}>{title}</span>
         </div>
       ) : (
-        <div onClick={onToggle} className="block" style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "13px 14px", cursor: "pointer" }}>
-          <span style={{ fontSize: 13, fontWeight: 800, color: C.text, letterSpacing: 0.3 }}>{title}</span>
-          <span style={{ fontSize: 13, color: "#C7C7C4", transform: isOpen ? "rotate(90deg)" : "none", transition: "transform 0.15s" }}>&rsaquo;</span>
+        <div onClick={onToggle} className="block" style={{ display: "flex", alignItems: "center", gap: 12, padding: "11px 16px", minHeight: 60, cursor: "pointer" }}>
+          <IconoCaja nombre={isAcumulado ? "grafica" : "calendario"} tono={isAcumulado ? "morado" : "azul"} />
+          <span style={{ flex: 1, fontSize: 15.5, fontWeight: 600, color: C.text }}>{title}</span>
+          <Chevron abierto={isOpen} />
         </div>
       )}
       {(isOpen || noCollapse) && (
-        <div style={{ padding: "0 14px 16px", borderTop: "1px solid " + C.cardBorder, paddingTop: 12 }}>
+        <div style={{ padding: "12px 16px 16px", borderTop: "1px solid " + C.divider }}>
 
           {isAcumulado && (
-            <div style={{ background: "#F2F2F0", borderRadius: 10, padding: "10px 12px", marginBottom: 14 }}>
+            <div style={{ background: C.surfaceMuted, borderRadius: 10, padding: "10px 12px", marginBottom: 14 }}>
               <div style={{ fontSize: 9.5, fontWeight: 800, color: "#787774", letterSpacing: 0.5, marginBottom: 6 }}>OBJETIVO TOTAL DEL PLAN (11 SEMANAS)</div>
               <div style={{ display: "flex", gap: 14 }}>
                 <div>

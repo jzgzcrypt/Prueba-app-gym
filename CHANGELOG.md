@@ -22,6 +22,7 @@ Todo cambio que se haga en la app se anota aquí. Sin excepciones.
 ## [Sin publicar]
 
 ### Nuevo aspecto "Aire" (1/6): base y HOY
+- Semana (opción A): la semana en una tarjeta con los 7 días (día, icono del tipo de sesión, título, Comer/Recortar en color y check redondo; hoy resaltado en azul), selector de semanas segmentado y Pausa como enlace. Resumen y acumulado como filas con icono.
 - Estilo elegido pantalla a pantalla: fondo gris muy claro, tarjetas blancas redondeadas con sombra suave, tipografía Inter, títulos grandes, azul para las acciones e iconos de línea (sin emoticonos ni dibujos). Barra inferior de cristal.
 - HOY (opción B): la fecha y los días que faltan para el 7K, la semana en círculos (check en lo hecho, azul el día que miras), la sesión como tarjeta grande con el mapa de tu última salida, sus datos y "Empezar sesión", y los hábitos en 4 cuadros (comida, cuello, magia, guerrero) que se abren al tocarlos. Avisos, calendario y resumen semanal con el mismo estilo.
 
