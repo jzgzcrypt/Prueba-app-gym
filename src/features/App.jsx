@@ -29,7 +29,7 @@ import { informeMensual, informePendiente } from "@/domain/progreso/informe";
 import { InformeScreen } from "@/features/informe/InformeScreen";
 import { ritmoDelDia } from "@/domain/running/adaptar";
 import { textoParaLibreta } from "@/domain/running/gps";
-import { leerTotalDelDia, semanaNutricion } from "@/domain/nutricion/ia-dia";
+import { ingestaDelDia } from "@/domain/nutricion/apuntar";
 import { gastoPorFormula, programaDeLaSemana, sumarDiasIso, tendenciaPeso } from "@/domain/nutricion/adaptativo";
 import { simplificar, sinSimplificar } from "@/domain/running/ruta";
 import { resumenSemana, semanasCumplidas } from "@/domain/progreso/resumen";
@@ -38,17 +38,6 @@ export default function App() {
   const todayIdx = findTodayIndex();
   const [flatIdx, setFlatIdx] = useState(todayIdx);
   const [screen, setScreen] = useState("hoy");
-  // Lo que llega compartido desde tu IA (share target): el resumen del dia.
-  const [compartido, setCompartido] = useState(null);
-  useEffect(() => {
-    try {
-      const q = new URLSearchParams(window.location.search);
-      const texto = [q.get("title"), q.get("text"), q.get("url")].filter(Boolean).join("\n");
-      if (!texto) return;
-      window.history.replaceState(null, "", window.location.pathname);
-      if (leerTotalDelDia(texto)) { setCompartido(texto); setScreen("nutricion"); }
-    } catch { /* sin URL que leer */ }
-  }, []);
   const [weekIdx, setWeekIdx] = useState(FLAT_DAYS[todayIdx].weekIdx);
   const [checked, setChecked] = useState({});
   const [cuelloChecks, setCuelloChecks] = useState({});
@@ -286,8 +275,9 @@ export default function App() {
   // La fase del cuello sale de los dias practicados, no de la semana del bloque.
   const cuelloEj = getCuelloEj(cuelloChecks, cuelloFaseManual);
   // ─── Motor adaptativo: tu gasto real y las kcal de esta semana ─────────
-  // Pesos: los de cada mañana y los de las medidas. Ingestas: los dias
-  // cerrados con tu IA (los demas no cuentan: no se asume nada).
+  // Pesos: los de cada mañana y los de las medidas. Ingestas: los dias con
+  // al menos 3 comidas apuntadas (o cerrados con tu IA, los de antes); un dia
+  // a medias no cuenta: no se asume nada.
   const pesosTodos = (() => {
     const p = {};
     for (const m of medidas) if (m && m.iso && m.peso != null) p[m.iso] = m.peso;
@@ -296,8 +286,8 @@ export default function App() {
   const ingestas = (() => {
     const out = {};
     for (const k of Object.keys(comidasLog)) {
-      const dia = (comidasLog[k] || []).filter(a => a && a.comida === "dia").slice(-1)[0];
-      if (dia && dia.kcal > 0) out[k] = dia.kcal;
+      const kcal = ingestaDelDia(comidasLog[k]);
+      if (kcal) out[k] = kcal;
     }
     return out;
   })();
@@ -342,16 +332,12 @@ export default function App() {
     return cuantas;
   };
 
-  // Tu IA lleva el dia: por la noche se cierra con su total (sustituye lo de
-  // ese dia: el total ya lo incluye todo). Reabrir lo quita.
-  const cerrarDia = (total) => setComidasLog(p => Object.assign({}, p, {
-    [dayKey]: [{ comida: "dia", origen: "texto", texto: "Día cerrado con tu IA",
-                 kcal: total.kcal, prot: total.prot, hc: total.hc, grasa: total.grasa }] }));
-  const reabrirDia = () => setComidasLog(p => Object.assign({}, p, { [dayKey]: (p[dayKey] || []).filter(ap => ap && ap.comida !== "dia") }));
-  const semanaComida = (() => {
-    const w = WEEKS.find(x => x.days.some(d => claveDia(d) === dayKey));
-    return w ? semanaNutricion({ dias: w.days, comidasLog, objetivoDe: d => comidaDelDia(d, objetivosSemana).macros, hoyIso: todayLocalIso(), claveDe: claveDia }) : null;
-  })();
+  // Apuntar una comida del dia: sustituye lo que hubiera en esa comida
+  // (asi se corrige: se rehace entera). Con null, se borra.
+  const apuntar = (comidaId, apunte) => setComidasLog(p => {
+    const resto = (p[dayKey] || []).filter(ap => ap && ap.comida !== comidaId);
+    return Object.assign({}, p, { [dayKey]: apunte ? resto.concat([apunte]) : resto });
+  });
 
   /** Marcar que una comida de un dia de la semana la haces fuera. */
   const marcarFuera = (comidaId, dayIdx) => setComidasFuera(p => {
@@ -671,9 +657,8 @@ export default function App() {
         {screen === "nutricion" && (
           <NutricionScreen comida={comida} apuntes={comidasLog[dayKey] || []}
             edits={menuEditado} esHoy={isToday}
-            cerrarDia={cerrarDia} reabrirDia={reabrirDia} semana={semanaComida}
+            log={comidasLog} apuntar={apuntar}
             motor={{ pesoHoy: pesosDiarios[todayLocalIso()] ?? null, guardarPeso, tendencia: tendenciaHoy, programa }}
-            pendiente={compartido} limpiarPendiente={() => setCompartido(null)}
             diasSemana={WEEKS[currentDay.weekIdx] ? WEEKS[currentDay.weekIdx].days : null}
             inicioSemana={WEEKS[currentDay.weekIdx] ? claveDia(WEEKS[currentDay.weekIdx].days[0]) : ""}
             compraMarcada={compraMarcada} marcarCompra={marcarCompra}

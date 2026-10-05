@@ -21,6 +21,14 @@ Todo cambio que se haga en la app se anota aquí. Sin excepciones.
 
 ## [Sin publicar]
 
+### Nutrición: apuntar en la app y que te diga qué comer
+- Fuera el ida y vuelta con la IA. La pantalla es tu día: arriba lo que te queda (kcal y proteína, con barra), las cuatro comidas y qué comer ahora.
+- Cada comida se apunta con un toque, sin escribir frases: "lo de siempre" (lo más apuntado en esa comida), "a ojo" (palmas, puños, pulgares y extras: pan, bebida, postre, picoteo) o "sé las kcal" (el número de una etiqueta). Una comida se rehace o se borra entera.
+- "Qué comer ahora": las raciones de la siguiente comida y tres ideas de platos normales, ajustadas a lo que queda; "Me lo como" la apunta.
+- El motor adaptativo cuenta los días con al menos 3 comidas apuntadas (y los cerrados con la IA de antes).
+- HOY dice lo que te queda y qué comida toca apuntar.
+- Se quitan de la pantalla los menús de 2022, pasos, comida libre y trucos; la compra queda plegada al final.
+
 ### Mapa: parciales de cada km en los rodajes
 - En un rodaje continuo, al lado de cada marca de km sale el tiempo de ese km, y debajo del mapa la lista "Parciales" (km 1, km 2… y el trozo final si pasa de 100 m, con su ritmo). Tiempo en movimiento: las pausas no cuentan. En sesiones con series sigue el ritmo de cada tramo.
 

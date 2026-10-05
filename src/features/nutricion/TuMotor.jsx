@@ -64,7 +64,7 @@ export function TuMotor({ pesoHoy, guardarPeso, tendencia, programa }) {
         {programa && programa.ajustado ? (
           <> · tu gasto real <b className="mono" style={{ color: C.text }}>{miles(g.gasto)} kcal</b> ({g.dias} días de datos)</>
         ) : (
-          <>{tendencia ? " · " : ""}Tu gasto real: aprendiendo ({g ? Math.min(g.dias, 7) : 0} de 7 días cerrados con tu IA). Pésate cada mañana, en ayunas.</>
+          <>{tendencia ? " · " : ""}Tu gasto real: aprendiendo ({g ? Math.min(g.dias, 7) : 0} de 7 días con 3 comidas apuntadas). Pésate cada mañana, en ayunas.</>
         )}
         {programa && programa.ajustado && g.confianza < 1 && <span style={{ color: C.textFaint }}> · afinando hasta {DIAS_PLENOS} días</span>}
       </div>

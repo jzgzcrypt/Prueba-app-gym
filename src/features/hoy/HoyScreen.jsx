@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { C, CAT, R, SP, TAP_MIN, TYPE } from "@/design/tokens";
 import { AvisoRitmo, LecturaSesion, queApuntar } from "@/features/ui/lectura";
+import { resumenDia } from "@/domain/nutricion/apuntar";
 import { MapaRuta } from "@/features/ui/MapaRuta";
 import { textoTiempo } from "@/domain/running/gps";
 
@@ -34,9 +35,8 @@ export function HoyScreen(props) {
     notes, noteInput, setNoteInput, editingNote, setEditingNote, saveNote, openCatalogo,
     expandedBlock, setExpandedBlock, magiaRepaso, bloquesHistorial } = props;
 
-  // El dia de comida: o esta cerrado (lo trajo tu IA) o toca mandarselo.
-  const diaCerrado = (apuntesComida || []).filter(ap => ap && ap.comida === "dia").slice(-1)[0] || null;
-  const enObjetivo = diaCerrado && comida && Math.abs(diaCerrado.kcal - comida.macros.kcal) <= comida.macros.kcal * 0.1;
+  // El dia de comida: lo que te queda, con lo apuntado hasta ahora.
+  const resComida = comida ? resumenDia(apuntesComida, comida.macros) : null;
 
   const frase = getFraseHoy(flatIdx);
   // Cuanto falta para el dia del objetivo. Es el dato que de verdad empuja.
@@ -166,19 +166,15 @@ export function HoyScreen(props) {
               {comida.etiqueta}
             </div>
             <div style={{ flexGrow: 1, minWidth: 0 }}>
-              {diaCerrado ? (
-                <>
-                  <div style={{ ...TYPE.bodyStrong, color: C.text }}>
-                    {Math.round(diaCerrado.kcal)} / {comida.macros.kcal} kcal {enObjetivo ? "✓" : ""} · proteína {Math.round(diaCerrado.prot)} g
-                  </div>
-                  <div style={{ fontSize: 11.5, color: C.textDim, marginTop: 1 }}>Día cerrado con tu IA</div>
-                </>
-              ) : (
-                <>
-                  <div style={{ ...TYPE.bodyStrong, color: C.text }}>{comida.macros.kcal} kcal · {comida.macros.prot} g proteína</div>
-                  <div style={{ fontSize: 11.5, color: C.textDim, marginTop: 1 }}>Toca para mandar tu día a tu IA</div>
-                </>
-              )}
+              <div style={{ ...TYPE.bodyStrong, color: C.text }}>
+                {resComida.hechas
+                  ? (resComida.quedan.kcal >= 0 ? "Te quedan " + resComida.quedan.kcal.toLocaleString("es-ES") + " kcal" : "Te has pasado " + (-resComida.quedan.kcal).toLocaleString("es-ES") + " kcal")
+                    + " · " + (resComida.quedan.prot > 0 ? resComida.quedan.prot + " g proteína" : "proteína ✓")
+                  : comida.macros.kcal.toLocaleString("es-ES") + " kcal · " + comida.macros.prot + " g proteína"}
+              </div>
+              <div style={{ fontSize: 11.5, color: C.textDim, marginTop: 1 }}>
+                {resComida.siguiente ? "Toca para apuntar " + ({ desayuno: "el desayuno", comida: "la comida", merienda: "la merienda", cena: "la cena" })[resComida.siguiente] + " y ver qué comer" : "Día apuntado ✓"}
+              </div>
             </div>
             <span style={{ color: C.textFaint, fontSize: 16, flexShrink: 0 }}>›</span>
           </button>
