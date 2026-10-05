@@ -6,10 +6,19 @@
  * Lo que repiten todas las pantallas desde el rediseño: tarjeta blanca,
  * iconos de linea dentro de un cuadrado de color suave, filas de lista,
  * checks redondos, botones de pastilla, anillos y el selector segmentado.
- * Nada de emoticonos ni dibujos: iconos de trazo, como la barra de abajo.
+ * Nada de emoticonos: los dibujos de siempre de la app (correr, fuerza,
+ * cuello, guerrero, magia, movilidad, nutricion) y, donde no hay dibujo,
+ * iconos de trazo como la barra de abajo.
  */
 
 import { A, C, CARD } from "@/design/tokens";
+import { ICON_CUELLO, ICON_FUERZA, ICON_GUERRERO, ICON_MAGIA, ICON_MOVILIDAD, ICON_NUTRICION, ICON_RUNNING } from "@/domain/assets/icons";
+
+/** Los dibujos de siempre de la app: donde hay uno, se usa en vez del trazo. */
+const DIBUJOS = {
+  correr: ICON_RUNNING, mancuerna: ICON_FUERZA, cuello: ICON_CUELLO, escudo: ICON_GUERRERO,
+  magia: ICON_MAGIA, mover: ICON_MOVILIDAD, pierna: ICON_MOVILIDAD, plato: ICON_NUTRICION, manzana: ICON_NUTRICION,
+};
 
 /** Trazos de los iconos, sobre 24x24. */
 const TRAZOS = {
@@ -51,6 +60,11 @@ const TRAZOS = {
 
 /** Un icono de trazo. `nombre` de TRAZOS; hereda el color si no se le da. */
 export function Icono({ nombre, tam = 20, color = "currentColor", grosor = 1.9, style }) {
+  if (DIBUJOS[nombre]) {
+    // Dibujo en negro sobre blanco: "multiply" deja ver el fondo de color de la caja.
+    return <img src={DIBUJOS[nombre]} alt="" aria-hidden="true" width={tam} height={tam}
+      style={{ objectFit: "contain", mixBlendMode: "multiply", flexShrink: 0, ...style }} />;
+  }
   const d = TRAZOS[nombre];
   if (!d) return null;
   return (
@@ -65,7 +79,7 @@ export function IconoCaja({ nombre, tono = "azul", tam = 38 }) {
   return (
     <div style={{ width: tam, height: tam, borderRadius: tam * 0.29, background: A.fondo[tono] || A.fondo.gris,
                   display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0, color: A[tono] || A.gris }}>
-      <Icono nombre={nombre} tam={Math.round(tam * 0.56)} />
+      <Icono nombre={nombre} tam={Math.round(tam * (DIBUJOS[nombre] ? 0.95 : 0.56))} />
     </div>
   );
 }

@@ -617,7 +617,8 @@ export default function App() {
           <EjerciciosScreen selectedId={catalogoSelected} setSelectedId={setCatalogoSelected}
             youtubeLinks={youtubeLinks} setYoutubeLinks={setYoutubeLinks}
             customExercises={customExercises} setCustomExercises={setCustomExercises}
-            flaggedExercises={flaggedExercises} setFlaggedExercises={setFlaggedExercises} pushUndo={pushUndo} />
+            flaggedExercises={flaggedExercises} setFlaggedExercises={setFlaggedExercises} pushUndo={pushUndo}
+            workoutWeights={workoutWeights} workoutReps={workoutReps} />
         )}
 
         {screen === "nutricion" && (

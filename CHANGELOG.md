@@ -22,8 +22,10 @@ Todo cambio que se haga en la app se anota aquí. Sin excepciones.
 ## [Sin publicar]
 
 ### Nuevo aspecto "Aire" (1/6): base y HOY
+- Iconos: vuelven los dibujos de siempre de la app (correr, fuerza, cuello, guerrero, magia, movilidad, nutrición) dentro de su cuadro de color; los iconos de línea quedan solo donde no hay dibujo.
+- Ejercicios (opción C): Fuerza/Movilidad en selector segmentado, buscador y chips por grupo (Todos, Pecho, Hombro…). Cada ejercicio es una tarjeta con su dibujo (o un play si tiene vídeo) y "Último: 14 kg × 12, 11, 10" con lo que apuntaste la última vez. "Añadir ejercicio propio" al final. El detalle muestra también la última vez.
 - Semana (opción A): la semana en una tarjeta con los 7 días (día, icono del tipo de sesión, título, Comer/Recortar en color y check redondo; hoy resaltado en azul), selector de semanas segmentado y Pausa como enlace. Resumen y acumulado como filas con icono.
-- Estilo elegido pantalla a pantalla: fondo gris muy claro, tarjetas blancas redondeadas con sombra suave, tipografía Inter, títulos grandes, azul para las acciones e iconos de línea (sin emoticonos ni dibujos). Barra inferior de cristal.
+- Estilo elegido pantalla a pantalla: fondo gris muy claro, tarjetas blancas redondeadas con sombra suave, tipografía Inter, títulos grandes, azul para las acciones sin emoticonos. Barra inferior de cristal.
 - HOY (opción B): la fecha y los días que faltan para el 7K, la semana en círculos (check en lo hecho, azul el día que miras), la sesión como tarjeta grande con el mapa de tu última salida, sus datos y "Empezar sesión", y los hábitos en 4 cuadros (comida, cuello, magia, guerrero) que se abren al tocarlos. Avisos, calendario y resumen semanal con el mismo estilo.
 
 ### Nutrición, lo mínimo: kcal y proteína de hoy, y tu peso
