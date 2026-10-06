@@ -1,8 +1,13 @@
 "use client";
 
 import { useState } from "react";
-import { C, CAT, R, SP, TYPE } from "@/design/tokens";
-import { DATE_MAP, FLAT_DAYS, WEEKS, claveDia, todayLocalIso } from "@/domain/plan/calendario";
+import { A, C, CAT, R, SP, TYPE } from "@/design/tokens";
+import { DATE_MAP, FECHA_INICIO, FLAT_DAYS, WEEKS, claveDia, todayLocalIso } from "@/domain/plan/calendario";
+import { hitos, porQue, prevision, riesgos, veredictoCoach } from "@/domain/coach/prevision";
+import { parteDelCoach } from "@/domain/progreso/parte";
+import { ScreenHeader } from "@/features/ui/headers";
+import { GraficoPlan } from "@/features/ui/plan-vs-real";
+import { Check, Chevron, Fila, Icono, IconoCaja, Pastilla, Segmentado, Tarjeta } from "@/features/ui/aire";
 import { RITMO_ESPERADO, parseRitmoToSeconds } from "@/domain/running/ritmo";
 import { leerTiempo } from "@/domain/progreso/libreta";
 import { MOVILIDAD } from "@/domain/salud/movilidad";
@@ -10,7 +15,10 @@ import { HitosContent, PaceComparisonChart, PhaseAdjustContent, PlanGlobalConten
 import { KpiBlock } from "@/features/semana/KpiBlock";
 import { SimpleLineChart } from "@/features/ui/charts";
 export function CoachScreen({ jumpToDay, setWeekIdx, checked, workoutWeights, ritmoReal, setScreen, weeklyLog, setWeeklyLog, phaseAdjustNote, setPhaseAdjustNote, currentWeekOverride, setCurrentWeekOverride, exportData, importData, ultimoBackup, ultimoGuardado, painLog, medidas, bloquesHistorial, setBloquesHistorial, storageStatus, cuelloChecks, magiaLog, guerreroLog }) {
-  const [subTab, setSubTab] = useState("resumen");
+  // "coach" es la pantalla nueva; el resto son las vistas de siempre, a las
+  // que se llega desde "Más" (nada se pierde: plan, bitacora, ajustes y copia).
+  const [subTab, setSubTab] = useState("coach");
+  const [panel, setPanel] = useState("porque");
   // Hace falta algo de recorrido para que un porcentaje quiera decir algo.
   // Por debajo de eso se enseña un guion, no un cero: un cero en el dia 1 no
   // es informacion, es un reproche.
@@ -127,20 +135,120 @@ export function CoachScreen({ jumpToDay, setWeekIdx, checked, workoutWeights, ri
   const painZonasConDatos = Object.keys(painSummary);
   const zonaPreocupante = painZonasConDatos.find(z => painSummary[z].avg >= 3);
 
+  const parte = parteDelCoach({ dias: FLAT_DAYS, semanas: WEEKS, checked, cuelloChecks, painLog, ritmoReal,
+    pesos: workoutWeights, reps: undefined, medidas: medidas || [], fechaInicio: FECHA_INICIO, hoyIso: todayIso });
+  const prev = prevision(FLAT_DAYS, ritmoReal);
+  const proxima = FLAT_DAYS.find(d => d.prueba && d.prueba.distKm && d.prueba.distKm !== 7 && d.isoDate >= todayIso && !ritmoReal[claveDia(d)]);
+  const ver = veredictoCoach(prev, proxima);
+  const listaRiesgos = riesgos({ alarmas: parte.alarmas, prev });
+  if (sugerenciaAjuste) listaRiesgos.push({ texto: "Llevas " + missedStreak + " sesiones de calidad seguidas sin completar.", accion: "La próxima, repite el ritmo de la semana anterior: mejor completar a un ritmo conservador que fallar a uno exigente." });
+  if (zonaPreocupante && !parte.alarmas.some(a => a.tipo === "molestia")) listaRiesgos.push({ texto: zonaPreocupante.charAt(0).toUpperCase() + zonaPreocupante.slice(1) + " con molestia media " + painSummary[zonaPreocupante].avg.toFixed(1) + "/5 en 14 días.", accion: "Si sigue, háblalo con tu fisio." });
+  const semana = WEEKS.find(w => w.n === currentWeekN) || WEEKS[0];
+  const NOMBRES_VISTA = { resumen: "Hábitos y movilidad", plan: "Plan completo", hitos: "Historial de bloques", bitacora: "Bitácora semanal", ajustes: "Ajustes y copia de seguridad" };
+
+  if (subTab === "coach") return (
+    <div style={{ padding: "16px 16px 28px" }}>
+      <ScreenHeader title="Coach" subtitle={"Semana " + currentWeekN + " de " + WEEKS.length} />
+
+      <Tarjeta data-veredicto style={{ padding: "16px 18px", marginBottom: 12, borderLeft: "4px solid " + (ver.tono === "bien" ? A.verde : ver.tono === "ojo" ? A.naranja : A.azul) }}>
+        <div style={{ fontSize: 19, fontWeight: 700, color: C.text, lineHeight: 1.35, letterSpacing: -0.2 }}>{ver.texto}</div>
+        {parte.veredicto && <div style={{ fontSize: 14, color: C.textDim, marginTop: 8, lineHeight: 1.45 }}>{parte.veredicto.texto}</div>}
+      </Tarjeta>
+
+      <Tarjeta data-prevision style={{ padding: "14px 16px", marginBottom: 14 }}>
+        <div style={{ display: "flex", alignItems: "baseline", gap: 8 }}>
+          <div style={{ flex: 1 }}>
+            <div style={{ fontSize: 12.5, fontWeight: 600, color: C.textDim }}>Previsión 6 de diciembre · 7 km</div>
+            {prev && (
+              <div style={{ fontSize: 30, fontWeight: 800, color: C.text, letterSpacing: -0.8, fontVariantNumeric: "tabular-nums" }}>
+                {prev.texto}<span style={{ fontSize: 15, fontWeight: 600, color: C.textDim }}>{"  " + prev.ritmo + "/km"}</span>
+              </div>
+            )}
+          </div>
+          <Pastilla color={A.gris}>objetivo 33:15</Pastilla>
+        </div>
+        <div style={{ marginTop: 6 }}><GraficoPlan ritmoReal={ritmoReal} /></div>
+      </Tarjeta>
+
+      <Segmentado opciones={[["porque", "Por qué"], ["semana", "Semana"], ["riesgos", "Riesgos" + (listaRiesgos.length ? " · " + listaRiesgos.length : "")], ["hitos", "Hitos"]]}
+        valor={panel} cambiar={setPanel} style={{ marginBottom: 12 }} />
+
+      {panel === "porque" && (
+        <Tarjeta data-panel="porque" style={{ padding: "6px 16px" }}>
+          {porQue(prev).map((t, i) => (
+            <div key={i} style={{ display: "flex", gap: 10, padding: "10px 0", borderTop: i ? "1px solid " + C.divider : "none" }}>
+              <span style={{ width: 22, height: 22, borderRadius: 11, background: A.fondo.azul, color: A.azul, fontSize: 12, fontWeight: 700, flexShrink: 0,
+                             display: "flex", alignItems: "center", justifyContent: "center" }}>{i + 1}</span>
+              <span style={{ fontSize: 14.5, color: C.text, lineHeight: 1.5 }}>{t}</span>
+            </div>
+          ))}
+        </Tarjeta>
+      )}
+
+      {panel === "semana" && (
+        <Tarjeta data-panel="semana" style={{ padding: 0, overflow: "hidden" }}>
+          <div style={{ fontSize: 14, color: C.textDim, padding: "12px 16px 4px", lineHeight: 1.45 }}>
+            Lo que más pesa: <b style={{ color: C.text }}>la calidad del jueves y la tirada del domingo</b>. Si una semana va justa, esas dos primero.
+          </div>
+          {semana.days.filter(d => d.tipo !== "libre").map((d, i) => {
+            const clave = d.esCalidad || d.tipo === "test" || d.tipo === "objetivo" || (d.tipo === "run" && d.dayIdx === 6);
+            const [ic, tono] = d.tipo === "fuerza" ? ["mancuerna", "azul"] : d.tipo === "compromiso" ? ["tenis", "verde"] : d.tipo === "test" || d.tipo === "objetivo" ? ["meta", "naranja"] : ["correr", "rojo"];
+            return (
+              <Fila key={d.isoDate} primera={i === 0} icono={ic} tono={tono} titulo={d.titulo}
+                sub={<>{d.dow} {d.date}{clave ? <span style={{ color: A.rojo, fontWeight: 600 }}> · clave</span> : null}</>}
+                derecha={<Check hecho={!!checked[claveDia(d)]} />}
+                onClick={() => jumpToDay(semana.n - 1, d.dayIdx)} />
+            );
+          })}
+        </Tarjeta>
+      )}
+
+      {panel === "riesgos" && (
+        <Tarjeta data-panel="riesgos" style={{ padding: "6px 16px" }}>
+          {listaRiesgos.length === 0 ? (
+            <div style={{ display: "flex", alignItems: "center", gap: 10, padding: "12px 0" }}>
+              <IconoCaja nombre="escudo" tono="verde" />
+              <div style={{ fontSize: 15, color: C.text }}>Sin riesgos ahora mismo. Sigue así.</div>
+            </div>
+          ) : listaRiesgos.map((r, i) => (
+            <div key={i} style={{ display: "flex", gap: 10, padding: "10px 0", borderTop: i ? "1px solid " + C.divider : "none" }}>
+              <span style={{ color: A.naranja, paddingTop: 1 }}><Icono nombre="aviso" tam={18} /></span>
+              <div>
+                <div style={{ fontSize: 15, fontWeight: 700, color: C.text }}>{r.texto}</div>
+                <div style={{ fontSize: 14, color: C.textDim, marginTop: 2, lineHeight: 1.45 }}>{r.accion}</div>
+              </div>
+            </div>
+          ))}
+        </Tarjeta>
+      )}
+
+      {panel === "hitos" && (
+        <Tarjeta data-panel="hitos" style={{ padding: 0, overflow: "hidden" }}>
+          {hitos(FLAT_DAYS, ritmoReal, todayIso).map((h, i) => (
+            <Fila key={h.iso} primera={i === 0} icono={h.estado === "hecho" ? "check" : "meta"} tono={h.estado === "hecho" ? "verde" : h.estado === "proximo" ? "rojo" : "gris"}
+              titulo={h.nombre} sub={"S" + h.semana + " · " + h.fecha + " · " + h.meta}
+              derecha={h.resultado ? <span style={{ fontSize: 14, fontWeight: 700, color: C.text }}>{h.resultado}</span>
+                : h.estado === "proximo" ? <Pastilla color={A.rojo}>próxima</Pastilla> : null} />
+          ))}
+        </Tarjeta>
+      )}
+
+      <div style={{ fontSize: 19, fontWeight: 700, color: C.text, margin: "22px 4px 8px" }}>Más</div>
+      <Tarjeta style={{ padding: 0, overflow: "hidden" }}>
+        {[["resumen", "grafica", "azul"], ["plan", "calendario", "naranja"], ["bitacora", "nota", "morado"], ["hitos", "estrella", "verde"], ["ajustes", "copia", "gris"]].map(([k, ic, tono], i) => (
+          <Fila key={k} primera={i === 0} icono={ic} tono={tono} titulo={NOMBRES_VISTA[k]} derecha={<Chevron />} onClick={() => setSubTab(k)} data-vista={k} />
+        ))}
+      </Tarjeta>
+    </div>
+  );
+
   return (
     <div>
-      <div style={{ padding: SP.xl + "px " + SP.lg + "px 4px" }}>
-        <div style={{ ...TYPE.screenTitle, color: C.text }}>COACH</div>
-        <div style={{ fontSize: 11.5, color: C.textDim, fontWeight: 600, marginTop: 2 }}>Vista de programa · progreso del atleta</div>
-      </div>
-
-      <div style={{ display: "flex", gap: SP.xs, padding: SP.md + "px " + SP.lg + "px 14px", overflowX: "auto" }}>
-        {[["resumen","RESUMEN"],["plan","PLAN"],["hitos","HITOS"],["bitacora","BITÁCORA"],["ajustes","AJUSTES"]].map(([key, label]) => (
-          <button key={key} className="btn" onClick={() => setSubTab(key)} style={{
-            flexShrink: 0, minWidth: 68, height: 38, padding: "0 10px", borderRadius: R.md, fontSize: 10.5, fontWeight: 800,
-            background: subTab === key ? C.accent : C.surfaceMuted, color: subTab === key ? "#FAFAF9" : C.textDim,
-          }}>{label}</button>
-        ))}
+      <div style={{ padding: "16px 16px 4px" }}>
+        <button className="btn" onClick={() => setSubTab("coach")} style={{ fontSize: 16, color: A.azul, fontWeight: 500, minHeight: 40, display: "flex", alignItems: "center", gap: 2 }}>
+          <Icono nombre="izquierda" tam={20} grosor={2.4} /> Coach
+        </button>
+        <div style={{ fontSize: 28, fontWeight: 800, color: C.text, letterSpacing: -0.6, margin: "2px 0 10px" }}>{NOMBRES_VISTA[subTab]}</div>
       </div>
 
       {subTab === "resumen" && (

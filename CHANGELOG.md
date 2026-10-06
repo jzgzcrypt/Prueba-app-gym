@@ -30,6 +30,7 @@ Todo cambio que se haga en la app se anota aquí. Sin excepciones.
 - GPS comprobado con Strava en una salida real: 2,40 km los dos (16:00 vs 16:08).
 
 ### Nuevo aspecto "Aire" (1/6): base y HOY
+- Coach (opción B): una frase con cómo llegas al 6 de diciembre y la previsión de tu 7K (tu último dato contra lo que el plan espera a esas alturas, llevado al final), con la gráfica tú / plan. Debajo, cuatro pestañas: **Por qué** (de dónde sale la previsión, paso a paso), **Semana** (las sesiones de esta semana, con las clave marcadas), **Riesgos** (sesiones clave sin hacer, molestias, calidades falladas, previsión muy por detrás) e **Hitos** (las pruebas con su resultado o el tiempo que va en línea). En "Más" siguen hábitos y movilidad, el plan completo, la bitácora, el historial y los ajustes con la copia de seguridad.
 - Progreso (opción A): arriba, la tarjeta oscura con tu objetivo (7 km a 4:45/km, días que faltan, día X de 77 con barra) y la frase del coach; la próxima prueba con el tiempo que va en línea con el objetivo (3 km: 14:30 o menos); el peso con su tendencia; la constancia de las 11 semanas en cuadrícula; y tus objetivos (7K, panza, hombro, cuello) en filas. Debajo, el detalle de siempre.
 - Nutrición (opción C): anillo con las kcal que quedan, la proteína al lado y barras de lo que llevas. Se apunta de dos formas:
   - **Mis comidas**: tus comidas de siempre, de un toque. Vienen las de tu menú de casa (avena con whey, pollo con arroz…) y se editan, se borran o se crean.
