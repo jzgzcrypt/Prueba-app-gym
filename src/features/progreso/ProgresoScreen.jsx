@@ -1,6 +1,6 @@
 "use client";
 
-import { FECHA_INICIO, FLAT_DAYS, claveDia, todayLocalIso } from "@/domain/plan/calendario";
+import { FECHA_FIN, FECHA_INICIO, FLAT_DAYS, claveDia, todayLocalIso } from "@/domain/plan/calendario";
 import { useEffect, useRef, useState } from "react";
 import { lecturaPrueba } from "@/domain/progreso/libreta";
 import { parteDelCoach } from "@/domain/progreso/parte";
@@ -10,7 +10,9 @@ import { MapaRuta } from "@/features/ui/MapaRuta";
 import { textoTiempo } from "@/domain/running/gps";
 import { tendenciaPeso } from "@/domain/nutricion/adaptativo";
 import { tablaRecords } from "@/domain/fuerza/registro";
-import { C, CAT } from "@/design/tokens";
+import { A, C, CARD, CAT } from "@/design/tokens";
+import { ScreenHeader } from "@/features/ui/headers";
+import { Boton, Chevron, Fila, Icono, IconoCaja, Pastilla, Tarjeta } from "@/features/ui/aire";
 import { QuickFieldInput, SimpleLineChart } from "@/features/ui/charts";
 export function ProgresoScreen({ medidas, setMedidas, ritmoReal, weeks, checked, workoutWeights, workoutReps, onVerInforme, cuelloChecks, painLog, gps, pesosDiarios }) {
   const [showForm, setShowForm] = useState(false);
@@ -31,6 +33,8 @@ export function ProgresoScreen({ medidas, setMedidas, ritmoReal, weeks, checked,
     setAbierta(s);
     setTimeout(() => { const el = document.getElementById("detalle-" + s); if (el) el.scrollIntoView({ behavior: "smooth", block: "start" }); }, 50);
   };
+  const hoyIso = todayLocalIso();
+  const semanaActual = weeks.find(w => w.days[0].isoDate <= hoyIso && w.days[w.days.length - 1].isoDate >= hoyIso);
   const parte = parteDelCoach({ dias: FLAT_DAYS, semanas: weeks, checked, cuelloChecks, painLog, ritmoReal,
     pesos: workoutWeights, reps: workoutReps, medidas, fechaInicio: FECHA_INICIO, hoyIso: todayLocalIso() });
 
@@ -163,19 +167,22 @@ export function ProgresoScreen({ medidas, setMedidas, ritmoReal, weeks, checked,
 
 
   return (
-    <div style={{ padding: "20px 16px 28px" }}>
-      <div style={{ fontSize: 22, fontWeight: 900, color: C.text, marginBottom: 12 }}>PROGRESO</div>
+    <div style={{ padding: "16px 16px 28px" }}>
+      <ScreenHeader title="Progreso" subtitle={semanaActual ? "Semana " + semanaActual.n + " de " + weeks.length : ""} />
 
-      <Parte parte={parte} onAbrir={abrir} />
+      <TuObjetivo veredicto={parte.veredicto} />
+      <ProximaPrueba ritmoReal={ritmoReal} />
+      <TuPeso datos={pesoData} onApuntar={() => { setShowForm(false); setQuickField("peso"); }} />
+      <Constancia c={parte.constancia} />
+      <Objetivos parte={parte} onAbrir={abrir} />
 
-      <div style={{ display: "flex", gap: 8, margin: "12px 0" }}>
-        <button className="btn" onClick={() => { setQuickField(null); setShowForm(!showForm); }} style={{
-          flex: 1, minHeight: 48, borderRadius: 12, background: showForm ? "#F2F2F0" : C.accent,
-          fontSize: 14, fontWeight: 900, color: showForm ? C.text : "#FAFAF9",
-        }}>{showForm ? "CANCELAR" : "MEDIR · CINTURA, HOMBRO Y FOTO"}</button>
-        <button className="btn" onClick={() => { setShowForm(false); setQuickField(quickField ? null : "menu"); }} style={{
-          minHeight: 48, borderRadius: 12, background: "#F2F2F0", padding: "0 14px", fontSize: 12.5, fontWeight: 800, color: C.text,
-        }}>{quickField ? "✕" : "1 dato"}</button>
+      <div style={{ display: "flex", gap: 8, margin: "14px 0 12px" }}>
+        <Boton tipo={showForm ? "suave" : "oscuro"} onClick={() => { setQuickField(null); setShowForm(!showForm); }} style={{ flex: 1, fontSize: 15 }}>
+          {showForm ? "Cancelar" : "Medir: cintura, hombro y foto"}
+        </Boton>
+        <Boton tipo="suave" onClick={() => { setShowForm(false); setQuickField(quickField ? null : "menu"); }} style={{ width: "auto", fontSize: 15 }}>
+          {quickField ? "Cerrar" : "1 dato"}
+        </Boton>
       </div>
 
       {quickField === "menu" && (
@@ -251,7 +258,7 @@ export function ProgresoScreen({ medidas, setMedidas, ritmoReal, weeks, checked,
         </div>
       )}
 
-      <div style={{ fontSize: 10.5, fontWeight: 800, color: C.textDim, letterSpacing: 0.6, margin: "18px 2px 8px" }}>DETALLE</div>
+      <div style={{ fontSize: 19, fontWeight: 700, color: C.text, margin: "20px 4px 8px" }}>Detalle</div>
 
       <Seccion id="running" titulo="Running" resumen={parte.objetivos[0].valor ? parte.objetivos[0].tendencia : "sin pruebas aún"} abierta={abierta} setAbierta={setAbierta}>
         <GraficoPlan ritmoReal={ritmoReal} />
@@ -402,7 +409,6 @@ function reducirFoto(dataUrl) {
   });
 }
 
-const tarjeta = { background: C.card, border: "1px solid " + C.cardBorder, borderRadius: 14, padding: "14px 16px", marginBottom: 12 };
 const etiqueta = { fontSize: 10.5, fontWeight: 800, color: C.textDim, letterSpacing: 0.6, marginBottom: 8 };
 
 
@@ -459,82 +465,163 @@ function TusMeses({ onVer }) {
   );
 }
 
-const TONO = { bien: C.ok, ojo: C.amber, gris: C.textFaint, neutro: C.text };
-const ESTADO_PUNTO = {
-  hecho: { background: C.ok }, falta: { background: "transparent", border: "1.5px solid " + C.amber },
-  hoy: { background: "transparent", border: "2px solid " + C.text }, descanso: { background: "#E3E3E0" },
-  futuro: { background: "transparent", border: "1.5px solid #E3E3E0" }, "futuro-descanso": { background: "#F0F0EE" },
+const DIA = 86400000;
+const aMs = (iso) => Date.UTC(+iso.slice(0, 4), +iso.slice(5, 7) - 1, +iso.slice(8, 10));
+const MESES = ["enero", "febrero", "marzo", "abril", "mayo", "junio", "julio", "agosto", "septiembre", "octubre", "noviembre", "diciembre"];
+
+/** La tarjeta oscura: el objetivo, cuanto falta y por donde vas del plan. */
+function TuObjetivo({ veredicto }) {
+  const hoy = todayLocalIso();
+  const total = Math.round((aMs(FECHA_FIN) - aMs(FECHA_INICIO)) / DIA) + 1;
+  const dia = Math.max(1, Math.min(total, Math.round((aMs(hoy) - aMs(FECHA_INICIO)) / DIA) + 1));
+  const faltan = Math.max(0, Math.round((aMs(FECHA_FIN) - aMs(hoy)) / DIA));
+  const meta = FLAT_DAYS.find(d => d.tipo === "objetivo");
+  return (
+    <div data-tu-objetivo style={{ background: "#1C1C1E", borderRadius: 22, padding: "18px 18px 16px", color: "#fff", marginBottom: 12 }}>
+      <div style={{ display: "flex", alignItems: "center", gap: 8, fontSize: 13, fontWeight: 600, opacity: 0.7 }}>
+        <Icono nombre="meta" tam={16} /> Tu objetivo
+      </div>
+      <div style={{ fontSize: 30, fontWeight: 800, letterSpacing: -0.8, marginTop: 4 }}>
+        {meta && meta.prueba ? meta.prueba.distKm : 7} km a {meta && meta.ritmo ? textoRitmoSeg(meta.ritmo) : "4:45"}/km
+      </div>
+      <div style={{ fontSize: 15, opacity: 0.8, marginTop: 2 }}>
+        {+FECHA_FIN.slice(8)} de {MESES[+FECHA_FIN.slice(5, 7) - 1]} · {faltan === 0 ? "¡es hoy!" : "faltan " + faltan + " días"}
+      </div>
+      <div style={{ display: "flex", justifyContent: "space-between", fontSize: 12.5, fontWeight: 600, opacity: 0.7, margin: "14px 0 6px" }}>
+        <span>Día {dia} de {total}</span><span>{Math.round(dia / total * 100)} %</span>
+      </div>
+      <div style={{ height: 6, borderRadius: 3, background: "rgba(255,255,255,.18)" }}>
+        <div style={{ width: dia / total * 100 + "%", height: "100%", borderRadius: 3, background: A.verde }} />
+      </div>
+      {veredicto && <div style={{ fontSize: 14, lineHeight: 1.45, marginTop: 14, opacity: 0.9 }}>{veredicto.texto}</div>}
+    </div>
+  );
+}
+const textoRitmoSeg = (s) => Math.floor(s / 60) + ":" + String(Math.round(s % 60)).padStart(2, "0");
+
+/** La proxima prueba: que es, cuando y que tiempo va en linea con el objetivo. */
+function ProximaPrueba({ ritmoReal }) {
+  const hoy = todayLocalIso();
+  const d = FLAT_DAYS.find(x => x.prueba && x.isoDate >= hoy && !(ritmoReal || {})[claveDia(x)]);
+  if (!d) return null;
+  const dias = Math.round((aMs(d.isoDate) - aMs(hoy)) / DIA);
+  const que = d.prueba.partida ? "Prueba de partida" : d.tipo === "objetivo" ? "El día: 7 km" : d.prueba.distKm + " km a tope";
+  const linea = d.prueba.enLinea ? "En línea con el objetivo: " + textoTiempo(d.prueba.enLinea) + " o menos."
+    : d.prueba.decide ? "Esta decide la fecha del 7K." : null;
+  return (
+    <Tarjeta data-proxima-prueba style={{ padding: "14px 16px", marginBottom: 12, display: "flex", alignItems: "center", gap: 12 }}>
+      <IconoCaja nombre="correr" tono="rojo" tam={44} />
+      <div style={{ flex: 1, minWidth: 0 }}>
+        <div style={{ fontSize: 12.5, fontWeight: 600, color: C.textDim }}>Próxima prueba · {dias === 0 ? "hoy" : dias === 1 ? "mañana" : "en " + dias + " días"}</div>
+        <div style={{ fontSize: 17, fontWeight: 700, color: C.text }}>{que} · {d.dow ? d.dow.slice(0, 3).toLowerCase() : ""} {d.date}</div>
+        {linea && <div style={{ fontSize: 13, color: C.textDim, marginTop: 2 }}>{linea}</div>}
+      </div>
+    </Tarjeta>
+  );
+}
+
+/** El peso: los pesajes y la tendencia, que es la que cuenta. */
+function TuPeso({ datos, onApuntar }) {
+  const ds = (datos || []).filter(x => x && (x.v != null || x.t != null));
+  const tend = ds.filter(x => x.t != null);
+  const ult = tend.length ? tend[tend.length - 1].t : ds.length ? ds[ds.length - 1].v : null;
+  const pri = tend.length ? tend[0].t : ds.length ? ds[0].v : null;
+  const vals = ds.flatMap(x => [x.v, x.t]).filter(v => v != null);
+  const W = 320, H = 90, min = Math.min(...vals) - 0.3, max = Math.max(...vals) + 0.3;
+  const X = (i) => ds.length > 1 ? i / (ds.length - 1) * W : W / 2;
+  const Y = (v) => H - (v - min) / (max - min || 1) * H;
+  const camino = ds.map((x, i) => x.t != null ? [X(i), Y(x.t)] : null).filter(Boolean).map((p, i) => (i ? "L" : "M") + p[0].toFixed(1) + " " + p[1].toFixed(1)).join(" ");
+  const cambio = ult != null && pri != null ? Math.round((ult - pri) * 10) / 10 : null;
+  return (
+    <Tarjeta data-tu-peso style={{ padding: "14px 16px", marginBottom: 12 }}>
+      <div style={{ display: "flex", alignItems: "baseline", gap: 8 }}>
+        <div style={{ flex: 1 }}>
+          <div style={{ fontSize: 12.5, fontWeight: 600, color: C.textDim }}>Peso · tendencia</div>
+          <div style={{ fontSize: 26, fontWeight: 800, color: C.text, letterSpacing: -0.5 }}>
+            {ult != null ? String(Math.round(ult * 10) / 10).replace(".", ",") + " kg" : "—"}
+          </div>
+        </div>
+        {cambio != null && ds.length > 1 && (
+          <Pastilla color={cambio <= 0 ? A.verde : A.naranja}>{(cambio > 0 ? "+" : "") + String(cambio).replace(".", ",")} kg en {ds.length} días</Pastilla>
+        )}
+      </div>
+      {vals.length > 1 ? (
+        <svg viewBox={`-4 -4 ${W + 8} ${H + 8}`} width="100%" height={H + 8} style={{ display: "block", marginTop: 8 }} aria-label="Peso y tendencia">
+          {ds.map((x, i) => x.v != null && <circle key={i} cx={X(i)} cy={Y(x.v)} r="2.6" fill={A.azul} opacity=".35" />)}
+          <path d={camino} fill="none" stroke={A.azul} strokeWidth="2.6" strokeLinecap="round" strokeLinejoin="round" />
+        </svg>
+      ) : (
+        <div style={{ fontSize: 13.5, color: C.textDim, marginTop: 6 }}>Pésate cada mañana en ayunas: con unos días sale la tendencia.</div>
+      )}
+      <button className="btn" onClick={onApuntar} style={{ fontSize: 14, fontWeight: 600, color: A.azul, minHeight: 36, marginTop: 4 }}>Apuntar peso</button>
+    </Tarjeta>
+  );
+}
+
+const CELDA = {
+  hecho: { background: A.verde }, falta: { background: A.fondo.naranja, border: "1.5px solid " + A.naranja },
+  hoy: { background: "#fff", border: "2px solid " + A.azul }, descanso: { background: "#E5E5EA" },
+  futuro: { background: "#fff", border: "1.5px solid #E5E5EA" }, "futuro-descanso": { background: "#F2F2F7" },
 };
 
-/**
- * El parte del coach: veredicto, constancia, los 4 objetivos, alarmas y lo
- * que viene. Corto y al pie: una frase, una tira, cuatro filas.
- */
-function Parte({ parte, onAbrir }) {
-  const { veredicto, constancia, objetivos, alarmas, proximo } = parte;
+/** La constancia de las 11 semanas: una columna por semana, un cuadrado por dia. */
+function Constancia({ c }) {
   return (
-    <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
-      <div style={{ ...tarjeta, marginBottom: 0, borderLeft: "3px solid " + TONO[veredicto.tono] }}>
-        <div style={{ fontSize: 17, fontWeight: 900, color: C.text, lineHeight: 1.3 }}>{veredicto.texto}</div>
+    <Tarjeta data-constancia style={{ padding: "14px 16px", marginBottom: 12 }}>
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", marginBottom: 10 }}>
+        <span style={{ fontSize: 15, fontWeight: 700, color: C.text }}>Constancia</span>
+        <span style={{ fontSize: 13, color: C.textDim }}>
+          {c.cumplidas > 0 ? c.cumplidas + (c.cumplidas === 1 ? " semana cumplida · " : " semanas cumplidas · ") : ""}{c.hechas}/{c.pasadas} sesiones
+        </span>
       </div>
-
-      <div style={{ ...tarjeta, marginBottom: 0 }}>
-        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", marginBottom: 10 }}>
-          <span style={etiqueta}>CONSTANCIA</span>
-          <span style={{ fontSize: 12, fontWeight: 800, color: C.text }}>
-            {constancia.cumplidas > 0 ? constancia.cumplidas + (constancia.cumplidas === 1 ? " semana cumplida · " : " semanas cumplidas · ") : ""}{constancia.hechas}/{constancia.pasadas} sesiones
-          </span>
-        </div>
-        <div style={{ display: "flex", gap: 4, justifyContent: "space-between" }} aria-label="Sesiones del bloque, semana a semana">
-          {constancia.tira.map((sem, i) => (
-            <div key={i} style={{ display: "flex", flexDirection: "column", gap: 3, alignItems: "center" }}>
-              {sem.map((e, j) => (
-                <span key={j} title={e} style={{ width: 10, height: 10, borderRadius: 3, boxSizing: "border-box", ...ESTADO_PUNTO[e] }} />
-              ))}
-              <span style={{ fontSize: 8.5, fontWeight: 700, color: C.textFaint, marginTop: 2 }}>{i + 1}</span>
-            </div>
-          ))}
-        </div>
-      </div>
-
-      <div style={{ ...tarjeta, marginBottom: 0, padding: "4px 16px" }}>
-        {objetivos.map((o, i) => (
-          <button key={o.id} className="btn" onClick={() => o.seccion && onAbrir(o.seccion)} style={{
-            width: "100%", display: "flex", alignItems: "center", gap: 10, minHeight: 50, textAlign: "left",
-            borderTop: i ? "1px solid " + C.divider : "none", cursor: o.seccion ? "pointer" : "default",
-          }}>
-            <span style={{ width: 62, fontSize: 12, fontWeight: 800, color: C.textDim, flexShrink: 0 }}>{o.nombre}</span>
-            {o.valor ? (
-              <>
-                <span className="mono" style={{ fontSize: 16, fontWeight: 800, color: C.text, flexShrink: 0 }}>{o.valor}</span>
-                <span style={{ flex: 1, fontSize: 12, fontWeight: 700, color: TONO[o.tono], textAlign: "right" }}>
-                  {o.flecha ? o.flecha + " " : ""}{o.tendencia}
-                </span>
-              </>
-            ) : (
-              <span style={{ flex: 1, fontSize: 12.5, fontWeight: 700, color: C.textDim }}>{o.accion} {o.seccion ? "→" : ""}</span>
-            )}
-          </button>
+      <div style={{ display: "flex", justifyContent: "space-between" }} aria-label="Sesiones del bloque, semana a semana">
+        {c.tira.map((sem, i) => (
+          <div key={i} style={{ display: "flex", flexDirection: "column", gap: 4, alignItems: "center" }}>
+            {sem.map((e, j) => <span key={j} title={e} style={{ width: 16, height: 16, borderRadius: 5, boxSizing: "border-box", ...CELDA[e] }} />)}
+            <span style={{ fontSize: 10.5, fontWeight: 600, color: C.textFaint, marginTop: 2 }}>{i + 1}</span>
+          </div>
         ))}
       </div>
+    </Tarjeta>
+  );
+}
 
+const TONO_A = { bien: A.verde, ojo: A.naranja, gris: C.textFaint, neutro: C.text };
+const ICONO_OBJ = { "7k": ["correr", "rojo"], panza: ["regla", "morado"], hombro: ["mancuerna", "azul"], cuello: ["cuello", "verde"] };
+
+/** Los objetivos del bloque en filas, y las alarmas si las hay. */
+function Objetivos({ parte, onAbrir }) {
+  const { objetivos, alarmas } = parte;
+  return (
+    <>
+      <Tarjeta data-objetivos style={{ padding: 0, overflow: "hidden", marginBottom: alarmas.length ? 12 : 0 }}>
+        {objetivos.map((o, i) => {
+          const [ic, tono] = ICONO_OBJ[o.id] || ["grafica", "gris"];
+          return (
+            <Fila key={o.id} primera={i === 0} icono={ic} tono={tono} titulo={o.nombre}
+              sub={o.valor ? <span style={{ color: TONO_A[o.tono] }}>{o.flecha ? o.flecha + " " : ""}{o.tendencia}</span> : o.accion}
+              derecha={<span style={{ display: "flex", alignItems: "center", gap: 6 }}>
+                {o.valor && <span style={{ fontSize: 16, fontWeight: 700, color: C.text, fontVariantNumeric: "tabular-nums" }}>{o.valor}</span>}
+                {o.seccion && <Chevron />}
+              </span>}
+              onClick={o.seccion ? () => onAbrir(o.seccion) : undefined} />
+          );
+        })}
+      </Tarjeta>
       {alarmas.length > 0 && (
-        <div style={{ ...tarjeta, marginBottom: 0, borderLeft: "3px solid " + C.amber, padding: "10px 16px" }}>
+        <Tarjeta data-alarmas style={{ padding: "6px 16px", background: A.fondo.naranja, boxShadow: "none" }}>
           {alarmas.map((a, i) => (
-            <div key={i} style={{ padding: "6px 0", borderTop: i ? "1px solid " + C.divider : "none" }}>
-              <div style={{ fontSize: 13, fontWeight: 800, color: C.text }}>{a.texto}</div>
-              <div style={{ fontSize: 12, color: "#4A4A47", marginTop: 2 }}>→ {a.accion}</div>
+            <div key={i} style={{ display: "flex", gap: 10, padding: "8px 0", borderTop: i ? "1px solid rgba(0,0,0,.06)" : "none" }}>
+              <span style={{ color: A.naranja, paddingTop: 1 }}><Icono nombre="aviso" tam={18} /></span>
+              <div>
+                <div style={{ fontSize: 14.5, fontWeight: 700, color: C.text }}>{a.texto}</div>
+                <div style={{ fontSize: 13.5, color: C.textDim, marginTop: 2 }}>{a.accion}</div>
+              </div>
             </div>
           ))}
-        </div>
+        </Tarjeta>
       )}
-
-      <div style={{ fontSize: 12, color: C.textDim, fontWeight: 600, padding: "0 2px", lineHeight: 1.5 }}>
-        {proximo.prueba && <>Próxima prueba: <b style={{ color: C.text }}>{proximo.prueba.texto}</b> · {proximo.prueba.cuando}</>}
-        {proximo.prueba && " · "}
-        Medir: <b style={{ color: C.text }}>{proximo.medicion.cuando}</b>
-      </div>
-    </div>
+    </>
   );
 }
 
@@ -542,13 +629,13 @@ function Parte({ parte, onAbrir }) {
 function Seccion({ id, titulo, resumen, abierta, setAbierta, children }) {
   const open = abierta === id;
   return (
-    <div id={"detalle-" + id} style={{ ...tarjeta, marginBottom: 8, padding: 0, overflow: "hidden" }}>
+    <div id={"detalle-" + id} style={{ ...CARD, marginBottom: 10, overflow: "hidden" }}>
       <button className="btn" onClick={() => setAbierta(open ? null : id)} style={{
-        width: "100%", display: "flex", alignItems: "center", gap: 10, minHeight: 48, padding: "0 16px", textAlign: "left",
+        width: "100%", display: "flex", alignItems: "center", gap: 10, minHeight: 54, padding: "0 16px", textAlign: "left",
       }}>
-        <span style={{ fontSize: 14, fontWeight: 800, color: C.text, flex: 1 }}>{titulo}</span>
-        <span style={{ fontSize: 12, fontWeight: 600, color: C.textDim }}>{resumen}</span>
-        <span style={{ color: C.textFaint, fontSize: 16, transform: open ? "rotate(90deg)" : "none", transition: "transform .2s" }}>›</span>
+        <span style={{ fontSize: 16, fontWeight: 600, color: C.text, flex: 1 }}>{titulo}</span>
+        <span style={{ fontSize: 13, fontWeight: 500, color: C.textDim }}>{resumen}</span>
+        <Chevron abierto={open} />
       </button>
       {open && <div style={{ padding: "4px 16px 16px" }}>{children}</div>}
     </div>
