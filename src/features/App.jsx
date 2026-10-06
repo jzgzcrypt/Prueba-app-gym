@@ -641,6 +641,7 @@ export default function App() {
             habituales={comidasHabituales || habitualesIniciales()} setHabituales={setComidasHabituales}
             semana={semanaNutricion({ dias: WEEKS[currentDay.weekIdx].days, comidasLog, hoyIso: todayLocalIso(), claveDe: claveDia,
                                       objetivoDe: (d) => comidaDelDia(d, objetivosSemana).macros })}
+            semanaApuntes={WEEKS[currentDay.weekIdx].days.filter(d => d.isoDate <= todayLocalIso()).map(d => comidasLog[claveDia(d)] || [])}
             medidas={medidas} irAProgreso={() => setScreen("progreso")}
             motor={{ pesoHoy: pesosDiarios[todayLocalIso()] ?? null, guardarPeso, tendencia: tendenciaHoy, programa }} />
         )}

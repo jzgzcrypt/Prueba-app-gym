@@ -192,6 +192,8 @@ export function mensajeDelDia({ comida, llevas }) {
     "3. Si me paso, sin dramas: dime cómo dejar ligera la siguiente comida.",
     "Sé breve. Termina SIEMPRE con esta línea exacta, con lo que te he contado" + (yaHay ? " (sin lo que ya tenía apuntado)" : "") + ":",
     "TOTAL DEL DÍA | kcal | proteína g | hidratos g | grasa g",
+    "Y justo debajo, esta otra, con tu estimación de lo mismo:",
+    "MICROS DEL DÍA | fibra g | hierro mg | calcio mg | vitamina D µg | B12 µg | omega-3 g | sodio mg",
   ].join("\n");
 }
 
@@ -264,4 +266,46 @@ export function semanaNutricion({ dias, comidasLog, objetivoDe, hoyIso, claveDe 
     salida.push({ iso: d.isoDate, kcal: Math.round(t.kcal), objetivo: obj.kcal, estado: Math.abs(t.kcal - obj.kcal) / obj.kcal <= 0.1 ? "bien" : "ojo" });
   }
   return { dias: salida, protMedia: cerrados ? Math.round(protSuma / cerrados) : null, cerrados };
+}
+
+// ─── LOS MICROS ───────────────────────────────────────────────────────────
+
+/** Los micros en el orden en que se piden en la linea MICROS. */
+export const MICROS = ["fibra", "hierro", "calcio", "vitD", "b12", "omega3", "sodio"];
+const ETIQUETAS_MICRO = {
+  fibra: "fibra",
+  hierro: "hierro",
+  calcio: "calcio",
+  vitD: "vitamina\\s*d|vit\\.?\\s*d",
+  b12: "(?:vitamina\\s*|vit\\.?\\s*)?b\\s*-?\\s*12",
+  omega3: "omega\\s*-?\\s*3",
+  sodio: "sodio|sal\\b",
+};
+
+/**
+ * La linea MICROS que devuelve la IA: { fibra, hierro, calcio, vitD, b12,
+ * omega3, sodio } (los que salgan). Vale la ultima; por posicion si viene
+ * con "|" en el orden pedido, o por etiquetas si la escribe a su manera.
+ * null si no hay linea de micros.
+ */
+export function leerMicros(texto) {
+  const lineas = String(texto || "").split(/\r?\n/).map(limpiar);
+  for (let i = lineas.length - 1; i >= 0; i--) {
+    if (!/micro/i.test(lineas[i])) continue;
+    const resto = lineas[i].replace(/^[^|:]*micro[^|:]*[|:]?/i, "");
+    const out = {};
+    // Por etiquetas: "fibra 28 g", "vitamina D: 4 µg", "12 mg de hierro".
+    for (const k of MICROS) {
+      const re = ETIQUETAS_MICRO[k];
+      const m = new RegExp("(?:" + re + ")\\s*[:=]?\\s*" + NUM, "i").exec(resto)
+        || new RegExp(NUM + "\\s*(?:g|mg|µg|mcg|ug)?\\s*(?:de\\s+)?(?:" + re + ")", "i").exec(resto);
+      if (m) out[k] = aNum(m[1]);
+    }
+    if (Object.keys(out).length >= 3) return out;
+    // Por posicion: los 7 numeros en el orden pedido.
+    const nums = (resto.match(new RegExp(NUM, "g")) || []).map(aNum);
+    if (nums.length >= MICROS.length) return Object.fromEntries(MICROS.map((k, j) => [k, nums[j]]));
+    if (Object.keys(out).length) return out;
+  }
+  return null;
 }

@@ -21,6 +21,11 @@ Todo cambio que se haga en la app se anota aquí. Sin excepciones.
 
 ## [Sin publicar]
 
+### Nutrición: macros completos y vitaminas vía tu IA
+- Arriba, además de kcal y proteína, barras de hidratos y grasa con lo que llevas y lo que toca.
+- El mensaje para tu IA pide una segunda línea, MICROS DEL DÍA (fibra, hierro, calcio, vitamina D, B12, omega-3 y sodio). Al pegar la respuesta se guardan con la comida.
+- Tarjeta "Vitaminas y minerales": hoy o la media de la semana, en % de lo recomendado para un hombre adulto (el sodio, en % del tope). Avisa si algo va bajo 3 de los últimos 5 días con dato, o si el sodio va alto, con una idea de comida. Solo sale los días que hay datos de tu IA: son estimaciones.
+
 ### La carrera, más clara: cuenta atrás, voz en cada km y medir cadencia
 - Arriba, grande, lo que toca correr ("16 min corriendo muy suave, pudiendo hablar"); los 22 min son la sesión completa con calentamiento y estiramientos, y así se dice.
 - En los rodajes por minutos el crono cuenta hacia atrás (16:00 → 0:00) con barra de progreso. Avisa con voz y vibración: mitad, último minuto, 3-2-1 y "¡Hecho! 16 minutos" con la pantalla en verde. Si sigues, cuenta "+0:20" y lo corrido vale igual. En los de km, "faltan X km".

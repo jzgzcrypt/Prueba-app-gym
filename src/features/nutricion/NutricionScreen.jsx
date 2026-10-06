@@ -2,10 +2,11 @@
 
 import { useState } from "react";
 import { A, C } from "@/design/tokens";
-import { leerTotalDelDia, mensajeDelDia, sumaDelDia } from "@/domain/nutricion/pegar-ia";
+import { leerMicros, leerTotalDelDia, mensajeDelDia, sumaDelDia } from "@/domain/nutricion/pegar-ia";
+import { ORDEN_MICROS, REFERENCIAS, avisosMicros, estadoMicro, perfilDia, perfilSemana } from "@/domain/nutricion/micros";
 import { recomendar } from "@/domain/nutricion/recomendar";
 import { ScreenHeader } from "@/features/ui/headers";
-import { Anillo, Boton, Icono, IconoCaja, Seccion, Tarjeta } from "@/features/ui/aire";
+import { Anillo, Boton, Icono, IconoCaja, Seccion, Segmentado, Tarjeta } from "@/features/ui/aire";
 import { TuMotor } from "@/features/nutricion/TuMotor";
 
 /**
@@ -107,6 +108,7 @@ function PegarIA({ comida, llevas, apuntar, cerrar }) {
   const [texto, setTexto] = useState("");
   const [copiado, setCopiado] = useState(false);
   const leido = texto.trim() ? leerTotalDelDia(texto) : null;
+  const micros = texto.trim() ? leerMicros(texto) : null;
   const copiar = async () => {
     const msg = mensajeDelDia({ comida, llevas });
     try { await navigator.clipboard.writeText(msg); setCopiado(true); } catch { setTexto(msg); }
@@ -126,8 +128,8 @@ function PegarIA({ comida, llevas, apuntar, cerrar }) {
       {texto.trim() && (
         leido ? (
           <div style={{ display: "flex", alignItems: "center", gap: 10, marginTop: 10 }}>
-            <div style={{ flex: 1, fontSize: 14, color: C.text }}>Leído: <b>{miles(leido.kcal)} kcal · {leido.prot} g proteína</b></div>
-            <button className="btn" data-anadir-ia onClick={() => { apuntar({ nombre: "De mi IA", ...leido, desde: "ia" }); setTexto(""); cerrar(); }}
+            <div style={{ flex: 1, fontSize: 14, color: C.text }}>Leído: <b>{miles(leido.kcal)} kcal · {leido.prot} g proteína</b>{micros ? " · y vitaminas" : ""}</div>
+            <button className="btn" data-anadir-ia onClick={() => { apuntar({ nombre: "De mi IA", ...leido, desde: "ia", ...(micros ? { micros } : {}) }); setTexto(""); cerrar(); }}
               style={{ minHeight: 38, padding: "0 16px", borderRadius: 999, background: A.azul, color: "#fff", fontSize: 15, fontWeight: 700 }}>Añadir</button>
           </div>
         ) : <div style={{ fontSize: 13, color: A.naranja, marginTop: 8 }}>No veo la línea TOTAL. Pídele a tu IA que termine con ella.</div>
@@ -136,7 +138,51 @@ function PegarIA({ comida, llevas, apuntar, cerrar }) {
   );
 }
 
-export function NutricionScreen({ comida, esHoy, apuntes = [], apuntar, quitar, habituales = [], setHabituales, semana, medidas = [], irAProgreso, motor }) {
+/** Vitaminas y minerales que estimó tu IA: hoy o la media de la semana, y avisos. */
+function Micros({ apuntes, semanaApuntes, esHoy }) {
+  const sem = perfilSemana(semanaApuntes);
+  const hoy = perfilDia(apuntes);
+  const [vista, setVista] = useState(null);
+  if (!sem.media && !hoy) return null;
+  const v = vista || (hoy ? "hoy" : "semana");
+  const datos = v === "hoy" ? hoy : sem.media;
+  const avisos = avisosMicros(sem.porDia);
+  return (
+    <>
+      <Seccion>Vitaminas y minerales</Seccion>
+      <Tarjeta data-micros style={{ padding: "14px 16px" }}>
+        <Segmentado opciones={[["hoy", esHoy ? "Hoy" : "Ese día"], ["semana", "Media semana"]]} valor={v} cambiar={setVista} style={{ marginBottom: 12 }} />
+        {datos ? ORDEN_MICROS.filter(k => Number.isFinite(datos[k])).map(k => {
+          const r = REFERENCIAS[k], e = estadoMicro(k, datos[k]);
+          const col = e.bien ? A.verde : A.naranja;
+          const val = datos[k] < 10 ? String(Math.round(datos[k] * 10) / 10).replace(".", ",") : Math.round(datos[k]).toLocaleString("es-ES");
+          return (
+            <div key={k} data-micro={k} style={{ marginBottom: 10 }}>
+              <div style={{ display: "flex", justifyContent: "space-between", fontSize: 13, marginBottom: 4 }}>
+                <span style={{ fontWeight: 600, color: C.text }}>{r.nombre}</span>
+                <span style={{ color: C.textDim, fontVariantNumeric: "tabular-nums" }}>
+                  <b style={{ color: C.text }}>{val}</b> {r.unidad} · <span style={{ color: col, fontWeight: 600 }}>{Math.round(e.pct * 100)} %</span>{r.tope ? " del tope" : ""}
+                </span>
+              </div>
+              <div style={{ height: 6, borderRadius: 3, background: col + "26" }}>
+                <div style={{ width: Math.min(1, e.pct) * 100 + "%", height: "100%", borderRadius: 3, background: col }} />
+              </div>
+            </div>
+          );
+        }) : <div style={{ fontSize: 14, color: C.textDim, padding: "4px 0 8px" }}>Hoy aún no hay vitaminas: llegan cuando pegas de tu IA.</div>}
+        {avisos.map(a => (
+          <div key={a.k} data-aviso-micro style={{ display: "flex", gap: 8, padding: "10px 0 2px", borderTop: "1px solid " + C.divider, marginTop: 4 }}>
+            <span style={{ color: A.naranja, paddingTop: 1 }}><Icono nombre="aviso" tam={17} /></span>
+            <div style={{ fontSize: 14, color: C.text, lineHeight: 1.4 }}><b>{a.texto}</b> <span style={{ color: C.textDim }}>Idea: {a.idea}.</span></div>
+          </div>
+        ))}
+        <div style={{ fontSize: 12, color: C.textFaint, marginTop: 8 }}>Estimado por tu IA · {sem.diasConDato} {sem.diasConDato === 1 ? "día" : "días"} con dato esta semana</div>
+      </Tarjeta>
+    </>
+  );
+}
+
+export function NutricionScreen({ comida, esHoy, apuntes = [], apuntar, quitar, habituales = [], setHabituales, semana, semanaApuntes = [], medidas = [], irAProgreso, motor }) {
   const [panel, setPanel] = useState(null); // null | "mias" | "ia"
   const m = comida && comida.macros;
   const llevas = sumaDelDia(apuntes);
@@ -172,6 +218,8 @@ export function NutricionScreen({ comida, esHoy, apuntes = [], apuntar, quitar, 
           <div style={{ marginTop: 16 }}>
             <Barra titulo="Kcal" llevas={llevas.kcal} objetivo={m.kcal} unidad="kcal" color={color} />
             <Barra titulo="Proteína" llevas={llevas.prot} objetivo={m.prot} unidad="g" color={A.azul} />
+            <Barra titulo="Hidratos" llevas={llevas.hc} objetivo={m.hc} unidad="g" color={A.naranja} />
+            <Barra titulo="Grasa" llevas={llevas.grasa} objetivo={m.grasa} unidad="g" color={A.morado} />
           </div>
         </Tarjeta>
       )}
@@ -247,6 +295,8 @@ export function NutricionScreen({ comida, esHoy, apuntes = [], apuntar, quitar, 
           </Tarjeta>
         </>
       )}
+
+      <Micros apuntes={apuntes} semanaApuntes={semanaApuntes} esHoy={esHoy} />
 
       {motor && esHoy && (
         <>

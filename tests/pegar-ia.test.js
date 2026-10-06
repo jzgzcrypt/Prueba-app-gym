@@ -117,3 +117,17 @@ test("la semana: bien, ojo, abierto y futuro", () => {
   assert.deepEqual(s.dias.map(d => d.estado), ["bien", "ojo", "abierto", "futuro"]);
   assert.equal(s.protMedia, 155);
 });
+
+test("el mensaje pide también la línea de micros", () => {
+  assert.match(mensajeDelDia({ comida: COMIDA.recortar }), /MICROS DEL DÍA \| fibra g \| hierro mg \| calcio mg \| vitamina D µg \| B12 µg \| omega-3 g \| sodio mg/);
+});
+
+test("lee los micros: la línea exacta, con etiquetas y markdown, y nada si no hay", async () => {
+  const { leerMicros } = await import("../src/domain/nutricion/pegar-ia.js");
+  assert.deepEqual(leerMicros("TOTAL DEL DÍA | 2100 | 160 | 200 | 60\nMICROS DEL DÍA | 28 | 12 | 850 | 4 | 3,1 | 1,2 | 2600"),
+    { fibra: 28, hierro: 12, calcio: 850, vitD: 4, b12: 3.1, omega3: 1.2, sodio: 2600 });
+  assert.deepEqual(leerMicros("**Micros del día:** fibra 22 g, hierro 9 mg, calcio 700 mg, vitamina D 2 µg, B12 4,5 µg, omega-3 0,8 g, sodio 3.100 mg"),
+    { fibra: 22, hierro: 9, calcio: 700, vitD: 2, b12: 4.5, omega3: 0.8, sodio: 3100 });
+  assert.equal(leerMicros("TOTAL DEL DÍA | 2100 | 160 | 200 | 60"), null);
+  assert.equal(leerTotalDelDia("TOTAL DEL DÍA | 2100 | 160 | 200 | 60\nMICROS DEL DÍA | 28 | 12 | 850 | 4 | 3 | 1 | 2600").kcal, 2100, "la línea de micros no estropea el total");
+});
