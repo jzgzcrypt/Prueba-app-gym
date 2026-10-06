@@ -30,6 +30,8 @@ import { InformeScreen } from "@/features/informe/InformeScreen";
 import { ritmoDelDia } from "@/domain/running/adaptar";
 import { textoParaLibreta } from "@/domain/running/gps";
 import { ajustePorPeso, objetivosConAjuste, tendenciaPeso } from "@/domain/nutricion/adaptativo";
+import { habitualesIniciales } from "@/domain/nutricion/recomendar";
+import { semanaNutricion } from "@/domain/nutricion/pegar-ia";
 import { simplificar, sinSimplificar } from "@/domain/running/ruta";
 import { resumenSemana, semanasCumplidas } from "@/domain/progreso/resumen";
 
@@ -84,6 +86,7 @@ export default function App() {
   // "casa" lleva gramos, "cantina" lleva racion, "rapida" no lleva nada porque
   // ya es una comida entera. Ver src/domain/nutricion/iifym.js.
   const [comidasLog, setComidasLog] = useState({}); // { dayKey: [apunte] }
+  const [comidasHabituales, setComidasHabituales] = useState(null); // [{id,nombre,kcal,prot,hc,grasa}]; null = las del menu de casa
   // Los cambios de alimento sobre el menu del dia: "hoy no hay salmon, hay
   // merluza". { dayKey: { "cena:salmon": "merluza" } }
   const [cambiosMenu, setCambiosMenu] = useState({});
@@ -175,6 +178,7 @@ export default function App() {
           if (d.currentWeekOverride !== undefined) setCurrentWeekOverride(d.currentWeekOverride);
           if (d.weeklyLog) setWeeklyLog(d.weeklyLog);
           if (d.comidasLog) setComidasLog(d.comidasLog);
+          if (d.comidasHabituales) setComidasHabituales(d.comidasHabituales);
           if (d.cambiosMenu) setCambiosMenu(d.cambiosMenu);
           if (d.menuEditado) setMenuEditado(d.menuEditado);
           if (d.compraMarcada) setCompraMarcada(d.compraMarcada);
@@ -251,7 +255,7 @@ export default function App() {
       checked, cuelloChecks, notes, youtubeLinks, customExercises, painLog,
       flaggedExercises, pausedRanges, workoutProgress, magiaProgress, magiaRepaso, magiaLog,
       guerreroLog, workoutWeights, workoutReps, medidas, ritmoReal, ritmoTramos, gps, pesosDiarios, sensaciones, postponed, phaseAdjustNote,
-      currentWeekOverride, weeklyLog, comidasLog, cambiosMenu, menuEditado, compraMarcada, comidasFuera,
+      currentWeekOverride, weeklyLog, comidasLog, comidasHabituales, cambiosMenu, menuEditado, compraMarcada, comidasFuera,
       bloquesHistorial, ultimoBackup, cuelloFaseManual, onboardingVisto,
     };
     // Se deja a mano el ultimo estado conocido para poder guardarlo de golpe
@@ -262,7 +266,7 @@ export default function App() {
   }, [checked, cuelloChecks, notes, youtubeLinks, customExercises, painLog,
       flaggedExercises, pausedRanges, workoutProgress, magiaProgress, magiaRepaso, magiaLog,
       guerreroLog, workoutWeights, workoutReps, medidas, ritmoReal, ritmoTramos, gps, pesosDiarios, sensaciones, postponed, phaseAdjustNote,
-      currentWeekOverride, weeklyLog, comidasLog, cambiosMenu, menuEditado, compraMarcada, comidasFuera,
+      currentWeekOverride, weeklyLog, comidasLog, comidasHabituales, cambiosMenu, menuEditado, compraMarcada, comidasFuera,
       bloquesHistorial, ultimoBackup, cuelloFaseManual, onboardingVisto, storageReady]);
 
   const currentDay = FLAT_DAYS[flatIdx] || FLAT_DAYS[todayIdx] || FLAT_DAYS[0];
@@ -360,7 +364,7 @@ export default function App() {
       checked, cuelloChecks, notes, youtubeLinks, customExercises, painLog,
       flaggedExercises, pausedRanges, workoutProgress, workoutWeights, workoutReps, medidas,
       ritmoReal, ritmoTramos, gps, pesosDiarios, sensaciones, postponed, phaseAdjustNote, currentWeekOverride, weeklyLog,
-      comidasLog, cambiosMenu, menuEditado, compraMarcada, comidasFuera, magiaProgress, magiaRepaso,
+      comidasLog, comidasHabituales, cambiosMenu, menuEditado, compraMarcada, comidasFuera, magiaProgress, magiaRepaso,
       magiaLog, guerreroLog, bloquesHistorial,
     };
     const nombre = "programa-7k-backup-" + todayLocalIso() + ".json";
@@ -413,6 +417,7 @@ export default function App() {
         if (data.currentWeekOverride !== undefined) setCurrentWeekOverride(data.currentWeekOverride);
         if (data.weeklyLog) setWeeklyLog(data.weeklyLog);
         if (data.comidasLog) setComidasLog(data.comidasLog);
+        if (data.comidasHabituales) setComidasHabituales(data.comidasHabituales);
         if (data.cambiosMenu) setCambiosMenu(data.cambiosMenu);
         if (data.menuEditado) setMenuEditado(data.menuEditado);
         if (data.compraMarcada) setCompraMarcada(data.compraMarcada);
@@ -622,7 +627,18 @@ export default function App() {
         )}
 
         {screen === "nutricion" && (
-          <NutricionScreen comida={comida} esHoy={isToday}
+          <NutricionScreen comida={comida} esHoy={isToday} dayKey={dayKey}
+            apuntes={comidasLog[dayKey] || []}
+            apuntar={(ap) => setComidasLog(p => Object.assign({}, p, { [dayKey]: [...(p[dayKey] || []), ap] }))}
+            quitar={(id) => {
+              const antes = comidasLog[dayKey] || [];
+              setComidasLog(p => Object.assign({}, p, { [dayKey]: (p[dayKey] || []).filter(a => a.id !== id) }));
+              pushUndo("Comida quitada", () => setComidasLog(p => Object.assign({}, p, { [dayKey]: antes })));
+            }}
+            habituales={comidasHabituales || habitualesIniciales()} setHabituales={setComidasHabituales}
+            semana={semanaNutricion({ dias: WEEKS[currentDay.weekIdx].days, comidasLog, hoyIso: todayLocalIso(), claveDe: claveDia,
+                                      objetivoDe: (d) => comidaDelDia(d, objetivosSemana).macros })}
+            medidas={medidas} irAProgreso={() => setScreen("progreso")}
             motor={{ pesoHoy: pesosDiarios[todayLocalIso()] ?? null, guardarPeso, tendencia: tendenciaHoy, programa }} />
         )}
 

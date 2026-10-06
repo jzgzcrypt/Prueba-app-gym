@@ -22,6 +22,11 @@ Todo cambio que se haga en la app se anota aquí. Sin excepciones.
 ## [Sin publicar]
 
 ### Nuevo aspecto "Aire" (1/6): base y HOY
+- Nutrición (opción C): anillo con las kcal que quedan, la proteína al lado y barras de lo que llevas. Se apunta de dos formas:
+  - **Mis comidas**: tus comidas de siempre, de un toque. Vienen las de tu menú de casa (avena con whey, pollo con arroz…) y se editan, se borran o se crean.
+  - **Pegar de mi IA**, para los días fuera de lo normal: copias un mensaje con el objetivo y lo que ya llevas, se lo cuentas a tu IA y pegas su respuesta; se suma su línea TOTAL.
+  - **Te quedan…**: con lo que falta, las 1 o 2 de tus comidas que mejor cierran el día (sin pasarse y llegando a la proteína), sin repetir un momento que ya has comido. Un toque y quedan apuntadas.
+  - Debajo: la semana en barras (verde en objetivo, naranja fuera), el peso con el ajuste de kcal de cada lunes, y la cintura con tu última foto.
 - Iconos: vuelven los dibujos de siempre de la app (correr, fuerza, cuello, guerrero, magia, movilidad, nutrición) dentro de su cuadro de color; los iconos de línea quedan solo donde no hay dibujo.
 - Ejercicios (opción C): Fuerza/Movilidad en selector segmentado, buscador y chips por grupo (Todos, Pecho, Hombro…). Cada ejercicio es una tarjeta con su dibujo (o un play si tiene vídeo) y "Último: 14 kg × 12, 11, 10" con lo que apuntaste la última vez. "Añadir ejercicio propio" al final. El detalle muestra también la última vez.
 - Semana (opción A): la semana en una tarjeta con los 7 días (día, icono del tipo de sesión, título, Comer/Recortar en color y check redondo; hoy resaltado en azul), selector de semanas segmentado y Pausa como enlace. Resumen y acumulado como filas con icono.

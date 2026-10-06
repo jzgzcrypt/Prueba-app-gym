@@ -9,7 +9,8 @@
  */
 
 import { useState } from "react";
-import { C, R, SP } from "@/design/tokens";
+import { A, C } from "@/design/tokens";
+import { Check, IconoCaja, Tarjeta } from "@/features/ui/aire";
 
 const coma = (x, d = 1) => Number(x).toFixed(d).replace(".", ",");
 const miles = (n) => Math.round(n).toLocaleString("es-ES");
@@ -32,41 +33,40 @@ export function TuMotor({ pesoHoy, guardarPeso, tendencia, programa }) {
   const signo = (x, d) => (x > 0 ? "+" : x < 0 ? "−" : "") + coma(Math.abs(x), d);
 
   return (
-    <div data-motor style={{ padding: "0 " + SP.xl + "px", marginBottom: SP.md }}>
-      <div style={{ display: "flex", alignItems: "center", gap: SP.sm, background: C.card, border: "1px solid " + C.cardBorder,
-                    borderRadius: R.xl, padding: "10px 12px 10px 14px" }}>
-        <span style={{ fontSize: 13, fontWeight: 800, color: C.text, flexShrink: 0 }}>Peso de hoy</span>
+    <Tarjeta data-motor style={{ padding: "14px 16px" }}>
+      <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+        <IconoCaja nombre="peso" tono="azul" />
+        <div style={{ flex: 1, fontSize: 15, fontWeight: 600, color: C.text }}>Peso de hoy</div>
         {conPeso ? (
-          <button className="btn mono" onClick={() => { setEditando(true); setTexto(coma(pesoHoy)); }}
-            style={{ marginLeft: "auto", fontSize: 15, fontWeight: 800, color: C.ok, minHeight: 36 }}>
-            ✓ {coma(pesoHoy)} kg
+          <button className="btn" onClick={() => { setEditando(true); setTexto(coma(pesoHoy)); }}
+            style={{ fontSize: 17, fontWeight: 700, color: C.text, minHeight: 40, display: "flex", alignItems: "center", gap: 6, fontVariantNumeric: "tabular-nums" }}>
+            {coma(pesoHoy)} kg <Check hecho tam={20} />
           </button>
         ) : (
           <>
             <input inputMode="decimal" placeholder={tendencia ? coma(tendencia.tendencia) : "86,0"} value={texto}
               onChange={e => setTexto(e.target.value.replace(/[^\d.,]/g, ""))} onKeyDown={e => { if (e.key === "Enter") guardar(); }}
-              style={{ marginLeft: "auto", width: 76, padding: "8px 10px", borderRadius: R.md, border: "1px solid " + C.cardBorder,
-                       background: C.bg, fontSize: 15, fontWeight: 700, textAlign: "center", color: C.text, fontFamily: "inherit" }} />
-            <span style={{ fontSize: 12, color: C.textDim }}>kg</span>
-            <button className="btn" onClick={guardar} style={{ minHeight: 38, padding: "0 14px", borderRadius: R.md, background: C.accent,
-                    color: "#FAFAF9", fontSize: 13, fontWeight: 800 }}>OK</button>
+              style={{ width: 72, padding: "9px 10px", borderRadius: 10, border: "none", background: C.surfaceMuted,
+                       fontSize: 16, fontWeight: 600, textAlign: "center", color: C.text, fontFamily: "inherit" }} />
+            <button className="btn" onClick={guardar} style={{ minHeight: 38, padding: "0 16px", borderRadius: 999, background: A.azul,
+                    color: "#fff", fontSize: 15, fontWeight: 700 }}>OK</button>
           </>
         )}
       </div>
 
-      <div data-como-vas style={{ fontSize: 12.5, color: C.textDim, lineHeight: 1.5, padding: "8px 4px 0" }}>
-        {tendencia && <>Tendencia <b className="mono" style={{ color: C.text }}>{coma(tendencia.tendencia)} kg</b></>}
-        {kg != null && <> · <span className="mono">{signo(kg, 2)} kg/sem</span> (objetivo {signo(objetivoSemana, 1)})</>}
+      <div data-como-vas style={{ fontSize: 13, color: C.textDim, lineHeight: 1.5, marginTop: 10 }}>
+        {tendencia && <>Tendencia <b style={{ color: C.text }}>{coma(tendencia.tendencia)} kg</b></>}
+        {kg != null && <> · {signo(kg, 2)} kg/sem (objetivo {signo(objetivoSemana, 1)})</>}
         {kg == null && <>{tendencia ? " · " : ""}Pésate cada mañana, en ayunas: con 8 pesajes en dos semanas, las kcal se ajustan solas cada lunes.</>}
       </div>
       {programa && (
-        <div data-ajuste style={{ fontSize: 12.5, color: C.text, lineHeight: 1.5, padding: "4px 4px 0" }}>
-          Esta semana: <b className="mono">COMER {miles(programa.objetivos.comer.kcal)} · RECORTAR {miles(programa.objetivos.recortar.kcal)}</b>
+        <div data-ajuste style={{ fontSize: 13, color: C.text, lineHeight: 1.5, marginTop: 4 }}>
+          Esta semana: <b>COMER {miles(programa.objetivos.comer.kcal)} · RECORTAR {miles(programa.objetivos.recortar.kcal)}</b>
           {programa.cambio
             ? <span style={{ color: C.textDim }}> ({programa.cambio > 0 ? "+" : "−"}{Math.abs(programa.cambio)} kcal/día: {porque})</span>
             : porque ? <span style={{ color: C.textDim }}> ({porque})</span> : null}
         </div>
       )}
-    </div>
+    </Tarjeta>
   );
 }
