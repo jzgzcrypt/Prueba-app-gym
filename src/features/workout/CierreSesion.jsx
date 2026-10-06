@@ -6,6 +6,7 @@ import { FLAT_DAYS, claveDia } from "@/domain/plan/calendario";
 import { progresion, recordsDelDia, seriesDe, textoSeries, ultimaVez } from "@/domain/fuerza/registro";
 import { LecturaSesion, queApuntar } from "@/features/ui/lectura";
 import { textoTiempo } from "@/domain/running/gps";
+import { veredictoCadencia } from "@/domain/running/cadencia";
 import { MapaRuta } from "@/features/ui/MapaRuta";
 
 /**
@@ -127,6 +128,12 @@ export function CierreSesion({ dayKey, workoutWeights, workoutReps, ritmoReal, g
                 Se perdieron {mmss(gps.huecos)} con la pantalla apagada: ese tramo va en línea recta. Para que cuente entero, deja la pantalla encendida.
               </div>
             )}
+            {gps && gps.cadencia && (() => {
+              const v = veredictoCadencia(gps.cadencia);
+              return (
+                <div data-cadencia-cierre style={{ fontSize: 14, fontWeight: 700, color: v.tono === "bien" ? C.ok : C.amber, marginBottom: 10 }}>{v.texto}</div>
+              );
+            })()}
             {gps && gps.m > 0 && (!gps.ruta || (gps.series && gps.series.length > 0)) && (
               <div className="mono" style={{ fontSize: 12.5, fontWeight: 700, color: C.textDim, marginBottom: 10 }}>
                 {gps.ruta ? "" : "GPS: " + (gps.m / 1000).toFixed(2).replace(".", ",") + " km · " + textoTiempo(gps.seg)}

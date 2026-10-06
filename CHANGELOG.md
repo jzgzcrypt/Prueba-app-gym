@@ -21,6 +21,14 @@ Todo cambio que se haga en la app se anota aquí. Sin excepciones.
 
 ## [Sin publicar]
 
+### La carrera, más clara: cuenta atrás, voz en cada km y medir cadencia
+- Arriba, grande, lo que toca correr ("16 min corriendo muy suave, pudiendo hablar"); los 22 min son la sesión completa con calentamiento y estiramientos, y así se dice.
+- En los rodajes por minutos el crono cuenta hacia atrás (16:00 → 0:00) con barra de progreso. Avisa con voz y vibración: mitad, último minuto, 3-2-1 y "¡Hecho! 16 minutos" con la pantalla en verde. Si sigues, cuenta "+0:20" y lo corrido vale igual. En los de km, "faltan X km".
+- Al cerrar cada km, la voz dice el parcial y cómo vas: contra el ritmo del día (series, pruebas) o, en los suaves, contra tu suave de siempre (media de tus últimos rodajes suaves). Si vas mucho más rápido en un día suave, te pide soltar.
+- Botón "Medir cadencia (1 min)": el sensor de movimiento del móvil cuenta tus pasos y la voz dice si estás en 170-180. Si el móvil no deja, a mano: 15 s contando las pisadas de un pie. Se guarda con la salida y sale al terminar.
+- Voz sí/no también en los rodajes.
+- GPS comprobado con Strava en una salida real: 2,40 km los dos (16:00 vs 16:08).
+
 ### Nuevo aspecto "Aire" (1/6): base y HOY
 - Nutrición (opción C): anillo con las kcal que quedan, la proteína al lado y barras de lo que llevas. Se apunta de dos formas:
   - **Mis comidas**: tus comidas de siempre, de un toque. Vienen las de tu menú de casa (avena con whey, pollo con arroz…) y se editan, se borran o se crean.

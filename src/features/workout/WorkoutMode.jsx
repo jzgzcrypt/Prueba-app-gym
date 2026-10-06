@@ -8,6 +8,7 @@ import { descansoEntreSeries, objetivoSerie, pasoPeso, propuestaSerie, sugerenci
 import { getPatronesDeSesion } from "@/domain/salud/patrones";
 import { IntervalTimer } from "@/features/workout/IntervalTimer";
 import { CarreraGps } from "@/features/workout/CarreraGps";
+import { objetivoCarrera } from "@/domain/running/objetivo";
 /** "5:05" a partir de segundos. */
 function textoRitmo(seg) { return Math.floor(seg / 60) + ":" + String(Math.round(seg % 60)).padStart(2, "0"); }
 
@@ -19,7 +20,7 @@ function intervalosDelDia(day, ritmoSeries) {
   return day.intervalos.map(b => ({ ...b, s: b.s.map(([t, d]) => t === "rapido" ? [t, seg] : [t, d]) }));
 }
 
-export function WorkoutMode({ day, mov, progress, onUpdateProgress, onFinish, onExit, weights, onUpdateWeight, reps, onUpdateReps, ultimaVez, ritmoSeries, flaggedExercises }) {
+export function WorkoutMode({ day, mov, progress, onUpdateProgress, onFinish, onExit, weights, onUpdateWeight, reps, onUpdateReps, ultimaVez, ritmoSeries, flaggedExercises, suave = null }) {
   const isFuerza = day.tipo === "fuerza";
   const hasCal = mov.cal && mov.cal.length > 0;
   const hasEnf = mov.enf && mov.enf.length > 0;
@@ -175,25 +176,26 @@ export function WorkoutMode({ day, mov, progress, onUpdateProgress, onFinish, on
           </div>
 
           <div style={{ flex: 1, padding: "24px 20px", display: "flex", flexDirection: "column", justifyContent: "center" }}>
-            <div style={{ fontSize: 10, fontWeight: 700, color: "#8A8A87", letterSpacing: 1.5, marginBottom: 8 }}>SESIÓN</div>
-            <div style={{ fontSize: 21, fontWeight: 800, color: "#171717", lineHeight: 1.3, marginBottom: 16 }}>{day.titulo}</div>
-
-            <div style={{ border: "1px solid #E5E5E3", borderRadius: 4, overflow: "hidden", marginBottom: 16 }}>
-              <div style={{ display: "flex", borderBottom: "1px solid #E5E5E3" }}>
-                <div style={{ flex: 1, padding: "12px 16px", borderRight: "1px solid #E5E5E3" }}>
-                  <div style={{ fontSize: 9.5, color: "#8A8A87", fontWeight: 700, letterSpacing: 0.5 }}>DURACIÓN</div>
-                  <div className="mono" style={{ fontSize: 16, color: "#171717", fontWeight: 700, marginTop: 2 }}>{day.dur}</div>
+            {(() => {
+              // Lo que toca correr, grande; el total de la sesion (con
+              // calentamiento y estiramientos), aparte y dicho como tal.
+              const obj = objetivoCarrera(day);
+              const resto = obj ? (day.what || "").replace(/^[^.]*\.\s*/, "").trim() : "";
+              return (
+                <div data-que-toca style={{ marginBottom: 16 }}>
+                  <div style={{ fontSize: 13, fontWeight: 600, color: "#8E8E93" }}>{day.titulo}</div>
+                  <div style={{ fontSize: 13, fontWeight: 700, color: "#FF375F", letterSpacing: 0.3, marginTop: 10 }}>HOY TOCA</div>
+                  <div style={{ fontSize: obj ? 26 : 19, fontWeight: 800, color: "#1C1C1E", lineHeight: 1.2, letterSpacing: -0.5, marginTop: 2 }}>
+                    {obj ? obj.texto.charAt(0).toUpperCase() + obj.texto.slice(1) : day.what}
+                  </div>
+                  {obj && obj.resto && <div style={{ fontSize: 15, fontWeight: 600, color: "#1C1C1E", marginTop: 4 }}>Y después: {obj.resto}</div>}
+                  {resto && <div style={{ fontSize: 14, color: "#8E8E93", marginTop: 6, lineHeight: 1.45 }}>{resto}</div>}
+                  <div style={{ fontSize: 13, color: "#8E8E93", marginTop: 8 }}>
+                    Sesión completa: {day.dur}{phases.length > 1 ? ", con calentamiento y estiramientos" : ""} · esfuerzo {day.rpe}
+                  </div>
                 </div>
-                <div style={{ flex: 1, padding: "12px 16px" }}>
-                  <div style={{ fontSize: 9.5, color: "#8A8A87", fontWeight: 700, letterSpacing: 0.5 }}>RPE</div>
-                  <div className="mono" style={{ fontSize: 16, color: "#171717", fontWeight: 700, marginTop: 2 }}>{day.rpe}</div>
-                </div>
-              </div>
-              <div style={{ padding: "14px 16px" }}>
-                <div style={{ fontSize: 9.5, color: "#8A8A87", fontWeight: 700, letterSpacing: 0.5, marginBottom: 4 }}>SESIÓN</div>
-                <div style={{ fontSize: 13, color: "#4A4A47", lineHeight: 1.5 }}>{day.what}</div>
-              </div>
-            </div>
+              );
+            })()}
 
             {ritmoSeries && ritmoSeries.ajustado && (
               <div style={{ padding: "11px 13px", borderRadius: 10, background: "#FDF6E3", border: "1px solid #E8D9A8", marginBottom: 14 }}>
@@ -207,7 +209,7 @@ export function WorkoutMode({ day, mov, progress, onUpdateProgress, onFinish, on
             {day.intervalos ? (
               <IntervalTimer intervalos={intervalosDelDia(day, ritmoSeries)} ritmo={ritmoSeries ? ritmoSeries.ritmo : (day.ritmo || null)} resultadoRef={gpsRef} />
             ) : (
-              <CarreraGps day={day} resultadoRef={gpsRef} />
+              <CarreraGps day={day} resultadoRef={gpsRef} suave={suave} tecnica={!!objetivoCarrera(day)} />
             )}
           </div>
 
