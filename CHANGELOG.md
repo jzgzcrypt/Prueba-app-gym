@@ -21,6 +21,10 @@ Todo cambio que se haga en la app se anota aquí. Sin excepciones.
 
 ## [Sin publicar]
 
+### Nutrición: la semana cuadra (IIFYM semanal)
+- Si un día te pasas, lo que sobra se reparte entre los días que quedan hasta el domingo (hoy incluido); si te quedas corto, suben. El objetivo de hoy ya viene ajustado, en Nutrición y en HOY, y se explica: "Esta semana llevas +400 kcal: hoy y los 3 días que quedan, 100 menos cada día".
+- Con cuidado: la proteína no se toca (sale de hidratos y grasa), como mucho ±300 kcal al día y nunca por debajo de 1.800, la víspera y el día de una prueba no se recortan, y menos de 150 kcal de saldo no mueve nada. Lo que no quepa se queda sin compensar, sin drama. Solo cuentan los días con algo apuntado.
+
 ### Nutrición: macros completos y vitaminas vía tu IA
 - Arriba, además de kcal y proteína, barras de hidratos y grasa con lo que llevas y lo que toca.
 - El mensaje para tu IA pide una segunda línea, MICROS DEL DÍA (fibra, hierro, calcio, vitamina D, B12, omega-3 y sodio). Al pegar la respuesta se guardan con la comida.

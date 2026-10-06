@@ -182,7 +182,7 @@ function Micros({ apuntes, semanaApuntes, esHoy }) {
   );
 }
 
-export function NutricionScreen({ comida, esHoy, apuntes = [], apuntar, quitar, habituales = [], setHabituales, semana, semanaApuntes = [], medidas = [], irAProgreso, motor }) {
+export function NutricionScreen({ comida, esHoy, cuadre = null, apuntes = [], apuntar, quitar, habituales = [], setHabituales, semana, semanaApuntes = [], medidas = [], irAProgreso, motor }) {
   const [panel, setPanel] = useState(null); // null | "mias" | "ia"
   const m = comida && comida.macros;
   const llevas = sumaDelDia(apuntes);
@@ -215,6 +215,12 @@ export function NutricionScreen({ comida, esHoy, apuntes = [], apuntar, quitar, 
               <div style={{ fontSize: 13, color: C.textDim, lineHeight: 1.4, marginTop: 4 }}>{QUE_ES[comida.id]}</div>
             </div>
           </div>
+          {cuadre && (
+            <div data-cuadre style={{ display: "flex", gap: 8, marginTop: 14, padding: "10px 12px", borderRadius: 12, background: A.fondo.azul, fontSize: 13.5, color: C.text, lineHeight: 1.45 }}>
+              <span style={{ color: A.azul, paddingTop: 1 }}><Icono nombre="calendario" tam={17} /></span>
+              <span>{cuadre}{comida.cuadre ? <b> Hoy: {miles(m.kcal)} kcal.</b> : null}</span>
+            </div>
+          )}
           <div style={{ marginTop: 16 }}>
             <Barra titulo="Kcal" llevas={llevas.kcal} objetivo={m.kcal} unidad="kcal" color={color} />
             <Barra titulo="Proteína" llevas={llevas.prot} objetivo={m.prot} unidad="g" color={A.azul} />

@@ -32,6 +32,7 @@ import { textoParaLibreta } from "@/domain/running/gps";
 import { ajustePorPeso, objetivosConAjuste, tendenciaPeso } from "@/domain/nutricion/adaptativo";
 import { habitualesIniciales } from "@/domain/nutricion/recomendar";
 import { suaveHabitual } from "@/domain/running/objetivo";
+import { aplicarCuadre, cuadreSemana, textoCuadre } from "@/domain/nutricion/cuadre-semana";
 import { semanaNutricion } from "@/domain/nutricion/pegar-ia";
 import { simplificar, sinSimplificar } from "@/domain/running/ruta";
 import { resumenSemana, semanasCumplidas } from "@/domain/progreso/resumen";
@@ -291,7 +292,18 @@ export default function App() {
   const tendenciaHoy = (() => { const t = tendenciaPeso(pesosTodos, todayLocalIso()); return t.length ? t[t.length - 1] : null; })();
   const ajusteSemana = ajustePorPeso({ pesos: pesosTodos, lunesIso: lunesActual, inicioIso: WEEKS[0].days[0].isoDate });
   const objetivosSemana = ajusteSemana.ajuste ? objetivosConAjuste(OBJETIVO_MACROS, ajusteSemana.ajuste) : null;
-  const comida = comidaDelDia(currentDay, objetivosSemana);
+  // IIFYM de la semana: lo que te pasas (o te falta) en los dias ya cerrados
+  // se reparte entre los que quedan hasta el domingo.
+  const semanaVista = WEEKS[currentDay.weekIdx] || WEEKS[0];
+  const cuadre = cuadreSemana({ dias: semanaVista.days, comidasLog, hoyIso: todayLocalIso(), claveDe: claveDia,
+    objetivoDe: (d) => comidaDelDia(d, objetivosSemana).macros });
+  const comida = (() => {
+    const base = comidaDelDia(currentDay, objetivosSemana);
+    const aj = cuadre.ajusteDe(currentDay);
+    if (!aj) return base;
+    const macros = aplicarCuadre(base.macros, aj);
+    return { ...base, macros, kcal: macros.kcal.toLocaleString("es-ES") + " kcal", cuadre: macros.kcal - base.macros.kcal };
+  })();
   const programa = { ...ajusteSemana, objetivos: objetivosConAjuste(OBJETIVO_MACROS, ajusteSemana.ajuste) };
   const guardarPeso = (kg) => setPesosDiarios(p => Object.assign({}, p, { [todayLocalIso()]: kg }));
   const mainDone = currentDay.tipo === "libre" ? true : !!checked[dayKey];
@@ -631,6 +643,7 @@ export default function App() {
 
         {screen === "nutricion" && (
           <NutricionScreen comida={comida} esHoy={isToday} dayKey={dayKey}
+            cuadre={currentDay.isoDate >= todayLocalIso() ? textoCuadre(cuadre) : null}
             apuntes={comidasLog[dayKey] || []}
             apuntar={(ap) => setComidasLog(p => Object.assign({}, p, { [dayKey]: [...(p[dayKey] || []), ap] }))}
             quitar={(id) => {
