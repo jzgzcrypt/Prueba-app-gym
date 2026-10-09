@@ -51,3 +51,12 @@ test("si ya has desayunado, no propone otro desayuno", () => {
   assert.ok(r.length > 0);
   for (const o of r) assert.ok(!o.comidas.some(c => c.id.endsWith("-desayuno")), JSON.stringify(o.comidas));
 });
+
+test("completar Mis comidas con lo que devuelve la IA, por nombre", async () => {
+  const { completarHabituales } = await import("../src/domain/nutricion/recomendar.js");
+  const mias = [{ id: "a", nombre: "Pollo con arroz", kcal: 760, prot: 53 }, { id: "b", nombre: "Queso batido", kcal: 118, prot: 20 }];
+  const r = completarHabituales(mias, [{ nombre: "pollo con  arroz ", kcal: 780, prot: 55, hc: 100, grasa: 12, micros: { fibra: 5, sodio: 600 } }]);
+  assert.equal(r.completadas, 1);
+  assert.deepEqual([r.habituales[0].kcal, r.habituales[0].hc, r.habituales[0].micros.fibra, r.habituales[0].id], [780, 100, 5, "a"]);
+  assert.equal(r.habituales[1], mias[1], "la que no viene no se toca");
+});

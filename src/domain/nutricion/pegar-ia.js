@@ -363,3 +363,20 @@ export function leerComidas(texto) {
   }
   return comidas;
 }
+
+/**
+ * El mensaje para completar Mis comidas: las que no tienen vitaminas, para
+ * que tu IA devuelva una linea COMIDA por cada una, con el mismo nombre.
+ * null si todas las tienen.
+ */
+export function mensajeCompletar(habituales) {
+  const sin = (habituales || []).filter(h => h && h.nombre && !h.micros);
+  if (!sin.length) return null;
+  return [
+    "Estas son comidas que tomo a menudo, con sus calorías aproximadas. Estima sus macros y micros (ración normal en España).",
+    ...sin.map(h => "- " + h.nombre + (h.kcal ? " (~" + Math.round(h.kcal) + " kcal)" : "")),
+    "",
+    "Responde SOLO con una línea por comida, con EXACTAMENTE el mismo nombre, en este formato:",
+    "COMIDA | nombre | kcal | proteína g | hidratos g | grasa g | fibra g | hierro mg | calcio mg | vitamina D µg | B12 µg | omega-3 g | sodio mg",
+  ].join("\n");
+}

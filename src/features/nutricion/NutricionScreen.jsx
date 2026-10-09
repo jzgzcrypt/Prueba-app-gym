@@ -2,9 +2,9 @@
 
 import { useState } from "react";
 import { A, C } from "@/design/tokens";
-import { leerComidas, leerMicros, leerTotalDelDia, mensajeDelDia, sumaDelDia } from "@/domain/nutricion/pegar-ia";
+import { leerComidas, leerMicros, leerTotalDelDia, mensajeCompletar, mensajeDelDia, sumaDelDia } from "@/domain/nutricion/pegar-ia";
 import { ORDEN_MICROS, REFERENCIAS, avisosMicros, estadoMicro, perfilDia, perfilSemana } from "@/domain/nutricion/micros";
-import { recomendar } from "@/domain/nutricion/recomendar";
+import { completarHabituales, recomendar } from "@/domain/nutricion/recomendar";
 import { ScreenHeader } from "@/features/ui/headers";
 import { Anillo, Boton, Chevron, Icono, IconoCaja, Seccion, Segmentado, Tarjeta } from "@/features/ui/aire";
 import { TuMotor } from "@/features/nutricion/TuMotor";
@@ -48,17 +48,26 @@ function Barra({ titulo, llevas, objetivo, unidad, color }) {
 }
 
 /** Mis comidas: tocar una la apunta; en modo editar se cambian, se borran o se crean. */
+const macrosCortos = (h) => miles(h.kcal || 0) + " kcal · P " + Math.round(h.prot || 0) + " · HC " + Math.round(h.hc || 0) + " · G " + Math.round(h.grasa || 0);
+
 function MisComidas({ habituales, setHabituales, apuntar, cerrar }) {
   const [editando, setEditando] = useState(false);
-  const [nueva, setNueva] = useState({ nombre: "", kcal: "", prot: "" });
+  const [abierta, setAbierta] = useState(null);
+  const [completar, setCompletar] = useState(false);
+  const [nueva, setNueva] = useState({ nombre: "", kcal: "", prot: "", hc: "", grasa: "" });
   const cambiar = (id, k, v) => setHabituales(habituales.map(h => h.id === id ? { ...h, [k]: k === "nombre" ? v : (numero(v) ?? 0) } : h));
   const borrar = (id) => setHabituales(habituales.filter(h => h.id !== id));
   const crear = () => {
-    const kcal = numero(nueva.kcal), prot = numero(nueva.prot);
+    const kcal = numero(nueva.kcal);
     if (!nueva.nombre.trim() || !kcal) return;
-    setHabituales([...habituales, { id: nuevoId(), nombre: nueva.nombre.trim(), kcal, prot: prot || 0, hc: 0, grasa: 0 }]);
-    setNueva({ nombre: "", kcal: "", prot: "" });
+    setHabituales([...habituales, { id: nuevoId(), nombre: nueva.nombre.trim(), kcal, prot: numero(nueva.prot) || 0, hc: numero(nueva.hc) || 0, grasa: numero(nueva.grasa) || 0 }]);
+    setNueva({ nombre: "", kcal: "", prot: "", hc: "", grasa: "" });
   };
+  const sinMicros = habituales.filter(h => !h.micros).length;
+  const numCampo = (valor, cambio, etiqueta) => (
+    <input inputMode="numeric" value={valor} placeholder={etiqueta} aria-label={etiqueta} onChange={cambio}
+      style={{ ...campo, flex: 1, minWidth: 0, textAlign: "center", padding: "9px 4px" }} />
+  );
   return (
     <Tarjeta data-mis-comidas style={{ padding: 0, marginTop: 10, overflow: "hidden" }}>
       <div style={{ display: "flex", alignItems: "center", padding: "14px 16px 6px" }}>
@@ -66,40 +75,99 @@ function MisComidas({ habituales, setHabituales, apuntar, cerrar }) {
         <button className="btn" onClick={() => setEditando(!editando)} style={{ fontSize: 15, color: A.azul, fontWeight: 600, minHeight: 36, marginRight: 14 }}>{editando ? "Hecho" : "Editar"}</button>
         <button className="btn" onClick={cerrar} style={{ fontSize: 15, color: A.azul, fontWeight: 600, minHeight: 36 }}>Cerrar</button>
       </div>
-      {!editando && <div style={{ fontSize: 13, color: C.textDim, padding: "0 16px 6px" }}>Toca una para sumarla a hoy.</div>}
+      {!editando && <div style={{ fontSize: 13, color: C.textDim, padding: "0 16px 6px" }}>Toca una para sumarla a hoy. La flecha, para ver todo.</div>}
       {habituales.map((h) => editando ? (
-        <div key={h.id} style={{ display: "flex", gap: 6, alignItems: "center", padding: "8px 16px", borderTop: "1px solid " + C.divider }}>
-          <input value={h.nombre} onChange={e => cambiar(h.id, "nombre", e.target.value)} style={{ ...campo, flex: 1, minWidth: 0 }} />
-          <input inputMode="numeric" value={h.kcal} onChange={e => cambiar(h.id, "kcal", e.target.value)} aria-label="kcal" style={{ ...campo, width: 62, textAlign: "center" }} />
-          <input inputMode="numeric" value={h.prot} onChange={e => cambiar(h.id, "prot", e.target.value)} aria-label="proteína" style={{ ...campo, width: 48, textAlign: "center" }} />
-          <button className="btn" aria-label={"Borrar " + h.nombre} onClick={() => borrar(h.id)} style={{ color: A.rojo, minWidth: 32, minHeight: 36, display: "flex", alignItems: "center", justifyContent: "center" }}>
-            <Icono nombre="mas" tam={20} style={{ transform: "rotate(45deg)" }} />
-          </button>
+        <div key={h.id} data-editar-habitual style={{ padding: "8px 16px", borderTop: "1px solid " + C.divider }}>
+          <div style={{ display: "flex", gap: 6, alignItems: "center", marginBottom: 6 }}>
+            <input value={h.nombre} onChange={e => cambiar(h.id, "nombre", e.target.value)} style={{ ...campo, flex: 1, minWidth: 0 }} />
+            <button className="btn" aria-label={"Borrar " + h.nombre} onClick={() => borrar(h.id)} style={{ color: A.rojo, minWidth: 32, minHeight: 36, display: "flex", alignItems: "center", justifyContent: "center" }}>
+              <Icono nombre="mas" tam={20} style={{ transform: "rotate(45deg)" }} />
+            </button>
+          </div>
+          <div style={{ display: "flex", gap: 6, paddingRight: 38 }}>
+            {numCampo(h.kcal, e => cambiar(h.id, "kcal", e.target.value), "kcal")}
+            {numCampo(h.prot, e => cambiar(h.id, "prot", e.target.value), "prot.")}
+            {numCampo(h.hc ?? "", e => cambiar(h.id, "hc", e.target.value), "hidr.")}
+            {numCampo(h.grasa ?? "", e => cambiar(h.id, "grasa", e.target.value), "grasa")}
+          </div>
         </div>
       ) : (
-        <button key={h.id} className="btn" data-habitual onClick={() => apuntar({ nombre: h.nombre, kcal: h.kcal, prot: h.prot, hc: h.hc || 0, grasa: h.grasa || 0, ...(h.micros ? { micros: h.micros } : {}), desde: "mia", de: h.id })}
-          style={{ display: "flex", alignItems: "center", gap: 12, width: "100%", textAlign: "left", padding: "10px 16px", borderTop: "1px solid " + C.divider, minHeight: 52 }}>
-          <div style={{ flex: 1, minWidth: 0 }}>
-            <div style={{ fontSize: 15, fontWeight: 600, color: C.text }}>{h.nombre}</div>
-            <div style={{ fontSize: 12.5, color: C.textDim, fontVariantNumeric: "tabular-nums" }}>{miles(h.kcal)} kcal · {h.prot} g proteína</div>
+        <div key={h.id} style={{ borderTop: "1px solid " + C.divider }}>
+          <div style={{ display: "flex", alignItems: "center" }}>
+            <button className="btn" data-habitual onClick={() => apuntar({ nombre: h.nombre, kcal: h.kcal, prot: h.prot, hc: h.hc || 0, grasa: h.grasa || 0, ...(h.micros ? { micros: h.micros } : {}), desde: "mia", de: h.id })}
+              style={{ flex: 1, minWidth: 0, display: "flex", alignItems: "center", gap: 12, textAlign: "left", padding: "10px 4px 10px 16px", minHeight: 52 }}>
+              <span style={{ width: 30, height: 30, borderRadius: 15, background: A.fondo.azul, color: A.azul, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+                <Icono nombre="mas" tam={18} grosor={2.4} />
+              </span>
+              <div style={{ flex: 1, minWidth: 0 }}>
+                <div style={{ fontSize: 15, fontWeight: 600, color: C.text }}>{h.nombre}</div>
+                <div style={{ fontSize: 12.5, color: C.textDim, fontVariantNumeric: "tabular-nums" }}>{macrosCortos(h)}{h.micros ? " · vit." : ""}</div>
+              </div>
+            </button>
+            <button className="btn" data-ver-habitual aria-label={"Ver " + h.nombre} onClick={() => setAbierta(abierta === h.id ? null : h.id)}
+              style={{ minWidth: 44, minHeight: 44, display: "flex", alignItems: "center", justifyContent: "center", marginRight: 6 }}>
+              <Chevron abierto={abierta === h.id} />
+            </button>
           </div>
-          <span style={{ width: 30, height: 30, borderRadius: 15, background: A.fondo.azul, color: A.azul, display: "flex", alignItems: "center", justifyContent: "center" }}>
-            <Icono nombre="mas" tam={18} grosor={2.4} />
-          </span>
-        </button>
+          {abierta === h.id && <div data-detalle-habitual style={{ padding: "0 16px 12px 58px" }}><DetalleMacros a={h} /></div>}
+        </div>
       ))}
       {editando && (
-        <div style={{ display: "flex", gap: 6, alignItems: "center", padding: "10px 16px 14px", borderTop: "1px solid " + C.divider }}>
-          <input value={nueva.nombre} placeholder="Nueva comida" onChange={e => setNueva(p => ({ ...p, nombre: e.target.value }))} style={{ ...campo, flex: 1, minWidth: 0 }} />
-          <input inputMode="numeric" value={nueva.kcal} placeholder="kcal" onChange={e => setNueva(p => ({ ...p, kcal: e.target.value }))} style={{ ...campo, width: 62, textAlign: "center" }} />
-          <input inputMode="numeric" value={nueva.prot} placeholder="g" onChange={e => setNueva(p => ({ ...p, prot: e.target.value }))} style={{ ...campo, width: 48, textAlign: "center" }} />
-          <button className="btn" aria-label="Añadir comida" onClick={crear} style={{ width: 32, height: 32, borderRadius: 16, background: A.azul, color: "#fff", display: "flex", alignItems: "center", justifyContent: "center" }}>
-            <Icono nombre="mas" tam={18} grosor={2.4} />
-          </button>
+        <div style={{ padding: "10px 16px 14px", borderTop: "1px solid " + C.divider }}>
+          <div style={{ display: "flex", gap: 6, alignItems: "center", marginBottom: 6 }}>
+            <input value={nueva.nombre} placeholder="Nueva comida" onChange={e => setNueva(p => ({ ...p, nombre: e.target.value }))} style={{ ...campo, flex: 1, minWidth: 0 }} />
+            <button className="btn" aria-label="Añadir comida" onClick={crear} style={{ width: 32, height: 32, borderRadius: 16, background: A.azul, color: "#fff", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+              <Icono nombre="mas" tam={18} grosor={2.4} />
+            </button>
+          </div>
+          <div style={{ display: "flex", gap: 6, paddingRight: 38 }}>
+            {numCampo(nueva.kcal, e => setNueva(p => ({ ...p, kcal: e.target.value })), "kcal")}
+            {numCampo(nueva.prot, e => setNueva(p => ({ ...p, prot: e.target.value })), "prot.")}
+            {numCampo(nueva.hc, e => setNueva(p => ({ ...p, hc: e.target.value })), "hidr.")}
+            {numCampo(nueva.grasa, e => setNueva(p => ({ ...p, grasa: e.target.value })), "grasa")}
+          </div>
         </div>
       )}
-      {editando && <div style={{ fontSize: 12, color: C.textDim, padding: "0 16px 14px" }}>Nombre · kcal · gramos de proteína</div>}
+      {!editando && sinMicros > 0 && (
+        <div style={{ padding: "8px 16px 14px", borderTop: "1px solid " + C.divider }}>
+          {!completar ? (
+            <button className="btn" data-completar onClick={() => setCompletar(true)} style={{ fontSize: 14.5, fontWeight: 600, color: A.azul, minHeight: 40, display: "flex", alignItems: "center", gap: 6 }}>
+              <Icono nombre="magia" tam={18} /> Completar vitaminas con mi IA ({sinMicros})
+            </button>
+          ) : <CompletarConIA habituales={habituales} setHabituales={setHabituales} cerrar={() => setCompletar(false)} />}
+        </div>
+      )}
     </Tarjeta>
+  );
+}
+
+/** Copiar las comidas sin vitaminas para tu IA y pegar su respuesta: se rellenan por nombre. */
+function CompletarConIA({ habituales, setHabituales, cerrar }) {
+  const [texto, setTexto] = useState("");
+  const [copiado, setCopiado] = useState(false);
+  const leidas = texto.trim() ? leerComidas(texto) : [];
+  const vista = completarHabituales(habituales, leidas);
+  const copiar = async () => {
+    const msg = mensajeCompletar(habituales);
+    try { await navigator.clipboard.writeText(msg); setCopiado(true); } catch { setTexto(msg); }
+  };
+  return (
+    <div data-completar-ia>
+      <div style={{ fontSize: 14, color: C.textDim, lineHeight: 1.5, margin: "4px 0 8px" }}>
+        1. Copia el mensaje y pégalo en tu IA. 2. Pega aquí su respuesta: cada comida se rellena con sus macros y vitaminas.
+      </div>
+      <Boton tipo="suave" onClick={copiar} style={{ minHeight: 42, fontSize: 15 }}>{copiado ? "Copiado: pégalo en tu IA" : "Copiar mensaje para mi IA"}</Boton>
+      <textarea value={texto} onChange={e => setTexto(e.target.value)} placeholder="Pega aquí la respuesta"
+        style={{ ...campo, minHeight: 80, resize: "vertical", marginTop: 8 }} />
+      <div style={{ display: "flex", alignItems: "center", gap: 10, marginTop: 8 }}>
+        <div style={{ flex: 1, fontSize: 13.5, color: texto.trim() && !vista.completadas ? A.naranja : C.textDim }}>
+          {texto.trim() ? (vista.completadas ? vista.completadas + " de tus comidas se completan." : "No coincide ningún nombre con tus comidas.") : ""}
+        </div>
+        <button className="btn" onClick={cerrar} style={{ fontSize: 15, color: A.azul, fontWeight: 600, minHeight: 36 }}>Cancelar</button>
+        <button className="btn" data-guardar-completar disabled={!vista.completadas} onClick={() => { setHabituales(vista.habituales); cerrar(); }}
+          style={{ minHeight: 38, padding: "0 16px", borderRadius: 999, background: vista.completadas ? A.azul : "#E5E5EA", color: vista.completadas ? "#fff" : C.textDim, fontSize: 15, fontWeight: 700 }}>Guardar</button>
+      </div>
+    </div>
   );
 }
 
@@ -191,23 +259,32 @@ function ApunteFila({ a, primera, quitar, favorita, alternarFavorita }) {
       </div>
       {abierta && (
         <div data-detalle-apunte style={{ padding: "0 16px 12px 62px" }}>
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 6, marginBottom: a.micros ? 8 : 0 }}>
-            {[["Kcal", a.kcal, ""], ["Prot.", a.prot, "g"], ["Hidr.", a.hc, "g"], ["Grasa", a.grasa, "g"]].map(([t, v, u]) => (
-              <div key={t} style={{ background: C.surfaceMuted, borderRadius: 10, padding: "6px 8px" }}>
-                <div style={{ fontSize: 11, color: C.textDim, fontWeight: 600 }}>{t}</div>
-                <div style={{ fontSize: 15, fontWeight: 700, color: C.text, fontVariantNumeric: "tabular-nums" }}>{Math.round(v || 0)}{u && <span style={{ fontSize: 11, color: C.textDim }}> {u}</span>}</div>
-              </div>
-            ))}
-          </div>
-          {a.micros && (
-            <div style={{ fontSize: 13, color: C.textDim, lineHeight: 1.6 }}>
-              {Object.keys(ETIQUETA_MICRO).filter(k => Number.isFinite(a.micros[k])).map(k => ETIQUETA_MICRO[k][0] + " " + num1(a.micros[k]) + " " + ETIQUETA_MICRO[k][1]).join(" · ")}
-              {a.microsRepartidos ? <div style={{ fontSize: 12, color: C.textFaint }}>Vitaminas repartidas del total del día.</div> : null}
-            </div>
-          )}
+          <DetalleMacros a={a} />
         </div>
       )}
     </div>
+  );
+}
+
+/** Los macros en cuadros y, si los hay, los micros en una linea. */
+function DetalleMacros({ a }) {
+  return (
+    <>
+      <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 6, marginBottom: a.micros ? 8 : 0 }}>
+        {[["Kcal", a.kcal, ""], ["Prot.", a.prot, "g"], ["Hidr.", a.hc, "g"], ["Grasa", a.grasa, "g"]].map(([t, v, u]) => (
+          <div key={t} style={{ background: C.surfaceMuted, borderRadius: 10, padding: "6px 8px" }}>
+            <div style={{ fontSize: 11, color: C.textDim, fontWeight: 600 }}>{t}</div>
+            <div style={{ fontSize: 15, fontWeight: 700, color: C.text, fontVariantNumeric: "tabular-nums" }}>{Math.round(v || 0)}{u && <span style={{ fontSize: 11, color: C.textDim }}> {u}</span>}</div>
+          </div>
+        ))}
+      </div>
+      {a.micros ? (
+        <div style={{ fontSize: 13, color: C.textDim, lineHeight: 1.6 }}>
+          {Object.keys(ETIQUETA_MICRO).filter(k => Number.isFinite(a.micros[k])).map(k => ETIQUETA_MICRO[k][0] + " " + num1(a.micros[k]) + " " + ETIQUETA_MICRO[k][1]).join(" · ")}
+          {a.microsRepartidos ? <div style={{ fontSize: 12, color: C.textFaint }}>Vitaminas repartidas del total del día.</div> : null}
+        </div>
+      ) : <div style={{ fontSize: 12.5, color: C.textFaint }}>Sin vitaminas todavía.</div>}
+    </>
   );
 }
 

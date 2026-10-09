@@ -167,3 +167,12 @@ test("el mensaje lleva las favoritas, las más usadas primero y como mucho 25", 
   assert.match(r, /COMIDA \| nombre corto \| kcal/);
   assert.doesNotMatch(mensajeDelDia({ comida: COMIDA.recortar }), /Mis comidas guardadas/);
 });
+
+test("el mensaje para completar lista solo las comidas sin vitaminas", async () => {
+  const { mensajeCompletar } = await import("../src/domain/nutricion/pegar-ia.js");
+  const r = mensajeCompletar([{ nombre: "Pollo con arroz", kcal: 760 }, { nombre: "Lentejas", kcal: 600, micros: { fibra: 10 } }]);
+  assert.match(r, /- Pollo con arroz \(~760 kcal\)/);
+  assert.doesNotMatch(r, /Lentejas/);
+  assert.match(r, /COMIDA \| nombre \| kcal/);
+  assert.equal(mensajeCompletar([{ nombre: "Lentejas", micros: { fibra: 10 } }]), null);
+});

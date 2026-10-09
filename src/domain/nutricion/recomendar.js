@@ -101,3 +101,23 @@ export function recomendar({ habituales, quedan, cuantas = 2, yaComidas = [] }) 
   }
   return elegidas;
 }
+
+/**
+ * Mis comidas con lo que devuelve tu IA (`leidas`, de leerComidas): a cada
+ * una que coincida por nombre (sin mayusculas ni espacios de mas) se le ponen
+ * los micros y los macros que traiga. Las demas no se tocan. Devuelve
+ * { habituales, completadas }.
+ */
+export function completarHabituales(habituales, leidas) {
+  const norm = (s) => String(s || "").trim().toLowerCase().replace(/\s+/g, " ");
+  const porNombre = new Map((leidas || []).map(l => [norm(l.nombre), l]));
+  let completadas = 0;
+  const salida = (habituales || []).map(h => {
+    const l = porNombre.get(norm(h.nombre));
+    if (!l) return h;
+    completadas++;
+    return { ...h, kcal: l.kcal || h.kcal, prot: l.prot ?? h.prot, hc: l.hc ?? h.hc, grasa: l.grasa ?? h.grasa,
+             ...(l.micros ? { micros: l.micros } : {}) };
+  });
+  return { habituales: salida, completadas };
+}
