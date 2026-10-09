@@ -21,6 +21,11 @@ Todo cambio que se haga en la app se anota aquí. Sin excepciones.
 
 ## [Sin publicar]
 
+### Mis comidas, compacto
+- Cada comida en una línea fina: nombre, "760 · P53" y la flecha para ver hidratos, grasa y vitaminas. El "+" la suma a hoy.
+- Solo salen tus 5 más usadas; "Ver todas (N)" enseña el resto, con buscador si tienes más de 8.
+- "Cargar de mi IA" pasa a un enlace pequeño al pie. La tarjeta ocupa menos de la mitad que antes.
+
 ### Mis comidas, con todo
 - Cada comida enseña kcal, proteína, hidratos y grasa. La flecha despliega los macros en cuadros y sus vitaminas (o "sin vitaminas todavía").
 - Al editar y al crear una comida se cambian también hidratos y grasa.

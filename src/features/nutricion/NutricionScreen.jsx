@@ -48,12 +48,12 @@ function Barra({ titulo, llevas, objetivo, unidad, color }) {
 }
 
 /** Mis comidas: tocar una la apunta; en modo editar se cambian, se borran o se crean. */
-const macrosCortos = (h) => miles(h.kcal || 0) + " kcal · P " + Math.round(h.prot || 0) + " · HC " + Math.round(h.hc || 0) + " · G " + Math.round(h.grasa || 0);
-
 function MisComidas({ habituales, setHabituales, apuntar, cerrar }) {
   const [editando, setEditando] = useState(false);
   const [abierta, setAbierta] = useState(null);
   const [completar, setCompletar] = useState(false);
+  const [todas, setTodas] = useState(false);
+  const [busca, setBusca] = useState("");
   const [nueva, setNueva] = useState({ nombre: "", kcal: "", prot: "", hc: "", grasa: "" });
   const cambiar = (id, k, v) => setHabituales(habituales.map(h => h.id === id ? { ...h, [k]: k === "nombre" ? v : (numero(v) ?? 0) } : h));
   const borrar = (id) => setHabituales(habituales.filter(h => h.id !== id));
@@ -64,19 +64,28 @@ function MisComidas({ habituales, setHabituales, apuntar, cerrar }) {
     setNueva({ nombre: "", kcal: "", prot: "", hc: "", grasa: "" });
   };
   const sinMicros = habituales.filter(h => !h.micros).length;
+  // Las 5 que mas usas (a igualdad, en su orden); "Ver todas" o buscar ensena el resto.
+  const ordenadas = habituales.map((h, i) => [h, i]).sort((x, y) => (y[0].usos || 0) - (x[0].usos || 0) || x[1] - y[1]).map(([h]) => h);
+  const q = busca.trim().toLowerCase();
+  const visibles = q ? ordenadas.filter(h => h.nombre.toLowerCase().includes(q)) : todas ? ordenadas : ordenadas.slice(0, 5);
   const numCampo = (valor, cambio, etiqueta) => (
     <input inputMode="numeric" value={valor} placeholder={etiqueta} aria-label={etiqueta} onChange={cambio}
       style={{ ...campo, flex: 1, minWidth: 0, textAlign: "center", padding: "9px 4px" }} />
   );
   return (
     <Tarjeta data-mis-comidas style={{ padding: 0, marginTop: 10, overflow: "hidden" }}>
-      <div style={{ display: "flex", alignItems: "center", padding: "14px 16px 6px" }}>
-        <div style={{ flex: 1, fontSize: 17, fontWeight: 700, color: C.text }}>Mis comidas</div>
+      <div style={{ display: "flex", alignItems: "center", padding: "10px 16px 4px" }}>
+        <div style={{ flex: 1, fontSize: 16, fontWeight: 700, color: C.text }}>Mis comidas</div>
         <button className="btn" onClick={() => setEditando(!editando)} style={{ fontSize: 15, color: A.azul, fontWeight: 600, minHeight: 36, marginRight: 14 }}>{editando ? "Hecho" : "Editar"}</button>
         <button className="btn" onClick={cerrar} style={{ fontSize: 15, color: A.azul, fontWeight: 600, minHeight: 36 }}>Cerrar</button>
       </div>
-      {!editando && <div style={{ fontSize: 13, color: C.textDim, padding: "0 16px 6px" }}>Toca una para sumarla a hoy. La flecha, para ver todo.</div>}
-      {habituales.map((h) => editando ? (
+      {!editando && habituales.length > 8 && (todas || busca) && (
+        <div style={{ padding: "2px 16px 6px" }}>
+          <input data-buscar-mias value={busca} onChange={e => setBusca(e.target.value)} placeholder="Buscar"
+            style={{ ...campo, padding: "8px 12px", fontSize: 14, background: "#E9E9EE" }} />
+        </div>
+      )}
+      {(editando ? habituales : visibles).map((h) => editando ? (
         <div key={h.id} data-editar-habitual style={{ padding: "8px 16px", borderTop: "1px solid " + C.divider }}>
           <div style={{ display: "flex", gap: 6, alignItems: "center", marginBottom: 6 }}>
             <input value={h.nombre} onChange={e => cambiar(h.id, "nombre", e.target.value)} style={{ ...campo, flex: 1, minWidth: 0 }} />
@@ -95,21 +104,17 @@ function MisComidas({ habituales, setHabituales, apuntar, cerrar }) {
         <div key={h.id} style={{ borderTop: "1px solid " + C.divider }}>
           <div style={{ display: "flex", alignItems: "center" }}>
             <button className="btn" data-habitual onClick={() => apuntar({ nombre: h.nombre, kcal: h.kcal, prot: h.prot, hc: h.hc || 0, grasa: h.grasa || 0, ...(h.micros ? { micros: h.micros } : {}), desde: "mia", de: h.id })}
-              style={{ flex: 1, minWidth: 0, display: "flex", alignItems: "center", gap: 12, textAlign: "left", padding: "10px 4px 10px 16px", minHeight: 52 }}>
-              <span style={{ width: 30, height: 30, borderRadius: 15, background: A.fondo.azul, color: A.azul, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
-                <Icono nombre="mas" tam={18} grosor={2.4} />
-              </span>
-              <div style={{ flex: 1, minWidth: 0 }}>
-                <div style={{ fontSize: 15, fontWeight: 600, color: C.text }}>{h.nombre}</div>
-                <div style={{ fontSize: 12.5, color: C.textDim, fontVariantNumeric: "tabular-nums" }}>{macrosCortos(h)}{h.micros ? " · vit." : ""}</div>
-              </div>
+              style={{ flex: 1, minWidth: 0, display: "flex", alignItems: "center", gap: 10, textAlign: "left", padding: "0 4px 0 16px", minHeight: 44 }}>
+              <span style={{ color: A.azul, display: "flex", flexShrink: 0 }}><Icono nombre="mas" tam={17} grosor={2.4} /></span>
+              <span style={{ flex: 1, minWidth: 0, fontSize: 14.5, fontWeight: 600, color: C.text, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{h.nombre}</span>
+              <span style={{ fontSize: 12.5, color: C.textDim, fontVariantNumeric: "tabular-nums", flexShrink: 0 }}>{miles(h.kcal || 0)} · P{Math.round(h.prot || 0)}</span>
             </button>
             <button className="btn" data-ver-habitual aria-label={"Ver " + h.nombre} onClick={() => setAbierta(abierta === h.id ? null : h.id)}
-              style={{ minWidth: 44, minHeight: 44, display: "flex", alignItems: "center", justifyContent: "center", marginRight: 6 }}>
+              style={{ minWidth: 40, minHeight: 44, display: "flex", alignItems: "center", justifyContent: "center", marginRight: 4 }}>
               <Chevron abierto={abierta === h.id} />
             </button>
           </div>
-          {abierta === h.id && <div data-detalle-habitual style={{ padding: "0 16px 12px 58px" }}><DetalleMacros a={h} /></div>}
+          {abierta === h.id && <div data-detalle-habitual style={{ padding: "0 16px 10px 43px" }}><DetalleMacros a={h} /></div>}
         </div>
       ))}
       {editando && (
@@ -128,11 +133,18 @@ function MisComidas({ habituales, setHabituales, apuntar, cerrar }) {
           </div>
         </div>
       )}
+      {!editando && !q && habituales.length > 5 && (
+        <button className="btn" data-ver-todas onClick={() => setTodas(!todas)}
+          style={{ width: "100%", minHeight: 40, borderTop: "1px solid " + C.divider, fontSize: 14, fontWeight: 600, color: A.azul }}>
+          {todas ? "Ver menos" : "Ver todas (" + habituales.length + ")"}
+        </button>
+      )}
+      {!editando && q && visibles.length === 0 && <div style={{ fontSize: 13.5, color: C.textDim, padding: "6px 16px 10px" }}>Ninguna con «{busca}».</div>}
       {!editando && (
-        <div style={{ padding: "8px 16px 14px", borderTop: "1px solid " + C.divider }}>
+        <div style={{ padding: completar ? "8px 16px 14px" : "2px 16px 8px", borderTop: "1px solid " + C.divider }}>
           {!completar ? (
-            <button className="btn" data-cargar onClick={() => setCompletar(true)} style={{ fontSize: 14.5, fontWeight: 600, color: A.azul, minHeight: 40, display: "flex", alignItems: "center", gap: 6 }}>
-              <Icono nombre="magia" tam={18} /> Cargar comidas de mi IA{sinMicros ? " · y completar " + sinMicros : ""}
+            <button className="btn" data-cargar onClick={() => setCompletar(true)} style={{ fontSize: 13, fontWeight: 600, color: A.azul, minHeight: 34, display: "flex", alignItems: "center", gap: 5 }}>
+              <Icono nombre="magia" tam={15} /> Cargar de mi IA{sinMicros ? " · completar " + sinMicros : ""}
             </button>
           ) : <CargarDeIA habituales={habituales} setHabituales={setHabituales} cerrar={() => setCompletar(false)} />}
         </div>
