@@ -12,6 +12,7 @@
  */
 
 import { parseRitmoToSeconds } from "./ritmo.js";
+import { DECIDE_FECHA, textoTiempo } from "../progreso/libreta.js";
 
 /**
  * Lo que hay que correr en un rodaje continuo, leido del principio de `what`:
@@ -105,4 +106,44 @@ export function suaveHabitual({ dias, ritmoReal, antesDe, cuantos = 3, claveDe =
     if (ritmos.length >= cuantos) break;
   }
   return ritmos.length ? Math.round(ritmos.reduce((a, b) => a + b, 0) / ritmos.length) : null;
+}
+
+// ─── LAS PRUEBAS ──────────────────────────────────────────────────────────
+
+/**
+ * El ritmo (s/km) que pide una prueba: el que va en linea con el objetivo.
+ * 3 km: en linea / 3 (4:50). 5 km que decide: el tiempo que mantiene la
+ * fecha / 5 (4:42). El dia del objetivo: su ritmo. La partida no tiene.
+ */
+export function ritmoDePrueba(day) {
+  const p = day && day.prueba;
+  if (!p || p.partida || !p.distKm) return null;
+  if (day.ritmo) return day.ritmo;
+  if (p.enLinea) return Math.round(p.enLinea / p.distKm);
+  if (p.decide) return Math.round(DECIDE_FECHA[0].hasta / p.distKm);
+  return null;
+}
+
+const mmss = (s) => { const r = Math.round(s); return Math.floor(r / 60) + ":" + String(r % 60).padStart(2, "0"); };
+
+/** La estrategia de una prueba, para leerla antes y oirla al empezar. null si no aplica. */
+export function estrategiaPrueba(day) {
+  const ritmo = ritmoDePrueba(day);
+  if (!ritmo) return null;
+  const p = day.prueba;
+  const meta = p.enLinea ? "En línea: " + textoTiempo(p.enLinea) : p.decide ? "Mantiene la fecha: " + textoTiempo(DECIDE_FECHA[0].hasta)
+    : "Objetivo: " + textoTiempo(ritmo * p.distKm);
+  return meta + " (" + mmss(ritmo) + "/km). Sal a " + mmss(ritmo + 5) + " el primer km, regular después y aprieta el último.";
+}
+
+/** Lo que se dice al cruzar la distancia de la prueba. */
+export function vozFinPrueba(day, seg) {
+  const p = day && day.prueba;
+  if (!p || !p.distKm || !seg) return null;
+  const base = p.distKm + " kilómetros en " + mmss(seg).replace(":", " ") + ".";
+  const linea = p.enLinea || (p.decide ? DECIDE_FECHA[0].hasta : (day.ritmo ? day.ritmo * p.distKm : null));
+  if (!linea) return base;
+  const dif = Math.round(seg - linea);
+  if (dif <= 0) return base + (p.decide ? " Se mantiene el 6 de diciembre." : " Dentro de la línea. Muy bien.") + " Ahora, suave para soltar.";
+  return base + " " + (dif >= 60 ? mmss(dif).replace(":", " minuto ") : dif + " segundos") + " por encima de la línea. Es un dato, no un juicio: con él se ajusta el plan. Ahora, suave para soltar.";
 }

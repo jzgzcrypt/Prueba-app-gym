@@ -53,7 +53,7 @@ export function WorkoutMode({ day, mov, progress, onUpdateProgress, onFinish, on
   };
   const goPrevPhase = () => { if (phaseIdx > 0) setPhaseIdx(phaseIdx - 1); };
 
-  const wrapStyle = { minHeight: "100vh", background: "#FAFAF9", display: "flex", flexDirection: "column" };
+  const wrapStyle = { minHeight: "100vh", background: "#F2F2F7", display: "flex", flexDirection: "column" };
   const containerStyle = { maxWidth: 480, margin: "0 auto", width: "100%", display: "flex", flexDirection: "column", minHeight: "100vh" };
   const fontImport = "@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap');";
   const globalCss = fontImport + " * { box-sizing: border-box; font-family: -apple-system, 'Inter', sans-serif; } button { cursor: pointer; border: none; background: none; } input { font-family: inherit; } .mono { font-family: 'JetBrains Mono', monospace; } .rb { transition: opacity 0.1s; } .rb:active { opacity: 0.6; } .nb { transition: opacity 0.1s; } .nb:active { opacity: 0.7; }";
@@ -84,10 +84,10 @@ export function WorkoutMode({ day, mov, progress, onUpdateProgress, onFinish, on
         <style>{globalCss}</style>
         <div style={containerStyle}>
 
-          <div style={{ padding: "16px 20px 12px", display: "flex", justifyContent: "space-between", alignItems: "center", borderBottom: "1px solid #E5E5E3" }}>
-            <button className="rb" onClick={() => onExit(gpsRef.current)} style={{ fontSize: 12, color: "#8A8A87", fontWeight: 600, letterSpacing: 0.3 }}>SALIR</button>
-            <div style={{ fontSize: 10.5, color: "#8A8A87", fontWeight: 700, letterSpacing: 0.5 }}>{day.titulo.toUpperCase()}</div>
-            <div className="mono" style={{ fontSize: 11, color: "#8A8A87" }}>{phaseIdx+1}/{phases.length}</div>
+          <div style={{ padding: "12px 16px 8px", display: "flex", justifyContent: "space-between", alignItems: "center", gap: 10 }}>
+            <button className="rb" onClick={() => onExit(gpsRef.current)} style={{ fontSize: 16, color: "#0A84FF", fontWeight: 500, minHeight: 40 }}>Salir</button>
+            <div style={{ fontSize: 13, color: "#8E8E93", fontWeight: 600, textAlign: "center", flex: 1, minWidth: 0, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{day.titulo}</div>
+            <div style={{ fontSize: 13, color: "#8E8E93", fontWeight: 600, fontVariantNumeric: "tabular-nums" }}>{phaseIdx+1}/{phases.length}</div>
           </div>
 
           <div style={{ padding: "16px 20px 8px" }}>
@@ -147,15 +147,15 @@ export function WorkoutMode({ day, mov, progress, onUpdateProgress, onFinish, on
           <div style={{ padding: "16px 20px 24px", display: "flex", gap: 8 }}>
             {phaseIdx > 0 && (
               <button className="nb" onClick={goPrevPhase} style={{
-                width: 48, height: 48, borderRadius: 4, background: "#F2F2F0", fontSize: 16, color: "#8A8A87",
+                width: 52, height: 52, borderRadius: 26, background: "#E5E5EA", fontSize: 22, color: "#1C1C1E",
               }}>&lsaquo;</button>
             )}
             {/* Siempre dice lo que viene, nunca "saltar": el boton no puede
                 invitar a escaquearse. Marcar cada ejercicio es opcional. */}
             <button className="nb" onClick={goNextPhase} style={{
-              flex: 1, height: 52, borderRadius: 12, background: "#171717", border: "1px solid #171717",
-              fontSize: 13.5, fontWeight: 800, color: "#FAFAF9", letterSpacing: 0.5,
-            }}>{phase === "cal" ? "YA ESTOY CALIENTE · A LA SESIÓN" : phaseIdx === phases.length - 1 ? "TERMINAR" : "SIGUIENTE"}</button>
+              flex: 1, height: 52, borderRadius: 999, background: "#1C1C1E",
+              fontSize: 16, fontWeight: 700, color: "#fff",
+            }}>{phase === "cal" ? "Ya estoy caliente: a la sesión" : phaseIdx === phases.length - 1 ? "Terminar" : "Siguiente"}</button>
           </div>
         </div>
       </div>
@@ -169,10 +169,10 @@ export function WorkoutMode({ day, mov, progress, onUpdateProgress, onFinish, on
         <style>{globalCss}</style>
         <div style={containerStyle}>
 
-          <div style={{ padding: "16px 20px 12px", display: "flex", justifyContent: "space-between", alignItems: "center", borderBottom: "1px solid #E5E5E3" }}>
-            <button className="rb" onClick={() => onExit(gpsRef.current)} style={{ fontSize: 12, color: "#8A8A87", fontWeight: 600, letterSpacing: 0.3 }}>SALIR</button>
-            <div style={{ fontSize: 10.5, color: "#8A8A87", fontWeight: 700, letterSpacing: 0.5 }}>{day.titulo.toUpperCase()}</div>
-            <div className="mono" style={{ fontSize: 11, color: "#8A8A87" }}>{phaseIdx+1}/{phases.length}</div>
+          <div style={{ padding: "12px 16px 8px", display: "flex", justifyContent: "space-between", alignItems: "center", gap: 10 }}>
+            <button className="rb" onClick={() => onExit(gpsRef.current)} style={{ fontSize: 16, color: "#0A84FF", fontWeight: 500, minHeight: 40 }}>Salir</button>
+            <div style={{ fontSize: 13, color: "#8E8E93", fontWeight: 600, textAlign: "center", flex: 1, minWidth: 0, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{day.titulo}</div>
+            <div style={{ fontSize: 13, color: "#8E8E93", fontWeight: 600, fontVariantNumeric: "tabular-nums" }}>{phaseIdx+1}/{phases.length}</div>
           </div>
 
           <div style={{ flex: 1, padding: "24px 20px", display: "flex", flexDirection: "column", justifyContent: "center" }}>
@@ -180,13 +180,16 @@ export function WorkoutMode({ day, mov, progress, onUpdateProgress, onFinish, on
               // Lo que toca correr, grande; el total de la sesion (con
               // calentamiento y estiramientos), aparte y dicho como tal.
               const obj = objetivoCarrera(day);
-              const resto = obj ? (day.what || "").replace(/^[^.]*\.\s*/, "").trim() : "";
+              // En una prueba, lo grande es la prueba; la explicacion, en pequeño.
+              const prueba = !obj && day.prueba && day.prueba.distKm
+                ? (day.tipo === "objetivo" ? "El día: " + day.prueba.distKm + " km" : day.prueba.distKm + " km a tope") : null;
+              const resto = obj ? (day.what || "").replace(/^[^.]*\.\s*/, "").trim() : prueba ? day.what : "";
               return (
                 <div data-que-toca style={{ marginBottom: 16 }}>
                   <div style={{ fontSize: 13, fontWeight: 600, color: "#8E8E93" }}>{day.titulo}</div>
                   <div style={{ fontSize: 13, fontWeight: 700, color: "#FF375F", letterSpacing: 0.3, marginTop: 10 }}>HOY TOCA</div>
-                  <div style={{ fontSize: obj ? 26 : 19, fontWeight: 800, color: "#1C1C1E", lineHeight: 1.2, letterSpacing: -0.5, marginTop: 2 }}>
-                    {obj ? obj.texto.charAt(0).toUpperCase() + obj.texto.slice(1) : day.what}
+                  <div style={{ fontSize: obj || prueba ? 26 : 19, fontWeight: 800, color: "#1C1C1E", lineHeight: 1.2, letterSpacing: -0.5, marginTop: 2 }}>
+                    {obj ? obj.texto.charAt(0).toUpperCase() + obj.texto.slice(1) : prueba || day.what}
                   </div>
                   {obj && obj.resto && <div style={{ fontSize: 15, fontWeight: 600, color: "#1C1C1E", marginTop: 4 }}>Y después: {obj.resto}</div>}
                   {resto && <div style={{ fontSize: 14, color: "#8E8E93", marginTop: 6, lineHeight: 1.45 }}>{resto}</div>}
@@ -216,13 +219,13 @@ export function WorkoutMode({ day, mov, progress, onUpdateProgress, onFinish, on
           <div style={{ padding: "16px 20px 24px", display: "flex", gap: 8 }}>
             {phaseIdx > 0 && (
               <button className="nb" onClick={goPrevPhase} style={{
-                width: 48, height: 48, borderRadius: 4, background: "#F2F2F0", fontSize: 16, color: "#8A8A87",
+                width: 52, height: 52, borderRadius: 26, background: "#E5E5EA", fontSize: 22, color: "#1C1C1E",
               }}>&lsaquo;</button>
             )}
             <button className="nb" onClick={goNextPhase} style={{
-              flex: 1, height: 48, borderRadius: 4, background: "#171717", border: "1px solid #171717",
-              fontSize: 13, fontWeight: 700, color: "#FAFAF9", letterSpacing: 0.5,
-            }}>{phaseIdx === phases.length - 1 ? "TERMINAR" : "HE TERMINADO DE CORRER"}</button>
+              flex: 1, height: 52, borderRadius: 999, background: "#1C1C1E",
+              fontSize: 16, fontWeight: 700, color: "#fff",
+            }}>{phaseIdx === phases.length - 1 ? "Terminar" : "He terminado de correr"}</button>
           </div>
         </div>
       </div>
@@ -260,10 +263,10 @@ export function WorkoutMode({ day, mov, progress, onUpdateProgress, onFinish, on
       <style>{globalCss}</style>
       <div style={containerStyle}>
 
-        <div style={{ padding: "16px 20px 12px", display: "flex", justifyContent: "space-between", alignItems: "center", borderBottom: "1px solid #E5E5E3" }}>
-          <button className="rb" onClick={() => onExit(gpsRef.current)} style={{ fontSize: 12, color: "#8A8A87", fontWeight: 600, letterSpacing: 0.3, minHeight: 32 }}>SALIR</button>
-          <div style={{ fontSize: 10.5, color: "#8A8A87", fontWeight: 700, letterSpacing: 0.5 }}>{day.titulo.toUpperCase()}</div>
-          <div className="mono" style={{ fontSize: 11, color: "#8A8A87" }}>{phaseIdx+1}/{phases.length}</div>
+        <div style={{ padding: "12px 16px 8px", display: "flex", justifyContent: "space-between", alignItems: "center", gap: 10 }}>
+          <button className="rb" onClick={() => onExit(gpsRef.current)} style={{ fontSize: 16, color: "#0A84FF", fontWeight: 500, minHeight: 40 }}>Salir</button>
+          <div style={{ fontSize: 13, color: "#8E8E93", fontWeight: 600, textAlign: "center", flex: 1, minWidth: 0, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{day.titulo}</div>
+          <div style={{ fontSize: 13, color: "#8E8E93", fontWeight: 600, fontVariantNumeric: "tabular-nums" }}>{phaseIdx+1}/{phases.length}</div>
         </div>
 
         <div style={{ padding: "12px 20px", borderBottom: "1px solid #E5E5E3" }}>

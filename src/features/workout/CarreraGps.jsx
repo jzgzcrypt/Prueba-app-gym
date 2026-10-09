@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import { A, C, CARD } from "@/design/tokens";
 import { comoVa, foto, ritmoActual, tiempoHasta, textoTiempo, segundosEnHuecos } from "@/domain/running/gps";
-import { avisosCuentaAtras, fraseFin, objetivoCarrera, vozDelKm } from "@/domain/running/objetivo";
+import { avisosCuentaAtras, estrategiaPrueba, fraseFin, objetivoCarrera, ritmoDePrueba, vozDelKm, vozFinPrueba } from "@/domain/running/objetivo";
 import { veredictoCadencia } from "@/domain/running/cadencia";
 import { avisoGps, useGps } from "@/features/workout/useGps";
 import { useCadencia } from "@/features/workout/useCadencia";
@@ -28,9 +28,12 @@ const vibrar = (p) => { try { if (navigator.vibrate) navigator.vibrate(p); } cat
  */
 export function CarreraGps({ day, resultadoRef, suave = null, tecnica = false }) {
   const distPrueba = day.prueba && day.prueba.distKm ? day.prueba.distKm * 1000 : null;
-  const objetivo = day.ritmo || null;
+  // El ritmo del dia: el de las series o el de la prueba (3 km a 4:50...). Tu
+  // suave de siempre solo cuenta en los rodajes: en una prueba no se suelta.
+  const objetivo = day.ritmo || ritmoDePrueba(day) || null;
+  const estrategia = estrategiaPrueba(day);
   const obj = objetivoCarrera(day);
-  const ritmoComparar = objetivo || suave;
+  const ritmoComparar = objetivo || (day.prueba ? null : suave);
   const gps = useGps();
   // El GPS empieza a buscar al abrir la sesion: al pulsar EMPEZAR ya tiene
   // señal y los primeros metros cuentan bien. Hasta entonces no se cuenta nada.
@@ -91,15 +94,21 @@ export function CarreraGps({ day, resultadoRef, suave = null, tecnica = false })
         const t1 = tiempoHasta(reg, (k + 1) * 1000), t0 = k > 0 ? tiempoHasta(reg, k * 1000) : 0;
         if (t1 == null || t0 == null) break;
         k++;
-        frases.push(vozDelKm({ km: k, segKm: t1 - t0, objetivo: ritmoComparar, suave: !objetivo }));
+        // En una prueba, pasada la distancia ya es soltar: sin comparar.
+        const enPrueba = !distPrueba || k <= distPrueba / 1000;
+        frases.push(vozDelKm({ km: k, segKm: t1 - t0, objetivo: enPrueba ? ritmoComparar : null, suave: !objetivo && !day.prueba }));
+        if (distPrueba && k === distPrueba / 1000 - 1) frases.push("Último kilómetro: lo que quede.");
       }
       antesRef.current = { s, m, km: k };
-      if (frases.length) hablar(frases.join(" "));
       if (distPrueba && !pruebaRef.current && m >= distPrueba) {
         const tp = tiempoHasta(reg, distPrueba) || reg.seg;
         pruebaRef.current = tp; setTiempoPrueba(tp);
         vibrar([300, 120, 300]);
+        // El tiempo de la prueba manda: va antes que el ultimo parcial.
+        const fin = vozFinPrueba(day, tp);
+        if (fin) frases.unshift(fin);
       }
+      if (frases.length) hablar(frases.join(" "));
       if (resultadoRef) resultadoRef.current = resultado();
     }, 1000);
     return () => clearInterval(t);
@@ -114,7 +123,7 @@ export function CarreraGps({ day, resultadoRef, suave = null, tecnica = false })
     } else {
       c.desde = Date.now();
       gps.iniciar(); setCorriendo(true);
-      if (!empezado) { setEmpezado(true); if (obj) hablar("Vamos: " + obj.texto + "."); }
+      if (!empezado) { setEmpezado(true); if (obj) hablar("Vamos: " + obj.texto + "."); else if (estrategia) hablar(estrategia); }
     }
   };
 
@@ -172,6 +181,11 @@ export function CarreraGps({ day, resultadoRef, suave = null, tecnica = false })
         </div>
       </div>
 
+      {!empezado && estrategia && (
+        <div data-estrategia style={{ margin: "12px 16px 0", padding: "10px 12px", borderRadius: 12, background: A.fondo.rojo, fontSize: 14, color: C.text, lineHeight: 1.45 }}>
+          <b>Cómo correrla.</b> {estrategia}
+        </div>
+      )}
       {!corriendo && gps.estado === "ok" && gps.precision != null && (
         <div data-gps-listo style={{ padding: "10px 16px 0", fontSize: 13, fontWeight: 600, color: A.verde }}>GPS listo · ±{Math.round(gps.precision)} m</div>
       )}

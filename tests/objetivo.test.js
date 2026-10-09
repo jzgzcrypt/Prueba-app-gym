@@ -70,3 +70,20 @@ test("tu suave de siempre: media de los últimos rodajes suaves, sin series ni p
   assert.equal(suaveHabitual({ dias, ritmoReal, antesDe: "2026-10-06" }), Math.round((410 + 428 + 430) / 3));
   assert.equal(suaveHabitual({ dias, ritmoReal: {}, antesDe: "2026-10-06" }), null);
 });
+
+test("las pruebas tienen su ritmo: 3 km a 4:50, el 5 km que decide a 4:42, el objetivo a 4:45", async () => {
+  const { ritmoDePrueba, estrategiaPrueba, vozFinPrueba } = await import("../src/domain/running/objetivo.js");
+  const tres = FLAT_DAYS.find(d => d.prueba && d.prueba.enLinea);
+  const cinco = FLAT_DAYS.find(d => d.prueba && d.prueba.decide);
+  const siete = FLAT_DAYS.find(d => d.tipo === "objetivo");
+  const partida = FLAT_DAYS.find(d => d.prueba && d.prueba.partida);
+  assert.equal(ritmoDePrueba(tres), 290);
+  assert.equal(ritmoDePrueba(cinco), 282);
+  assert.equal(ritmoDePrueba(siete), 285);
+  assert.equal(ritmoDePrueba(partida), null);
+  assert.equal(ritmoDePrueba({ tipo: "run" }), null);
+  assert.match(estrategiaPrueba(tres), /^En línea: 14:30 \(4:50\/km\)\. Sal a 4:55 el primer km/);
+  assert.match(vozFinPrueba(tres, 860), /^3 kilómetros en 14 20\. Dentro de la línea/);
+  assert.match(vozFinPrueba(tres, 910), /40 segundos por encima de la línea/);
+  assert.match(vozFinPrueba(cinco, 1400), /Se mantiene el 6 de diciembre/);
+});

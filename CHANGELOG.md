@@ -21,6 +21,12 @@ Todo cambio que se haga en la app se anota aquí. Sin excepciones.
 
 ## [Sin publicar]
 
+### Rumbo al 7K: pruebas guiadas
+- Arreglado: en las pruebas (3 km, 5 km) la voz comparaba con tu ritmo suave y te habría dicho "suelta, hoy es para recuperar". Ahora compara con el ritmo de la prueba: 4:50/km en el 3 km (14:30 en línea), 4:42 en el 5 km que decide la fecha, 4:45 el día del objetivo.
+- Antes de empezar, la estrategia ("En línea: 14:30. Sal a 4:55 el primer km, regular después y aprieta el último"), que la voz repite al arrancar. En el penúltimo km avisa "Último kilómetro: lo que quede"; al cruzar la distancia dice tu tiempo y si estás dentro de la línea. Pasada la prueba, la vuelta suave no se compara.
+- En la pantalla de "Sesión hecha" de una prueba, la previsión del 6 de diciembre con ese resultado.
+- La sesión, con la barra de arriba y los botones en el estilo nuevo; en las pruebas, "3 km a tope" en grande y la explicación debajo.
+
 ### Mis comidas, compacto
 - Cada comida en una línea fina: nombre, "760 · P53" y la flecha para ver hidratos, grasa y vitaminas. El "+" la suma a hoy.
 - Solo salen tus 5 más usadas; "Ver todas (N)" enseña el resto, con buscador si tienes más de 8.
