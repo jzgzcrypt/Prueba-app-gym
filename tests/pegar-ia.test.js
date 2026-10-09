@@ -131,3 +131,39 @@ test("lee los micros: la línea exacta, con etiquetas y markdown, y nada si no h
   assert.equal(leerMicros("TOTAL DEL DÍA | 2100 | 160 | 200 | 60"), null);
   assert.equal(leerTotalDelDia("TOTAL DEL DÍA | 2100 | 160 | 200 | 60\nMICROS DEL DÍA | 28 | 12 | 850 | 4 | 3 | 1 | 2600").kcal, 2100, "la línea de micros no estropea el total");
 });
+
+test("cada comida con sus macros y micros, del formato COMIDA", async () => {
+  const { leerComidas } = await import("../src/domain/nutricion/pegar-ia.js");
+  const t = "Vale.\n**COMIDA | Tostada con aceite | 250 | 8 | 30 | 11 | 3 | 1,2 | 40 | 0 | 0 | 0,1 | 380**\n" +
+    "COMIDA | Menú: macarrones y pollo | 950 | 55 | 110 | 28 | 6 | 3,5 | 120 | 0,3 | 0,6 | 0,1 | 1.500\n" +
+    "COMIDA | nombre corto | kcal | proteína g\nTOTAL DEL DÍA | 1200 | 63 | 140 | 39\nMICROS DEL DÍA | 9 | 4,7 | 160 | 0,3 | 0,6 | 0,2 | 1880";
+  const c = leerComidas(t);
+  assert.deepEqual(c.map(x => x.nombre), ["Tostada con aceite", "Menú: macarrones y pollo"]);
+  assert.deepEqual([c[1].kcal, c[1].prot, c[1].hc, c[1].grasa], [950, 55, 110, 28]);
+  assert.equal(c[1].micros.sodio, 1500);
+  assert.equal(c[0].microsRepartidos, undefined);
+});
+
+test("sin líneas COMIDA: las comidas que se entiendan, con los micros del día repartidos por kcal", async () => {
+  const { leerComidas } = await import("../src/domain/nutricion/pegar-ia.js");
+  const c = leerComidas("Tostada | 250 | 8 | 30 | 11\nMenú del día | 750 | 55 | 80 | 20\nTOTAL DEL DÍA | 1000 | 63 | 110 | 31\nMICROS DEL DÍA | 20 | 8 | 600 | 4 | 2 | 1 | 3000");
+  assert.deepEqual(c.map(x => x.nombre), ["Tostada", "Menú del día"], "ni TOTAL ni MICROS salen como comida");
+  assert.equal(c[0].micros.sodio, 750);
+  assert.equal(c[1].micros.fibra, 15);
+  assert.ok(c.every(x => x.microsRepartidos));
+  assert.deepEqual(leerComidas("TOTAL DEL DÍA | 1200 | 63 | 140 | 39"), []);
+});
+
+test("el mensaje lleva las favoritas, las más usadas primero y como mucho 25", async () => {
+  const { textoFavoritas } = await import("../src/domain/nutricion/pegar-ia.js");
+  const favs = Array.from({ length: 30 }, (_, i) => ({ nombre: "F" + i, kcal: 300 + i, prot: 20, hc: 30, grasa: 8, usos: i }));
+  favs[0].micros = { fibra: 4, sodio: 300 };
+  const t = textoFavoritas(favs);
+  assert.equal(t.length, 25);
+  assert.match(t[0], /^- F29: 329 kcal · P 20 · HC 30 · G 8$/);
+  const r = mensajeDelDia({ comida: COMIDA.recortar, favoritas: [favs[0]] });
+  assert.match(r, /Mis comidas guardadas/);
+  assert.match(r, /- F0: 300 kcal · P 20 · HC 30 · G 8 · fibra 4, sodio 300/);
+  assert.match(r, /COMIDA \| nombre corto \| kcal/);
+  assert.doesNotMatch(mensajeDelDia({ comida: COMIDA.recortar }), /Mis comidas guardadas/);
+});

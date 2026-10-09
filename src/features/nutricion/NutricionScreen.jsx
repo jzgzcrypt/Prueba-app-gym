@@ -2,11 +2,11 @@
 
 import { useState } from "react";
 import { A, C } from "@/design/tokens";
-import { leerMicros, leerTotalDelDia, mensajeDelDia, sumaDelDia } from "@/domain/nutricion/pegar-ia";
+import { leerComidas, leerMicros, leerTotalDelDia, mensajeDelDia, sumaDelDia } from "@/domain/nutricion/pegar-ia";
 import { ORDEN_MICROS, REFERENCIAS, avisosMicros, estadoMicro, perfilDia, perfilSemana } from "@/domain/nutricion/micros";
 import { recomendar } from "@/domain/nutricion/recomendar";
 import { ScreenHeader } from "@/features/ui/headers";
-import { Anillo, Boton, Icono, IconoCaja, Seccion, Segmentado, Tarjeta } from "@/features/ui/aire";
+import { Anillo, Boton, Chevron, Icono, IconoCaja, Seccion, Segmentado, Tarjeta } from "@/features/ui/aire";
 import { TuMotor } from "@/features/nutricion/TuMotor";
 
 /**
@@ -77,7 +77,7 @@ function MisComidas({ habituales, setHabituales, apuntar, cerrar }) {
           </button>
         </div>
       ) : (
-        <button key={h.id} className="btn" data-habitual onClick={() => apuntar({ nombre: h.nombre, kcal: h.kcal, prot: h.prot, hc: h.hc || 0, grasa: h.grasa || 0, desde: "mia", de: h.id })}
+        <button key={h.id} className="btn" data-habitual onClick={() => apuntar({ nombre: h.nombre, kcal: h.kcal, prot: h.prot, hc: h.hc || 0, grasa: h.grasa || 0, ...(h.micros ? { micros: h.micros } : {}), desde: "mia", de: h.id })}
           style={{ display: "flex", alignItems: "center", gap: 12, width: "100%", textAlign: "left", padding: "10px 16px", borderTop: "1px solid " + C.divider, minHeight: 52 }}>
           <div style={{ flex: 1, minWidth: 0 }}>
             <div style={{ fontSize: 15, fontWeight: 600, color: C.text }}>{h.nombre}</div>
@@ -104,15 +104,23 @@ function MisComidas({ habituales, setHabituales, apuntar, cerrar }) {
 }
 
 /** Pegar de tu IA: copiar el mensaje, hablar con ella y pegar su respuesta. Se lee el TOTAL. */
-function PegarIA({ comida, llevas, apuntar, cerrar }) {
+function PegarIA({ comida, llevas, favoritas, apuntar, cerrar }) {
   const [texto, setTexto] = useState("");
   const [copiado, setCopiado] = useState(false);
-  const leido = texto.trim() ? leerTotalDelDia(texto) : null;
-  const micros = texto.trim() ? leerMicros(texto) : null;
+  const hay = texto.trim();
+  const comidas = hay ? leerComidas(texto) : [];
+  const leido = hay && !comidas.length ? leerTotalDelDia(texto) : null;
+  const micros = hay && !comidas.length ? leerMicros(texto) : null;
   const copiar = async () => {
-    const msg = mensajeDelDia({ comida, llevas });
+    const msg = mensajeDelDia({ comida, llevas, favoritas });
     try { await navigator.clipboard.writeText(msg); setCopiado(true); } catch { setTexto(msg); }
   };
+  const anadir = () => {
+    if (comidas.length) comidas.forEach(c => apuntar({ ...c, desde: "ia" }));
+    else if (leido) apuntar({ nombre: "De mi IA", ...leido, desde: "ia", ...(micros ? { micros } : {}) });
+    setTexto(""); cerrar();
+  };
+  const totalComidas = comidas.reduce((t, c) => ({ kcal: t.kcal + c.kcal, prot: t.prot + c.prot }), { kcal: 0, prot: 0 });
   return (
     <Tarjeta data-pegar-ia style={{ padding: "14px 16px", marginTop: 10 }}>
       <div style={{ display: "flex", alignItems: "center", marginBottom: 6 }}>
@@ -120,21 +128,86 @@ function PegarIA({ comida, llevas, apuntar, cerrar }) {
         <button className="btn" onClick={cerrar} style={{ fontSize: 15, color: A.azul, fontWeight: 600, minHeight: 36 }}>Cerrar</button>
       </div>
       <div style={{ fontSize: 14, color: C.textDim, lineHeight: 1.5, marginBottom: 10 }}>
-        1. Copia el mensaje y pégalo en tu IA (Claude, ChatGPT). 2. Cuéntale lo que has comido. 3. Pega aquí su respuesta: se suma su línea TOTAL.
+        1. Copia el mensaje y pégalo en tu IA (Claude, ChatGPT){favoritas && favoritas.length ? "; ya lleva tus comidas guardadas" : ""}. 2. Cuéntale lo que has comido. 3. Pega aquí su respuesta: cada comida se apunta con sus macros y vitaminas.
       </div>
       <Boton tipo="suave" onClick={copiar} style={{ minHeight: 44, fontSize: 15 }}>{copiado ? "Copiado: pégalo en tu IA" : "Copiar mensaje para mi IA"}</Boton>
       <textarea value={texto} onChange={e => setTexto(e.target.value)} placeholder="Pega aquí la respuesta de tu IA"
         style={{ ...campo, minHeight: 90, resize: "vertical", marginTop: 10 }} />
-      {texto.trim() && (
+      {hay && comidas.length > 0 && (
+        <div data-leidas style={{ marginTop: 10 }}>
+          {comidas.map((c, i) => (
+            <div key={i} data-leida style={{ display: "flex", gap: 8, padding: "7px 0", borderTop: i ? "1px solid " + C.divider : "none", fontSize: 14 }}>
+              <span style={{ flex: 1, color: C.text, fontWeight: 600 }}>{c.nombre}</span>
+              <span style={{ color: C.textDim, fontVariantNumeric: "tabular-nums", flexShrink: 0 }}>{miles(c.kcal)} kcal · {c.prot} g{c.micros ? " · vit." : ""}</span>
+            </div>
+          ))}
+          <button className="btn" data-anadir-ia onClick={anadir} style={{ width: "100%", marginTop: 8, minHeight: 44, borderRadius: 999, background: A.azul, color: "#fff", fontSize: 15, fontWeight: 700 }}>
+            Añadir {comidas.length === 1 ? "1 comida" : comidas.length + " comidas"} · {miles(totalComidas.kcal)} kcal
+          </button>
+        </div>
+      )}
+      {hay && !comidas.length && (
         leido ? (
           <div style={{ display: "flex", alignItems: "center", gap: 10, marginTop: 10 }}>
             <div style={{ flex: 1, fontSize: 14, color: C.text }}>Leído: <b>{miles(leido.kcal)} kcal · {leido.prot} g proteína</b>{micros ? " · y vitaminas" : ""}</div>
-            <button className="btn" data-anadir-ia onClick={() => { apuntar({ nombre: "De mi IA", ...leido, desde: "ia", ...(micros ? { micros } : {}) }); setTexto(""); cerrar(); }}
+            <button className="btn" data-anadir-ia onClick={anadir}
               style={{ minHeight: 38, padding: "0 16px", borderRadius: 999, background: A.azul, color: "#fff", fontSize: 15, fontWeight: 700 }}>Añadir</button>
           </div>
-        ) : <div style={{ fontSize: 13, color: A.naranja, marginTop: 8 }}>No veo la línea TOTAL. Pídele a tu IA que termine con ella.</div>
+        ) : <div style={{ fontSize: 13, color: A.naranja, marginTop: 8 }}>No veo comidas ni la línea TOTAL. Pídele a tu IA que termine con las líneas COMIDA.</div>
       )}
     </Tarjeta>
+  );
+}
+
+const ETIQUETA_MICRO = { fibra: ["Fibra", "g"], hierro: ["Hierro", "mg"], calcio: ["Calcio", "mg"], vitD: ["Vit. D", "µg"], b12: ["B12", "µg"], omega3: ["Omega-3", "g"], sodio: ["Sodio", "mg"] };
+const num1 = (v) => (v < 10 ? String(Math.round(v * 10) / 10).replace(".", ",") : Math.round(v).toLocaleString("es-ES"));
+
+/** Una comida apuntada: al tocarla, sus macros y micros; la estrella la guarda en Mis comidas. */
+function ApunteFila({ a, primera, quitar, favorita, alternarFavorita }) {
+  const [abierta, setAbierta] = useState(false);
+  return (
+    <div data-apunte style={{ borderTop: primera ? "none" : "1px solid " + C.divider }}>
+      <div style={{ display: "flex", alignItems: "center", gap: 10, padding: "10px 8px 10px 16px", minHeight: 56 }}>
+        <button className="btn" data-abrir-apunte onClick={() => setAbierta(!abierta)} style={{ flex: 1, minWidth: 0, display: "flex", alignItems: "center", gap: 12, textAlign: "left" }}>
+          <IconoCaja nombre={a.desde === "ia" ? "portapapeles" : "plato"} tono={a.desde === "ia" ? "morado" : "verde"} tam={34} />
+          <div style={{ flex: 1, minWidth: 0 }}>
+            <div style={{ fontSize: 15, fontWeight: 600, color: C.text }}>{a.nombre || "Comida"}</div>
+            <div style={{ fontSize: 12.5, color: C.textDim, fontVariantNumeric: "tabular-nums" }}>{miles(a.kcal || 0)} kcal · {Math.round(a.prot || 0)} g proteína</div>
+          </div>
+          <Chevron abierto={abierta} />
+        </button>
+        <button className="btn" data-favorita aria-label={favorita ? "Quitar de Mis comidas" : "Guardar en Mis comidas"} onClick={() => alternarFavorita(a)}
+          style={{ color: favorita ? A.naranja : "#C7C7CC", minWidth: 36, minHeight: 36, display: "flex", alignItems: "center", justifyContent: "center" }}>
+          <svg width="20" height="20" viewBox="0 0 24 24" fill={favorita ? "currentColor" : "none"} stroke="currentColor" strokeWidth="1.9" strokeLinejoin="round" aria-hidden="true">
+            <path d="M12 3l2.7 5.6 6.1.9-4.4 4.3 1 6.1L12 17l-5.4 2.9 1-6.1L3.2 9.5l6.1-.9z" />
+          </svg>
+        </button>
+        {a.id && (
+          <button className="btn" aria-label={"Quitar " + (a.nombre || "comida")} onClick={() => quitar(a.id)}
+            style={{ color: "#C7C7CC", minWidth: 36, minHeight: 36, display: "flex", alignItems: "center", justifyContent: "center" }}>
+            <Icono nombre="mas" tam={20} grosor={2.2} style={{ transform: "rotate(45deg)" }} />
+          </button>
+        )}
+      </div>
+      {abierta && (
+        <div data-detalle-apunte style={{ padding: "0 16px 12px 62px" }}>
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 6, marginBottom: a.micros ? 8 : 0 }}>
+            {[["Kcal", a.kcal, ""], ["Prot.", a.prot, "g"], ["Hidr.", a.hc, "g"], ["Grasa", a.grasa, "g"]].map(([t, v, u]) => (
+              <div key={t} style={{ background: C.surfaceMuted, borderRadius: 10, padding: "6px 8px" }}>
+                <div style={{ fontSize: 11, color: C.textDim, fontWeight: 600 }}>{t}</div>
+                <div style={{ fontSize: 15, fontWeight: 700, color: C.text, fontVariantNumeric: "tabular-nums" }}>{Math.round(v || 0)}{u && <span style={{ fontSize: 11, color: C.textDim }}> {u}</span>}</div>
+              </div>
+            ))}
+          </div>
+          {a.micros && (
+            <div style={{ fontSize: 13, color: C.textDim, lineHeight: 1.6 }}>
+              {Object.keys(ETIQUETA_MICRO).filter(k => Number.isFinite(a.micros[k])).map(k => ETIQUETA_MICRO[k][0] + " " + num1(a.micros[k]) + " " + ETIQUETA_MICRO[k][1]).join(" · ")}
+              {a.microsRepartidos ? <div style={{ fontSize: 12, color: C.textFaint }}>Vitaminas repartidas del total del día.</div> : null}
+            </div>
+          )}
+        </div>
+      )}
+    </div>
   );
 }
 
@@ -189,6 +262,18 @@ export function NutricionScreen({ comida, esHoy, cuadre = null, apuntes = [], ap
   const quedan = m ? { kcal: m.kcal - llevas.kcal, prot: m.prot - llevas.prot } : null;
   const ideas = m ? recomendar({ habituales, quedan, yaComidas: apuntes.map(a => a.de) }) : [];
   const apuntarNuevo = (ap) => apuntar({ id: nuevoId(), ...ap });
+  const mismo = (x, y) => (x || "").trim().toLowerCase() === (y || "").trim().toLowerCase();
+  const esFavorita = (a) => habituales.some(h => mismo(h.nombre, a.nombre));
+  const alternarFavorita = (a) => {
+    if (esFavorita(a)) { setHabituales(habituales.filter(h => !mismo(h.nombre, a.nombre))); return; }
+    setHabituales([...habituales, { id: nuevoId(), nombre: a.nombre, kcal: Math.round(a.kcal || 0), prot: Math.round(a.prot || 0),
+      hc: Math.round(a.hc || 0), grasa: Math.round(a.grasa || 0), ...(a.micros ? { micros: a.micros } : {}), usos: 1 }]);
+  };
+  // Mis comidas: al usar una, cuenta (las mas usadas van primero en el mensaje para la IA).
+  const apuntarHabitual = (ap) => {
+    apuntarNuevo(ap);
+    if (ap.de) setHabituales(habituales.map(h => h.id === ap.de ? { ...h, usos: (h.usos || 0) + 1 } : h));
+  };
   const color = comida && comida.id === "comer" ? A.verde : A.naranja;
   const conCintura = medidas.filter(x => x && x.cintura != null);
   const ultCintura = conCintura[conCintura.length - 1];
@@ -234,19 +319,8 @@ export function NutricionScreen({ comida, esHoy, cuadre = null, apuntes = [], ap
       {apuntes.length > 0 && (
         <Tarjeta data-apuntes style={{ padding: 0, overflow: "hidden" }}>
           {apuntes.map((a, i) => (
-            <div key={a.id || i} data-apunte style={{ display: "flex", alignItems: "center", gap: 12, padding: "10px 12px 10px 16px", borderTop: i ? "1px solid " + C.divider : "none", minHeight: 56 }}>
-              <IconoCaja nombre={a.desde === "ia" ? "portapapeles" : "plato"} tono={a.desde === "ia" ? "morado" : "verde"} tam={34} />
-              <div style={{ flex: 1, minWidth: 0 }}>
-                <div style={{ fontSize: 15, fontWeight: 600, color: C.text }}>{a.nombre || "Comida"}</div>
-                <div style={{ fontSize: 12.5, color: C.textDim, fontVariantNumeric: "tabular-nums" }}>{miles(a.kcal || 0)} kcal · {Math.round(a.prot || 0)} g proteína</div>
-              </div>
-              {a.id && (
-                <button className="btn" aria-label={"Quitar " + (a.nombre || "comida")} onClick={() => quitar(a.id)}
-                  style={{ color: "#C7C7CC", minWidth: 36, minHeight: 36, display: "flex", alignItems: "center", justifyContent: "center" }}>
-                  <Icono nombre="mas" tam={20} grosor={2.2} style={{ transform: "rotate(45deg)" }} />
-                </button>
-              )}
-            </div>
+            <ApunteFila key={a.id || i} a={a} primera={i === 0} quitar={quitar}
+              favorita={esFavorita(a)} alternarFavorita={alternarFavorita} />
           ))}
         </Tarjeta>
       )}
@@ -258,7 +332,7 @@ export function NutricionScreen({ comida, esHoy, cuadre = null, apuntes = [], ap
             <Icono nombre="idea" tam={18} /> Te quedan {miles(quedan.kcal)} kcal · {Math.max(0, Math.round(quedan.prot))} g proteína
           </div>
           {ideas.map((o, i) => (
-            <button key={i} className="btn" data-idea onClick={() => o.comidas.forEach(c => apuntarNuevo({ nombre: c.nombre, kcal: c.kcal, prot: c.prot, hc: c.hc || 0, grasa: c.grasa || 0, desde: "mia", de: c.id }))}
+            <button key={i} className="btn" data-idea onClick={() => o.comidas.forEach(c => apuntarHabitual({ nombre: c.nombre, kcal: c.kcal, prot: c.prot, hc: c.hc || 0, grasa: c.grasa || 0, ...(c.micros ? { micros: c.micros } : {}), desde: "mia", de: c.id }))}
               style={{ display: "flex", alignItems: "center", gap: 10, width: "100%", textAlign: "left", background: "#fff", borderRadius: 14, padding: "10px 12px", marginTop: i ? 8 : 0 }}>
               <div style={{ flex: 1, minWidth: 0 }}>
                 <div style={{ fontSize: 15, fontWeight: 600, color: C.text }}>{o.comidas.map(c => c.nombre).join(" + ")}</div>
@@ -274,8 +348,8 @@ export function NutricionScreen({ comida, esHoy, cuadre = null, apuntes = [], ap
         <Boton tipo="color" data-boton-mias onClick={() => setPanel(panel === "mias" ? null : "mias")} style={{ flex: 1, minHeight: 46, fontSize: 15 }}>+ Mis comidas</Boton>
         <Boton tipo="suave" data-boton-ia onClick={() => setPanel(panel === "ia" ? null : "ia")} style={{ flex: 1, minHeight: 46, fontSize: 15 }}>Pegar de mi IA</Boton>
       </div>
-      {panel === "mias" && <MisComidas habituales={habituales} setHabituales={setHabituales} apuntar={apuntarNuevo} cerrar={() => setPanel(null)} />}
-      {panel === "ia" && comida && <PegarIA comida={comida} llevas={llevas} apuntar={apuntarNuevo} cerrar={() => setPanel(null)} />}
+      {panel === "mias" && <MisComidas habituales={habituales} setHabituales={setHabituales} apuntar={apuntarHabitual} cerrar={() => setPanel(null)} />}
+      {panel === "ia" && comida && <PegarIA comida={comida} llevas={llevas} favoritas={habituales} apuntar={apuntarNuevo} cerrar={() => setPanel(null)} />}
 
       {semana && (
         <>

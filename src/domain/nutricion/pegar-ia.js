@@ -46,7 +46,8 @@ function limpiar(s) {
     .trim();
 }
 
-const esTotal = (nombre) => /^(total|suma|en total)\b/i.test(nombre.trim());
+// Ni el total ni la linea de micros son una comida.
+const esTotal = (nombre) => /^(total|suma|en total|micros?)\b/i.test(nombre.trim());
 const tieneLetras = (s) => /[a-záéíóúñü]/i.test(s);
 
 /** Una celda que es solo un numero con su unidad: "12", "12 g", "70 kcal", "~5". */
@@ -174,10 +175,11 @@ export function totalLeido(lineas) {
  * configurar nada. Con `llevas` (lo ya apuntado hoy) la IA sabe de donde
  * parte y pide solo lo nuevo en la linea TOTAL.
  */
-export function mensajeDelDia({ comida, llevas }) {
+export function mensajeDelDia({ comida, llevas, favoritas = [] }) {
   const m = comida.macros;
   const esComer = comida.id === "comer";
   const yaHay = llevas && llevas.kcal > 0;
+  const favs = textoFavoritas(favoritas);
   return [
     "Ayúdame a cuadrar mi dieta de hoy (IIFYM: solo importa el total del día).",
     "Soy hombre, 86 kg, 1,83 m; preparo 7 km a 4:45/km. La proteína es lo que más importa.",
@@ -185,16 +187,28 @@ export function mensajeDelDia({ comida, llevas }) {
       ": " + m.kcal + " kcal · " + m.prot + " g proteína · " + m.hc + " g hidratos · " + m.grasa + " g grasa.",
     ...(yaHay ? ["Ya tengo apuntado " + Math.round(llevas.kcal) + " kcal · " + Math.round(llevas.prot) + " g proteína; " +
       "me quedan " + Math.max(0, Math.round(m.kcal - llevas.kcal)) + " kcal · " + Math.max(0, Math.round(m.prot - llevas.prot)) + " g proteína."] : []),
+    ...(favs.length ? ["", "Mis comidas guardadas (si te digo su nombre, usa estos números tal cual; y si me propones algo, mejor de aquí):", ...favs] : []),
     "",
     "Te diré o mandaré foto de lo que he comido" + (yaHay ? " que no tengo apuntado" : "") + ". Cada vez:",
-    "1. Estima sus kcal y macros (ración normal en España si no digo cantidad).",
+    "1. Estima sus kcal, macros y micros (ración normal en España si no digo cantidad).",
     "2. Si aún me falta alguna comida, propónme 2 opciones fáciles de casa, con cantidades, para cuadrar el día (proteína primero).",
     "3. Si me paso, sin dramas: dime cómo dejar ligera la siguiente comida.",
-    "Sé breve. Termina SIEMPRE con esta línea exacta, con lo que te he contado" + (yaHay ? " (sin lo que ya tenía apuntado)" : "") + ":",
+    "Sé breve. Al final, SIEMPRE, una línea por cada comida que te he contado" + (yaHay ? " (sin lo que ya tenía apuntado)" : "") + ", con este formato exacto:",
+    "COMIDA | nombre corto | kcal | proteína g | hidratos g | grasa g | fibra g | hierro mg | calcio mg | vitamina D µg | B12 µg | omega-3 g | sodio mg",
+    "Y debajo, el total de esas comidas:",
     "TOTAL DEL DÍA | kcal | proteína g | hidratos g | grasa g",
-    "Y justo debajo, esta otra, con tu estimación de lo mismo:",
     "MICROS DEL DÍA | fibra g | hierro mg | calcio mg | vitamina D µg | B12 µg | omega-3 g | sodio mg",
   ].join("\n");
+}
+
+/** Las favoritas para el mensaje: las mas usadas primero, como mucho 25. */
+export function textoFavoritas(favoritas, max = 25) {
+  const r1 = (x) => Math.round(x * 10) / 10;
+  return [...(favoritas || [])].filter(f => f && f.nombre && f.kcal > 0)
+    .sort((a, b) => (b.usos || 0) - (a.usos || 0))
+    .slice(0, max)
+    .map(f => "- " + f.nombre + ": " + Math.round(f.kcal) + " kcal · P " + Math.round(f.prot || 0) + " · HC " + Math.round(f.hc || 0) + " · G " + Math.round(f.grasa || 0) +
+      (f.micros ? " · " + MICROS.filter(k => Number.isFinite(f.micros[k])).map(k => k + " " + r1(f.micros[k])).join(", ") : ""));
 }
 
 // ─── LA RESPUESTA DE LA NOCHE ─────────────────────────────────────────────
@@ -308,4 +322,44 @@ export function leerMicros(texto) {
     if (Object.keys(out).length) return out;
   }
   return null;
+}
+
+/**
+ * Las comidas de lo que pega tu IA, cada una con sus macros y, si vienen,
+ * sus micros: [{ nombre, kcal, prot, hc, grasa, micros?, microsRepartidos? }].
+ *  1. Las lineas "COMIDA | nombre | kcal | P | HC | G | 7 micros" (el formato pedido).
+ *  2. Si no hay, las lineas con nombre y numeros que se entiendan (solo macros).
+ *  3. Si las comidas no traen micros y hay linea MICROS DEL DIA, se reparten
+ *     en proporcion a las kcal de cada comida (y se marcan como repartidos).
+ * Vacio si no hay ninguna comida legible (entonces vale el TOTAL).
+ */
+export function leerComidas(texto) {
+  const salida = [];
+  for (const bruta of String(texto || "").split(/\r?\n/)) {
+    const linea = limpiar(bruta);
+    if (!/^comida\s*[|:]/i.test(linea)) continue;
+    const celdas = linea.split("|").map(c => limpiar(c)).slice(1);
+    if (celdas.length < 3) continue;
+    const nombre = celdas[0].replace(/[\s:\-–—,]+$/, "").trim();
+    if (!nombre || !tieneLetras(nombre) || esTotal(nombre) || /^nombre/i.test(nombre)) continue;
+    const nums = celdas.slice(1).map(c => { const m = new RegExp(NUM).exec(c); return m ? aNum(m[1]) : null; });
+    if (nums[0] == null) continue;
+    const l = { nombre, kcal: Math.round(nums[0]), prot: Math.round(nums[1] || 0), hc: Math.round(nums[2] || 0), grasa: Math.round(nums[3] || 0) };
+    const mic = nums.slice(4, 4 + MICROS.length);
+    if (mic.filter(v => v != null).length >= 3) l.micros = Object.fromEntries(MICROS.map((k, j) => [k, mic[j]]).filter(([, v]) => v != null));
+    salida.push(l);
+  }
+  const comidas = salida.length ? salida
+    : leerRespuestaIA(texto).filter(l => !/^comida$/i.test(l.nombre)).map(({ nombre, kcal, prot, hc, grasa }) =>
+        ({ nombre, kcal: Math.round(kcal), prot: Math.round(prot), hc: Math.round(hc), grasa: Math.round(grasa) }));
+  const delDia = leerMicros(texto);
+  const total = comidas.reduce((s, c) => s + c.kcal, 0);
+  if (delDia && total > 0 && comidas.every(c => !c.micros)) {
+    for (const c of comidas) {
+      const f = c.kcal / total;
+      c.micros = Object.fromEntries(Object.entries(delDia).map(([k, v]) => [k, Math.round(v * f * 10) / 10]));
+      c.microsRepartidos = true;
+    }
+  }
+  return comidas;
 }

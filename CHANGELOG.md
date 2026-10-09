@@ -21,6 +21,14 @@ Todo cambio que se haga en la app se anota aquí. Sin excepciones.
 
 ## [Sin publicar]
 
+### Nutrición: cada comida de tu IA, con todos sus macros y vitaminas, y favoritas
+- Tu IA devuelve una línea por comida (COMIDA | nombre | kcal | P | HC | G | fibra, hierro, calcio, vitamina D, B12, omega-3 y sodio). Al pegarla ves la lista antes de añadir, y cada comida queda apuntada aparte en ese día. Si tu IA solo da el total de vitaminas del día, se reparten entre las comidas según sus kcal.
+- Al tocar una comida se despliegan sus macros y vitaminas.
+- La estrella guarda la comida en Mis comidas (con sus vitaminas); otra vez, la quita. Mis comidas cuentan cuántas veces las usas.
+- El mensaje para tu IA lleva tus comidas guardadas (las 25 más usadas) con sus números, para que las use tal cual cuando le digas su nombre y te proponga de ahí.
+- Arreglado: la línea de vitaminas ya no se leía como si fuera una comida.
+- Carpeta `iconos-referencia/` con los 7 dibujos actuales, para usarlos de referencia al generar los nuevos.
+
 ### Nutrición: la semana cuadra (IIFYM semanal)
 - Si un día te pasas, lo que sobra se reparte entre los días que quedan hasta el domingo (hoy incluido); si te quedas corto, suben. El objetivo de hoy ya viene ajustado, en Nutrición y en HOY, y se explica: "Esta semana llevas +400 kcal: hoy y los 3 días que quedan, 100 menos cada día".
 - Con cuidado: la proteína no se toca (sale de hidratos y grasa), como mucho ±300 kcal al día y nunca por debajo de 1.800, la víspera y el día de una prueba no se recortan, y menos de 150 kcal de saldo no mueve nada. Lo que no quepa se queda sin compensar, sin drama. Solo cuentan los días con algo apuntado.
