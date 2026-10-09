@@ -366,6 +366,7 @@ function Micros({ apuntes, semanaApuntes, esHoy }) {
 
 export function NutricionScreen({ comida, esHoy, cuadre = null, apuntes = [], apuntar, quitar, habituales = [], setHabituales, semana, semanaApuntes = [], medidas = [], irAProgreso, motor }) {
   const [panel, setPanel] = useState(null); // null | "mias" | "ia"
+  const [verIdeas, setVerIdeas] = useState(false);
   const m = comida && comida.macros;
   const llevas = sumaDelDia(apuntes);
   const quedan = m ? { kcal: m.kcal - llevas.kcal, prot: m.prot - llevas.prot } : null;
@@ -436,11 +437,14 @@ export function NutricionScreen({ comida, esHoy, cuadre = null, apuntes = [], ap
       {apuntes.length === 0 && <div style={{ fontSize: 14, color: C.textDim, margin: "0 4px 4px" }}>Nada apuntado todavía.</div>}
 
       {ideas.length > 0 && (
-        <Tarjeta data-ideas style={{ padding: "14px 16px", marginTop: 10, background: A.fondo.azul, boxShadow: "none" }}>
-          <div style={{ display: "flex", alignItems: "center", gap: 8, fontSize: 14, fontWeight: 700, color: A.azul, marginBottom: 8 }}>
-            <Icono nombre="idea" tam={18} /> Te quedan {miles(quedan.kcal)} kcal · {Math.max(0, Math.round(quedan.prot))} g proteína
-          </div>
-          {ideas.map((o, i) => (
+        <Tarjeta data-ideas style={{ padding: verIdeas ? "4px 12px 12px" : "0 12px", marginTop: 10, background: A.fondo.azul, boxShadow: "none" }}>
+          <button className="btn" data-ver-ideas onClick={() => setVerIdeas(!verIdeas)}
+            style={{ width: "100%", minHeight: 44, display: "flex", alignItems: "center", gap: 8, fontSize: 14, fontWeight: 700, color: A.azul, textAlign: "left" }}>
+            <Icono nombre="idea" tam={18} />
+            <span style={{ flex: 1 }}>Te quedan {miles(quedan.kcal)} kcal · {Math.max(0, Math.round(quedan.prot))} g · ideas</span>
+            <Chevron abierto={verIdeas} />
+          </button>
+          {verIdeas && ideas.map((o, i) => (
             <button key={i} className="btn" data-idea onClick={() => o.comidas.forEach(c => apuntarHabitual({ nombre: c.nombre, kcal: c.kcal, prot: c.prot, hc: c.hc || 0, grasa: c.grasa || 0, ...(c.micros ? { micros: c.micros } : {}), desde: "mia", de: c.id }))}
               style={{ display: "flex", alignItems: "center", gap: 10, width: "100%", textAlign: "left", background: "#fff", borderRadius: 14, padding: "10px 12px", marginTop: i ? 8 : 0 }}>
               <div style={{ flex: 1, minWidth: 0 }}>
