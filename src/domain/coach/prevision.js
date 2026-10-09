@@ -11,7 +11,8 @@
  * Puro: sin React, se prueba sin navegador.
  */
 
-import { OBJETIVO_7K, textoTiempo } from "../progreso/libreta.js";
+import { OBJETIVO_7K, equivalente, leerRitmo, textoTiempo } from "../progreso/libreta.js";
+import { suaveHabitual } from "../running/objetivo.js";
 import { tuContraElPlan } from "../progreso/plan-vs-real.js";
 
 const ritmoDe = (seg7k) => { const s = Math.round(seg7k / 7); return Math.floor(s / 60) + ":" + String(s % 60).padStart(2, "0"); };
@@ -90,4 +91,50 @@ export function hitos(dias, ritmoReal, hoyIso) {
       : d.prueba.decide ? "23:30 o menos mantiene la fecha" : d.tipo === "objetivo" ? "33:15 (4:45/km)" : "tu punto de partida";
     return { iso: d.isoDate, fecha: d.date, semana: d.weekN, nombre, estado, resultado: r || null, meta };
   });
+}
+
+/**
+ * ANTES DE LA PRIMERA PRUEBA: una estimacion por tus rodajes, orientativa.
+ * El rodaje suave va de 1:15 a 1:40 por km mas lento que el ritmo de 5 km;
+ * de ahi sale un rango del 3 km y del 7K. Si aun no hay rodajes suaves, se
+ * usa el ritmo de la prueba de partida (que es comodo, no a tope).
+ * null si ya hay alguna prueba (entonces manda la prevision) o no hay nada.
+ */
+export function estimacionPorRodajes({ dias, ritmoReal, hoyIso }) {
+  const rr = ritmoReal || {};
+  if (dias.some(d => d.prueba && d.prueba.distKm && rr[d.isoDate])) return null;
+  // Tus ultimos rodajes suaves, el de hoy incluido.
+  let suave = suaveHabitual({ dias, ritmoReal: rr, antesDe: hoyIso + "z", cuantos: 3 });
+  let fuente = "tus rodajes suaves";
+  if (!suave) {
+    const partida = dias.find(d => d.prueba && d.prueba.partida && rr[d.isoDate]);
+    const p = partida ? ritmoDeTexto(rr[partida.isoDate]) : null;
+    if (!p) return null;
+    suave = p; fuente = "tu prueba de partida";
+  }
+  const cinco = [suave - 100, suave - 75].map(r => r * 5);
+  const tres = cinco.map(t => equivalente(5, t, 3));
+  const siete = cinco.map(t => equivalente(5, t, 7));
+  return { suave, fuente, tres, siete, texto3: textoTiempo(tres[0]) + " y " + textoTiempo(tres[1]), texto7: textoTiempo(siete[0]) + " y " + textoTiempo(siete[1]) };
+}
+
+/** El ritmo de lo apuntado: "7:16/km", o "25:03 · 3,45 km" (tiempo y distancia). */
+function ritmoDeTexto(t) {
+  const r = leerRitmo(t);
+  if (r) return r;
+  const m = /(\d+):(\d{2})\D+(\d+(?:[.,]\d+)?)\s*km/i.exec(String(t || ""));
+  if (!m) return null;
+  const km = Number(m[3].replace(",", "."));
+  return km > 0 ? Math.round((Number(m[1]) * 60 + Number(m[2])) / km) : null;
+}
+
+/** Por que de la estimacion, en frases cortas. */
+export function porQueEstimacion(e) {
+  const r = (s) => textoTiempo(s);
+  return [
+    "Aún no hay pruebas: esto es una estimación orientativa, sale de " + e.fuente + " (" + r(e.suave) + "/km).",
+    "Un rodaje suave suele ir entre 1:15 y 1:40 por km más lento que tu ritmo de 5 km: tu 5 km de hoy estaría entre " + r(e.suave - 100) + " y " + r(e.suave - 75) + "/km.",
+    "Pasado a 3 km: entre " + e.texto3 + " (la línea del jueves es 14:30). Pasado a 7 km: entre " + e.texto7 + " (el objetivo es 33:15).",
+    "El 3 km lo confirma: en cuanto lo hagas, manda la prueba y esto desaparece.",
+  ];
 }

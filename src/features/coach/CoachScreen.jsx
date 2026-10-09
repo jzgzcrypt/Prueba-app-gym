@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { A, C, CAT, R, SP, TYPE } from "@/design/tokens";
 import { DATE_MAP, FECHA_INICIO, FLAT_DAYS, WEEKS, claveDia, todayLocalIso } from "@/domain/plan/calendario";
-import { hitos, porQue, prevision, riesgos, veredictoCoach } from "@/domain/coach/prevision";
+import { estimacionPorRodajes, hitos, porQue, porQueEstimacion, prevision, riesgos, veredictoCoach } from "@/domain/coach/prevision";
 import { parteDelCoach } from "@/domain/progreso/parte";
 import { ScreenHeader } from "@/features/ui/headers";
 import { GraficoPlan } from "@/features/ui/plan-vs-real";
@@ -138,6 +138,10 @@ export function CoachScreen({ jumpToDay, setWeekIdx, checked, workoutWeights, ri
   const parte = parteDelCoach({ dias: FLAT_DAYS, semanas: WEEKS, checked, cuelloChecks, painLog, ritmoReal,
     pesos: workoutWeights, reps: undefined, medidas: medidas || [], fechaInicio: FECHA_INICIO, hoyIso: todayIso });
   const prev = prevision(FLAT_DAYS, ritmoReal);
+  // Antes de la primera prueba, una estimacion orientativa por tus rodajes.
+  const partidaDia = FLAT_DAYS.find(d => d.prueba && d.prueba.partida);
+  const faltaPartida = !!partidaDia && !ritmoReal[claveDia(partidaDia)] && partidaDia.isoDate <= todayIso;
+  const estimacion = prev ? null : estimacionPorRodajes({ dias: FLAT_DAYS, ritmoReal, hoyIso: todayIso });
   const proxima = FLAT_DAYS.find(d => d.prueba && d.prueba.distKm && d.prueba.distKm !== 7 && d.isoDate >= todayIso && !ritmoReal[claveDia(d)]);
   const ver = veredictoCoach(prev, proxima);
   const listaRiesgos = riesgos({ alarmas: parte.alarmas, prev });
@@ -167,6 +171,11 @@ export function CoachScreen({ jumpToDay, setWeekIdx, checked, workoutWeights, ri
           </div>
           <Pastilla color={A.gris}>objetivo 33:15</Pastilla>
         </div>
+        {estimacion && (
+          <div data-estimacion style={{ marginTop: 8, padding: "10px 12px", borderRadius: 12, background: A.fondo.azul, fontSize: 14, color: C.text, lineHeight: 1.45 }}>
+            <b>Estimación por tus rodajes (orientativa).</b> El 3 km, entre {estimacion.texto3}: la línea es 14:30. Tu 7K hoy, entre {estimacion.texto7}.
+          </div>
+        )}
         <div style={{ marginTop: 6 }}><GraficoPlan ritmoReal={ritmoReal} /></div>
       </Tarjeta>
 
@@ -175,7 +184,7 @@ export function CoachScreen({ jumpToDay, setWeekIdx, checked, workoutWeights, ri
 
       {panel === "porque" && (
         <Tarjeta data-panel="porque" style={{ padding: "6px 16px" }}>
-          {porQue(prev).map((t, i) => (
+          {(estimacion ? porQueEstimacion(estimacion) : porQue(prev)).map((t, i) => (
             <div key={i} style={{ display: "flex", gap: 10, padding: "10px 0", borderTop: i ? "1px solid " + C.divider : "none" }}>
               <span style={{ width: 22, height: 22, borderRadius: 11, background: A.fondo.azul, color: A.azul, fontSize: 12, fontWeight: 700, flexShrink: 0,
                              display: "flex", alignItems: "center", justifyContent: "center" }}>{i + 1}</span>
@@ -224,8 +233,18 @@ export function CoachScreen({ jumpToDay, setWeekIdx, checked, workoutWeights, ri
 
       {panel === "hitos" && (
         <Tarjeta data-panel="hitos" style={{ padding: 0, overflow: "hidden" }}>
+          {(() => {
+            // La partida: si no esta apuntada, se pide (y se abre ese dia).
+            const partida = FLAT_DAYS.find(d => d.prueba && d.prueba.partida);
+            if (!partida || ritmoReal[claveDia(partida)] || partida.isoDate > todayIso) return null;
+            return (
+              <Fila primera icono="nota" tono="azul" titulo="Apunta tu partida" data-apunta-partida
+                sub={partida.date + " · tiempo y km, o el ritmo (ej. 25:03 · 3,45 km)"} derecha={<Chevron />}
+                onClick={() => jumpToDay(partida.weekN - 1, partida.dayIdx)} />
+            );
+          })()}
           {hitos(FLAT_DAYS, ritmoReal, todayIso).map((h, i) => (
-            <Fila key={h.iso} primera={i === 0} icono={h.estado === "hecho" ? "check" : "meta"} tono={h.estado === "hecho" ? "verde" : h.estado === "proximo" ? "rojo" : "gris"}
+            <Fila key={h.iso} primera={i === 0 && !faltaPartida} icono={h.estado === "hecho" ? "check" : "meta"} tono={h.estado === "hecho" ? "verde" : h.estado === "proximo" ? "rojo" : "gris"}
               titulo={h.nombre} sub={"S" + h.semana + " · " + h.fecha + " · " + h.meta}
               derecha={h.resultado ? <span style={{ fontSize: 14, fontWeight: 700, color: C.text }}>{h.resultado}</span>
                 : h.estado === "proximo" ? <Pastilla color={A.rojo}>próxima</Pastilla> : null} />

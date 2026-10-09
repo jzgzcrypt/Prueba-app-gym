@@ -49,3 +49,20 @@ test("hitos: hecho, el próximo y los futuros, con su meta", () => {
   assert.match(h[2].meta, /23:30/);
   assert.equal(h[3].nombre, "El día: 7 km");
 });
+
+test("antes de la primera prueba, una estimación por tus rodajes", async () => {
+  const { estimacionPorRodajes, porQueEstimacion } = await import("../src/domain/coach/prevision.js");
+  const suave = FLAT_DAYS.find(d => d.cat === "runZ2" && !d.intervalos && d.isoDate === "2026-10-06");
+  const e = estimacionPorRodajes({ dias: FLAT_DAYS, ritmoReal: { [suave.isoDate]: "6:40/km" }, hoyIso: "2026-10-09" });
+  assert.equal(e.suave, 400);
+  assert.equal(e.fuente, "tus rodajes suaves");
+  assert.ok(e.tres[0] > 860 && e.tres[0] < 885 && e.tres[1] > 935 && e.tres[1] < 955, JSON.stringify(e.tres));
+  assert.ok(e.siete[0] > 2130 && e.siete[1] < 2330, JSON.stringify(e.siete));
+  assert.match(porQueEstimacion(e)[2], /la línea del jueves es 14:30/);
+  const partida = FLAT_DAYS.find(d => d.prueba && d.prueba.partida);
+  const p = estimacionPorRodajes({ dias: FLAT_DAYS, ritmoReal: { [partida.isoDate]: "25:03 · 3,45 km" }, hoyIso: "2026-10-09" });
+  assert.equal(p.fuente, "tu prueba de partida");
+  assert.equal(p.suave, 436);
+  assert.equal(estimacionPorRodajes({ dias: FLAT_DAYS, ritmoReal: { [s4.isoDate]: "14:50", [suave.isoDate]: "6:40/km" }, hoyIso: "2026-10-16" }), null, "con prueba manda la previsión");
+  assert.equal(estimacionPorRodajes({ dias: FLAT_DAYS, ritmoReal: {}, hoyIso: "2026-10-09" }), null);
+});

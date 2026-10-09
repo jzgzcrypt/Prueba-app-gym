@@ -21,6 +21,10 @@ Todo cambio que se haga en la app se anota aquí. Sin excepciones.
 
 ## [Sin publicar]
 
+### Coach: estimación antes de la primera prueba
+- Mientras no hay ninguna prueba, Coach da un rango orientativo sacado de tu ritmo suave (o de la partida): el 3 km entre X e Y (la línea es 14:30) y tu 7K de hoy. "Por qué" explica la cuenta. Desaparece en cuanto haces el 3 km.
+- En Hitos, si la partida no está apuntada, "Apunta tu partida" abre ese día. Vale "25:03 · 3,45 km" o "7:16/km".
+
 ### Rumbo al 7K: pruebas guiadas
 - Arreglado: en las pruebas (3 km, 5 km) la voz comparaba con tu ritmo suave y te habría dicho "suelta, hoy es para recuperar". Ahora compara con el ritmo de la prueba: 4:50/km en el 3 km (14:30 en línea), 4:42 en el 5 km que decide la fecha, 4:45 el día del objetivo.
 - Antes de empezar, la estrategia ("En línea: 14:30. Sal a 4:55 el primer km, regular después y aprieta el último"), que la voz repite al arrancar. En el penúltimo km avisa "Último kilómetro: lo que quede"; al cruzar la distancia dice tu tiempo y si estás dentro de la línea. Pasada la prueba, la vuelta suave no se compara.
