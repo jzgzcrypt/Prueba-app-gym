@@ -121,3 +121,22 @@ export function completarHabituales(habituales, leidas) {
   });
   return { habituales: salida, completadas };
 }
+
+/**
+ * Cargar en Mis comidas lo que devuelve tu IA: las que ya tienes (mismo
+ * nombre) se actualizan con completarHabituales; las demas se anaden.
+ * `nuevoId` da el id de cada nueva. Devuelve { habituales, nuevas, actualizadas }.
+ */
+export function cargarHabituales(habituales, leidas, nuevoId) {
+  const norm = (s) => String(s || "").trim().toLowerCase().replace(/\s+/g, " ");
+  const tengo = new Set((habituales || []).map(h => norm(h.nombre)));
+  const { habituales: actualizadas, completadas } = completarHabituales(habituales, leidas);
+  const vistas = new Set();
+  const nuevas = (leidas || []).filter(l => {
+    const n = norm(l.nombre);
+    if (!n || tengo.has(n) || vistas.has(n)) return false;
+    vistas.add(n); return true;
+  }).map(l => ({ id: nuevoId(), nombre: l.nombre.trim(), kcal: l.kcal, prot: l.prot || 0, hc: l.hc || 0, grasa: l.grasa || 0,
+                 ...(l.micros ? { micros: l.micros } : {}) }));
+  return { habituales: [...actualizadas, ...nuevas], nuevas: nuevas.length, actualizadas: completadas };
+}

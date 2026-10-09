@@ -380,3 +380,20 @@ export function mensajeCompletar(habituales) {
     "COMIDA | nombre | kcal | proteína g | hidratos g | grasa g | fibra g | hierro mg | calcio mg | vitamina D µg | B12 µg | omega-3 g | sodio mg",
   ].join("\n");
 }
+
+/**
+ * El mensaje para cargar Mis comidas desde tu IA: le cuentas comidas que
+ * tomas a menudo y devuelve una linea COMIDA por cada una. Si alguna de las
+ * que ya tienes no tiene vitaminas, se le pide tambien, con el mismo nombre.
+ */
+export function mensajeCargar(habituales) {
+  const sin = (habituales || []).filter(h => h && h.nombre && !h.micros);
+  return [
+    "Voy a guardar en mi app comidas que tomo a menudo. Ahora te las digo (o te mando foto).",
+    "Para cada una, estima sus macros y micros (ración normal en España si no digo cantidad).",
+    ...(sin.length ? ["", "Además, complétame estas que ya tengo, con EXACTAMENTE el mismo nombre:", ...sin.map(h => "- " + h.nombre + (h.kcal ? " (~" + Math.round(h.kcal) + " kcal)" : ""))] : []),
+    "",
+    "Responde con una línea por comida, nombre corto, en este formato exacto:",
+    "COMIDA | nombre | kcal | proteína g | hidratos g | grasa g | fibra g | hierro mg | calcio mg | vitamina D µg | B12 µg | omega-3 g | sodio mg",
+  ].join("\n");
+}

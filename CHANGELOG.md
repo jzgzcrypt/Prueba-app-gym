@@ -24,7 +24,7 @@ Todo cambio que se haga en la app se anota aquí. Sin excepciones.
 ### Mis comidas, con todo
 - Cada comida enseña kcal, proteína, hidratos y grasa. La flecha despliega los macros en cuadros y sus vitaminas (o "sin vitaminas todavía").
 - Al editar y al crear una comida se cambian también hidratos y grasa.
-- "Completar vitaminas con mi IA": copia un mensaje con tus comidas que aún no tienen vitaminas, se lo pasas a tu IA y, al pegar su respuesta, cada una se rellena por su nombre con macros y vitaminas.
+- "Cargar comidas de mi IA": copias un mensaje, le cuentas a tu IA las comidas que tomas a menudo (o le mandas foto) y pegas su respuesta. Antes de guardar ves cada una marcada como "nueva" o "se completa": las nuevas se añaden a Mis comidas y las que ya tenías (mismo nombre) se rellenan con macros y vitaminas. El mensaje pide también completar las tuyas que aún no tienen vitaminas.
 
 ### Nutrición: cada comida de tu IA, con todos sus macros y vitaminas, y favoritas
 - Tu IA devuelve una línea por comida (COMIDA | nombre | kcal | P | HC | G | fibra, hierro, calcio, vitamina D, B12, omega-3 y sodio). Al pegarla ves la lista antes de añadir, y cada comida queda apuntada aparte en ese día. Si tu IA solo da el total de vitaminas del día, se reparten entre las comidas según sus kcal.

@@ -60,3 +60,18 @@ test("completar Mis comidas con lo que devuelve la IA, por nombre", async () => 
   assert.deepEqual([r.habituales[0].kcal, r.habituales[0].hc, r.habituales[0].micros.fibra, r.habituales[0].id], [780, 100, 5, "a"]);
   assert.equal(r.habituales[1], mias[1], "la que no viene no se toca");
 });
+
+test("cargar de la IA: las que tengo se actualizan y las nuevas se añaden, sin repetir", async () => {
+  const { cargarHabituales } = await import("../src/domain/nutricion/recomendar.js");
+  let n = 0;
+  const r = cargarHabituales([{ id: "a", nombre: "Queso batido", kcal: 118, prot: 20 }], [
+    { nombre: "queso batido", kcal: 120, prot: 20, hc: 9, grasa: 1, micros: { calcio: 230 } },
+    { nombre: "Tortilla francesa de 3 huevos", kcal: 280, prot: 20, hc: 1, grasa: 22, micros: { b12: 1.5 } },
+    { nombre: "Tortilla francesa de 3 huevos", kcal: 280, prot: 20, hc: 1, grasa: 22 },
+  ], () => "n" + (++n));
+  assert.equal(r.actualizadas, 1);
+  assert.equal(r.nuevas, 1);
+  assert.deepEqual(r.habituales.map(h => h.id), ["a", "n1"]);
+  assert.equal(r.habituales[0].micros.calcio, 230);
+  assert.equal(r.habituales[1].micros.b12, 1.5);
+});

@@ -2,9 +2,9 @@
 
 import { useState } from "react";
 import { A, C } from "@/design/tokens";
-import { leerComidas, leerMicros, leerTotalDelDia, mensajeCompletar, mensajeDelDia, sumaDelDia } from "@/domain/nutricion/pegar-ia";
+import { leerComidas, leerMicros, leerTotalDelDia, mensajeCargar, mensajeDelDia, sumaDelDia } from "@/domain/nutricion/pegar-ia";
 import { ORDEN_MICROS, REFERENCIAS, avisosMicros, estadoMicro, perfilDia, perfilSemana } from "@/domain/nutricion/micros";
-import { completarHabituales, recomendar } from "@/domain/nutricion/recomendar";
+import { cargarHabituales, recomendar } from "@/domain/nutricion/recomendar";
 import { ScreenHeader } from "@/features/ui/headers";
 import { Anillo, Boton, Chevron, Icono, IconoCaja, Seccion, Segmentado, Tarjeta } from "@/features/ui/aire";
 import { TuMotor } from "@/features/nutricion/TuMotor";
@@ -128,44 +128,64 @@ function MisComidas({ habituales, setHabituales, apuntar, cerrar }) {
           </div>
         </div>
       )}
-      {!editando && sinMicros > 0 && (
+      {!editando && (
         <div style={{ padding: "8px 16px 14px", borderTop: "1px solid " + C.divider }}>
           {!completar ? (
-            <button className="btn" data-completar onClick={() => setCompletar(true)} style={{ fontSize: 14.5, fontWeight: 600, color: A.azul, minHeight: 40, display: "flex", alignItems: "center", gap: 6 }}>
-              <Icono nombre="magia" tam={18} /> Completar vitaminas con mi IA ({sinMicros})
+            <button className="btn" data-cargar onClick={() => setCompletar(true)} style={{ fontSize: 14.5, fontWeight: 600, color: A.azul, minHeight: 40, display: "flex", alignItems: "center", gap: 6 }}>
+              <Icono nombre="magia" tam={18} /> Cargar comidas de mi IA{sinMicros ? " · y completar " + sinMicros : ""}
             </button>
-          ) : <CompletarConIA habituales={habituales} setHabituales={setHabituales} cerrar={() => setCompletar(false)} />}
+          ) : <CargarDeIA habituales={habituales} setHabituales={setHabituales} cerrar={() => setCompletar(false)} />}
         </div>
       )}
     </Tarjeta>
   );
 }
 
-/** Copiar las comidas sin vitaminas para tu IA y pegar su respuesta: se rellenan por nombre. */
-function CompletarConIA({ habituales, setHabituales, cerrar }) {
+/**
+ * Cargar Mis comidas desde tu IA: le cuentas lo que comes a menudo, pegas su
+ * respuesta y las comidas se guardan (las nuevas se añaden; las que ya
+ * tienes, mismo nombre, se completan con macros y vitaminas).
+ */
+function CargarDeIA({ habituales, setHabituales, cerrar }) {
   const [texto, setTexto] = useState("");
   const [copiado, setCopiado] = useState(false);
   const leidas = texto.trim() ? leerComidas(texto) : [];
-  const vista = completarHabituales(habituales, leidas);
+  const vista = cargarHabituales(habituales, leidas, nuevoId);
+  const hay = vista.nuevas + vista.actualizadas;
   const copiar = async () => {
-    const msg = mensajeCompletar(habituales);
+    const msg = mensajeCargar(habituales);
     try { await navigator.clipboard.writeText(msg); setCopiado(true); } catch { setTexto(msg); }
   };
+  const norm = (x) => String(x || "").trim().toLowerCase().replace(/\s+/g, " ");
+  const tengo = new Set(habituales.map(h => norm(h.nombre)));
   return (
-    <div data-completar-ia>
+    <div data-cargar-ia>
       <div style={{ fontSize: 14, color: C.textDim, lineHeight: 1.5, margin: "4px 0 8px" }}>
-        1. Copia el mensaje y pégalo en tu IA. 2. Pega aquí su respuesta: cada comida se rellena con sus macros y vitaminas.
+        1. Copia el mensaje y pégalo en tu IA. 2. Cuéntale las comidas que tomas a menudo (o mándale foto). 3. Pega aquí su respuesta: se guardan con sus macros y vitaminas.
       </div>
       <Boton tipo="suave" onClick={copiar} style={{ minHeight: 42, fontSize: 15 }}>{copiado ? "Copiado: pégalo en tu IA" : "Copiar mensaje para mi IA"}</Boton>
       <textarea value={texto} onChange={e => setTexto(e.target.value)} placeholder="Pega aquí la respuesta"
         style={{ ...campo, minHeight: 80, resize: "vertical", marginTop: 8 }} />
+      {leidas.length > 0 && (
+        <div data-cargar-lista style={{ marginTop: 8 }}>
+          {leidas.map((l, i) => (
+            <div key={i} style={{ display: "flex", gap: 8, padding: "6px 0", borderTop: i ? "1px solid " + C.divider : "none", fontSize: 14 }}>
+              <span style={{ flex: 1, color: C.text, fontWeight: 600 }}>{l.nombre}</span>
+              <span style={{ color: tengo.has(norm(l.nombre)) ? A.azul : A.verde, fontWeight: 600, flexShrink: 0 }}>{tengo.has(norm(l.nombre)) ? "se completa" : "nueva"}</span>
+              <span style={{ color: C.textDim, fontVariantNumeric: "tabular-nums", flexShrink: 0 }}>{miles(l.kcal)} kcal</span>
+            </div>
+          ))}
+        </div>
+      )}
       <div style={{ display: "flex", alignItems: "center", gap: 10, marginTop: 8 }}>
-        <div style={{ flex: 1, fontSize: 13.5, color: texto.trim() && !vista.completadas ? A.naranja : C.textDim }}>
-          {texto.trim() ? (vista.completadas ? vista.completadas + " de tus comidas se completan." : "No coincide ningún nombre con tus comidas.") : ""}
+        <div style={{ flex: 1, fontSize: 13.5, color: texto.trim() && !hay ? A.naranja : C.textDim }}>
+          {texto.trim() && !hay ? "No veo líneas COMIDA. Pídele a tu IA el formato del mensaje." : ""}
         </div>
         <button className="btn" onClick={cerrar} style={{ fontSize: 15, color: A.azul, fontWeight: 600, minHeight: 36 }}>Cancelar</button>
-        <button className="btn" data-guardar-completar disabled={!vista.completadas} onClick={() => { setHabituales(vista.habituales); cerrar(); }}
-          style={{ minHeight: 38, padding: "0 16px", borderRadius: 999, background: vista.completadas ? A.azul : "#E5E5EA", color: vista.completadas ? "#fff" : C.textDim, fontSize: 15, fontWeight: 700 }}>Guardar</button>
+        <button className="btn" data-guardar-cargar disabled={!hay} onClick={() => { setHabituales(vista.habituales); cerrar(); }}
+          style={{ minHeight: 38, padding: "0 16px", borderRadius: 999, background: hay ? A.azul : "#E5E5EA", color: hay ? "#fff" : C.textDim, fontSize: 15, fontWeight: 700 }}>
+          Guardar{hay ? " " + hay : ""}
+        </button>
       </div>
     </div>
   );
