@@ -25,7 +25,7 @@ import { GuerreroBlock, HabitBlock, ListBlock, MagiaBlock, MoveDayBlock, PainBlo
 import { progresoMagia } from "@/domain/habilidades/magia";
 import { WeekDots } from "@/features/ui/WeekDots";
 import { destinoDe, llegadasA } from "@/lib/estado/mover-sesion";
-import { dejarPasar, deshacer, diaHablado, esClave, nombreDe, pendienteDeRecolocar } from "@/domain/plan/reprogramar";
+import { dejarPasar, deshacer, diaHablado, esClave, nombreDe, pendienteDeRecolocar, proponerHueco } from "@/domain/plan/reprogramar";
 import { Recolocar } from "@/features/hoy/Recolocar";
 import { AhoraToca, Avanzo, FinPrueba, RepasoDia, SentirSemana } from "@/features/hoy/AhoraYAvance";
 import { ahoraToca } from "@/domain/hoy/ahora";
@@ -110,7 +110,8 @@ export function HoyScreen(props) {
     if (day.tipo !== "libre") {
       filasRepaso.push({ id: "sesion", titulo: day.tipo === "compromiso" ? "Tenis" : day.titulo,
         estado: checked[dayKey] ? "si" : movidaA === "pasa" ? "no" : null,
-        fija: movidaA && movidaA !== "pasa" && !checked[dayKey] ? "Movida" : null });
+        fija: movidaA && movidaA !== "pasa" && !checked[dayKey]
+          ? (/^\d{4}-/.test(movidaA) && FLAT_DAYS.find(d => d.isoDate === movidaA) ? "Movida al " + diaHablado(FLAT_DAYS.find(d => d.isoDate === movidaA)).slice(3) : "Movida") : null });
     }
     for (const [k, t] of [["m", "Cuello mañana"], ["t", "Cuello tarde"], ["n", "Cuello noche"]]) {
       filasRepaso.push({ id: "cuello-" + k, titulo: t, estado: cuelloChecks[dayKey + "-" + k] ? "si" : noHechasHoy.includes("cuello-" + k) ? "no" : null });
@@ -120,9 +121,16 @@ export function HoyScreen(props) {
     filasRepaso.push({ id: "comida", titulo: "Apuntar la comida", soloNo: true, estado: props.comidaDia ? "si" : noHechasHoy.includes("comida") ? "no" : null,
       fija: props.comidaDia ? "Apuntada" : null });
   }
+  // Una clave pasada que aun cabe en los proximos dias: se ofrece recolocarla.
+  const [recolocarPasado, setRecolocarPasado] = useState(null);
   const marcarRepaso = (id, v) => {
     if (id === "sesion") {
       if (checked[dayKey] && v !== "si") toggleCheck(dayKey);
+      if (v === "no" && esClave(day) && proponerHueco({ dia: day, dias: diasConPrueba, movidas: props.postponed, checked, hoyIso }).mejor) {
+        setRecolocarPasado(dayKey);
+        return;
+      }
+      setRecolocarPasado(null);
       if (!checked[dayKey] && v === "si") toggleCheck(dayKey);
       if (v === "no") props.setPostponed(dejarPasar(props.postponed, dayKey));
       else if (movidaA === "pasa") props.setPostponed(deshacer(props.postponed, dayKey));
@@ -228,6 +236,10 @@ export function HoyScreen(props) {
 
         {esPasado && filasRepaso.length > 0 && (
           <RepasoDia filas={filasRepaso} onMarcar={marcarRepaso} onTodoNo={repasoTodoNo} />
+        )}
+        {esPasado && recolocarPasado === dayKey && !movidaA && !checked[dayKey] && (
+          <Recolocar dias={diasConPrueba} key={"p" + dayKey} dia={day} movidas={props.postponed} setMovidas={props.setPostponed} checked={checked}
+            abiertaInicial titulo={"Faltó " + nombreDe(day) + ": aún cabe"} onCerrar={() => setRecolocarPasado(null)} />
         )}
 
         {missedImportantDay && (

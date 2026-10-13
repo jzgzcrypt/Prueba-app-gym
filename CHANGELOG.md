@@ -21,6 +21,9 @@ Todo cambio que se haga en la app se anota aquí. Sin excepciones.
 
 ## [Sin publicar]
 
+### Cambiado
+- En un día pasado, marcar **No** en una sesión clave (tirada, calidad o prueba) ya no la pierde sin más: si aún cabe en los próximos días, sale la propuesta de hueco con "Vale", otras opciones o "Dejarla pasar". La fila muestra "Movida al martes 13".
+
 ### Añadido
 - **Días pasados: "¿Qué hiciste este día?"**. Al abrir un día anterior sale arriba la sesión, el cuello (mañana, tarde, noche), pesarte y apuntar la comida, cada uno con "Hecho" o "No", más "Lo que falta, no lo hice" de un toque. La sesión marcada como No queda dejada pasar (y ya no te pregunta al día siguiente); el resto va a `noHechas`. En la fila de días, una sesión dejada pasar sale en gris.
 

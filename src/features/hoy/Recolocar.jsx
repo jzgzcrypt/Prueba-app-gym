@@ -14,7 +14,7 @@ import { Boton, Icono } from "@/features/ui/aire";
  * pregunta si lo hiciste (`onHecha`); de hoy, se deja pasar o se mueve con lo
  * que llegue en `children`. `onCerrar`: abierta desde "Ahora toca".
  */
-export function Recolocar({ dia, movidas, setMovidas, checked, ayer = false, abiertaInicial = false, dias = FLAT_DAYS, onCerrar, onHecha, children }) {
+export function Recolocar({ dia, movidas, setMovidas, checked, ayer = false, abiertaInicial = false, dias = FLAT_DAYS, titulo, onCerrar, onHecha, children }) {
   const [abierta, setAbiertaEstado] = useState(ayer || abiertaInicial);
   const setAbierta = (v) => { setAbiertaEstado(v); if (!v && onCerrar) onCerrar(); };
   const clave = esClave(dia);
@@ -40,8 +40,8 @@ export function Recolocar({ dia, movidas, setMovidas, checked, ayer = false, abi
     <div data-recolocar style={{ ...CARD, padding: "14px 16px", background: A.fondo.naranja, boxShadow: "none" }}>
       <div style={{ display: "flex", alignItems: "center", gap: 8, fontSize: 15, fontWeight: 700, color: C.text }}>
         <span style={{ color: A.naranja, display: "flex" }}><Icono nombre="calendario" tam={18} /></span>
-        {clase === "tenis" ? (ayer ? "¿Ayer fuiste al tenis?" : "Si hoy no vas al tenis")
-          : ayer ? (clave ? "Ayer faltó " + quien : "¿Ayer hiciste " + quien + "?") : "Si hoy no puedes con " + quien}
+        {titulo || (clase === "tenis" ? (ayer ? "¿Ayer fuiste al tenis?" : "Si hoy no vas al tenis")
+          : ayer ? (clave ? "Ayer faltó " + quien : "¿Ayer hiciste " + quien + "?") : "Si hoy no puedes con " + quien)}
       </div>
       <div data-motivo style={{ fontSize: 14.5, color: C.text, lineHeight: 1.45, marginTop: 6 }}>{motivo}</div>
       <div style={{ display: "flex", flexDirection: "column", gap: 8, marginTop: 10 }}>
