@@ -144,7 +144,7 @@ export function HoyScreen(props) {
         </div>
       </div>
 
-      <WeekDots day={day} checked={checked} onJumpDay={props.onJumpDay} />
+      <WeekDots day={day} checked={checked} onJumpDay={props.onJumpDay} aplicar={(d) => diaEnPrueba(d, prueba)} />
 
 
       {isToday && (

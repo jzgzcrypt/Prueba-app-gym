@@ -360,7 +360,11 @@ export default function App() {
   const saveNote = (key) => { setNotes(p => Object.assign({}, p, { [key]: noteInput[key] || "" })); setEditingNote(p => Object.assign({}, p, { [key]: false })); };
   const goDay = (d) => { setFlatIdx(Math.max(0, Math.min(FLAT_DAYS.length - 1, flatIdx + d))); setExpandedBlock("main"); };
   const goToday = () => { setFlatIdx(todayIdx); setScreen("hoy"); setExpandedBlock("main"); };
-  const jumpToDay = (wIdx, dIdx) => { setFlatIdx(FLAT_DAYS.findIndex(d => d.weekIdx === wIdx && d.dayIdx === dIdx)); setScreen("hoy"); };
+  const jumpToDay = (wIdx, dIdx) => {
+    const i = FLAT_DAYS.findIndex(d => d.weekIdx === wIdx && d.dayIdx === dIdx);
+    if (i < 0) return; // un dia que no existe no te manda al principio del plan
+    setFlatIdx(i); setScreen("hoy");
+  };
 
   // Las rutas del mapa ocupan ~4-6 KB cada una. Por si algun dia se juntan
   // muchas, se quitan las mas viejas antes de acercarse al limite de ~5 MB

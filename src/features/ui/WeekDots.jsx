@@ -8,12 +8,12 @@ import { DATE_MAP, WEEKS, claveDia, todayLocalIso } from "@/domain/plan/calendar
  * numero o un check si esta hecho. El dia que estas viendo, en azul. Toca
  * uno para ir a el.
  */
-export function WeekDots({ day, checked, onJumpDay }) {
+export function WeekDots({ day, checked, onJumpDay, aplicar = (d) => d }) {
   const week = WEEKS[day.weekIdx];
   const todayIso = todayLocalIso();
   return (
     <div data-semana-circulos style={{ display: "flex", justifyContent: "space-between", marginTop: 10 }}>
-      {week.days.map((d, i) => {
+      {week.days.map(aplicar).map((d, i) => {
         const done = !!checked[claveDia(d)];
         const isRest = d.tipo === "libre";
         const isCurrent = i === day.dayIdx;
@@ -22,7 +22,7 @@ export function WeekDots({ day, checked, onJumpDay }) {
         const fondo = isCurrent ? A.azul : done ? A.fondo.verde : "#fff";
         const color = isCurrent ? "#fff" : done ? A.verde : isRest ? C.textFaint : C.text;
         return (
-          <button key={i} className="btn" onClick={() => onJumpDay(week.weekIdx, i)} aria-label={d.dow + " " + d.date}
+          <button key={i} className="btn" onClick={() => onJumpDay(day.weekIdx, i)} aria-label={d.dow + " " + d.date}
             style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 5, padding: 0 }}>
             <span style={{ fontSize: 11, fontWeight: 600, color: isToday && !isCurrent ? A.azul : C.textDim }}>{d.dow.slice(0, 1)}</span>
             <span style={{ width: 40, height: 40, borderRadius: 20, background: fondo, color, display: "flex", alignItems: "center", justifyContent: "center",

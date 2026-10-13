@@ -21,6 +21,9 @@ Todo cambio que se haga en la app se anota aquí. Sin excepciones.
 
 ## [Sin publicar]
 
+### Arreglado
+- La fila de días de arriba de HOY no te llevaba al día que tocabas: se quedaba en hoy, y después las flechas saltaban al principio del plan. Ahora va al día que tocas. Durante la prueba, el sábado sale como descanso.
+
 ### "No la he hecho", a la vista
 - En "Ahora toca", debajo de Empezar: **"No la he hecho / hoy no puedo"**. Antes ese botón quedaba escondido en "Todo lo de hoy". Una sesión clave abre la propuesta de hueco; un suave o la fuerza se dejan pasar o se mueven a otro día.
 - Al día siguiente de un suave sin marcar: "¿Ayer hiciste el suave?" con "Sí, la hice" o "No, dejarla pasar". Antes solo preguntaba por las sesiones clave.
