@@ -26,6 +26,8 @@ import { GuerreroBlock, HabitBlock, ListBlock, MagiaBlock, MoveDayBlock, PainBlo
 import { progresoMagia } from "@/domain/habilidades/magia";
 import { WeekDots } from "@/features/ui/WeekDots";
 import { destinoDe, llegadasA } from "@/lib/estado/mover-sesion";
+import { deshacer, esClave, nombreDe, pendienteDeRecolocar } from "@/domain/plan/reprogramar";
+import { Recolocar } from "@/features/hoy/Recolocar";
 export function HoyScreen(props) {
   const { day, dayKey, isToday, flatIdx, goDay, goToday, isFuerzaDay, isRunDay, isCompromisoDay, mov,
           comida, vaciarDia, cosasEnElDia,
@@ -141,6 +143,24 @@ export function HoyScreen(props) {
         )}
 
         {props.resumenSemana && <TarjetaResumen resumen={props.resumenSemana} nombreBloque="Base 7K" />}
+
+        {/* ═══ AYER FALTÓ UNA SESIÓN CLAVE: dónde va ahora ═══ */}
+        {isToday && (() => {
+          const falta = pendienteDeRecolocar({ dias: FLAT_DAYS, movidas: props.postponed, checked, hoyIso: todayLocalIso() });
+          return falta ? <Recolocar key={falta.isoDate} dia={falta} movidas={props.postponed} setMovidas={props.setPostponed} checked={checked} ayer /> : null;
+        })()}
+
+        {/* Lo de este día se recolocó, cedió su sitio o se dejó pasar */}
+        {movidaA && !/^\d{4}-/.test(movidaA) && (
+          <div data-estado-movida style={{ ...CARD, padding: "12px 16px", display: "flex", alignItems: "center", gap: 10 }}>
+            <div style={{ flex: 1, fontSize: 14, color: C.text, lineHeight: 1.4 }}>
+              {movidaA === "pasa" ? "Dejaste pasar " + nombreDe(day) + ". Sin drama: se sigue."
+                : "Hoy " + nombreDe(day) + " deja su sitio a " + nombreDe(FLAT_DAYS.find(d => d.isoDate === movidaA.slice(5))) + "."}
+            </div>
+            <button className="btn" onClick={() => props.setPostponed(deshacer(props.postponed, movidaA === "pasa" ? dayKey : movidaA.slice(5)))}
+              style={{ fontSize: 14, fontWeight: 600, color: A.azul, minHeight: 36 }}>Deshacer</button>
+          </div>
+        )}
 
         {isToday && <TarjetaCalendario modo="hoy" />}
 
@@ -427,7 +447,10 @@ export function HoyScreen(props) {
         ))}
 
         {/* ═══ MOVER SESIÓN — colapsable, muy discreto ═══ */}
-        {(isRunDay || isFuerzaDay) && (
+        {esClave(day) && !movidaA && !checked[dayKey] && day.isoDate >= todayLocalIso() && (
+          <Recolocar key={"h" + dayKey} dia={day} movidas={props.postponed} setMovidas={props.setPostponed} checked={checked} />
+        )}
+        {(isRunDay || isFuerzaDay) && !esClave(day) && (!movidaA || /^\d{4}-/.test(movidaA)) && (
           <MoveDayBlock dayKey={dayKey} weekN={day.weekN} dayIdx={day.dayIdx} day={day}
             week={WEEKS[day.weekIdx]} postponed={props.postponed} setPostponed={props.setPostponed} />
         )}

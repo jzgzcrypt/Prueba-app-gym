@@ -21,6 +21,12 @@ Todo cambio que se haga en la app se anota aquí. Sin excepciones.
 
 ## [Sin publicar]
 
+### Me la he saltado: la app la recoloca
+- Si ayer faltó una sesión clave (la tirada, la calidad o una prueba), HOY lo dice sola y propone el mejor hueco con su motivo: "Ayer faltó la tirada. Mejor el martes 13: la tirada ocupa el sitio del suave, que se queda fuera". Un toque en Vale, otras opciones o Dejarla pasar.
+- En el día de una sesión clave, "¿No puedes hoy? Recolócala" hace lo mismo por adelantado.
+- Reglas de entrenador: lo importante puede quitarle el sitio a un suave, a la fuerza o a un día libre (nunca a otra clave ni al tenis); nunca dos días intensos seguidos; la tirada no va justo antes de un día intenso; como mucho 3 días después, aunque sea ya la semana siguiente. Si no cabe, mejor dejarla pasar. Un suave saltado no se recupera.
+- El día que cede su sitio lo dice ("Hoy el suave deja su sitio a la tirada") y todo se puede deshacer.
+
 ### Coach: estimación antes de la primera prueba
 - Mientras no hay ninguna prueba, Coach da un rango orientativo sacado de tu ritmo suave (o de la partida): el 3 km entre X e Y (la línea es 14:30) y tu 7K de hoy. "Por qué" explica la cuenta. Desaparece en cuanto haces el 3 km.
 - En Hitos, si la partida no está apuntada, "Apunta tu partida" abre ese día. Vale "25:03 · 3,45 km" o "7:16/km".
