@@ -54,6 +54,13 @@ test("ahora toca: por la mañana el cuello, por la tarde las zapatillas, de noch
   assert.equal(ahoraToca({ ...base, day: dia("2026-10-12"), hora: 17, cuello: { m: true }, pesado: true }).ahora.titulo, "Tenis a las 20:00");
 });
 
+test("ahora toca: lo que dices que no has hecho se salta y pasa a lo siguiente", () => {
+  const base = { day: dia("2026-10-13"), sesionHecha: false, cuello: {}, pesado: false, comidaApuntada: false };
+  assert.equal(ahoraToca({ ...base, hora: 8, noHechas: ["cuello-m"] }).ahora.id, "peso");
+  assert.equal(ahoraToca({ ...base, hora: 22, sesionHecha: true, cuello: { t: true }, noHechas: ["comida"] }).ahora.id, "cuello-n");
+  assert.equal(ahoraToca({ ...base, hora: 23, sesionHecha: true, cuello: { t: true }, noHechas: ["comida", "cuello-n"] }).ahora.id, "extras");
+});
+
 test("al acabar: toca decidir; quedarse alarga la prueba y volver la apaga", async () => {
   const { tocaDecidir, quedarse, volverAlPlan, diaDePrueba } = await import("../src/domain/hoy/prueba.js");
   assert.equal(tocaDecidir(PRUEBA_DEFECTO, "2026-10-25"), false);

@@ -22,9 +22,10 @@
  * @param {{m:boolean,t:boolean,n:boolean}} p.cuello
  * @param {boolean} p.pesado       peso de hoy apuntado
  * @param {boolean} p.comidaApuntada
+ * @param {string[]} [p.noHechas] ids que dijiste que hoy no haces: se saltan
  * @returns {{ ahora: {id,titulo,sub,accion}, despues: {id,titulo}[] }}
  */
-export function ahoraToca({ hora, day, sesionHecha, cuello, pesado, comidaApuntada }) {
+export function ahoraToca({ hora, day, sesionHecha, cuello, pesado, comidaApuntada, noHechas = [] }) {
   const hay = day && day.tipo !== "libre";
   const esTenis = day && day.tipo === "compromiso";
   const lista = [];
@@ -42,8 +43,10 @@ export function ahoraToca({ hora, day, sesionHecha, cuello, pesado, comidaApunta
   if (!c.t && hora >= 12) lista.push({ id: "cuello-t", titulo: "Cuello", sub: algunCuello ? "Después de la ducha. 2 minutos." : "Después de la ducha. Con esta ya cuenta el día.", accion: "cuello" });
   if (hora >= 21 && !comidaApuntada) lista.push({ id: "comida", titulo: "Apunta lo que has comido", sub: "Mis comidas o pegar de tu IA. 1 minuto.", accion: "comida" });
   if (hora >= 21 && !c.n) lista.push({ id: "cuello-n", titulo: "Cuello", sub: "Al acostarte. 2 minutos.", accion: "cuello" });
-  if (!lista.length) {
+  const no = new Set(noHechas);
+  const pendientes = lista.filter(x => !no.has(x.id));
+  if (!pendientes.length) {
     return { ahora: { id: "extras", titulo: "Todo lo de hoy, hecho", sub: "Si te apetece: 5 min de magia en el sofá en vez del móvil, o la respiración de guerrero.", accion: "extras" }, despues: [] };
   }
-  return { ahora: lista[0], despues: lista.slice(1, 3).map(({ id, titulo }) => ({ id, titulo })) };
+  return { ahora: pendientes[0], despues: pendientes.slice(1, 3).map(({ id, titulo }) => ({ id, titulo })) };
 }

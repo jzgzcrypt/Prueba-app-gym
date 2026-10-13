@@ -92,6 +92,7 @@ export default function App() {
   const [comidasLog, setComidasLog] = useState({}); // { dayKey: [apunte] }
   const [comidasHabituales, setComidasHabituales] = useState(null);
   const [pruebaSemana, setPruebaSemana] = useState(undefined); // la prueba de 2 semanas; undefined = la de por defecto, null = quitada
+  const [noHechas, setNoHechas] = useState({}); // { iso: [id] } lo de "Ahora toca" que dijiste que no hiciste
   const [semanaSentir, setSemanaSentir] = useState({}); // { lunesIso: { nota 1-5, frase } } // [{id,nombre,kcal,prot,hc,grasa}]; null = las del menu de casa
   // Los cambios de alimento sobre el menu del dia: "hoy no hay salmon, hay
   // merluza". { dayKey: { "cena:salmon": "merluza" } }
@@ -187,6 +188,7 @@ export default function App() {
           if (d.comidasHabituales) setComidasHabituales(d.comidasHabituales);
           if (d.pruebaSemana !== undefined) setPruebaSemana(d.pruebaSemana);
           if (d.semanaSentir) setSemanaSentir(d.semanaSentir);
+          if (d.noHechas) setNoHechas(d.noHechas);
           if (d.cambiosMenu) setCambiosMenu(d.cambiosMenu);
           if (d.menuEditado) setMenuEditado(d.menuEditado);
           if (d.compraMarcada) setCompraMarcada(d.compraMarcada);
@@ -263,7 +265,7 @@ export default function App() {
       checked, cuelloChecks, notes, youtubeLinks, customExercises, painLog,
       flaggedExercises, pausedRanges, workoutProgress, magiaProgress, magiaRepaso, magiaLog,
       guerreroLog, workoutWeights, workoutReps, medidas, ritmoReal, ritmoTramos, gps, pesosDiarios, sensaciones, postponed, phaseAdjustNote,
-      currentWeekOverride, weeklyLog, comidasLog, comidasHabituales, pruebaSemana, semanaSentir, cambiosMenu, menuEditado, compraMarcada, comidasFuera,
+      currentWeekOverride, weeklyLog, comidasLog, comidasHabituales, pruebaSemana, semanaSentir, noHechas, cambiosMenu, menuEditado, compraMarcada, comidasFuera,
       bloquesHistorial, ultimoBackup, cuelloFaseManual, onboardingVisto,
     };
     // Se deja a mano el ultimo estado conocido para poder guardarlo de golpe
@@ -274,7 +276,7 @@ export default function App() {
   }, [checked, cuelloChecks, notes, youtubeLinks, customExercises, painLog,
       flaggedExercises, pausedRanges, workoutProgress, magiaProgress, magiaRepaso, magiaLog,
       guerreroLog, workoutWeights, workoutReps, medidas, ritmoReal, ritmoTramos, gps, pesosDiarios, sensaciones, postponed, phaseAdjustNote,
-      currentWeekOverride, weeklyLog, comidasLog, comidasHabituales, pruebaSemana, semanaSentir, cambiosMenu, menuEditado, compraMarcada, comidasFuera,
+      currentWeekOverride, weeklyLog, comidasLog, comidasHabituales, pruebaSemana, semanaSentir, noHechas, cambiosMenu, menuEditado, compraMarcada, comidasFuera,
       bloquesHistorial, ultimoBackup, cuelloFaseManual, onboardingVisto, storageReady]);
 
   // La prueba de 2 semanas es una capa encima del plan: el plan no se toca.
@@ -385,7 +387,7 @@ export default function App() {
       checked, cuelloChecks, notes, youtubeLinks, customExercises, painLog,
       flaggedExercises, pausedRanges, workoutProgress, workoutWeights, workoutReps, medidas,
       ritmoReal, ritmoTramos, gps, pesosDiarios, sensaciones, postponed, phaseAdjustNote, currentWeekOverride, weeklyLog,
-      comidasLog, comidasHabituales, pruebaSemana, semanaSentir, cambiosMenu, menuEditado, compraMarcada, comidasFuera, magiaProgress, magiaRepaso,
+      comidasLog, comidasHabituales, pruebaSemana, semanaSentir, noHechas, cambiosMenu, menuEditado, compraMarcada, comidasFuera, magiaProgress, magiaRepaso,
       magiaLog, guerreroLog, bloquesHistorial,
     };
     const nombre = "programa-7k-backup-" + todayLocalIso() + ".json";
@@ -441,6 +443,7 @@ export default function App() {
         if (data.comidasHabituales) setComidasHabituales(data.comidasHabituales);
         if (data.pruebaSemana !== undefined) setPruebaSemana(data.pruebaSemana);
         if (data.semanaSentir) setSemanaSentir(data.semanaSentir);
+        if (data.noHechas) setNoHechas(data.noHechas);
         if (data.cambiosMenu) setCambiosMenu(data.cambiosMenu);
         if (data.menuEditado) setMenuEditado(data.menuEditado);
         if (data.compraMarcada) setCompraMarcada(data.compraMarcada);
@@ -630,6 +633,7 @@ export default function App() {
             guerreroLog={guerreroLog} setGuerreroLog={setGuerreroLog}
             bloquesHistorial={bloquesHistorial}
             prueba={prueba} setPrueba={setPruebaSemana} semanaSentir={semanaSentir} setSemanaSentir={setSemanaSentir}
+            noHechas={noHechas} setNoHechas={setNoHechas}
             pesoHoy={pesosDiarios[todayLocalIso()] ?? null} guardarPeso={guardarPeso}
             comidaApuntada={(comidasLog[todayLocalIso()] || []).length > 0}
             onStartWorkoutDe={(k) => setActiveWorkout(k)}

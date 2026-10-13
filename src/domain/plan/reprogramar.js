@@ -107,6 +107,9 @@ export function proponerHueco({ dia, dias, movidas, checked, hoyIso }) {
   }
   opciones.sort((a, b) => a.coste - b.coste);
   const limpias = opciones.map(({ dia: d, cede, texto }) => ({ dia: d, cede, texto }));
+  if (!limpias.length && clase === "fuerza") {
+    return { opciones: [], mejor: null, motivo: "La fuerza solo va a un día libre y no hay ninguno en los próximos 3 días. Mejor dejarla pasar." };
+  }
   if (!limpias.length) {
     return { opciones: [], mejor: null, motivo: "No cabe en los próximos 3 días sin pisar otra sesión clave o juntar dos días duros. Mejor dejarla pasar que cargar la semana." };
   }
@@ -141,15 +144,15 @@ export function deshacer(movidas, origen) {
 }
 
 /**
- * La sesion de ayer que falta por resolver (una clave o un suave), o null:
- * no hecha, ni movida, ni dejada pasar. Para un suave solo se pregunta si lo
- * hiciste; si no, se deja pasar.
+ * La sesion de ayer que falta por resolver, o null: no hecha, ni movida, ni
+ * dejada pasar. Una clave se recoloca; de las demas (suave, fuerza, tenis) se
+ * pregunta si la hiciste y, si no, se deja pasar o se mueve.
  */
 export function pendienteDeRecolocar({ dias, movidas, checked, hoyIso }) {
   const i = dias.findIndex(d => d.isoDate === hoyIso);
   if (i <= 0) return null;
   const ayer = dias[i - 1];
   const m = movidas || {};
-  if ((esClave(ayer) || claseDe(ayer) === "suave") && !(checked || {})[ayer.isoDate] && !m[ayer.isoDate]) return ayer;
+  if (["prueba", "calidad", "tirada", "suave", "fuerza", "tenis"].includes(claseDe(ayer)) && !(checked || {})[ayer.isoDate] && !m[ayer.isoDate]) return ayer;
   return null;
 }

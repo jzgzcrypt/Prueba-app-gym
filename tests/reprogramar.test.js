@@ -57,6 +57,19 @@ test("lo pendiente: la clave de ayer sin hacer ni resolver", () => {
   assert.equal(pendienteDeRecolocar({ dias: FLAT_DAYS, movidas: { "2026-10-11": "pasa" }, checked: {}, hoyIso: "2026-10-12" }), null);
   assert.equal(pendienteDeRecolocar({ dias: FLAT_DAYS, movidas: {}, checked: {}, hoyIso: "2026-10-14" }).isoDate, "2026-10-13", "un suave sin marcar tambien pregunta");
   assert.equal(pendienteDeRecolocar({ dias: FLAT_DAYS, movidas: { "2026-10-13": "pasa" }, checked: {}, hoyIso: "2026-10-14" }), null);
-  assert.equal(pendienteDeRecolocar({ dias: FLAT_DAYS, movidas: {}, checked: {}, hoyIso: "2026-10-13" }), null, "ayer fue tenis");
-  assert.equal(pendienteDeRecolocar({ dias: FLAT_DAYS, movidas: {}, checked: {}, hoyIso: "2026-10-15" }), null, "ayer fue fuerza");
+  assert.equal(pendienteDeRecolocar({ dias: FLAT_DAYS, movidas: {}, checked: {}, hoyIso: "2026-10-13" }).isoDate, "2026-10-12", "ayer fue tenis");
+  assert.equal(pendienteDeRecolocar({ dias: FLAT_DAYS, movidas: {}, checked: {}, hoyIso: "2026-10-15" }).isoDate, "2026-10-14", "ayer fue fuerza");
+  const libre = FLAT_DAYS.map(d => d.isoDate === "2026-10-14" ? { ...d, tipo: "libre" } : d);
+  assert.equal(pendienteDeRecolocar({ dias: libre, movidas: {}, checked: {}, hoyIso: "2026-10-15" }), null, "un dia libre no pregunta");
+});
+
+test("la fuerza sin dia libre cerca: se deja pasar, con su motivo; en la prueba el sabado libre la recoge", async () => {
+  const { diaEnPrueba, PRUEBA_DEFECTO } = await import("../src/domain/hoy/prueba.js");
+  const mie = dia("2026-10-14");
+  const r = proponerHueco({ dia: mie, dias: FLAT_DAYS, movidas: {}, checked: {}, hoyIso: "2026-10-14" });
+  assert.equal(r.mejor, null);
+  assert.match(r.motivo, /^La fuerza solo va a un día libre/);
+  const enPrueba = FLAT_DAYS.map(d => diaEnPrueba(d, PRUEBA_DEFECTO));
+  const r2 = proponerHueco({ dia: mie, dias: enPrueba, movidas: {}, checked: {}, hoyIso: "2026-10-14" });
+  assert.equal(r2.mejor.dia.isoDate, "2026-10-17");
 });

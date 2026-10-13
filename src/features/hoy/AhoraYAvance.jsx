@@ -12,8 +12,14 @@ import { Boton, Icono, IconoCaja, Tarjeta } from "@/features/ui/aire";
 const ICONO = { "cuello-m": ["cuello", "azul"], "cuello-t": ["cuello", "azul"], "cuello-n": ["cuello", "azul"],
   peso: ["peso", "azul"], sesion: ["correr", "rojo"], comida: ["plato", "verde"], extras: ["magia", "morado"] };
 
-/** "Ahora toca": lo de esta hora, grande, con un toque para hacerlo. */
-export function AhoraToca({ plan, onSesion, onNoHecha, onCuello, onPeso, onComida, onExtras, tituloSesion }) {
+const NOMBRE_NO = { "cuello-m": "cuello de la mañana", "cuello-t": "cuello de la tarde", "cuello-n": "cuello de la noche", peso: "pesarte", comida: "apuntar la comida" };
+
+/**
+ * "Ahora toca": lo de esta hora, grande, con un toque para hacerlo. Debajo,
+ * "No la he hecho" para cualquier cosa: se apunta sin reproche y pasa a lo
+ * siguiente. `saltadas`: los ids de hoy que dijiste que no, con Deshacer.
+ */
+export function AhoraToca({ plan, onSesion, onNoHecha, saltadas = [], onDeshacerNo, esTenis, onCuello, onPeso, onComida, onExtras, tituloSesion }) {
   const [kg, setKg] = useState("");
   const a = plan.ahora;
   const [ic, tono] = ICONO[a.id] || ["meta", "gris"];
@@ -42,10 +48,16 @@ export function AhoraToca({ plan, onSesion, onNoHecha, onCuello, onPeso, onComid
           </div>
         )}
       </div>
-      {a.accion === "sesion" && tituloSesion && onNoHecha && (
-        <button className="btn" data-no-hecha onClick={onNoHecha} style={{ width: "100%", marginTop: 6, minHeight: 36, fontSize: 14, fontWeight: 600, color: C.textDim }}>
-          No la he hecho / hoy no puedo
+      {a.accion !== "extras" && onNoHecha && (a.accion !== "sesion" || tituloSesion || esTenis) && (
+        <button className="btn" data-no-hecha onClick={() => onNoHecha(a)} style={{ width: "100%", marginTop: 6, minHeight: 36, fontSize: 14, fontWeight: 600, color: C.textDim }}>
+          {a.accion === "sesion" ? (esTenis ? "No he ido / hoy no voy" : "No la he hecho / hoy no puedo") : "No la he hecho"}
         </button>
+      )}
+      {saltadas.length > 0 && (
+        <div data-saltadas style={{ display: "flex", alignItems: "center", gap: 8, fontSize: 13, color: C.textDim, marginTop: 8 }}>
+          <span style={{ flex: 1 }}>Hoy no: {saltadas.map(id => NOMBRE_NO[id] || id).join(", ")}. Sin drama.</span>
+          <button className="btn" data-deshacer-no onClick={() => onDeshacerNo(saltadas[saltadas.length - 1])} style={{ fontSize: 13, fontWeight: 600, color: A.azul, minHeight: 30 }}>Deshacer</button>
+        </div>
       )}
       {plan.despues.length > 0 && (
         <div style={{ fontSize: 13, color: C.textDim, marginTop: 10 }}>

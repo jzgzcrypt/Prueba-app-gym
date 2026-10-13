@@ -25,6 +25,11 @@ Todo cambio que se haga en la app se anota aquí. Sin excepciones.
 - En "Ahora toca", debajo de Empezar: **"No la he hecho / hoy no puedo"**. Antes ese botón quedaba escondido en "Todo lo de hoy". Una sesión clave abre la propuesta de hueco; un suave o la fuerza se dejan pasar o se mueven a otro día.
 - Al día siguiente de un suave sin marcar: "¿Ayer hiciste el suave?" con "Sí, la hice" o "No, dejarla pasar". Antes solo preguntaba por las sesiones clave.
 - Lo que hayas resuelto (dejada pasar o movida) sale arriba con "Deshacer", y "Ahora toca" pasa a lo siguiente.
+- **Para todas las actividades**: cuello (mañana, tarde, noche), pesarte y apuntar la comida también tienen "No la he hecho". Se apunta sin reproche, "Ahora toca" pasa a lo siguiente y queda "Hoy no: … · Deshacer". El tenis tiene "No he ido / hoy no voy".
+- La fuerza y el tenis también preguntan al día siguiente si los hiciste. La fuerza saltada busca un día libre (durante la prueba, el sábado); si no hay, se deja pasar con su motivo.
+
+### Datos
+- Nuevo campo opcional `noHechas` (`{ iso: [id] }`): lo de "Ahora toca" que dijiste que no hiciste. Se guarda, se exporta y se importa. No necesita migración.
 
 ### HOY reformulado y la prueba de 2 semanas (12-25 de octubre)
 - HOY abre con **"Ahora toca"**: una sola cosa según la hora y lo que ya has hecho (por la mañana cuello y peso; desde las 16:00 "Zapatillas puestas" y la sesión; después de la ducha el cuello; de noche apuntar la comida y el cuello del final). Un toque para hacerla y "Después:" con las dos siguientes. Si se te pasó algo, sin reproche: sigue lo siguiente.

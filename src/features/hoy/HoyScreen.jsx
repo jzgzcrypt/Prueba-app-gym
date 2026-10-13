@@ -63,8 +63,13 @@ export function HoyScreen(props) {
   // Hecha, o resuelta (movida o dejada pasar) sin que haya llegado otra por hacer.
   const resueltaFuera = !!destinoDe(props.postponed, dayKey) && !llegadasA(props.postponed, dayKey).some(o => !checked[o]);
   const [noHecha, setNoHecha] = useState(false);
+  const noHechasHoy = (props.noHechas || {})[dayKey] || [];
+  const marcarNo = (id, si) => props.setNoHechas && props.setNoHechas(p => {
+    const l = (p[dayKey] || []).filter(x => x !== id);
+    return { ...p, [dayKey]: si ? [...l, id] : l };
+  });
   const planAhora = ahoraToca({ hora: new Date().getHours(), day, sesionHecha: day.tipo === "libre" || !!checked[dayKey] || resueltaFuera,
-    cuello: { m: cM, t: cT, n: cN }, pesado: props.pesoHoy != null, comidaApuntada: !!props.comidaApuntada });
+    cuello: { m: cM, t: cT, n: cN }, pesado: props.pesoHoy != null, comidaApuntada: !!props.comidaApuntada, noHechas: noHechasHoy });
   const lunesHoy = lunesDe(hoyIso);
   const cumplidos = diasCumplidos(diasConPrueba, lunesHoy, hoyIso, { checked, cuelloChecks });
   const sentir = props.semanaSentir || {};
@@ -146,7 +151,7 @@ export function HoyScreen(props) {
         <div style={{ display: "flex", flexDirection: "column", gap: 12, marginTop: 14 }}>
           {(() => {
             const falta = pendienteDeRecolocar({ dias: diasConPrueba, movidas: props.postponed, checked, hoyIso });
-            return falta ? <Recolocar key={falta.isoDate} dia={falta} movidas={props.postponed} setMovidas={props.setPostponed} checked={checked} ayer
+            return falta ? <Recolocar dias={diasConPrueba} key={falta.isoDate} dia={falta} movidas={props.postponed} setMovidas={props.setPostponed} checked={checked} ayer
               onHecha={esClave(falta) ? null : () => toggleCheck(claveDia(falta))} /> : null;
           })()}
           {prueba && tocaDecidir(prueba, hoyIso) && (
@@ -156,11 +161,12 @@ export function HoyScreen(props) {
           <AhoraToca plan={planAhora} tituloSesion={day.tipo !== "libre" && day.tipo !== "compromiso" ? day.titulo : ""}
             onSesion={day.tipo === "compromiso" ? () => toggleCheck(dayKey) : onStartWorkout}
             onCuello={(k) => toggleCuello(k)} onPeso={props.guardarPeso} onComida={props.irANutricion} onExtras={() => abrirTodo("magia")}
-            onNoHecha={!movidaA && day.tipo !== "compromiso" ? () => setNoHecha(true) : null} />
+            esTenis={day.tipo === "compromiso"} saltadas={noHechasHoy} onDeshacerNo={(id) => marcarNo(id, false)}
+            onNoHecha={(a) => a.accion === "sesion" ? (!movidaA && setNoHecha(true)) : marcarNo(a.id, true)} />
           {noHecha && !movidaA && !checked[dayKey] && (
-            <Recolocar key={"nh" + dayKey} dia={day} movidas={props.postponed} setMovidas={props.setPostponed} checked={checked}
+            <Recolocar dias={diasConPrueba} key={"nh" + dayKey} dia={day} movidas={props.postponed} setMovidas={props.setPostponed} checked={checked}
               abiertaInicial onCerrar={() => setNoHecha(false)}>
-              {!esClave(day) && (
+              {!esClave(day) && day.tipo !== "compromiso" && (
                 <MoveDayBlock dayKey={dayKey} weekN={day.weekN} dayIdx={day.dayIdx} day={day}
                   week={WEEKS[day.weekIdx]} postponed={props.postponed} setPostponed={props.setPostponed} />
               )}
@@ -531,7 +537,7 @@ export function HoyScreen(props) {
 
         {/* ═══ MOVER SESIÓN — colapsable, muy discreto ═══ */}
         {esClave(day) && !movidaA && !checked[dayKey] && day.isoDate >= todayLocalIso() && (
-          <Recolocar key={"h" + dayKey} dia={day} movidas={props.postponed} setMovidas={props.setPostponed} checked={checked} />
+          <Recolocar dias={diasConPrueba} key={"h" + dayKey} dia={day} movidas={props.postponed} setMovidas={props.setPostponed} checked={checked} />
         )}
         {(isRunDay || isFuerzaDay) && !esClave(day) && (!movidaA || /^\d{4}-/.test(movidaA)) && (
           <MoveDayBlock dayKey={dayKey} weekN={day.weekN} dayIdx={day.dayIdx} day={day}

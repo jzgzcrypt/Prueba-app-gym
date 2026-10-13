@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { A, C, CARD } from "@/design/tokens";
 import { FLAT_DAYS, todayLocalIso } from "@/domain/plan/calendario";
-import { dejarPasar, diaHablado, esClave, nombreDe, proponerHueco, recolocar } from "@/domain/plan/reprogramar";
+import { claseDe, dejarPasar, diaHablado, esClave, nombreDe, proponerHueco, recolocar } from "@/domain/plan/reprogramar";
 import { Boton, Icono } from "@/features/ui/aire";
 
 /**
@@ -14,15 +14,20 @@ import { Boton, Icono } from "@/features/ui/aire";
  * pregunta si lo hiciste (`onHecha`); de hoy, se deja pasar o se mueve con lo
  * que llegue en `children`. `onCerrar`: abierta desde "Ahora toca".
  */
-export function Recolocar({ dia, movidas, setMovidas, checked, ayer = false, abiertaInicial = false, onCerrar, onHecha, children }) {
+export function Recolocar({ dia, movidas, setMovidas, checked, ayer = false, abiertaInicial = false, dias = FLAT_DAYS, onCerrar, onHecha, children }) {
   const [abierta, setAbiertaEstado] = useState(ayer || abiertaInicial);
   const setAbierta = (v) => { setAbiertaEstado(v); if (!v && onCerrar) onCerrar(); };
   const clave = esClave(dia);
   const [otras, setOtras] = useState(false);
   const hoyIso = todayLocalIso();
-  const p = proponerHueco({ dia, dias: FLAT_DAYS, movidas, checked, hoyIso });
+  const p = proponerHueco({ dia, dias, movidas, checked, hoyIso });
   const aplicar = (o) => setMovidas(recolocar(movidas, dia.isoDate, o.dia.isoDate, o.cede));
   const quien = nombreDe(dia);
+  const clase = claseDe(dia);
+  const motivo = clase === "tenis" ? (onHecha ? "Si no, se deja pasar. Sin drama." : "El tenis no se recoloca: se deja pasar y sigues.")
+    : !onHecha ? p.motivo
+    : clase === "suave" ? "Si no, se deja pasar: un suave no se recupera."
+    : "Si no: " + p.motivo.charAt(0).toLowerCase() + p.motivo.slice(1);
 
   if (!abierta) {
     return (
@@ -35,9 +40,10 @@ export function Recolocar({ dia, movidas, setMovidas, checked, ayer = false, abi
     <div data-recolocar style={{ ...CARD, padding: "14px 16px", background: A.fondo.naranja, boxShadow: "none" }}>
       <div style={{ display: "flex", alignItems: "center", gap: 8, fontSize: 15, fontWeight: 700, color: C.text }}>
         <span style={{ color: A.naranja, display: "flex" }}><Icono nombre="calendario" tam={18} /></span>
-        {ayer ? (clave ? "Ayer faltó " + quien : "¿Ayer hiciste " + quien + "?") : "Si hoy no puedes con " + quien}
+        {clase === "tenis" ? (ayer ? "¿Ayer fuiste al tenis?" : "Si hoy no vas al tenis")
+          : ayer ? (clave ? "Ayer faltó " + quien : "¿Ayer hiciste " + quien + "?") : "Si hoy no puedes con " + quien}
       </div>
-      <div data-motivo style={{ fontSize: 14.5, color: C.text, lineHeight: 1.45, marginTop: 6 }}>{onHecha ? "Si no, se deja pasar: un suave no se recupera." : p.motivo}</div>
+      <div data-motivo style={{ fontSize: 14.5, color: C.text, lineHeight: 1.45, marginTop: 6 }}>{motivo}</div>
       <div style={{ display: "flex", flexDirection: "column", gap: 8, marginTop: 10 }}>
         {onHecha && (
           <Boton tipo="color" color={A.verde} data-la-hice onClick={onHecha} style={{ minHeight: 44, fontSize: 15 }}>Sí, la hice</Boton>
