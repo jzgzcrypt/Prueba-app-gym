@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { A, C, CARD, TAP_MIN, TYPE } from "@/design/tokens";
-import { Boton, Etiqueta, Icono, IconoCaja, Tarjeta } from "@/features/ui/aire";
+import { Boton, Chevron, Etiqueta, Icono, IconoCaja, Tarjeta } from "@/features/ui/aire";
 import { AvisoRitmo, LecturaSesion, queApuntar } from "@/features/ui/lectura";
 import { MapaRuta } from "@/features/ui/MapaRuta";
 import { textoTiempo } from "@/domain/running/gps";
@@ -16,7 +16,6 @@ function trazaCompletaDe(dayKey) {
 }
 import { TarjetaResumen } from "@/features/ui/resumen";
 import { TarjetaCalendario } from "@/features/ui/calendario";
-import { LineaPlan } from "@/features/ui/plan-vs-real";
 import { nombreMes } from "@/domain/progreso/informe";
 import { parseSeries } from "@/domain/fuerza/series";
 import { BLOQUE, FECHA_FIN, FECHA_INICIO, FLAT_DAYS, WEEKS, claveDia, todayLocalIso } from "@/domain/plan/calendario";
@@ -28,6 +27,9 @@ import { WeekDots } from "@/features/ui/WeekDots";
 import { destinoDe, llegadasA } from "@/lib/estado/mover-sesion";
 import { deshacer, esClave, nombreDe, pendienteDeRecolocar } from "@/domain/plan/reprogramar";
 import { Recolocar } from "@/features/hoy/Recolocar";
+import { AhoraToca, Avanzo, FinPrueba, SentirSemana } from "@/features/hoy/AhoraYAvance";
+import { ahoraToca } from "@/domain/hoy/ahora";
+import { compararPrueba, diaDePrueba, diaEnPrueba, diasCumplidos, lunesDe, quedarse, tocaDecidir, volverAlPlan } from "@/domain/hoy/prueba";
 export function HoyScreen(props) {
   const { day, dayKey, isToday, flatIdx, goDay, goToday, isFuerzaDay, isRunDay, isCompromisoDay, mov,
           comida, vaciarDia, cosasEnElDia,
@@ -50,6 +52,27 @@ export function HoyScreen(props) {
   const doneSeries = isFuerzaDay && workoutProgress ? Object.values(workoutProgress).reduce((s,v) => s+(v||0),0) : 0;
 
   const [confirmandoVaciar, setConfirmandoVaciar] = useState(false);
+
+  // ── Lo de arriba de HOY: ahora toca, ¿avanzo?, la pregunta del domingo y el
+  //    final de la prueba. Lo demas, plegado en "Todo lo de hoy". ──
+  const [verTodo, setVerTodo] = useState(false);
+  const plegado = isToday && !verTodo;
+  const hoyIso = todayLocalIso();
+  const prueba = props.prueba || null;
+  const diasConPrueba = FLAT_DAYS.map(d => diaEnPrueba(d, prueba));
+  const planAhora = ahoraToca({ hora: new Date().getHours(), day, sesionHecha: day.tipo === "libre" || !!checked[dayKey],
+    cuello: { m: cM, t: cT, n: cN }, pesado: props.pesoHoy != null, comidaApuntada: !!props.comidaApuntada });
+  const lunesHoy = lunesDe(hoyIso);
+  const cumplidos = diasCumplidos(diasConPrueba, lunesHoy, hoyIso, { checked, cuelloChecks });
+  const sentir = props.semanaSentir || {};
+  const dowHoy = new Date(hoyIso + "T12:00:00").getDay();
+  const lunesPregunta = dowHoy === 0 ? lunesHoy : dowHoy === 1 ? lunesDe(FLAT_DAYS[Math.max(0, flatIdx - 1)].isoDate) : null;
+  const preguntaSentir = isToday && lunesPregunta && !sentir[lunesPregunta] && lunesPregunta >= FECHA_INICIO;
+  const ultimoSentir = Object.keys(sentir).sort().pop();
+  const enLaPrueba = !!diaDePrueba(prueba, day.isoDate) || (prueba && prueba.decidido && !prueba.volver && day.isoDate >= prueba.desde);
+  const [verExtrasEstado, setVerExtras] = useState(false);
+  const verExtras = verExtrasEstado || expandedBlock === "magia" || expandedBlock === "guerrero";
+  const abrirTodo = (bloque) => { setVerTodo(true); if (bloque) { setVerExtras(true); setExpandedBlock(bloque); } };
 
   // Lo movido: si esta sesión se fue a otro día no se enseña aquí, y si han
   // venido sesiones de otros días se enseñan. Esta segunda mitad es justo la
@@ -102,12 +125,38 @@ export function HoyScreen(props) {
 
       <WeekDots day={day} checked={checked} onJumpDay={props.onJumpDay} />
 
+
       {isToday && (
-        <div style={{ marginTop: 12 }}>
-          <LineaPlan ritmoReal={props.ritmoReal} onVer={props.onVerProgreso} />
+        <div style={{ display: "flex", flexDirection: "column", gap: 12, marginTop: 14 }}>
+          {(() => {
+            const falta = pendienteDeRecolocar({ dias: FLAT_DAYS, movidas: props.postponed, checked, hoyIso });
+            return falta ? <Recolocar key={falta.isoDate} dia={falta} movidas={props.postponed} setMovidas={props.setPostponed} checked={checked} ayer /> : null;
+          })()}
+          {prueba && tocaDecidir(prueba, hoyIso) && (
+            <FinPrueba comp={compararPrueba({ dias: FLAT_DAYS, prueba, checked, cuelloChecks, sentir, aplicar: (d) => diaEnPrueba(d, prueba) })}
+              onQuedarme={() => props.setPrueba(quedarse(prueba, FECHA_FIN))} onVolver={() => props.setPrueba(volverAlPlan(prueba))} />
+          )}
+          <AhoraToca plan={planAhora} tituloSesion={day.tipo !== "libre" && day.tipo !== "compromiso" ? day.titulo : ""}
+            onSesion={day.tipo === "compromiso" ? () => toggleCheck(dayKey) : onStartWorkout}
+            onCuello={(k) => toggleCuello(k)} onPeso={props.guardarPeso} onComida={props.irANutricion} onExtras={() => abrirTodo("magia")} />
+          {preguntaSentir && (
+            <SentirSemana onGuardar={(v) => props.setSemanaSentir(p => ({ ...p, [lunesPregunta]: v }))} />
+          )}
+          {props.parte && (
+            <Avanzo objetivos={props.parte.objetivos} cumplidos={cumplidos} onVer={props.onVerProgreso}
+              sentir={ultimoSentir ? sentir[ultimoSentir].nota : null}
+              prueba={diaDePrueba(prueba, hoyIso) ? { dia: diaDePrueba(prueba, hoyIso) } : null} />
+          )}
+          <button className="btn" data-todo-hoy onClick={() => setVerTodo(!verTodo)}
+            style={{ ...CARD, display: "flex", alignItems: "center", gap: 10, padding: "0 16px", minHeight: 50, width: "100%", textAlign: "left" }}>
+            <span style={{ flex: 1, fontSize: 15, fontWeight: 600, color: C.text }}>Todo lo de hoy</span>
+            <span style={{ fontSize: 13, color: C.textDim }}>sesión, hábitos, notas</span>
+            <Chevron abierto={verTodo} />
+          </button>
         </div>
       )}
 
+      {!plegado && (
       <div style={{ display: "flex", flexDirection: "column", gap: 12, marginTop: 14 }}>
 
         {missedImportantDay && (
@@ -143,12 +192,6 @@ export function HoyScreen(props) {
         )}
 
         {props.resumenSemana && <TarjetaResumen resumen={props.resumenSemana} nombreBloque="Base 7K" />}
-
-        {/* ═══ AYER FALTÓ UNA SESIÓN CLAVE: dónde va ahora ═══ */}
-        {isToday && (() => {
-          const falta = pendienteDeRecolocar({ dias: FLAT_DAYS, movidas: props.postponed, checked, hoyIso: todayLocalIso() });
-          return falta ? <Recolocar key={falta.isoDate} dia={falta} movidas={props.postponed} setMovidas={props.setPostponed} checked={checked} ayer /> : null;
-        })()}
 
         {/* Lo de este día se recolocó, cedió su sitio o se dejó pasar */}
         {movidaA && !/^\d{4}-/.test(movidaA) && (
@@ -208,6 +251,16 @@ export function HoyScreen(props) {
               </div>
 
               {!mainDone && <Boton tipo="color" color={A.rojo} onClick={onStartWorkout}>Empezar sesión</Boton>}
+              {day.pierna10 && (
+                <div data-pierna10 style={{ marginTop: 12, padding: "10px 12px", borderRadius: 12, background: C.surfaceMuted }}>
+                  <div style={{ fontSize: 13, fontWeight: 700, color: C.text, marginBottom: 4 }}>Y al volver, 10 min de pierna (el sábado es libre)</div>
+                  {day.pierna10.map(e => (
+                    <div key={e.nombre} style={{ display: "flex", justifyContent: "space-between", fontSize: 13.5, color: C.text, padding: "2px 0" }}>
+                      <span>{e.nombre}</span><span style={{ color: C.textDim }}>{e.series}</span>
+                    </div>
+                  ))}
+                </div>
+              )}
               {mainDone && (
                 <div style={{ minHeight: 50, borderRadius: 999, background: A.fondo.verde, display: "flex", alignItems: "center", justifyContent: "center", gap: 8,
                               fontSize: 15, fontWeight: 700, color: C.ok }}><Icono nombre="check" tam={18} grosor={2.6} /> Sesión completada</div>
@@ -368,10 +421,19 @@ export function HoyScreen(props) {
           {comida && (
             <Cuadro icono="plato" tono="verde" v={comida.macros.kcal.toLocaleString("es-ES")} l={"kcal · " + comida.etiqueta.toLowerCase()} onClick={props.irANutricion} />
           )}
-          <Cuadro icono="cuello" tono="azul" v={cuelloTotal + "/3"} l="cuello" hecho={cuelloTotal === 3} activo={expandedBlock === "cuello"} onClick={() => habito("cuello")} />
-          <Cuadro icono="magia" tono="morado" v={magiaProg.dominados + "/" + magiaProg.total} l="magia" activo={expandedBlock === "magia"} onClick={() => habito("magia")} />
-          <Cuadro icono="escudo" tono="gris" v={props.guerreroLog[dayKey] ? "✓" : "—"} l="guerrero" hecho={!!props.guerreroLog[dayKey]} activo={expandedBlock === "guerrero"} onClick={() => habito("guerrero")} />
+          <Cuadro icono="cuello" tono="azul" v={cuelloTotal + "/3"} l={enLaPrueba ? "cuello · con 1 cuenta" : "cuello"} hecho={enLaPrueba ? cuelloTotal >= 1 : cuelloTotal === 3} activo={expandedBlock === "cuello"} onClick={() => habito("cuello")} />
+          {(!enLaPrueba || verExtras) && (
+            <>
+              <Cuadro icono="magia" tono="morado" v={magiaProg.dominados + "/" + magiaProg.total} l={enLaPrueba ? "magia · extra" : "magia"} activo={expandedBlock === "magia"} onClick={() => habito("magia")} />
+              <Cuadro icono="escudo" tono="gris" v={props.guerreroLog[dayKey] ? "✓" : "—"} l={enLaPrueba ? "guerrero · extra" : "guerrero"} hecho={!!props.guerreroLog[dayKey]} activo={expandedBlock === "guerrero"} onClick={() => habito("guerrero")} />
+            </>
+          )}
         </div>
+        {enLaPrueba && !verExtras && (
+          <button className="btn" data-extras onClick={() => setVerExtras(true)} style={{ fontSize: 14, fontWeight: 600, color: A.azul, padding: "2px 4px", textAlign: "left" }}>
+            Extras: magia y guerrero, si te apetece ›
+          </button>
+        )}
         {expandedBlock === "cuello" && (
           <HabitBlock cuelloEj={cuelloEj} cM={cM} cT={cT} cN={cN} cuelloTotal={cuelloTotal} toggleCuello={toggleCuello}
             expandedBlock={expandedBlock} toggleBlock={toggleBlock} />
@@ -441,7 +503,10 @@ export function HoyScreen(props) {
               </div>
             )}
             <div style={{ marginTop: 12 }}>
-              <Boton tipo={checked[claveDia(origen)] ? "color" : "oscuro"} color={A.verde} onClick={() => toggleCheck(claveDia(origen))}>{checked[claveDia(origen)] ? "Hecha ✓" : "Marcar como hecha"}</Boton>
+              {!checked[claveDia(origen)] && props.onStartWorkoutDe && (origen.tipo === "run" || origen.tipo === "test" || origen.tipo === "objetivo" || origen.tipo === "fuerza") && (
+                <Boton tipo="color" color={A.rojo} onClick={() => props.onStartWorkoutDe(claveDia(origen))} style={{ marginBottom: 8 }}>Empezar</Boton>
+              )}
+              <Boton tipo={checked[claveDia(origen)] ? "color" : "suave"} color={A.verde} onClick={() => toggleCheck(claveDia(origen))}>{checked[claveDia(origen)] ? "Hecha ✓" : "Ya la hice fuera de la app"}</Boton>
             </div>
           </div>
         ))}
@@ -478,6 +543,7 @@ export function HoyScreen(props) {
         </ListBlock>
 
       </div>
+      )}
     </div>
   );
 }

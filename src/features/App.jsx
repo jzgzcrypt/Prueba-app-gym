@@ -32,6 +32,8 @@ import { textoParaLibreta } from "@/domain/running/gps";
 import { ajustePorPeso, objetivosConAjuste, tendenciaPeso } from "@/domain/nutricion/adaptativo";
 import { habitualesIniciales } from "@/domain/nutricion/recomendar";
 import { suaveHabitual } from "@/domain/running/objetivo";
+import { diaEnPrueba, pruebaDe } from "@/domain/hoy/prueba";
+import { parteDelCoach } from "@/domain/progreso/parte";
 import { aplicarCuadre, cuadreSemana, textoCuadre } from "@/domain/nutricion/cuadre-semana";
 import { semanaNutricion } from "@/domain/nutricion/pegar-ia";
 import { simplificar, sinSimplificar } from "@/domain/running/ruta";
@@ -88,7 +90,9 @@ export default function App() {
   // "casa" lleva gramos, "cantina" lleva racion, "rapida" no lleva nada porque
   // ya es una comida entera. Ver src/domain/nutricion/iifym.js.
   const [comidasLog, setComidasLog] = useState({}); // { dayKey: [apunte] }
-  const [comidasHabituales, setComidasHabituales] = useState(null); // [{id,nombre,kcal,prot,hc,grasa}]; null = las del menu de casa
+  const [comidasHabituales, setComidasHabituales] = useState(null);
+  const [pruebaSemana, setPruebaSemana] = useState(undefined); // la prueba de 2 semanas; undefined = la de por defecto, null = quitada
+  const [semanaSentir, setSemanaSentir] = useState({}); // { lunesIso: { nota 1-5, frase } } // [{id,nombre,kcal,prot,hc,grasa}]; null = las del menu de casa
   // Los cambios de alimento sobre el menu del dia: "hoy no hay salmon, hay
   // merluza". { dayKey: { "cena:salmon": "merluza" } }
   const [cambiosMenu, setCambiosMenu] = useState({});
@@ -181,6 +185,8 @@ export default function App() {
           if (d.weeklyLog) setWeeklyLog(d.weeklyLog);
           if (d.comidasLog) setComidasLog(d.comidasLog);
           if (d.comidasHabituales) setComidasHabituales(d.comidasHabituales);
+          if (d.pruebaSemana !== undefined) setPruebaSemana(d.pruebaSemana);
+          if (d.semanaSentir) setSemanaSentir(d.semanaSentir);
           if (d.cambiosMenu) setCambiosMenu(d.cambiosMenu);
           if (d.menuEditado) setMenuEditado(d.menuEditado);
           if (d.compraMarcada) setCompraMarcada(d.compraMarcada);
@@ -257,7 +263,7 @@ export default function App() {
       checked, cuelloChecks, notes, youtubeLinks, customExercises, painLog,
       flaggedExercises, pausedRanges, workoutProgress, magiaProgress, magiaRepaso, magiaLog,
       guerreroLog, workoutWeights, workoutReps, medidas, ritmoReal, ritmoTramos, gps, pesosDiarios, sensaciones, postponed, phaseAdjustNote,
-      currentWeekOverride, weeklyLog, comidasLog, comidasHabituales, cambiosMenu, menuEditado, compraMarcada, comidasFuera,
+      currentWeekOverride, weeklyLog, comidasLog, comidasHabituales, pruebaSemana, semanaSentir, cambiosMenu, menuEditado, compraMarcada, comidasFuera,
       bloquesHistorial, ultimoBackup, cuelloFaseManual, onboardingVisto,
     };
     // Se deja a mano el ultimo estado conocido para poder guardarlo de golpe
@@ -268,10 +274,12 @@ export default function App() {
   }, [checked, cuelloChecks, notes, youtubeLinks, customExercises, painLog,
       flaggedExercises, pausedRanges, workoutProgress, magiaProgress, magiaRepaso, magiaLog,
       guerreroLog, workoutWeights, workoutReps, medidas, ritmoReal, ritmoTramos, gps, pesosDiarios, sensaciones, postponed, phaseAdjustNote,
-      currentWeekOverride, weeklyLog, comidasLog, comidasHabituales, cambiosMenu, menuEditado, compraMarcada, comidasFuera,
+      currentWeekOverride, weeklyLog, comidasLog, comidasHabituales, pruebaSemana, semanaSentir, cambiosMenu, menuEditado, compraMarcada, comidasFuera,
       bloquesHistorial, ultimoBackup, cuelloFaseManual, onboardingVisto, storageReady]);
 
-  const currentDay = FLAT_DAYS[flatIdx] || FLAT_DAYS[todayIdx] || FLAT_DAYS[0];
+  // La prueba de 2 semanas es una capa encima del plan: el plan no se toca.
+  const prueba = pruebaDe(pruebaSemana);
+  const currentDay = diaEnPrueba(FLAT_DAYS[flatIdx] || FLAT_DAYS[todayIdx] || FLAT_DAYS[0], prueba);
   const isToday = flatIdx === todayIdx;
   const dayKey = claveDia(currentDay);
   const isFuerzaDay = currentDay.tipo === "fuerza";
@@ -377,7 +385,7 @@ export default function App() {
       checked, cuelloChecks, notes, youtubeLinks, customExercises, painLog,
       flaggedExercises, pausedRanges, workoutProgress, workoutWeights, workoutReps, medidas,
       ritmoReal, ritmoTramos, gps, pesosDiarios, sensaciones, postponed, phaseAdjustNote, currentWeekOverride, weeklyLog,
-      comidasLog, comidasHabituales, cambiosMenu, menuEditado, compraMarcada, comidasFuera, magiaProgress, magiaRepaso,
+      comidasLog, comidasHabituales, pruebaSemana, semanaSentir, cambiosMenu, menuEditado, compraMarcada, comidasFuera, magiaProgress, magiaRepaso,
       magiaLog, guerreroLog, bloquesHistorial,
     };
     const nombre = "programa-7k-backup-" + todayLocalIso() + ".json";
@@ -431,6 +439,8 @@ export default function App() {
         if (data.weeklyLog) setWeeklyLog(data.weeklyLog);
         if (data.comidasLog) setComidasLog(data.comidasLog);
         if (data.comidasHabituales) setComidasHabituales(data.comidasHabituales);
+        if (data.pruebaSemana !== undefined) setPruebaSemana(data.pruebaSemana);
+        if (data.semanaSentir) setSemanaSentir(data.semanaSentir);
         if (data.cambiosMenu) setCambiosMenu(data.cambiosMenu);
         if (data.menuEditado) setMenuEditado(data.menuEditado);
         if (data.compraMarcada) setCompraMarcada(data.compraMarcada);
@@ -618,7 +628,13 @@ export default function App() {
             magiaLog={magiaLog} setMagiaLog={setMagiaLog}
             onOpenMagiaCatalogo={() => setScreen("magia-catalogo")}
             guerreroLog={guerreroLog} setGuerreroLog={setGuerreroLog}
-            bloquesHistorial={bloquesHistorial} />
+            bloquesHistorial={bloquesHistorial}
+            prueba={prueba} setPrueba={setPruebaSemana} semanaSentir={semanaSentir} setSemanaSentir={setSemanaSentir}
+            pesoHoy={pesosDiarios[todayLocalIso()] ?? null} guardarPeso={guardarPeso}
+            comidaApuntada={(comidasLog[todayLocalIso()] || []).length > 0}
+            onStartWorkoutDe={(k) => setActiveWorkout(k)}
+            parte={parteDelCoach({ dias: FLAT_DAYS, semanas: WEEKS, checked, cuelloChecks, painLog, ritmoReal, pesos: workoutWeights,
+              reps: workoutReps, medidas, fechaInicio: FECHA_INICIO, hoyIso: todayLocalIso() })} />
         )}
 
         {screen === "magia-catalogo" && (
@@ -627,7 +643,7 @@ export default function App() {
         )}
 
         {screen === "semana" && (
-          <SemanaScreen weekIdx={weekIdx} setWeekIdx={setWeekIdx} jumpToDay={jumpToDay}
+          <SemanaScreen weekIdx={weekIdx} setWeekIdx={setWeekIdx} jumpToDay={jumpToDay} aplicarDia={(d) => diaEnPrueba(d, prueba)}
             checked={checked} todayIso={FLAT_DAYS[todayIdx].isoDate}
             workoutWeights={workoutWeights} ritmoReal={ritmoReal}
             pausedRanges={pausedRanges} setPausedRanges={setPausedRanges} />

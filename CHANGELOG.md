@@ -21,6 +21,14 @@ Todo cambio que se haga en la app se anota aquí. Sin excepciones.
 
 ## [Sin publicar]
 
+### HOY reformulado y la prueba de 2 semanas (12-25 de octubre)
+- HOY abre con **"Ahora toca"**: una sola cosa según la hora y lo que ya has hecho (por la mañana cuello y peso; desde las 16:00 "Zapatillas puestas" y la sesión; después de la ducha el cuello; de noche apuntar la comida y el cuello del final). Un toque para hacerla y "Después:" con las dos siguientes. Si se te pasó algo, sin reproche: sigue lo siguiente.
+- Debajo, **"¿Avanzo?"**: el 7K, la panza, el hombro, el cuello y tú (días cumplidos esta semana: lo principal hecho y el cuello al menos una vez). El resto del día, plegado en "Todo lo de hoy".
+- **Prueba de 2 semanas**, como capa encima del plan (no se borra nada): el sábado de pierna pasa a libre y lo esencial de la pierna va en 10 minutos detrás de los rodajes del martes y del domingo; el cuello cuenta como hecho con 1 toma; magia y guerrero son extras que no cuentan en contra.
+- El domingo (o el lunes si se pasó), un toque: "¿Cómo te has sentido contigo esta semana?" de 1 a 5.
+- El 26 de octubre, las 2 semanas de la prueba contra las 2 de antes (sesiones, cuello, días cumplidos, cómo te sentiste) y eliges: "Me quedo así" (sigue hasta el 6 de diciembre) o "Volver al plan anterior".
+- Una sesión recolocada se puede empezar desde el día al que se movió.
+
 ### Me la he saltado: la app la recoloca
 - Si ayer faltó una sesión clave (la tirada, la calidad o una prueba), HOY lo dice sola y propone el mejor hueco con su motivo: "Ayer faltó la tirada. Mejor el martes 13: la tirada ocupa el sitio del suave, que se queda fuera". Un toque en Vale, otras opciones o Dejarla pasar.
 - En el día de una sesión clave, "¿No puedes hoy? Recolócala" hace lo mismo por adelantado.

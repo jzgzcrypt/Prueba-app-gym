@@ -6,7 +6,7 @@ import { Boton, Check, Chevron, IconoCaja, Tarjeta } from "@/features/ui/aire";
 import { DATE_MAP, WEEKS, claveDia } from "@/domain/plan/calendario";
 import { comidaDelDia } from "@/domain/nutricion/dias";
 import { KpiBlock } from "@/features/semana/KpiBlock";
-export function SemanaScreen({ weekIdx, setWeekIdx, jumpToDay, checked, todayIso, workoutWeights, ritmoReal, pausedRanges, setPausedRanges }) {
+export function SemanaScreen({ weekIdx, setWeekIdx, jumpToDay, checked, todayIso, workoutWeights, ritmoReal, pausedRanges, setPausedRanges, aplicarDia = (d) => d }) {
   const week = WEEKS[weekIdx];
   const [kpiOpen, setKpiOpen] = useState(null);
   const [pauseMode, setPauseMode] = useState(false);
@@ -58,7 +58,7 @@ export function SemanaScreen({ weekIdx, setWeekIdx, jumpToDay, checked, todayIso
       </div>
 
       <Tarjeta data-dias style={{ marginTop: 14, overflow: "hidden" }}>
-        {week.days.map((day, i) => {
+        {week.days.map(aplicarDia).map((day, i) => {
           const key = claveDia(day);
           const done = !!checked[key];
           const isT = DATE_MAP[day.date] === todayIso;
