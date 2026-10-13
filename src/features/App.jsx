@@ -639,6 +639,7 @@ export default function App() {
             prueba={prueba} setPrueba={setPruebaSemana} semanaSentir={semanaSentir} setSemanaSentir={setSemanaSentir}
             noHechas={noHechas} setNoHechas={setNoHechas}
             pesoHoy={pesosDiarios[todayLocalIso()] ?? null} guardarPeso={guardarPeso}
+            pesoDia={pesosDiarios[dayKey] ?? null} comidaDia={(comidasLog[dayKey] || []).length > 0}
             comidaApuntada={(comidasLog[todayLocalIso()] || []).length > 0}
             onStartWorkoutDe={(k) => setActiveWorkout(k)}
             parte={parteDelCoach({ dias: FLAT_DAYS, semanas: WEEKS, checked, cuelloChecks, painLog, ritmoReal, pesos: workoutWeights,

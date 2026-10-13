@@ -8,19 +8,20 @@ import { DATE_MAP, WEEKS, claveDia, todayLocalIso } from "@/domain/plan/calendar
  * numero o un check si esta hecho. El dia que estas viendo, en azul. Toca
  * uno para ir a el.
  */
-export function WeekDots({ day, checked, onJumpDay, aplicar = (d) => d }) {
+export function WeekDots({ day, checked, onJumpDay, aplicar = (d) => d, movidas = {} }) {
   const week = WEEKS[day.weekIdx];
   const todayIso = todayLocalIso();
   return (
     <div data-semana-circulos style={{ display: "flex", justifyContent: "space-between", marginTop: 10 }}>
       {week.days.map(aplicar).map((d, i) => {
         const done = !!checked[claveDia(d)];
+        const noHecha = !done && movidas[claveDia(d)] === "pasa";
         const isRest = d.tipo === "libre";
         const isCurrent = i === day.dayIdx;
         const isToday = DATE_MAP[d.date] === todayIso;
         const num = String(d.date).split(" ")[0];
         const fondo = isCurrent ? A.azul : done ? A.fondo.verde : "#fff";
-        const color = isCurrent ? "#fff" : done ? A.verde : isRest ? C.textFaint : C.text;
+        const color = isCurrent ? "#fff" : done ? A.verde : isRest || noHecha ? C.textFaint : C.text;
         return (
           <button key={i} className="btn" onClick={() => onJumpDay(day.weekIdx, i)} aria-label={d.dow + " " + d.date}
             style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 5, padding: 0 }}>

@@ -25,9 +25,9 @@ import { GuerreroBlock, HabitBlock, ListBlock, MagiaBlock, MoveDayBlock, PainBlo
 import { progresoMagia } from "@/domain/habilidades/magia";
 import { WeekDots } from "@/features/ui/WeekDots";
 import { destinoDe, llegadasA } from "@/lib/estado/mover-sesion";
-import { deshacer, diaHablado, esClave, nombreDe, pendienteDeRecolocar } from "@/domain/plan/reprogramar";
+import { dejarPasar, deshacer, diaHablado, esClave, nombreDe, pendienteDeRecolocar } from "@/domain/plan/reprogramar";
 import { Recolocar } from "@/features/hoy/Recolocar";
-import { AhoraToca, Avanzo, FinPrueba, SentirSemana } from "@/features/hoy/AhoraYAvance";
+import { AhoraToca, Avanzo, FinPrueba, RepasoDia, SentirSemana } from "@/features/hoy/AhoraYAvance";
 import { ahoraToca } from "@/domain/hoy/ahora";
 import { compararPrueba, diaDePrueba, diaEnPrueba, diasCumplidos, lunesDe, quedarse, tocaDecidir, volverAlPlan } from "@/domain/hoy/prueba";
 export function HoyScreen(props) {
@@ -103,6 +103,39 @@ export function HoyScreen(props) {
           </div>
         );
 
+  // Un dia pasado: marcar que hiciste y que no.
+  const esPasado = day.isoDate < hoyIso;
+  const filasRepaso = [];
+  if (esPasado) {
+    if (day.tipo !== "libre") {
+      filasRepaso.push({ id: "sesion", titulo: day.tipo === "compromiso" ? "Tenis" : day.titulo,
+        estado: checked[dayKey] ? "si" : movidaA === "pasa" ? "no" : null,
+        fija: movidaA && movidaA !== "pasa" && !checked[dayKey] ? "Movida" : null });
+    }
+    for (const [k, t] of [["m", "Cuello mañana"], ["t", "Cuello tarde"], ["n", "Cuello noche"]]) {
+      filasRepaso.push({ id: "cuello-" + k, titulo: t, estado: cuelloChecks[dayKey + "-" + k] ? "si" : noHechasHoy.includes("cuello-" + k) ? "no" : null });
+    }
+    filasRepaso.push({ id: "peso", titulo: "Pesarte", soloNo: true, estado: props.pesoDia != null ? "si" : noHechasHoy.includes("peso") ? "no" : null,
+      fija: props.pesoDia != null ? String(props.pesoDia).replace(".", ",") + " kg" : null });
+    filasRepaso.push({ id: "comida", titulo: "Apuntar la comida", soloNo: true, estado: props.comidaDia ? "si" : noHechasHoy.includes("comida") ? "no" : null,
+      fija: props.comidaDia ? "Apuntada" : null });
+  }
+  const marcarRepaso = (id, v) => {
+    if (id === "sesion") {
+      if (checked[dayKey] && v !== "si") toggleCheck(dayKey);
+      if (!checked[dayKey] && v === "si") toggleCheck(dayKey);
+      if (v === "no") props.setPostponed(dejarPasar(props.postponed, dayKey));
+      else if (movidaA === "pasa") props.setPostponed(deshacer(props.postponed, dayKey));
+      return;
+    }
+    if (id.startsWith("cuello-")) {
+      const k = id.slice(-1), hecho = !!cuelloChecks[dayKey + "-" + k];
+      if (hecho !== (v === "si")) toggleCuello(k);
+    }
+    marcarNo(id, v === "no");
+  };
+  const repasoTodoNo = () => filasRepaso.filter(f => f.estado == null && !f.fija).forEach(f => marcarRepaso(f.id, "no"));
+
   const startDate = new Date(FECHA_INICIO);
   const thisDate = new Date(day.isoDate || startDate);
   const daysSinceStart = Math.round((thisDate - startDate) / (1000*60*60*24));
@@ -144,7 +177,7 @@ export function HoyScreen(props) {
         </div>
       </div>
 
-      <WeekDots day={day} checked={checked} onJumpDay={props.onJumpDay} aplicar={(d) => diaEnPrueba(d, prueba)} />
+      <WeekDots day={day} checked={checked} onJumpDay={props.onJumpDay} aplicar={(d) => diaEnPrueba(d, prueba)} movidas={props.postponed || {}} />
 
 
       {isToday && (
@@ -192,6 +225,10 @@ export function HoyScreen(props) {
 
       {!plegado && (
       <div style={{ display: "flex", flexDirection: "column", gap: 12, marginTop: 14 }}>
+
+        {esPasado && filasRepaso.length > 0 && (
+          <RepasoDia filas={filasRepaso} onMarcar={marcarRepaso} onTodoNo={repasoTodoNo} />
+        )}
 
         {missedImportantDay && (
           <Tarjeta style={{ padding: "13px 16px", background: A.fondo.naranja }}>

@@ -159,3 +159,42 @@ export function FinPrueba({ comp, onQuedarme, onVolver }) {
     </Tarjeta>
   );
 }
+
+/**
+ * Un dia pasado: que hiciste y que no. Cada cosa con "Hecho" o "No"; sin
+ * marcar no cuenta ni a favor ni en contra. `filas`: [{ id, titulo, estado:
+ * "si"|"no"|null, valor?, soloNo? }]. `soloNo`: lo que no se puede dar por
+ * hecho a mano (el peso, la comida: se apuntan en su sitio).
+ */
+export function RepasoDia({ filas, onMarcar, onTodoNo }) {
+  const faltan = filas.filter(f => f.estado == null && !f.fija).length;
+  const pastilla = (activa, color, txt, onClick, data) => (
+    <button className="btn" data-repaso-btn={data} onClick={onClick} style={{
+      minWidth: 58, height: 32, padding: "0 12px", borderRadius: 999, fontSize: 13.5, fontWeight: 700,
+      background: activa ? color : C.surfaceMuted, color: activa ? "#fff" : C.textDim }}>{txt}</button>
+  );
+  return (
+    <Tarjeta data-repaso style={{ padding: "12px 16px 10px" }}>
+      <div style={{ fontSize: 16, fontWeight: 700, color: C.text }}>¿Qué hiciste este día?</div>
+      <div style={{ fontSize: 13, color: C.textDim, marginTop: 2, marginBottom: 4 }}>Marca lo que no hiciste. Sin reproche: es para que las cuentas sean verdad.</div>
+      {filas.map(f => (
+        <div key={f.id} data-repaso-fila={f.id} style={{ display: "flex", alignItems: "center", gap: 8, minHeight: 44, borderTop: "1px solid " + C.divider }}>
+          <span style={{ flex: 1, minWidth: 0, fontSize: 14.5, color: C.text }}>
+            {f.titulo}{f.valor && <span style={{ color: C.textDim }}> · {f.valor}</span>}
+          </span>
+          {f.fija ? <span style={{ fontSize: 13, color: C.textDim }}>{f.fija}</span> : (
+            <>
+              {!f.soloNo && pastilla(f.estado === "si", A.verde, "Hecho", () => onMarcar(f.id, f.estado === "si" ? null : "si"), "si")}
+              {pastilla(f.estado === "no", A.naranja, "No", () => onMarcar(f.id, f.estado === "no" ? null : "no"), "no")}
+            </>
+          )}
+        </div>
+      ))}
+      {faltan > 1 && (
+        <button className="btn" data-repaso-todo-no onClick={onTodoNo} style={{ width: "100%", marginTop: 6, minHeight: 36, fontSize: 14, fontWeight: 600, color: A.azul }}>
+          Lo que falta, no lo hice ({faltan})
+        </button>
+      )}
+    </Tarjeta>
+  );
+}

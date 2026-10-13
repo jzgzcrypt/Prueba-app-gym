@@ -21,6 +21,9 @@ Todo cambio que se haga en la app se anota aquí. Sin excepciones.
 
 ## [Sin publicar]
 
+### Añadido
+- **Días pasados: "¿Qué hiciste este día?"**. Al abrir un día anterior sale arriba la sesión, el cuello (mañana, tarde, noche), pesarte y apuntar la comida, cada uno con "Hecho" o "No", más "Lo que falta, no lo hice" de un toque. La sesión marcada como No queda dejada pasar (y ya no te pregunta al día siguiente); el resto va a `noHechas`. En la fila de días, una sesión dejada pasar sale en gris.
+
 ### Arreglado
 - La fila de días de arriba de HOY no te llevaba al día que tocabas: se quedaba en hoy, y después las flechas saltaban al principio del plan. Ahora va al día que tocas. Durante la prueba, el sábado sale como descanso.
 
