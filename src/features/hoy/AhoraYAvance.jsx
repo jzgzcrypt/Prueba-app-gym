@@ -13,7 +13,7 @@ const ICONO = { "cuello-m": ["cuello", "azul"], "cuello-t": ["cuello", "azul"], 
   peso: ["peso", "azul"], sesion: ["correr", "rojo"], comida: ["plato", "verde"], extras: ["magia", "morado"] };
 
 /** "Ahora toca": lo de esta hora, grande, con un toque para hacerlo. */
-export function AhoraToca({ plan, onSesion, onCuello, onPeso, onComida, onExtras, tituloSesion }) {
+export function AhoraToca({ plan, onSesion, onNoHecha, onCuello, onPeso, onComida, onExtras, tituloSesion }) {
   const [kg, setKg] = useState("");
   const a = plan.ahora;
   const [ic, tono] = ICONO[a.id] || ["meta", "gris"];
@@ -42,6 +42,11 @@ export function AhoraToca({ plan, onSesion, onCuello, onPeso, onComida, onExtras
           </div>
         )}
       </div>
+      {a.accion === "sesion" && tituloSesion && onNoHecha && (
+        <button className="btn" data-no-hecha onClick={onNoHecha} style={{ width: "100%", marginTop: 6, minHeight: 36, fontSize: 14, fontWeight: 600, color: C.textDim }}>
+          No la he hecho / hoy no puedo
+        </button>
+      )}
       {plan.despues.length > 0 && (
         <div style={{ fontSize: 13, color: C.textDim, marginTop: 10 }}>
           Después: {plan.despues.map(d => d.titulo).join(" · ")}

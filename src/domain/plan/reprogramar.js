@@ -141,14 +141,15 @@ export function deshacer(movidas, origen) {
 }
 
 /**
- * La sesion clave que falta por resolver de ayer o de hoy (la mas reciente),
- * o null: no hecha, ni movida, ni dejada pasar.
+ * La sesion de ayer que falta por resolver (una clave o un suave), o null:
+ * no hecha, ni movida, ni dejada pasar. Para un suave solo se pregunta si lo
+ * hiciste; si no, se deja pasar.
  */
 export function pendienteDeRecolocar({ dias, movidas, checked, hoyIso }) {
   const i = dias.findIndex(d => d.isoDate === hoyIso);
   if (i <= 0) return null;
   const ayer = dias[i - 1];
   const m = movidas || {};
-  if (esClave(ayer) && !(checked || {})[ayer.isoDate] && !m[ayer.isoDate]) return ayer;
+  if ((esClave(ayer) || claseDe(ayer) === "suave") && !(checked || {})[ayer.isoDate] && !m[ayer.isoDate]) return ayer;
   return null;
 }

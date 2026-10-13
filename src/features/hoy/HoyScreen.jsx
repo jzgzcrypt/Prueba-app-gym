@@ -25,7 +25,7 @@ import { GuerreroBlock, HabitBlock, ListBlock, MagiaBlock, MoveDayBlock, PainBlo
 import { progresoMagia } from "@/domain/habilidades/magia";
 import { WeekDots } from "@/features/ui/WeekDots";
 import { destinoDe, llegadasA } from "@/lib/estado/mover-sesion";
-import { deshacer, esClave, nombreDe, pendienteDeRecolocar } from "@/domain/plan/reprogramar";
+import { deshacer, diaHablado, esClave, nombreDe, pendienteDeRecolocar } from "@/domain/plan/reprogramar";
 import { Recolocar } from "@/features/hoy/Recolocar";
 import { AhoraToca, Avanzo, FinPrueba, SentirSemana } from "@/features/hoy/AhoraYAvance";
 import { ahoraToca } from "@/domain/hoy/ahora";
@@ -60,7 +60,10 @@ export function HoyScreen(props) {
   const hoyIso = todayLocalIso();
   const prueba = props.prueba || null;
   const diasConPrueba = FLAT_DAYS.map(d => diaEnPrueba(d, prueba));
-  const planAhora = ahoraToca({ hora: new Date().getHours(), day, sesionHecha: day.tipo === "libre" || !!checked[dayKey],
+  // Hecha, o resuelta (movida o dejada pasar) sin que haya llegado otra por hacer.
+  const resueltaFuera = !!destinoDe(props.postponed, dayKey) && !llegadasA(props.postponed, dayKey).some(o => !checked[o]);
+  const [noHecha, setNoHecha] = useState(false);
+  const planAhora = ahoraToca({ hora: new Date().getHours(), day, sesionHecha: day.tipo === "libre" || !!checked[dayKey] || resueltaFuera,
     cuello: { m: cM, t: cT, n: cN }, pesado: props.pesoHoy != null, comidaApuntada: !!props.comidaApuntada });
   const lunesHoy = lunesDe(hoyIso);
   const cumplidos = diasCumplidos(diasConPrueba, lunesHoy, hoyIso, { checked, cuelloChecks });
@@ -81,6 +84,19 @@ export function HoyScreen(props) {
   const recibidas = llegadasA(props.postponed, dayKey)
     .map(origen => FLAT_DAYS.find(d => d.isoDate === origen))
     .filter(Boolean);
+
+  // Lo de este día se recolocó, cedió su sitio o se dejó pasar.
+  const estadoMovida = movidaA && (
+          <div data-estado-movida style={{ ...CARD, padding: "12px 16px", display: "flex", alignItems: "center", gap: 10 }}>
+            <div style={{ flex: 1, fontSize: 14, color: C.text, lineHeight: 1.4 }}>
+              {movidaA === "pasa" ? "Dejaste pasar " + nombreDe(day) + ". Sin drama: se sigue."
+                : /^\d{4}-/.test(movidaA) ? "La has movido " + (FLAT_DAYS.find(d => d.isoDate === movidaA) ? "al " + diaHablado(FLAT_DAYS.find(d => d.isoDate === movidaA)).slice(3) : "a " + movidaA) + "."
+                : "Hoy " + nombreDe(day) + " deja su sitio a " + nombreDe(FLAT_DAYS.find(d => d.isoDate === movidaA.slice(5))) + "."}
+            </div>
+            <button className="btn" onClick={() => props.setPostponed(deshacer(props.postponed, movidaA.startsWith("cede:") ? movidaA.slice(5) : dayKey))}
+              style={{ fontSize: 14, fontWeight: 600, color: A.azul, minHeight: 36 }}>Deshacer</button>
+          </div>
+        );
 
   const startDate = new Date(FECHA_INICIO);
   const thisDate = new Date(day.isoDate || startDate);
@@ -129,8 +145,9 @@ export function HoyScreen(props) {
       {isToday && (
         <div style={{ display: "flex", flexDirection: "column", gap: 12, marginTop: 14 }}>
           {(() => {
-            const falta = pendienteDeRecolocar({ dias: FLAT_DAYS, movidas: props.postponed, checked, hoyIso });
-            return falta ? <Recolocar key={falta.isoDate} dia={falta} movidas={props.postponed} setMovidas={props.setPostponed} checked={checked} ayer /> : null;
+            const falta = pendienteDeRecolocar({ dias: diasConPrueba, movidas: props.postponed, checked, hoyIso });
+            return falta ? <Recolocar key={falta.isoDate} dia={falta} movidas={props.postponed} setMovidas={props.setPostponed} checked={checked} ayer
+              onHecha={esClave(falta) ? null : () => toggleCheck(claveDia(falta))} /> : null;
           })()}
           {prueba && tocaDecidir(prueba, hoyIso) && (
             <FinPrueba comp={compararPrueba({ dias: FLAT_DAYS, prueba, checked, cuelloChecks, sentir, aplicar: (d) => diaEnPrueba(d, prueba) })}
@@ -138,7 +155,18 @@ export function HoyScreen(props) {
           )}
           <AhoraToca plan={planAhora} tituloSesion={day.tipo !== "libre" && day.tipo !== "compromiso" ? day.titulo : ""}
             onSesion={day.tipo === "compromiso" ? () => toggleCheck(dayKey) : onStartWorkout}
-            onCuello={(k) => toggleCuello(k)} onPeso={props.guardarPeso} onComida={props.irANutricion} onExtras={() => abrirTodo("magia")} />
+            onCuello={(k) => toggleCuello(k)} onPeso={props.guardarPeso} onComida={props.irANutricion} onExtras={() => abrirTodo("magia")}
+            onNoHecha={!movidaA && day.tipo !== "compromiso" ? () => setNoHecha(true) : null} />
+          {noHecha && !movidaA && !checked[dayKey] && (
+            <Recolocar key={"nh" + dayKey} dia={day} movidas={props.postponed} setMovidas={props.setPostponed} checked={checked}
+              abiertaInicial onCerrar={() => setNoHecha(false)}>
+              {!esClave(day) && (
+                <MoveDayBlock dayKey={dayKey} weekN={day.weekN} dayIdx={day.dayIdx} day={day}
+                  week={WEEKS[day.weekIdx]} postponed={props.postponed} setPostponed={props.setPostponed} />
+              )}
+            </Recolocar>
+          )}
+          {estadoMovida}
           {preguntaSentir && (
             <SentirSemana onGuardar={(v) => props.setSemanaSentir(p => ({ ...p, [lunesPregunta]: v }))} />
           )}
@@ -193,17 +221,7 @@ export function HoyScreen(props) {
 
         {props.resumenSemana && <TarjetaResumen resumen={props.resumenSemana} nombreBloque="Base 7K" />}
 
-        {/* Lo de este día se recolocó, cedió su sitio o se dejó pasar */}
-        {movidaA && !/^\d{4}-/.test(movidaA) && (
-          <div data-estado-movida style={{ ...CARD, padding: "12px 16px", display: "flex", alignItems: "center", gap: 10 }}>
-            <div style={{ flex: 1, fontSize: 14, color: C.text, lineHeight: 1.4 }}>
-              {movidaA === "pasa" ? "Dejaste pasar " + nombreDe(day) + ". Sin drama: se sigue."
-                : "Hoy " + nombreDe(day) + " deja su sitio a " + nombreDe(FLAT_DAYS.find(d => d.isoDate === movidaA.slice(5))) + "."}
-            </div>
-            <button className="btn" onClick={() => props.setPostponed(deshacer(props.postponed, movidaA === "pasa" ? dayKey : movidaA.slice(5)))}
-              style={{ fontSize: 14, fontWeight: 600, color: A.azul, minHeight: 36 }}>Deshacer</button>
-          </div>
-        )}
+        {!isToday && movidaA && !/^\d{4}-/.test(movidaA) && estadoMovida}
 
         {isToday && <TarjetaCalendario modo="hoy" />}
 

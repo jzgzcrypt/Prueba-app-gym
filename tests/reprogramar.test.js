@@ -55,5 +55,8 @@ test("lo pendiente: la clave de ayer sin hacer ni resolver", () => {
   assert.equal(pendienteDeRecolocar({ dias: FLAT_DAYS, movidas: {}, checked: {}, hoyIso: "2026-10-12" }).isoDate, "2026-10-11");
   assert.equal(pendienteDeRecolocar({ dias: FLAT_DAYS, movidas: {}, checked: { "2026-10-11": true }, hoyIso: "2026-10-12" }), null);
   assert.equal(pendienteDeRecolocar({ dias: FLAT_DAYS, movidas: { "2026-10-11": "pasa" }, checked: {}, hoyIso: "2026-10-12" }), null);
-  assert.equal(pendienteDeRecolocar({ dias: FLAT_DAYS, movidas: {}, checked: {}, hoyIso: "2026-10-14" }), null, "ayer fue un suave");
+  assert.equal(pendienteDeRecolocar({ dias: FLAT_DAYS, movidas: {}, checked: {}, hoyIso: "2026-10-14" }).isoDate, "2026-10-13", "un suave sin marcar tambien pregunta");
+  assert.equal(pendienteDeRecolocar({ dias: FLAT_DAYS, movidas: { "2026-10-13": "pasa" }, checked: {}, hoyIso: "2026-10-14" }), null);
+  assert.equal(pendienteDeRecolocar({ dias: FLAT_DAYS, movidas: {}, checked: {}, hoyIso: "2026-10-13" }), null, "ayer fue tenis");
+  assert.equal(pendienteDeRecolocar({ dias: FLAT_DAYS, movidas: {}, checked: {}, hoyIso: "2026-10-15" }), null, "ayer fue fuerza");
 });
