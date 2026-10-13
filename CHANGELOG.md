@@ -21,6 +21,9 @@ Todo cambio que se haga en la app se anota aquí. Sin excepciones.
 
 ## [Sin publicar]
 
+### Arreglado
+- "Ver magia y guerrero" parecía no hacer nada: abría los extras muy abajo sin mover la pantalla. Ahora baja hasta ellos con la magia abierta.
+
 ### Cambiado
 - En un día pasado, marcar **No** en una sesión clave (tirada, calidad o prueba) ya no la pierde sin más: si aún cabe en los próximos días, sale la propuesta de hueco con "Vale", otras opciones o "Dejarla pasar". La fila muestra "Movida al martes 13".
 

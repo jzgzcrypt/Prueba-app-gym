@@ -80,7 +80,13 @@ export function HoyScreen(props) {
   const enLaPrueba = !!diaDePrueba(prueba, day.isoDate) || (prueba && prueba.decidido && !prueba.volver && day.isoDate >= prueba.desde);
   const [verExtrasEstado, setVerExtras] = useState(false);
   const verExtras = verExtrasEstado || expandedBlock === "magia" || expandedBlock === "guerrero";
-  const abrirTodo = (bloque) => { setVerTodo(true); if (bloque) { setVerExtras(true); setExpandedBlock(bloque); } };
+  // Abre lo plegado y baja hasta los cuadros de habitos: se abria muy abajo y
+  // parecia que el boton no hacia nada.
+  const abrirTodo = (bloque) => {
+    setVerTodo(true);
+    if (bloque) { setVerExtras(true); setExpandedBlock(bloque); }
+    setTimeout(() => { const el = document.querySelector("[data-habitos]"); if (el) el.scrollIntoView({ behavior: "smooth", block: "start" }); }, 60);
+  };
 
   // Lo movido: si esta sesión se fue a otro día no se enseña aquí, y si han
   // venido sesiones de otros días se enseñan. Esta segunda mitad es justo la
