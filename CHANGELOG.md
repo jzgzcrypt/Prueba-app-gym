@@ -22,6 +22,7 @@ Todo cambio que se haga en la app se anota aquí. Sin excepciones.
 ## [Sin publicar]
 
 ### Arreglado
+- Los días de fuerza, "Ahora toca" decía "Zapatillas puestas" con el icono de correr. Ahora dice "Primera serie" con la mancuerna: "Solo haz la primera serie: lo demás viene solo".
 - "Ver magia y guerrero" parecía no hacer nada: abría los extras muy abajo sin mover la pantalla. Ahora baja hasta ellos con la magia abierta.
 
 ### Cambiado

@@ -54,6 +54,13 @@ test("ahora toca: por la mañana el cuello, por la tarde las zapatillas, de noch
   assert.equal(ahoraToca({ ...base, day: dia("2026-10-12"), hora: 17, cuello: { m: true }, pesado: true }).ahora.titulo, "Tenis a las 20:00");
 });
 
+test("ahora toca en dia de fuerza: primera serie con la mancuerna, no zapatillas", () => {
+  const r = ahoraToca({ hora: 19, day: dia("2026-10-14"), sesionHecha: false, cuello: { m: true }, pesado: true, comidaApuntada: false });
+  assert.equal(r.ahora.titulo, "Primera serie");
+  assert.equal(r.ahora.icono, "mancuerna");
+  assert.match(r.ahora.sub, /^Empuje/);
+});
+
 test("ahora toca: lo que dices que no has hecho se salta y pasa a lo siguiente", () => {
   const base = { day: dia("2026-10-13"), sesionHecha: false, cuello: {}, pesado: false, comidaApuntada: false };
   assert.equal(ahoraToca({ ...base, hora: 8, noHechas: ["cuello-m"] }).ahora.id, "peso");

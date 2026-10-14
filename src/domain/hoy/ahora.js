@@ -36,8 +36,12 @@ export function ahoraToca({ hora, day, sesionHecha, cuello, pesado, comidaApunta
     if (!pesado) lista.push({ id: "peso", titulo: "Pésate", sub: "En ayunas, antes del desayuno.", accion: "peso" });
   }
   if (hay && !sesionHecha && hora < 22) {
+    const esFuerza = day.tipo === "fuerza";
     lista.push(esTenis
       ? { id: "sesion", titulo: "Tenis a las 20:00", sub: "Cuenta como la sesión de hoy.", accion: "sesion" }
+      : esFuerza
+      ? { id: "sesion", titulo: hora >= 16 ? "Primera serie" : "Hoy: " + day.titulo, icono: "mancuerna",
+          sub: hora >= 16 ? day.titulo + ". Solo haz la primera serie: lo demás viene solo." : "A partir de las 16:00, al llegar a casa.", accion: "sesion" }
       : { id: "sesion", titulo: hora >= 16 ? "Zapatillas puestas" : "Hoy: " + day.titulo, sub: hora >= 16 ? day.titulo + ". Solo ponte las zapatillas: lo demás viene solo." : "A partir de las 16:00, al llegar a casa.", accion: "sesion" });
   }
   if (!c.t && hora >= 12) lista.push({ id: "cuello-t", titulo: "Cuello", sub: algunCuello ? "Después de la ducha. 2 minutos." : "Después de la ducha. Con esta ya cuenta el día.", accion: "cuello" });

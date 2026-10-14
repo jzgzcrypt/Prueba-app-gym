@@ -22,7 +22,7 @@ const NOMBRE_NO = { "cuello-m": "cuello de la mañana", "cuello-t": "cuello de l
 export function AhoraToca({ plan, onSesion, onNoHecha, saltadas = [], onDeshacerNo, esTenis, onCuello, onPeso, onComida, onExtras, tituloSesion }) {
   const [kg, setKg] = useState("");
   const a = plan.ahora;
-  const [ic, tono] = ICONO[a.id] || ["meta", "gris"];
+  const [ic, tono] = a.icono === "mancuerna" ? ["mancuerna", "azul"] : ICONO[a.id] || ["meta", "gris"];
   const guardarPeso = () => { const n = Number(String(kg).replace(",", ".")); if (n > 40 && n < 200) { onPeso(Math.round(n * 10) / 10); setKg(""); } };
   return (
     <div data-ahora style={{ ...CARD, padding: "16px 16px 14px" }}>
