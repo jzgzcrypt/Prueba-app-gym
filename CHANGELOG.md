@@ -21,6 +21,9 @@ Todo cambio que se haga en la app se anota aquí. Sin excepciones.
 
 ## [Sin publicar]
 
+### Añadido
+- **"Añadir a mi calendario" al acabar la sesión**, como hace Runna con Strava pero sin servidor. Abre Google Calendar con el evento ya relleno: 🏃 o 🏋️ más el nombre de la sesión, la hora real (la del GPS si la hay) y el resumen. En running son distancia, tiempo, ritmo medio y cadencia; en fuerza, las series de cada ejercicio. Tú le das a Guardar y el botón pasa a "Añadido ✓".
+
 ### Arreglado
 - Los días de fuerza, "Ahora toca" decía "Zapatillas puestas" con el icono de correr. Ahora dice "Primera serie" con la mancuerna: "Solo haz la primera serie: lo demás viene solo".
 - "Ver magia y guerrero" parecía no hacer nada: abría los extras muy abajo sin mover la pantalla. Ahora baja hasta ellos con la magia abierta.

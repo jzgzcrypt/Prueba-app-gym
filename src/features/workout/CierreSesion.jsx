@@ -9,6 +9,10 @@ import { textoTiempo } from "@/domain/running/gps";
 import { veredictoCadencia } from "@/domain/running/cadencia";
 import { MapaRuta } from "@/features/ui/MapaRuta";
 import { prevision, veredictoCoach } from "@/domain/coach/prevision";
+import { eventoSesion, urlGoogleCalendar } from "@/domain/plan/evento-calendario";
+
+const CLAVE_CAL = "programa7k:en-calendario";
+function enCalendario() { try { return JSON.parse(window.localStorage.getItem(CLAVE_CAL) || "{}"); } catch { return {}; } }
 
 /**
  * Lo que sale al terminar una sesion: la pagina de la libreta.
@@ -31,6 +35,7 @@ export function CierreSesion({ dayKey, workoutWeights, workoutReps, ritmoReal, g
   const day = FLAT_DAYS.find(d => claveDia(d) === dayKey);
   const [texto, setTexto] = useState(ritmoReal[dayKey] || "");
   const [guardado, setGuardado] = useState(ritmoReal[dayKey] || "");
+  const [anadido, setAnadido] = useState(() => !!enCalendario()[dayKey]);
   if (!day) return null;
 
   const esFuerza = day.tipo === "fuerza";
@@ -176,8 +181,24 @@ export function CierreSesion({ dayKey, workoutWeights, workoutReps, ritmoReal, g
           );
         })()}
 
+        {(() => {
+          // A tu calendario, como Runna: se abre Google Calendar relleno y le das a Guardar.
+          const ev = eventoSesion({ day, gps, ahora: Date.now(), series: filas.map(f => ({ nombre: f.nombre, texto: textoSeries(f.hoy) })) });
+          const marcar = () => {
+            try { window.localStorage.setItem(CLAVE_CAL, JSON.stringify({ ...enCalendario(), [dayKey]: true })); } catch { /* sin storage */ }
+            setAnadido(true);
+          };
+          return (
+            <a data-a-calendario href={urlGoogleCalendar(ev)} target="_blank" rel="noopener" onClick={marcar} className="btn" style={{
+              display: "flex", alignItems: "center", justifyContent: "center", gap: 8, minHeight: 48, marginTop: 20, borderRadius: 12,
+              background: anadido ? C.surfaceMuted : C.card, border: "1px solid " + C.cardBorder,
+              color: anadido ? C.textDim : C.text, fontSize: 15, fontWeight: 700, textDecoration: "none",
+            }}>{anadido ? "Añadido a tu calendario ✓" : "📅 Añadir a mi calendario"}</a>
+          );
+        })()}
+
         <button className="btn" onClick={onVolver} style={{
-          width: "100%", marginTop: 20, padding: "15px", borderRadius: 12, background: acento,
+          width: "100%", marginTop: 12, padding: "15px", borderRadius: 12, background: acento,
           fontSize: 15, fontWeight: 900, color: "#FAFAF9", letterSpacing: 0.3,
         }}>VOLVER A HOY</button>
       </div>
