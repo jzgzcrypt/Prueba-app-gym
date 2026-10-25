@@ -75,3 +75,18 @@ test("el dia del objetivo no se toca nunca", () => {
   const obj = FLAT_DAYS.find(d => d.tipo === "objetivo");
   assert.equal(diaAjustado(obj, e), obj);
 });
+
+test("lo apuntado en la libreta (de Strava) cuenta como carrera hecha", () => {
+  const e = estadoCarga({ dias: FLAT_DAYS, checked: {}, ritmoReal: { "2026-10-11": "30:10 · 4,2 km" }, hoyIso: "2026-10-25" });
+  assert.equal(e.paro, 14);
+});
+
+test("sin ninguna carrera apuntada y el plan ya empezado: vuelta desde el inicio, diciendo por que", () => {
+  const e = estadoCarga({ dias: FLAT_DAYS, checked: {}, hoyIso: "2026-10-25" });
+  const d = diaAjustado(dia("2026-10-25"), e);
+  assert.ok(d.ajuste);
+  assert.match(d.ajuste.motivo, /No hay ninguna carrera apuntada/);
+  assert.ok(objetivoCarrera(d).seg < 40 * 60);
+  const antes = estadoCarga({ dias: FLAT_DAYS, checked: {}, hoyIso: "2026-09-01" });
+  assert.deepEqual(antes.vuelta, {});
+});

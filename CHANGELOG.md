@@ -28,6 +28,7 @@ Todo cambio que se haga en la app se anota aquí. Sin excepciones.
   - **Constancia baja** (menos de la mitad de las salidas en 2 semanas): las series de la semana siguiente son más cortas y la tirada no crece.
   - **Dónde se ve:** en HOY, arriba, con el motivo; en la cuenta atrás de la carrera; y en Semana.
   - El día del objetivo no se toca.
+  - Cuenta como hecha una carrera marcada, con GPS o apuntada en la libreta (lo copiado de Strava). Si no hay ninguna apuntada y el plan ya lleva 7 días o más, cuenta desde el inicio del plan y lo dice: "Si corriste, márcalo en su día y se recalcula".
 
 ### Añadido
 - **"Añadir a mi calendario" al acabar la sesión**, como hace Runna con Strava pero sin servidor. Abre Google Calendar con el evento ya relleno: 🏃 o 🏋️ más el nombre de la sesión, la hora real (la del GPS si la hay) y el resumen. En running son distancia, tiempo, ritmo medio y cadencia; en fuerza, las series de cada ejercicio. Tú le das a Guardar y el botón pasa a "Añadido ✓".

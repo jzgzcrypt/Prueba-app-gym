@@ -39,22 +39,26 @@ const minutos = (txt) => { const m = /(\d+)\s*min/.exec(String(txt || "")); retu
  * @param {object[]} p.dias   FLAT_DAYS
  * @param {object} p.checked  { iso: true }
  * @param {object} [p.gps]    { iso: { m } }
+ * @param {object} [p.ritmoReal] { iso: "texto de la libreta" } (lo apuntado de Strava cuenta como hecho)
  * @param {string} p.hoyIso
  * @returns {{ paro:number, vuelta:Object<string,{n:number,de:number,factor:number,sinSeries:boolean,paro:number}>,
  *             constancia:null|{hechas:number,de:number}, suavizar:Object<string,"series"|"tirada"> }}
  */
-export function estadoCarga({ dias, checked, gps, hoyIso }) {
-  const ch = checked || {}, g = gps || {};
-  const hecha = (d) => !!ch[d.isoDate] || !!(g[d.isoDate] && g[d.isoDate].m > 0);
+export function estadoCarga({ dias, checked, gps, ritmoReal, hoyIso }) {
+  const ch = checked || {}, g = gps || {}, rr = ritmoReal || {};
+  const hecha = (d) => !!ch[d.isoDate] || !!(g[d.isoDate] && g[d.isoDate].m > 0) || !!String(rr[d.isoDate] || "").trim();
   const carreras = (dias || []).filter(esCarrera);
   const hechas = carreras.filter(d => d.isoDate <= hoyIso && hecha(d)).map(d => d.isoDate).sort();
-  const vacio = { paro: 0, vuelta: {}, constancia: null, suavizar: {}, dias };
-  if (!hechas.length) return vacio;
+  // Sin ninguna carrera apuntada, se cuenta desde la primera del plan: si el
+  // plan ya lleva 7 dias o mas, se vuelve como tras un paron.
+  const primera = carreras.length ? carreras[0].isoDate : null;
+  if (!hechas.length && (!primera || primera >= hoyIso)) return { paro: 0, vuelta: {}, constancia: null, suavizar: {}, dias };
 
   // El ultimo paron de 7 dias o mas: entre dos carreras hechas, o desde la
   // ultima hasta hoy si aun no has vuelto.
   let inicio = null, paro = 0;
-  const ultima = hechas[hechas.length - 1];
+  const sinNada = !hechas.length;
+  const ultima = sinNada ? primera : hechas[hechas.length - 1];
   if (ultima < hoyIso && diasEntre(ultima, hoyIso) >= 7) { inicio = hoyIso; paro = diasEntre(ultima, hoyIso); }
   else {
     for (let i = hechas.length - 1; i > 0; i--) {
@@ -71,7 +75,7 @@ export function estadoCarga({ dias, checked, gps, hoyIso }) {
     // (las que se pasaron sin hacer no cuentan).
     const salidas = carreras.filter(d => d.isoDate >= inicio && (d.isoDate >= hoyIso || hecha(d))).slice(0, de);
     salidas.forEach((d, k) => {
-      vuelta[d.isoDate] = { n: k + 1, de, paro, factor: Math.round((f0 + (1 - f0) * k / de) * 100) / 100, sinSeries: k < de / 2 };
+      vuelta[d.isoDate] = { n: k + 1, de, paro, sinNada, factor: Math.round((f0 + (1 - f0) * k / de) * 100) / 100, sinSeries: k < de / 2 };
     });
   }
 
@@ -144,7 +148,9 @@ export function diaAjustado(day, estado) {
   const v = estado.vuelta[day.isoDate];
   if (v) {
     const pct = Math.round(v.factor * 100);
-    const motivo = v.paro + " días sin correr: salida " + v.n + " de " + v.de + " de vuelta, al " + pct + " %. Sin drama: así se vuelve bien.";
+    const motivo = v.sinNada
+      ? "No hay ninguna carrera apuntada: salida " + v.n + " de " + v.de + " de vuelta, al " + pct + " %. Si corriste, márcalo en su día y se recalcula."
+      : v.paro + " días sin correr: salida " + v.n + " de " + v.de + " de vuelta, al " + pct + " %. Sin drama: así se vuelve bien.";
     const out = esSeries(day) || day.prueba
       ? (v.sinSeries || day.prueba ? aSuave(day, v.factor) : menosSeries(day, v.factor))
       : acortar(day, v.factor);

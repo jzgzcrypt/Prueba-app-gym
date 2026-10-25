@@ -283,7 +283,7 @@ export default function App() {
   // La prueba de 2 semanas es una capa encima del plan: el plan no se toca.
   const prueba = pruebaDe(pruebaSemana);
   // Y otra capa: lo que de verdad has corrido (paron, constancia) ajusta lo que toca.
-  const carga = estadoCarga({ dias: FLAT_DAYS, checked, gps, hoyIso: todayLocalIso() });
+  const carga = estadoCarga({ dias: FLAT_DAYS, checked, gps, ritmoReal, hoyIso: todayLocalIso() });
   const capas = (d) => diaAjustado(diaEnPrueba(d, prueba), carga);
   const currentDay = capas(FLAT_DAYS[flatIdx] || FLAT_DAYS[todayIdx] || FLAT_DAYS[0]);
   const isToday = flatIdx === todayIdx;
