@@ -22,6 +22,14 @@ Todo cambio que se haga en la app se anota aquí. Sin excepciones.
 ## [Sin publicar]
 
 ### Añadido
+- **El plan se ajusta solo a lo que de verdad corres.** Es una capa encima del plan que se recalcula cada día con lo hecho (marcado o con GPS).
+  - **Parón de 7 días o más:** vuelta progresiva. Hay una salida de vuelta por cada 5 días parado, entre 2 y 6. La primera va al 1 − 2,5 % por día parado (mínimo 40 %) y cada salida sube hasta el 100 %.
+  - **En la vuelta:** en la primera mitad, las series pasan a suave + progresivos; en la segunda, hay menos repeticiones. Una prueba no se hace durante la vuelta.
+  - **Constancia baja** (menos de la mitad de las salidas en 2 semanas): las series de la semana siguiente son más cortas y la tirada no crece.
+  - **Dónde se ve:** en HOY, arriba, con el motivo; en la cuenta atrás de la carrera; y en Semana.
+  - El día del objetivo no se toca.
+
+### Añadido
 - **"Añadir a mi calendario" al acabar la sesión**, como hace Runna con Strava pero sin servidor. Abre Google Calendar con el evento ya relleno: 🏃 o 🏋️ más el nombre de la sesión, la hora real (la del GPS si la hay) y el resumen. En running son distancia, tiempo, ritmo medio y cadencia; en fuerza, las series de cada ejercicio. Tú le das a Guardar y el botón pasa a "Añadido ✓".
 
 ### Arreglado

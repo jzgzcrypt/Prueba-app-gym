@@ -28,6 +28,7 @@ import { ultimaVez } from "@/domain/fuerza/registro";
 import { informeMensual, informePendiente } from "@/domain/progreso/informe";
 import { InformeScreen } from "@/features/informe/InformeScreen";
 import { ritmoDelDia } from "@/domain/running/adaptar";
+import { diaAjustado, estadoCarga } from "@/domain/plan/ajuste";
 import { textoParaLibreta } from "@/domain/running/gps";
 import { ajustePorPeso, objetivosConAjuste, tendenciaPeso } from "@/domain/nutricion/adaptativo";
 import { habitualesIniciales } from "@/domain/nutricion/recomendar";
@@ -281,7 +282,10 @@ export default function App() {
 
   // La prueba de 2 semanas es una capa encima del plan: el plan no se toca.
   const prueba = pruebaDe(pruebaSemana);
-  const currentDay = diaEnPrueba(FLAT_DAYS[flatIdx] || FLAT_DAYS[todayIdx] || FLAT_DAYS[0], prueba);
+  // Y otra capa: lo que de verdad has corrido (paron, constancia) ajusta lo que toca.
+  const carga = estadoCarga({ dias: FLAT_DAYS, checked, gps, hoyIso: todayLocalIso() });
+  const capas = (d) => diaAjustado(diaEnPrueba(d, prueba), carga);
+  const currentDay = capas(FLAT_DAYS[flatIdx] || FLAT_DAYS[todayIdx] || FLAT_DAYS[0]);
   const isToday = flatIdx === todayIdx;
   const dayKey = claveDia(currentDay);
   const isFuerzaDay = currentDay.tipo === "fuerza";
@@ -497,7 +501,7 @@ export default function App() {
   }
 
   if (activeWorkout) {
-    const wDay = FLAT_DAYS.find(d => claveDia(d) === activeWorkout);
+    const wDay = diaAjustado(FLAT_DAYS.find(d => claveDia(d) === activeWorkout), carga);
     const wMov = getMovilidadDelDia(wDay);
     /** Guarda lo que midio el GPS en este dia. false si no hay nada que guardar. */
     const guardarGps = (res) => {
@@ -652,7 +656,7 @@ export default function App() {
         )}
 
         {screen === "semana" && (
-          <SemanaScreen weekIdx={weekIdx} setWeekIdx={setWeekIdx} jumpToDay={jumpToDay} aplicarDia={(d) => diaEnPrueba(d, prueba)}
+          <SemanaScreen weekIdx={weekIdx} setWeekIdx={setWeekIdx} jumpToDay={jumpToDay} aplicarDia={capas}
             checked={checked} todayIso={FLAT_DAYS[todayIdx].isoDate}
             workoutWeights={workoutWeights} ritmoReal={ritmoReal}
             pausedRanges={pausedRanges} setPausedRanges={setPausedRanges} />

@@ -205,6 +205,11 @@ export function HoyScreen(props) {
             <FinPrueba comp={compararPrueba({ dias: FLAT_DAYS, prueba, checked, cuelloChecks, sentir, aplicar: (d) => diaEnPrueba(d, prueba) })}
               onQuedarme={() => props.setPrueba(quedarse(prueba, FECHA_FIN))} onVolver={() => props.setPrueba(volverAlPlan(prueba))} />
           )}
+          {day.ajuste && (
+            <div data-ajuste style={{ ...CARD, padding: "11px 16px", fontSize: 14, color: C.text, lineHeight: 1.45, background: A.fondo.azul, boxShadow: "none" }}>
+              {day.ajuste.motivo}
+            </div>
+          )}
           <AhoraToca plan={planAhora} tituloSesion={day.tipo !== "libre" && day.tipo !== "compromiso" ? day.titulo : ""}
             onSesion={day.tipo === "compromiso" ? () => toggleCheck(dayKey) : onStartWorkout}
             onCuello={(k) => toggleCuello(k)} onPeso={props.guardarPeso} onComida={props.irANutricion} onExtras={() => abrirTodo("magia")}
@@ -239,6 +244,12 @@ export function HoyScreen(props) {
 
       {!plegado && (
       <div style={{ display: "flex", flexDirection: "column", gap: 12, marginTop: 14 }}>
+
+        {!isToday && day.ajuste && (
+          <div data-ajuste style={{ ...CARD, padding: "11px 16px", fontSize: 14, color: C.text, lineHeight: 1.45, background: A.fondo.azul, boxShadow: "none" }}>
+            {day.ajuste.motivo}
+          </div>
+        )}
 
         {esPasado && filasRepaso.length > 0 && (
           <RepasoDia filas={filasRepaso} onMarcar={marcarRepaso} onTodoNo={repasoTodoNo} />
