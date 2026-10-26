@@ -29,6 +29,7 @@ import { informeMensual, informePendiente } from "@/domain/progreso/informe";
 import { InformeScreen } from "@/features/informe/InformeScreen";
 import { ritmoDelDia } from "@/domain/running/adaptar";
 import { diaAjustado, estadoCarga } from "@/domain/plan/ajuste";
+import { ritmoEsperado } from "@/domain/running/esperado";
 import { textoParaLibreta } from "@/domain/running/gps";
 import { ajustePorPeso, objetivosConAjuste, tendenciaPeso } from "@/domain/nutricion/adaptativo";
 import { habitualesIniciales } from "@/domain/nutricion/recomendar";
@@ -565,6 +566,7 @@ export default function App() {
         ultimaVez={(nombre) => ultimaVez(nombre, wDay.isoDate, FLAT_DAYS, workoutWeights, workoutReps)}
         ritmoSeries={ritmoDelDia(wDay, FLAT_DAYS, ritmoReal)}
         suave={suaveHabitual({ dias: FLAT_DAYS, ritmoReal, antesDe: wDay.isoDate, claveDe: claveDia })}
+        esperado={ritmoEsperado({ day: wDay, dias: FLAT_DAYS, ritmoReal, gps })}
         flaggedExercises={flaggedExercises} />
     );
   }
@@ -603,7 +605,7 @@ export default function App() {
         )}
 
         {screen === "hoy" && (
-          <HoyScreen day={currentDay} dayKey={dayKey} isToday={isToday} flatIdx={flatIdx} gpsDelDia={gps[dayKey]}
+          <HoyScreen day={currentDay} dayKey={dayKey} isToday={isToday} flatIdx={flatIdx} gpsDelDia={gps[dayKey]} gps={gps}
             ultimaSalida={(() => { const k = Object.keys(gps).filter(c => gps[c] && gps[c].ruta && c <= dayKey).sort().pop(); return k ? gps[k] : null; })()}
             goDay={goDay} goToday={goToday} onJumpDay={jumpToDay}
             isFuerzaDay={isFuerzaDay} isRunDay={isRunDay} isCompromisoDay={isCompromisoDay} mov={mov}

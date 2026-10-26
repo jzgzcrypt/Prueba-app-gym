@@ -20,7 +20,7 @@ function intervalosDelDia(day, ritmoSeries) {
   return day.intervalos.map(b => ({ ...b, s: b.s.map(([t, d]) => t === "rapido" ? [t, seg] : [t, d]) }));
 }
 
-export function WorkoutMode({ day, mov, progress, onUpdateProgress, onFinish, onExit, weights, onUpdateWeight, reps, onUpdateReps, ultimaVez, ritmoSeries, flaggedExercises, suave = null }) {
+export function WorkoutMode({ day, mov, progress, onUpdateProgress, onFinish, onExit, weights, onUpdateWeight, reps, onUpdateReps, ultimaVez, ritmoSeries, flaggedExercises, suave = null, esperado = null }) {
   const isFuerza = day.tipo === "fuerza";
   const hasCal = mov.cal && mov.cal.length > 0;
   const hasEnf = mov.enf && mov.enf.length > 0;
@@ -194,7 +194,7 @@ export function WorkoutMode({ day, mov, progress, onUpdateProgress, onFinish, on
                   {obj && obj.resto && <div style={{ fontSize: 15, fontWeight: 600, color: "#1C1C1E", marginTop: 4 }}>Y después: {obj.resto}</div>}
                   {resto && <div style={{ fontSize: 14, color: "#8E8E93", marginTop: 6, lineHeight: 1.45 }}>{resto}</div>}
                   <div style={{ fontSize: 13, color: "#8E8E93", marginTop: 8 }}>
-                    Sesión completa: {day.dur}{phases.length > 1 ? ", con calentamiento y estiramientos" : ""} · esfuerzo {day.rpe}
+                    Sesión completa: {day.dur}{phases.length > 1 ? ", con calentamiento y estiramientos" : ""} · esfuerzo {day.rpe}{esperado ? " · ritmo " + esperado.texto : ""}
                   </div>
                 </div>
               );

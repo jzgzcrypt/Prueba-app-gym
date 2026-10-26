@@ -29,6 +29,7 @@ import { dejarPasar, deshacer, diaHablado, esClave, nombreDe, pendienteDeRecoloc
 import { Recolocar } from "@/features/hoy/Recolocar";
 import { AhoraToca, Avanzo, FinPrueba, RepasoDia, SentirSemana } from "@/features/hoy/AhoraYAvance";
 import { ahoraToca } from "@/domain/hoy/ahora";
+import { ritmoEsperado } from "@/domain/running/esperado";
 import { compararPrueba, diaDePrueba, diaEnPrueba, diasCumplidos, lunesDe, quedarse, tocaDecidir, volverAlPlan } from "@/domain/hoy/prueba";
 export function HoyScreen(props) {
   const { day, dayKey, isToday, flatIdx, goDay, goToday, isFuerzaDay, isRunDay, isCompromisoDay, mov,
@@ -328,6 +329,17 @@ export function HoyScreen(props) {
                 {day.rpe && <Dato v={day.rpe} l="RPE" />}
                 {comida && <Dato v={comida.macros.kcal.toLocaleString("es-ES")} l={"kcal · " + comida.etiqueta.toLowerCase()} />}
               </div>
+              {(() => {
+                // El RPE en ritmo: lo que de verdad miras corriendo.
+                const e = ritmoEsperado({ day, dias: FLAT_DAYS, ritmoReal: props.ritmoReal, gps: props.gps });
+                if (!e) return null;
+                return (
+                  <div data-ritmo-esperado style={{ marginTop: 6 }}>
+                    <span style={{ fontSize: 15, fontWeight: 700, color: C.text }}>Ritmo esperado: {e.texto}</span>
+                    <span style={{ fontSize: 12.5, color: C.textDim }}> · {e.fuente}</span>
+                  </div>
+                );
+              })()}
               <div style={{ fontSize: 14, color: "#3A3A3C", lineHeight: 1.5, margin: "8px 0 12px" }}>{day.what}</div>
               <AvisoRitmo day={day} ritmoReal={props.ritmoReal} />
 

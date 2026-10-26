@@ -22,6 +22,14 @@ Todo cambio que se haga en la app se anota aquí. Sin excepciones.
 ## [Sin publicar]
 
 ### Añadido
+- **Ritmo esperado junto al RPE**, en HOY ("Ritmo esperado: 7:01–7:21/km · de tus 2 últimos suaves") y en la pantalla de correr ("esfuerzo 3-4/10 · ritmo …"). De dónde sale:
+  - **Series:** su ritmo, ajustado a la última prueba.
+  - **Prueba:** el ritmo que va en línea con el objetivo.
+  - **Suave o tirada:** la media de los 3 últimos suaves (libreta o GPS); si no hay, lo que sale de la última prueba; si tampoco, la prueba de partida.
+  - **Ajustes:** con RPE 3 la franja es algo más lenta, y en vuelta tras un parón, +10 s.
+  - **Sin ningún dato:** "a ritmo de poder hablar".
+
+### Añadido
 - **El plan se ajusta solo a lo que de verdad corres.** Es una capa encima del plan que se recalcula cada día con lo hecho (marcado o con GPS).
   - **Parón de 7 días o más:** vuelta progresiva. Hay una salida de vuelta por cada 5 días parado, entre 2 y 6. La primera va al 1 − 2,5 % por día parado (mínimo 40 %) y cada salida sube hasta el 100 %.
   - **En la vuelta:** en la primera mitad, las series pasan a suave + progresivos; en la segunda, hay menos repeticiones. Una prueba no se hace durante la vuelta.
