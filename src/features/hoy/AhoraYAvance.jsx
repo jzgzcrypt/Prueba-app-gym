@@ -19,13 +19,28 @@ const NOMBRE_NO = { "cuello-m": "cuello de la mañana", "cuello-t": "cuello de l
  * "No la he hecho" para cualquier cosa: se apunta sin reproche y pasa a lo
  * siguiente. `saltadas`: los ids de hoy que dijiste que no, con Deshacer.
  */
-export function AhoraToca({ plan, onSesion, onNoHecha, saltadas = [], onDeshacerNo, esTenis, onCuello, onPeso, onComida, onExtras, tituloSesion }) {
+export function AhoraToca({ plan, onSesion, onNoHecha, saltadas = [], onDeshacerNo, esTenis, onVerDia, onCuello, onPeso, onComida, onExtras, tituloSesion }) {
   const [kg, setKg] = useState("");
   const a = plan.ahora;
   const [ic, tono] = a.icono === "mancuerna" ? ["mancuerna", "azul"] : ICONO[a.id] || ["meta", "gris"];
   const guardarPeso = () => { const n = Number(String(kg).replace(",", ".")); if (n > 40 && n < 200) { onPeso(Math.round(n * 10) / 10); setKg(""); } };
   return (
     <div data-ahora style={{ ...CARD, padding: "16px 16px 14px" }}>
+      {plan.dia && plan.dia.length > 0 && (
+        <div data-hoy-dia style={{ display: "flex", flexWrap: "wrap", alignItems: "center", gap: "4px 6px", fontSize: 13.5, color: C.textDim, marginBottom: 10, paddingBottom: 10, borderBottom: "1px solid " + C.divider }}>
+          <span style={{ fontWeight: 700, color: C.text }}>Hoy:</span>
+          {plan.dia.map((x, i) => {
+            const ahora = a.id === x.id || (x.id === "cuello" && a.accion === "cuello");
+            return (
+              <button key={x.id} className="btn" data-hoy-pieza={x.id} data-estado={x.estado} onClick={() => onVerDia && onVerDia(x.id)}
+                style={{ fontSize: 13.5, padding: "2px 0", color: x.estado === "hecho" ? A.verde : x.estado === "no" ? C.textFaint : C.text,
+                         fontWeight: ahora ? 800 : 500, textDecoration: x.estado === "no" ? "line-through" : "none" }}>
+                {x.titulo}{x.estado === "hecho" ? " ✓" : ""}{i < plan.dia.length - 1 ? <span style={{ color: C.textFaint, fontWeight: 400 }}> ·</span> : null}
+              </button>
+            );
+          })}
+        </div>
+      )}
       <div style={{ fontSize: 12.5, fontWeight: 700, color: A.rojo, letterSpacing: 0.3 }}>AHORA TOCA</div>
       <div style={{ display: "flex", alignItems: "center", gap: 12, marginTop: 6 }}>
         <IconoCaja nombre={ic} tono={tono} tam={48} />

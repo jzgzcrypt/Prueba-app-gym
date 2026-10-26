@@ -22,6 +22,9 @@ Todo cambio que se haga en la app se anota aquí. Sin excepciones.
 ## [Sin publicar]
 
 ### Añadido
+- **"Hoy:" arriba de "Ahora toca"** con todo lo del día y su estado: "Tenis ✓ · Cuello · Pesarte ✓ · Comida". En verde con ✓ lo hecho, tachado lo que dijiste que no, y en negrita lo de ahora. Al tocar una pieza se abre su sitio. Antes, con la sesión hecha, no se veía qué tocaba hoy.
+
+### Añadido
 - **Ritmo esperado junto al RPE**, en HOY ("Ritmo esperado: 7:01–7:21/km · de tus 2 últimos suaves") y en la pantalla de correr ("esfuerzo 3-4/10 · ritmo …"). De dónde sale:
   - **Series:** su ritmo, ajustado a la última prueba.
   - **Prueba:** el ritmo que va en línea con el objetivo.

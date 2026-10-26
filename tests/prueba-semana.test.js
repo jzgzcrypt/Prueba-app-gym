@@ -61,6 +61,13 @@ test("ahora toca en dia de fuerza: primera serie con la mancuerna, no zapatillas
   assert.match(r.ahora.sub, /^Empuje/);
 });
 
+test("ahora toca: la lista del dia entero con su estado, aunque la sesion ya este hecha", () => {
+  const r = ahoraToca({ hora: 17, day: dia("2026-10-12"), sesionHecha: true, cuello: {}, pesado: true, comidaApuntada: false, noHechas: ["comida"] });
+  assert.deepEqual(r.dia.map(x => x.titulo + ":" + x.estado), ["Tenis:hecho", "Cuello:pendiente", "Pesarte:hecho", "Comida:no"]);
+  const pasa = ahoraToca({ hora: 17, day: dia("2026-10-13"), sesionHecha: true, sesionNo: true, cuello: {}, pesado: false, comidaApuntada: false });
+  assert.equal(pasa.dia[0].estado, "no");
+});
+
 test("ahora toca: lo que dices que no has hecho se salta y pasa a lo siguiente", () => {
   const base = { day: dia("2026-10-13"), sesionHecha: false, cuello: {}, pesado: false, comidaApuntada: false };
   assert.equal(ahoraToca({ ...base, hora: 8, noHechas: ["cuello-m"] }).ahora.id, "peso");

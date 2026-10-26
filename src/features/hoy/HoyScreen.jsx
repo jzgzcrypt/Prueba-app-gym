@@ -70,6 +70,7 @@ export function HoyScreen(props) {
     return { ...p, [dayKey]: si ? [...l, id] : l };
   });
   const planAhora = ahoraToca({ hora: new Date().getHours(), day, sesionHecha: day.tipo === "libre" || !!checked[dayKey] || resueltaFuera,
+    sesionNo: !checked[dayKey] && destinoDe(props.postponed, dayKey) === "pasa",
     cuello: { m: cM, t: cT, n: cN }, pesado: props.pesoHoy != null, comidaApuntada: !!props.comidaApuntada, noHechas: noHechasHoy });
   const lunesHoy = lunesDe(hoyIso);
   const cumplidos = diasCumplidos(diasConPrueba, lunesHoy, hoyIso, { checked, cuelloChecks });
@@ -214,6 +215,7 @@ export function HoyScreen(props) {
           <AhoraToca plan={planAhora} tituloSesion={day.tipo !== "libre" && day.tipo !== "compromiso" ? day.titulo : ""}
             onSesion={day.tipo === "compromiso" ? () => toggleCheck(dayKey) : onStartWorkout}
             onCuello={(k) => toggleCuello(k)} onPeso={props.guardarPeso} onComida={props.irANutricion} onExtras={() => abrirTodo("magia")}
+            onVerDia={(id) => id === "comida" ? props.irANutricion() : abrirTodo(id === "cuello" ? "cuello" : null)}
             esTenis={day.tipo === "compromiso"} saltadas={noHechasHoy} onDeshacerNo={(id) => marcarNo(id, false)}
             onNoHecha={(a) => a.accion === "sesion" ? (!movidaA && setNoHecha(true)) : marcarNo(a.id, true)} />
           {noHecha && !movidaA && !checked[dayKey] && (
