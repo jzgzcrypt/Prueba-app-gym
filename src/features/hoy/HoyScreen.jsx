@@ -215,6 +215,7 @@ export function HoyScreen(props) {
           <AhoraToca plan={planAhora} tituloSesion={day.tipo !== "libre" && day.tipo !== "compromiso" ? day.titulo : ""}
             onSesion={day.tipo === "compromiso" ? () => toggleCheck(dayKey) : onStartWorkout}
             onCuello={(k) => toggleCuello(k)} onPeso={props.guardarPeso} onComida={props.irANutricion} onExtras={() => abrirTodo("magia")}
+            cuelloEj={cuelloEj}
             onVerDia={(id) => id === "comida" ? props.irANutricion() : abrirTodo(id === "cuello" ? "cuello" : null)}
             esTenis={day.tipo === "compromiso"} saltadas={noHechasHoy} onDeshacerNo={(id) => marcarNo(id, false)}
             onNoHecha={(a) => a.accion === "sesion" ? (!movidaA && setNoHecha(true)) : marcarNo(a.id, true)} />

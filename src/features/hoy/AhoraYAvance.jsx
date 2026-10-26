@@ -19,7 +19,7 @@ const NOMBRE_NO = { "cuello-m": "cuello de la mañana", "cuello-t": "cuello de l
  * "No la he hecho" para cualquier cosa: se apunta sin reproche y pasa a lo
  * siguiente. `saltadas`: los ids de hoy que dijiste que no, con Deshacer.
  */
-export function AhoraToca({ plan, onSesion, onNoHecha, saltadas = [], onDeshacerNo, esTenis, onVerDia, onCuello, onPeso, onComida, onExtras, tituloSesion }) {
+export function AhoraToca({ plan, onSesion, onNoHecha, saltadas = [], onDeshacerNo, esTenis, onVerDia, cuelloEj, onCuello, onPeso, onComida, onExtras, tituloSesion }) {
   const [kg, setKg] = useState("");
   const a = plan.ahora;
   const [ic, tono] = a.icono === "mancuerna" ? ["mancuerna", "azul"] : ICONO[a.id] || ["meta", "gris"];
@@ -49,6 +49,19 @@ export function AhoraToca({ plan, onSesion, onNoHecha, saltadas = [], onDeshacer
           <div style={{ fontSize: 14, color: C.textDim, marginTop: 3, lineHeight: 1.4 }}>{a.sub}</div>
         </div>
       </div>
+      {a.accion === "cuello" && cuelloEj && (
+        // Lo que toca de cuello, aqui mismo: sin tener que buscarlo.
+        <div data-cuello-pasos style={{ background: A.fondo.azul, borderRadius: 14, padding: "11px 13px", marginTop: 12 }}>
+          <div style={{ fontSize: 14, fontWeight: 700, color: C.text, marginBottom: 6 }}>{cuelloEj.nombre}</div>
+          {cuelloEj.pasos.map((p, i) => (
+            <div key={i} style={{ display: "flex", gap: 8, marginBottom: 5 }}>
+              <span style={{ fontSize: 13, fontWeight: 800, color: A.azul, flexShrink: 0 }}>{i + 1}.</span>
+              <span style={{ fontSize: 14, color: C.text, lineHeight: 1.45 }}>{p}</span>
+            </div>
+          ))}
+          {cuelloEj.sensacion && <div style={{ fontSize: 13, color: C.textDim, lineHeight: 1.4, marginTop: 4 }}>Debe sentirse: {cuelloEj.sensacion}</div>}
+        </div>
+      )}
       <div style={{ marginTop: 12 }}>
         {a.accion === "sesion" && <Boton tipo="color" color={A.rojo} data-ahora-accion onClick={onSesion}>{tituloSesion ? "Empezar" : "Hecho"}</Boton>}
         {a.accion === "cuello" && <Boton tipo="color" color={A.azul} data-ahora-accion onClick={() => onCuello(a.id.slice(-1))}>Hecho</Boton>}
