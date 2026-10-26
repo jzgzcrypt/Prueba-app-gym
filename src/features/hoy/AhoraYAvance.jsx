@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { A, C, CARD } from "@/design/tokens";
-import { Boton, Icono, IconoCaja, Tarjeta } from "@/features/ui/aire";
+import { Boton, Chevron, Icono, IconoCaja, Tarjeta } from "@/features/ui/aire";
 
 /**
  * LO DE ARRIBA DE HOY: una cosa cada vez, si avanzas, y una vez por semana
@@ -21,6 +21,7 @@ const NOMBRE_NO = { "cuello-m": "cuello de la mañana", "cuello-t": "cuello de l
  */
 export function AhoraToca({ plan, onSesion, onNoHecha, saltadas = [], onDeshacerNo, esTenis, onVerDia, cuelloEj, onCuello, onPeso, onComida, onExtras, tituloSesion }) {
   const [kg, setKg] = useState("");
+  const [verPasos, setVerPasos] = useState(false);
   const a = plan.ahora;
   const [ic, tono] = a.icono === "mancuerna" ? ["mancuerna", "azul"] : ICONO[a.id] || ["meta", "gris"];
   const guardarPeso = () => { const n = Number(String(kg).replace(",", ".")); if (n > 40 && n < 200) { onPeso(Math.round(n * 10) / 10); setKg(""); } };
@@ -50,9 +51,16 @@ export function AhoraToca({ plan, onSesion, onNoHecha, saltadas = [], onDeshacer
         </div>
       </div>
       {a.accion === "cuello" && cuelloEj && (
-        // Lo que toca de cuello, aqui mismo: sin tener que buscarlo.
-        <div data-cuello-pasos style={{ background: A.fondo.azul, borderRadius: 14, padding: "11px 13px", marginTop: 12 }}>
-          <div style={{ fontSize: 14, fontWeight: 700, color: C.text, marginBottom: 6 }}>{cuelloEj.nombre}</div>
+        // Lo que toca de cuello, aqui mismo y plegado: un toque y se ve.
+        <button className="btn" data-cuello-ver onClick={() => setVerPasos(!verPasos)} style={{
+          width: "100%", display: "flex", alignItems: "center", gap: 8, marginTop: 12, padding: "10px 13px", textAlign: "left",
+          background: A.fondo.azul, borderRadius: verPasos ? "14px 14px 0 0" : 14 }}>
+          <span style={{ flex: 1, fontSize: 14, color: C.text }}><b>{cuelloEj.nombre}</b> · <span style={{ color: A.azul, fontWeight: 600 }}>{verPasos ? "ocultar" : "ver cómo se hace"}</span></span>
+          <Chevron abierto={verPasos} />
+        </button>
+      )}
+      {a.accion === "cuello" && cuelloEj && verPasos && (
+        <div data-cuello-pasos style={{ background: A.fondo.azul, borderRadius: "0 0 14px 14px", padding: "2px 13px 11px" }}>
           {cuelloEj.pasos.map((p, i) => (
             <div key={i} style={{ display: "flex", gap: 8, marginBottom: 5 }}>
               <span style={{ fontSize: 13, fontWeight: 800, color: A.azul, flexShrink: 0 }}>{i + 1}.</span>

@@ -22,7 +22,7 @@ Todo cambio que se haga en la app se anota aquí. Sin excepciones.
 ## [Sin publicar]
 
 ### Cambiado
-- Cuando "Ahora toca" es el cuello, salen ahí mismo los pasos del ejercicio que te toca y cómo debe sentirse. Antes solo decía "Después de la ducha" y había que buscarlo dentro de "Todo lo de hoy".
+- Cuando "Ahora toca" es el cuello, sale plegado el ejercicio que te toca ("Activación visual · ver cómo se hace"): un toque abre los pasos y cómo debe sentirse. Antes solo decía "Después de la ducha" y había que buscarlo dentro de "Todo lo de hoy".
 
 ### Añadido
 - **"Hoy:" arriba de "Ahora toca"** con todo lo del día y su estado: "Tenis ✓ · Cuello · Pesarte ✓ · Comida". En verde con ✓ lo hecho, tachado lo que dijiste que no, y en negrita lo de ahora. Al tocar una pieza se abre su sitio. Antes, con la sesión hecha, no se veía qué tocaba hoy.
