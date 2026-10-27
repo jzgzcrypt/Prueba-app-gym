@@ -21,6 +21,15 @@ Todo cambio que se haga en la app se anota aquí. Sin excepciones.
 
 ## [Sin publicar]
 
+### Arreglado (revisión completa, tanda 1: que no se pierdan datos)
+- Si lo guardado no se puede leer, ya no se sobrescribe con vacío: se aparta una copia (`programa7k:datos.roto-…`), la app no guarda encima y avisa.
+- Correr sin GPS guarda el tiempo del cronómetro ("30 min") en vez de nada.
+- Desde los estiramientos ya no se puede volver a la carrera si ya corriste: volver la reiniciaba y se perdía lo corrido.
+- Las series guardan lo medido cada 2 s y al salir, no solo al cerrar un tramo.
+- El confirmar de "Vaciar este día" ya no se arrastra a otro día al cambiar de día.
+- Importar una copia sustituye todo (lo que no venga en ella queda vacío). Antes mezclaba con lo del móvil. Cargar e importar usan la misma lista de campos, y la copia lleva también la fecha del último backup y la fase del cuello.
+- Comidas: se borra la que tocas (antes, en las antiguas, todas las del mismo alimento), y "Deshacer" devuelve solo esa, sin llevarse lo apuntado después.
+
 ### Cambiado
 - Cuando "Ahora toca" es el cuello, sale plegado el ejercicio que te toca ("Activación visual · ver cómo se hace"): un toque abre los pasos y cómo debe sentirse. Antes solo decía "Después de la ducha" y había que buscarlo dentro de "Todo lo de hoy".
 

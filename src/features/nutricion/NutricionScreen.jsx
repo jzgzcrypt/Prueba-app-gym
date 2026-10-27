@@ -282,8 +282,8 @@ function ApunteFila({ a, primera, quitar, favorita, alternarFavorita }) {
             <path d="M12 3l2.7 5.6 6.1.9-4.4 4.3 1 6.1L12 17l-5.4 2.9 1-6.1L3.2 9.5l6.1-.9z" />
           </svg>
         </button>
-        {a.id && (
-          <button className="btn" aria-label={"Quitar " + (a.nombre || "comida")} onClick={() => quitar(a.id)}
+        {(
+          <button className="btn" data-quitar-apunte aria-label={"Quitar " + (a.nombre || "comida")} onClick={quitar}
             style={{ color: "#C7C7CC", minWidth: 36, minHeight: 36, display: "flex", alignItems: "center", justifyContent: "center" }}>
             <Icono nombre="mas" tam={20} grosor={2.2} style={{ transform: "rotate(45deg)" }} />
           </button>
@@ -429,7 +429,7 @@ export function NutricionScreen({ comida, esHoy, cuadre = null, apuntes = [], ap
       {apuntes.length > 0 && (
         <Tarjeta data-apuntes style={{ padding: 0, overflow: "hidden" }}>
           {apuntes.map((a, i) => (
-            <ApunteFila key={a.id || i} a={a} primera={i === 0} quitar={quitar}
+            <ApunteFila key={i + ":" + (a.id || "")} a={a} primera={i === 0} quitar={() => quitar(i)}
               favorita={esFavorita(a)} alternarFavorita={alternarFavorita} />
           ))}
         </Tarjeta>

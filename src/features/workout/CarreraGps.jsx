@@ -68,7 +68,8 @@ export function CarreraGps({ day, resultadoRef, suave = null, tecnica = false })
   };
   const resultado = () => {
     const reg = gps.regRef.current;
-    return { tramos: [], total: foto(reg), tiempoPrueba: pruebaRef.current, traza: reg.traza, huecos: segundosEnHuecos(reg), cadencia: cadRef.current };
+    // crono: el tiempo corrido aunque no haya GPS (se apunta igual).
+    return { tramos: [], total: foto(reg), tiempoPrueba: pruebaRef.current, traza: reg.traza, huecos: segundosEnHuecos(reg), cadencia: cadRef.current, crono: Math.round(segCrono()) };
   };
 
   // Cada segundo: repinta, avisa de la cuenta atras, dice cada km y mira si

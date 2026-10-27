@@ -52,6 +52,11 @@ export function WorkoutMode({ day, mov, progress, onUpdateProgress, onFinish, on
     else onFinish(gpsRef.current);
   };
   const goPrevPhase = () => { if (phaseIdx > 0) setPhaseIdx(phaseIdx - 1); };
+  // Volver a la carrera desde los estiramientos la empezaba de cero y se
+  // perdia lo corrido: si ya hay algo medido, no se ofrece volver.
+  const r0 = gpsRef.current;
+  const yaCorrido = !isFuerza && !!r0 && ((r0.total && r0.total.m > 0) || r0.crono > 0);
+  const puedeVolver = phaseIdx > 0 && !(phase === "enf" && yaCorrido);
 
   const wrapStyle = { minHeight: "100vh", background: "#F2F2F7", display: "flex", flexDirection: "column" };
   const containerStyle = { maxWidth: 480, margin: "0 auto", width: "100%", display: "flex", flexDirection: "column", minHeight: "100vh" };
@@ -145,7 +150,7 @@ export function WorkoutMode({ day, mov, progress, onUpdateProgress, onFinish, on
           </div>
 
           <div style={{ padding: "16px 20px 24px", display: "flex", gap: 8 }}>
-            {phaseIdx > 0 && (
+            {puedeVolver && (
               <button className="nb" onClick={goPrevPhase} style={{
                 width: 52, height: 52, borderRadius: 26, background: "#E5E5EA", fontSize: 22, color: "#1C1C1E",
               }}>&lsaquo;</button>
@@ -217,7 +222,7 @@ export function WorkoutMode({ day, mov, progress, onUpdateProgress, onFinish, on
           </div>
 
           <div style={{ padding: "16px 20px 24px", display: "flex", gap: 8 }}>
-            {phaseIdx > 0 && (
+            {puedeVolver && (
               <button className="nb" onClick={goPrevPhase} style={{
                 width: 52, height: 52, borderRadius: 26, background: "#E5E5EA", fontSize: 22, color: "#1C1C1E",
               }}>&lsaquo;</button>

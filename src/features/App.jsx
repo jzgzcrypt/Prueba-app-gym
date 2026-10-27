@@ -147,6 +147,38 @@ export default function App() {
   const [storageStatus, setStorageStatus] = useState(null); // null | "ok" | "error"
   const [showOnboarding, setShowOnboarding] = useState(false);
 
+  // Todos los datos del usuario, con su valor de partida. Cargar e importar
+  // pasan por aqui: asi ninguno se queda fuera de uno de los dos.
+  const CAMPOS = [
+    ["checked", setChecked, {}], ["cuelloChecks", setCuelloChecks, {}], ["notes", setNotes, {}],
+    ["youtubeLinks", setYoutubeLinks, {}], ["customExercises", setCustomExercises, {}], ["painLog", setPainLog, {}],
+    ["flaggedExercises", setFlaggedExercises, {}], ["pausedRanges", setPausedRanges, []], ["workoutProgress", setWorkoutProgress, {}],
+    ["magiaProgress", setMagiaProgress, {}], ["magiaRepaso", setMagiaRepaso, {}], ["magiaLog", setMagiaLog, {}],
+    ["guerreroLog", setGuerreroLog, {}], ["workoutWeights", setWorkoutWeights, {}], ["workoutReps", setWorkoutReps, {}],
+    ["medidas", setMedidas, []], ["ritmoReal", setRitmoReal, {}], ["ritmoTramos", setRitmoTramos, {}], ["gps", setGps, {}],
+    ["pesosDiarios", setPesosDiarios, {}], ["sensaciones", setSensaciones, {}], ["postponed", setPostponed, {}],
+    ["phaseAdjustNote", setPhaseAdjustNote, ""], ["currentWeekOverride", setCurrentWeekOverride, null], ["weeklyLog", setWeeklyLog, {}],
+    ["comidasLog", setComidasLog, {}], ["comidasHabituales", setComidasHabituales, null], ["pruebaSemana", setPruebaSemana, undefined],
+    ["semanaSentir", setSemanaSentir, {}], ["noHechas", setNoHechas, {}], ["cambiosMenu", setCambiosMenu, {}],
+    ["menuEditado", setMenuEditado, {}], ["compraMarcada", setCompraMarcada, {}], ["comidasFuera", setComidasFuera, FUERA_POR_DEFECTO],
+    ["bloquesHistorial", setBloquesHistorial, null], ["ultimoBackup", setUltimoBackup, null], ["cuelloFaseManual", setCuelloFaseManual, null],
+  ];
+  /** Pone los datos en la app. `reemplazar`: lo que no venga vuelve a su valor de partida (importar una copia). */
+  const aplicarDatos = (d, reemplazar) => {
+    // null es un valor valido donde el de partida tambien puede serlo (o, en
+    // la prueba de 2 semanas, "quitada"); en el resto se trata como "no viene".
+    const nullValido = (k, def) => def === null || def === undefined;
+    for (const [k, set, def] of CAMPOS) {
+      const v = d[k];
+      const viene = v !== undefined && (v !== null || nullValido(k, def));
+      if (viene) set(v);
+      else if (reemplazar && k !== "bloquesHistorial") set(def);
+    }
+    if (d.onboardingVisto) setOnboardingVisto(true);
+  };
+  // Si lo guardado no se puede leer, NO se sobrescribe: se guarda una copia y se avisa.
+  const [cargaFallida, setCargaFallida] = useState(false);
+
   // Carga los datos guardados una sola vez, al montar la app
   useEffect(() => {
     let cancelled = false;
@@ -159,45 +191,16 @@ export default function App() {
           // migrar() lleva los datos de cualquier version anterior a la actual
           // antes de que ninguna pantalla los vea. Sin esto, un cambio de forma
           // en el futuro romperia los datos ya guardados.
-          const { datos: d } = migrar(JSON.parse(result.value));
-          if (d.checked) setChecked(d.checked);
-          if (d.cuelloChecks) setCuelloChecks(d.cuelloChecks);
-          if (d.notes) setNotes(d.notes);
-          if (d.youtubeLinks) setYoutubeLinks(d.youtubeLinks);
-          if (d.customExercises) setCustomExercises(d.customExercises);
-          if (d.painLog) setPainLog(d.painLog);
-          if (d.flaggedExercises) setFlaggedExercises(d.flaggedExercises);
-          if (d.pausedRanges) setPausedRanges(d.pausedRanges);
-          if (d.workoutProgress) setWorkoutProgress(d.workoutProgress);
-          if (d.magiaProgress) setMagiaProgress(d.magiaProgress);
-          if (d.magiaRepaso) setMagiaRepaso(d.magiaRepaso);
-          if (d.onboardingVisto) setOnboardingVisto(true);
-          if (d.magiaLog) setMagiaLog(d.magiaLog);
-          if (d.guerreroLog) setGuerreroLog(d.guerreroLog);
-          if (d.workoutWeights) setWorkoutWeights(d.workoutWeights);
-          if (d.workoutReps) setWorkoutReps(d.workoutReps);
-          if (d.medidas) setMedidas(d.medidas);
-          if (d.ritmoReal) setRitmoReal(d.ritmoReal);
-        if (d.ritmoTramos) setRitmoTramos(d.ritmoTramos);
-        if (d.gps) setGps(d.gps);
-        if (d.pesosDiarios) setPesosDiarios(d.pesosDiarios);
-        if (d.sensaciones) setSensaciones(d.sensaciones);
-          if (d.postponed) setPostponed(d.postponed);
-          if (d.phaseAdjustNote != null) setPhaseAdjustNote(d.phaseAdjustNote);
-          if (d.currentWeekOverride !== undefined) setCurrentWeekOverride(d.currentWeekOverride);
-          if (d.weeklyLog) setWeeklyLog(d.weeklyLog);
-          if (d.comidasLog) setComidasLog(d.comidasLog);
-          if (d.comidasHabituales) setComidasHabituales(d.comidasHabituales);
-          if (d.pruebaSemana !== undefined) setPruebaSemana(d.pruebaSemana);
-          if (d.semanaSentir) setSemanaSentir(d.semanaSentir);
-          if (d.noHechas) setNoHechas(d.noHechas);
-          if (d.cambiosMenu) setCambiosMenu(d.cambiosMenu);
-          if (d.menuEditado) setMenuEditado(d.menuEditado);
-          if (d.compraMarcada) setCompraMarcada(d.compraMarcada);
-          if (d.comidasFuera) setComidasFuera(d.comidasFuera);
-          if (d.bloquesHistorial) setBloquesHistorial(d.bloquesHistorial);
-          if (d.ultimoBackup) setUltimoBackup(d.ultimoBackup);
-          if (d.cuelloFaseManual) setCuelloFaseManual(d.cuelloFaseManual);
+          let d;
+          try {
+            d = migrar(JSON.parse(result.value)).datos;
+          } catch (errLectura) {
+            // Lo guardado esta roto: se aparta una copia tal cual y no se toca.
+            try { await storage.set(CLAVE_DATOS + ".roto-" + Date.now(), result.value); } catch { /* sin espacio */ }
+            if (!cancelled) { setCargaFallida(true); setStorageReady(true); }
+            return;
+          }
+          aplicarDatos(d, false);
           loadedOk = true;
         }
       } catch (err) {
@@ -261,7 +264,7 @@ export default function App() {
   // Guarda automaticamente cada vez que cambia cualquier dato real del usuario.
   // No guarda hasta que la carga inicial ha terminado, para no sobreescribir con valores vacios.
   useEffect(() => {
-    if (!storageReady) return;
+    if (!storageReady || cargaFallida) return;
     const payload = {
       version: VERSION_ESQUEMA,
       checked, cuelloChecks, notes, youtubeLinks, customExercises, painLog,
@@ -279,7 +282,7 @@ export default function App() {
       flaggedExercises, pausedRanges, workoutProgress, magiaProgress, magiaRepaso, magiaLog,
       guerreroLog, workoutWeights, workoutReps, medidas, ritmoReal, ritmoTramos, gps, pesosDiarios, sensaciones, postponed, phaseAdjustNote,
       currentWeekOverride, weeklyLog, comidasLog, comidasHabituales, pruebaSemana, semanaSentir, noHechas, cambiosMenu, menuEditado, compraMarcada, comidasFuera,
-      bloquesHistorial, ultimoBackup, cuelloFaseManual, onboardingVisto, storageReady]);
+      bloquesHistorial, ultimoBackup, cuelloFaseManual, onboardingVisto, storageReady, cargaFallida]);
 
   // La prueba de 2 semanas es una capa encima del plan: el plan no se toca.
   const prueba = pruebaDe(pruebaSemana);
@@ -397,7 +400,7 @@ export default function App() {
       flaggedExercises, pausedRanges, workoutProgress, workoutWeights, workoutReps, medidas,
       ritmoReal, ritmoTramos, gps, pesosDiarios, sensaciones, postponed, phaseAdjustNote, currentWeekOverride, weeklyLog,
       comidasLog, comidasHabituales, pruebaSemana, semanaSentir, noHechas, cambiosMenu, menuEditado, compraMarcada, comidasFuera, magiaProgress, magiaRepaso,
-      magiaLog, guerreroLog, bloquesHistorial,
+      magiaLog, guerreroLog, bloquesHistorial, ultimoBackup, cuelloFaseManual, onboardingVisto,
     };
     const nombre = "programa-7k-backup-" + todayLocalIso() + ".json";
     const blob = new Blob([JSON.stringify(payload, null, 2)], { type: "application/json" });
@@ -427,41 +430,9 @@ export default function App() {
         // Un backup puede ser de una version antigua del esquema: se migra igual
         // que los datos cargados de storage, para que importar nunca pierda nada.
         const { datos: data } = migrar(JSON.parse(e.target.result));
-        if (data.checked) setChecked(data.checked);
-        if (data.cuelloChecks) setCuelloChecks(data.cuelloChecks);
-        if (data.notes) setNotes(data.notes);
-        if (data.youtubeLinks) setYoutubeLinks(data.youtubeLinks);
-        if (data.customExercises) setCustomExercises(data.customExercises);
-        if (data.painLog) setPainLog(data.painLog);
-        if (data.flaggedExercises) setFlaggedExercises(data.flaggedExercises);
-        if (data.pausedRanges) setPausedRanges(data.pausedRanges);
-        if (data.workoutProgress) setWorkoutProgress(data.workoutProgress);
-        if (data.workoutWeights) setWorkoutWeights(data.workoutWeights);
-        if (data.workoutReps) setWorkoutReps(data.workoutReps);
-        if (data.medidas) setMedidas(data.medidas);
-        if (data.ritmoReal) setRitmoReal(data.ritmoReal);
-        if (data.ritmoTramos) setRitmoTramos(data.ritmoTramos);
-        if (data.gps) setGps(data.gps);
-        if (data.pesosDiarios) setPesosDiarios(data.pesosDiarios);
-        if (data.sensaciones) setSensaciones(data.sensaciones);
-        if (data.postponed) setPostponed(data.postponed);
-        if (data.phaseAdjustNote != null) setPhaseAdjustNote(data.phaseAdjustNote);
-        if (data.currentWeekOverride !== undefined) setCurrentWeekOverride(data.currentWeekOverride);
-        if (data.weeklyLog) setWeeklyLog(data.weeklyLog);
-        if (data.comidasLog) setComidasLog(data.comidasLog);
-        if (data.comidasHabituales) setComidasHabituales(data.comidasHabituales);
-        if (data.pruebaSemana !== undefined) setPruebaSemana(data.pruebaSemana);
-        if (data.semanaSentir) setSemanaSentir(data.semanaSentir);
-        if (data.noHechas) setNoHechas(data.noHechas);
-        if (data.cambiosMenu) setCambiosMenu(data.cambiosMenu);
-        if (data.menuEditado) setMenuEditado(data.menuEditado);
-        if (data.compraMarcada) setCompraMarcada(data.compraMarcada);
-        if (data.comidasFuera) setComidasFuera(data.comidasFuera);
-        if (data.magiaProgress) setMagiaProgress(data.magiaProgress);
-        if (data.magiaRepaso) setMagiaRepaso(data.magiaRepaso);
-        if (data.magiaLog) setMagiaLog(data.magiaLog);
-        if (data.guerreroLog) setGuerreroLog(data.guerreroLog);
-        if (data.bloquesHistorial) setBloquesHistorial(data.bloquesHistorial);
+        // La copia SUSTITUYE lo que hay: lo que no venga en ella vuelve a vacio.
+        aplicarDatos(data, true);
+        setCargaFallida(false);
         alert("Datos importados correctamente.");
       } catch (err) {
         alert("El archivo no es un backup válido de Programa 7K.");
@@ -531,6 +502,9 @@ export default function App() {
           if (guardarGps(res)) {
             const texto = textoParaLibreta({ day: wDay, ...res });
             if (texto && !(ritmoReal[activeWorkout] || "").trim()) guardarRitmo(activeWorkout, texto);
+          } else if (res && res.crono >= 60 && !wDay.prueba && !(ritmoReal[activeWorkout] || "").trim()) {
+            // Sin GPS: el tiempo del cronometro, que es lo que si se sabe.
+            guardarRitmo(activeWorkout, Math.round(res.crono / 60) + " min");
           }
           setCierre(activeWorkout); setActiveWorkout(null);
         }}
@@ -594,6 +568,15 @@ export default function App() {
         {/* Si el guardado falla, lo tiene que ver en cualquier pantalla: antes
             solo se avisaba dentro de Coach > Ajustes, y se podian perder dias
             de registro sin enterarse. */}
+        {cargaFallida && (
+          <div role="alert" style={{ margin: "12px 16px 0", padding: "11px 14px", borderRadius: 12,
+                                     background: "#FBF0EF", border: "1px solid #E8C9C6" }}>
+            <div style={{ fontSize: 13, fontWeight: 800, color: "#171717" }}>No se han podido leer tus datos guardados</div>
+            <div style={{ fontSize: 12, color: "#4A4A47", marginTop: 3, lineHeight: 1.4 }}>
+              No se ha borrado nada: están apartados en una copia y la app no guarda encima. Importa tu última copia en Coach → Ajustes.
+            </div>
+          </div>
+        )}
         {storageStatus === "error" && (
           <div role="alert" style={{ margin: "12px 16px 0", padding: "11px 14px", borderRadius: 12,
                                      background: "#FBF0EF", border: "1px solid #E8C9C6" }}>
@@ -605,7 +588,7 @@ export default function App() {
         )}
 
         {screen === "hoy" && (
-          <HoyScreen day={currentDay} dayKey={dayKey} isToday={isToday} flatIdx={flatIdx} gpsDelDia={gps[dayKey]} gps={gps}
+          <HoyScreen key={dayKey} day={currentDay} dayKey={dayKey} isToday={isToday} flatIdx={flatIdx} gpsDelDia={gps[dayKey]} gps={gps}
             ultimaSalida={(() => { const k = Object.keys(gps).filter(c => gps[c] && gps[c].ruta && c <= dayKey).sort().pop(); return k ? gps[k] : null; })()}
             goDay={goDay} goToday={goToday} onJumpDay={jumpToDay}
             isFuerzaDay={isFuerzaDay} isRunDay={isRunDay} isCompromisoDay={isCompromisoDay} mov={mov}
@@ -677,10 +660,18 @@ export default function App() {
             cuadre={currentDay.isoDate >= todayLocalIso() ? textoCuadre(cuadre) : null}
             apuntes={comidasLog[dayKey] || []}
             apuntar={(ap) => setComidasLog(p => Object.assign({}, p, { [dayKey]: [...(p[dayKey] || []), ap] }))}
-            quitar={(id) => {
-              const antes = comidasLog[dayKey] || [];
-              setComidasLog(p => Object.assign({}, p, { [dayKey]: (p[dayKey] || []).filter(a => a.id !== id) }));
-              pushUndo("Comida quitada", () => setComidasLog(p => Object.assign({}, p, { [dayKey]: antes })));
+            quitar={(i) => {
+              // Por posicion: los apuntes antiguos comparten id (el del alimento).
+              const quitada = (comidasLog[dayKey] || [])[i];
+              if (!quitada) return;
+              const dia = dayKey;
+              setComidasLog(p => Object.assign({}, p, { [dia]: (p[dia] || []).filter((_, j) => j !== i) }));
+              // Deshacer devuelve SOLO esa comida, sin llevarse lo apuntado despues.
+              pushUndo("Comida quitada", () => setComidasLog(p => {
+                const l = [...(p[dia] || [])];
+                l.splice(Math.min(i, l.length), 0, quitada);
+                return Object.assign({}, p, { [dia]: l });
+              }));
             }}
             habituales={comidasHabituales || habitualesIniciales()} setHabituales={setComidasHabituales}
             semana={semanaNutricion({ dias: WEEKS[currentDay.weekIdx].days, comidasLog, hoyIso: todayLocalIso(), claveDe: claveDia,

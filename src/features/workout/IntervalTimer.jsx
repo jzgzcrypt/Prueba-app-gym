@@ -72,6 +72,14 @@ export function IntervalTimer({ intervalos, ritmo, resultadoRef }) {
     const lista = Object.keys(medidosRef.current).sort((a, b) => a - b).map(k => medidosRef.current[k]);
     resultadoRef.current = { tramos: lista, total: foto(gps.regRef.current), traza: gps.regRef.current.traza, huecos: segundosEnHuecos(gps.regRef.current) };
   };
+  // Se guarda lo medido cada pocos segundos y al salir: antes solo al cerrar
+  // un tramo, y "Salir" a mitad de serie perdia todo lo de ese tramo.
+  useEffect(() => {
+    if (!corriendo) return;
+    const t = setInterval(guardarResultado, 2000);
+    return () => { clearInterval(t); guardarResultado(); };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [corriendo]);
   /** Cierra el tramo `i`: lo mide, cortando en este instante exacto. */
   const cerrarTramo = (i) => {
     const t = tramos[i];
