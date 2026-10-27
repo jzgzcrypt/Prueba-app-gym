@@ -27,12 +27,12 @@
  * @returns {{ ahora: {id,titulo,sub,accion}, despues: {id,titulo}[], dia: {id,titulo,estado}[] }}
  */
 /** Todo lo del dia, sin mirar la hora: { id, titulo, estado: "hecho"|"no"|"pendiente" }. */
-function todoElDia({ day, sesionHecha, sesionNo, cuello, pesado, comidaApuntada, no }) {
+function todoElDia({ day, sesionHecha, sesionNo, sesionMovida, cuello, pesado, comidaApuntada, no }) {
   const c = cuello || {};
   const out = [];
   if (day && day.tipo !== "libre") {
     const titulo = day.tipo === "compromiso" ? "Tenis" : day.tipo === "fuerza" ? "Fuerza" : day.tipo === "run" ? "Correr" : "Prueba";
-    out.push({ id: "sesion", titulo, estado: sesionHecha ? (sesionNo ? "no" : "hecho") : "pendiente" });
+    out.push({ id: "sesion", titulo, estado: sesionMovida ? "movida" : sesionHecha ? (sesionNo ? "no" : "hecho") : "pendiente" });
   }
   const cuelloNo = ["cuello-m", "cuello-t", "cuello-n"].every(k => no.has(k));
   out.push({ id: "cuello", titulo: "Cuello", estado: c.m || c.t || c.n ? "hecho" : cuelloNo ? "no" : "pendiente" });
@@ -41,7 +41,7 @@ function todoElDia({ day, sesionHecha, sesionNo, cuello, pesado, comidaApuntada,
   return out;
 }
 
-export function ahoraToca({ hora, day, sesionHecha, sesionNo = false, cuello, pesado, comidaApuntada, noHechas = [] }) {
+export function ahoraToca({ hora, day, sesionHecha, sesionNo = false, sesionMovida = false, cuello, pesado, comidaApuntada, noHechas = [] }) {
   const hay = day && day.tipo !== "libre";
   const esTenis = day && day.tipo === "compromiso";
   const lista = [];
@@ -65,7 +65,7 @@ export function ahoraToca({ hora, day, sesionHecha, sesionNo = false, cuello, pe
   if (hora >= 21 && !c.n) lista.push({ id: "cuello-n", titulo: "Cuello", sub: "Al acostarte. 2 minutos.", accion: "cuello" });
   const no = new Set(noHechas);
   const pendientes = lista.filter(x => !no.has(x.id));
-  const dia = todoElDia({ day, sesionHecha, sesionNo, cuello, pesado, comidaApuntada, no });
+  const dia = todoElDia({ day, sesionHecha, sesionNo, sesionMovida, cuello, pesado, comidaApuntada, no });
   if (!pendientes.length) {
     return { ahora: { id: "extras", titulo: "Todo lo de hoy, hecho", sub: "Si te apetece: 5 min de magia en el sofá en vez del móvil, o la respiración de guerrero.", accion: "extras" }, despues: [], dia };
   }

@@ -21,6 +21,17 @@ Todo cambio que se haga en la app se anota aquí. Sin excepciones.
 
 ## [Sin publicar]
 
+### Arreglado (revisión completa, tanda 2: sesiones movidas)
+- "Ahora toca" y "Empezar" usan la sesión que de verdad toca hoy: una que llegó movida a hoy manda sobre la del día (antes "Empezar" abría la que había cedido el sitio). En "Hoy:" una sesión movida sale como "(movida)", no como hecha.
+- Una sesión movida pasa por los mismos ajustes que el resto (prueba de 2 semanas y vuelta tras parón, por el día en que cae), también en el entreno.
+- "Vaciar este día" y "Devolver a su día" deshacen el movimiento entero; antes dejaban la otra mitad colgando y un día podía quedarse vacío para siempre. Recolocar o dejar pasar una sesión ya movida limpia lo anterior. "Vaciar" también borra los "No la he hecho" del día.
+- "¿Mover a otro día?" solo ofrece días de hoy a 7 días adelante, sin hacer, libres y sin otra sesión. Si no hay, lo dice.
+- Una sesión recibida ayer y no hecha también se pregunta ("Ayer faltó…").
+- Un día cuya sesión se movió muestra "La has movido al … · Deshacer" también fuera de hoy.
+- Se quita la tarjeta vieja "Ayer tocaba un test…", que salía duplicada o desfasada.
+- La fila de días marca ✓ donde se hizo la sesión, no en su día original.
+- Lo movido o dejado pasar a propósito ya no cuenta como falta de constancia.
+
 ### Arreglado (revisión completa, tanda 1: que no se pierdan datos)
 - Si lo guardado no se puede leer, ya no se sobrescribe con vacío: se aparta una copia (`programa7k:datos.roto-…`), la app no guarda encima y avisa.
 - Correr sin GPS guarda el tiempo del cronómetro ("30 min") en vez de nada.

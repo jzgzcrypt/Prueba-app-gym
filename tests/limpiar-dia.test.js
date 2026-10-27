@@ -80,3 +80,13 @@ test("aguanta estado incompleto sin romperse", () => {
   assert.equal(limpiarDia({ checked: undefined }, "1-3").habiaAlgo, false);
   assert.equal(cuantoHayEn({}, "1-3"), 0);
 });
+
+test("vaciar un dia quita los movimientos enteros, sin dejar la otra mitad colgando", async () => {
+  const { limpiarDia: limpiar } = await import("../src/lib/estado/limpiar-dia.js");
+  // El 11 (tirada) se movio al 13, que le cedio el sitio. Y el 15 llego al 17.
+  const postponed = { "2026-10-11": "2026-10-13", "2026-10-13": "cede:2026-10-11", "2026-10-15": "2026-10-17" };
+  assert.deepEqual(limpiar({ postponed }, "2026-10-11").estado.postponed, { "2026-10-15": "2026-10-17" });
+  assert.deepEqual(limpiar({ postponed }, "2026-10-13").estado.postponed, { "2026-10-15": "2026-10-17" });
+  assert.deepEqual(limpiar({ postponed }, "2026-10-17").estado.postponed, { "2026-10-11": "2026-10-13", "2026-10-13": "cede:2026-10-11" });
+  assert.deepEqual(limpiar({ noHechas: { "2026-10-11": ["peso"] } }, "2026-10-11").estado.noHechas, {});
+});

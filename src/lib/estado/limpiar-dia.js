@@ -11,9 +11,11 @@
  * sin abrir un navegador.
  */
 
+import { quitarMovimientosDe } from "./mover-sesion.js";
+
 /** Claves que guardan UN valor por dia, indexadas por dayKey exacto. */
 const POR_DIA = ["notes", "painLog", "magiaLog", "guerreroLog", "workoutWeights", "workoutReps", "workoutProgress",
-                 "ritmoReal", "ritmoTramos", "gps", "pesosDiarios", "sensaciones", "postponed", "comidasLog", "cambiosMenu"];
+                 "ritmoReal", "ritmoTramos", "gps", "pesosDiarios", "sensaciones", "comidasLog", "cambiosMenu", "noHechas"];
 
 /** Claves donde un dia puede tener varias entradas: el propio dayKey y
  *  ademas sufijos como "1-3-m" (cuello manana) o "1-3-movenf" (movilidad). */
@@ -54,8 +56,10 @@ export function limpiarDia(estado, dayKey) {
   const salida = { ...estado };
   for (const k of POR_DIA) salida[k] = sinEsteDia(estado[k], dayKey, false);
   for (const k of POR_DIA_CON_SUFIJO) salida[k] = sinEsteDia(estado[k], dayKey, true);
+  // Los movimientos van por parejas (origen y destino): se quitan enteros.
+  if ("postponed" in estado) salida.postponed = quitarMovimientosDe(estado.postponed, dayKey);
 
-  const habiaAlgo = [...POR_DIA, ...POR_DIA_CON_SUFIJO].some(k => salida[k] !== estado[k]);
+  const habiaAlgo = [...POR_DIA, ...POR_DIA_CON_SUFIJO, "postponed"].some(k => salida[k] !== estado[k]);
   return { estado: salida, habiaAlgo };
 }
 
@@ -66,5 +70,6 @@ export function cuantoHayEn(estado, dayKey) {
   let n = 0;
   for (const k of POR_DIA) n += Object.keys(estado[k] || {}).filter(c => c === dayKey).length;
   for (const k of POR_DIA_CON_SUFIJO) n += Object.keys(estado[k] || {}).filter(c => esDelDia(c, dayKey)).length;
+  n += Object.keys(estado.postponed || {}).filter(c => c === dayKey).length;
   return n;
 }

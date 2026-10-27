@@ -14,8 +14,11 @@ export function WeekDots({ day, checked, onJumpDay, aplicar = (d) => d, movidas 
   return (
     <div data-semana-circulos style={{ display: "flex", justifyContent: "space-between", marginTop: 10 }}>
       {week.days.map(aplicar).map((d, i) => {
-        const done = !!checked[claveDia(d)];
-        const noHecha = !done && movidas[claveDia(d)] === "pasa";
+        // Hecho donde se hizo: la sesion propia si no se movio, o una que llego aqui.
+        const iso = claveDia(d), m = movidas[iso];
+        const llegadas = Object.keys(movidas).filter(o => movidas[o] === iso);
+        const done = (!m && !!checked[iso]) || llegadas.some(o => checked[o]) || (d.tipo === "libre" && !!checked[iso]);
+        const noHecha = !done && m === "pasa" && !llegadas.length;
         const isRest = d.tipo === "libre";
         const isCurrent = i === day.dayIdx;
         const isToday = DATE_MAP[d.date] === todayIso;

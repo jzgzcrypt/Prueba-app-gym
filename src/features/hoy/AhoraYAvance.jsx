@@ -34,9 +34,9 @@ export function AhoraToca({ plan, onSesion, onNoHecha, saltadas = [], onDeshacer
             const ahora = a.id === x.id || (x.id === "cuello" && a.accion === "cuello");
             return (
               <button key={x.id} className="btn" data-hoy-pieza={x.id} data-estado={x.estado} onClick={() => onVerDia && onVerDia(x.id)}
-                style={{ fontSize: 13.5, padding: "2px 0", color: x.estado === "hecho" ? A.verde : x.estado === "no" ? C.textFaint : C.text,
+                style={{ fontSize: 13.5, padding: "2px 0", color: x.estado === "hecho" ? A.verde : x.estado === "no" || x.estado === "movida" ? C.textFaint : C.text,
                          fontWeight: ahora ? 800 : 500, textDecoration: x.estado === "no" ? "line-through" : "none" }}>
-                {x.titulo}{x.estado === "hecho" ? " ✓" : ""}{i < plan.dia.length - 1 ? <span style={{ color: C.textFaint, fontWeight: 400 }}> ·</span> : null}
+                {x.titulo}{x.estado === "hecho" ? " ✓" : x.estado === "movida" ? " (movida)" : ""}{i < plan.dia.length - 1 ? <span style={{ color: C.textFaint, fontWeight: 400 }}> ·</span> : null}
               </button>
             );
           })}

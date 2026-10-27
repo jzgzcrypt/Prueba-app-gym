@@ -43,6 +43,24 @@ export function sesionesDelDia(dia, movidas, todos) {
 }
 
 /**
+ * Quita todo movimiento que toque a un dia, como origen o como destino, sin
+ * dejar la otra mitad colgando: lo que salio de el, lo que llego a el y los
+ * "cede" de ambos lados. Es lo que necesita "Vaciar este dia".
+ */
+export function quitarMovimientosDe(movidas, dia) {
+  if (!movidas) return movidas;
+  const m = { ...movidas };
+  const v = m[dia];
+  delete m[dia];
+  if (typeof v === "string" && v.startsWith("cede:")) delete m[v.slice(5)];
+  for (const k of Object.keys(m)) {
+    if (m[k] === dia) delete m[k];                 // llego aqui desde k
+    else if (m[k] === "cede:" + dia) delete m[k];  // otro dia le cedio el sitio
+  }
+  return Object.keys(m).length === Object.keys(movidas).length ? movidas : m;
+}
+
+/**
  * Mueve lo de un dia a otro, o lo devuelve a su sitio si destino es null.
  *
  * Reglas, y el motivo de cada una:
@@ -58,9 +76,11 @@ export function moverSesion(movidas, origen, destino) {
   const actual = movidas || {};
 
   if (destino == null) {
-    if (!(origen in actual)) return { movidas: actual, ok: true, motivo: null };
+    // Devolver deshace el traslado entero: tambien el "cede" que dejo en el
+    // dia de destino (si no, ese dia se quedaba vacio para siempre).
     const fuera = { ...actual };
     delete fuera[origen];
+    for (const k of Object.keys(fuera)) if (fuera[k] === "cede:" + origen) delete fuera[k];
     return { movidas: fuera, ok: true, motivo: null };
   }
 
@@ -68,7 +88,7 @@ export function moverSesion(movidas, origen, destino) {
   if (llegadasA(actual, destino).some(o => o !== origen)) {
     return { movidas: actual, ok: false, motivo: "Ese día ya ha recibido otra sesión." };
   }
-  if (actual[destino]) {
+  if (actual[destino] && actual[destino] !== "pasa") {
     return { movidas: actual, ok: false, motivo: "Ese día ya movió lo suyo a otro sitio." };
   }
 

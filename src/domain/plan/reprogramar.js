@@ -123,7 +123,9 @@ export function proponerHueco({ dia, dias, movidas, checked, hoyIso }) {
  * Devuelve el nuevo mapa de movidas.
  */
 export function recolocar(movidas, origen, destino, cede) {
-  const m = { ...(movidas || {}) };
+  // Si ya estaba movida (una sesion recibida que tampoco se hizo), primero
+  // se deshace lo anterior: nada queda colgando.
+  const m = deshacer(movidas, origen);
   m[origen] = destino;
   if (cede) m[destino] = "cede:" + origen;
   return m;
@@ -131,7 +133,7 @@ export function recolocar(movidas, origen, destino, cede) {
 
 /** Dejarla pasar: queda apuntado que fue a proposito (ya no avisa). */
 export function dejarPasar(movidas, origen) {
-  return { ...(movidas || {}), [origen]: "pasa" };
+  return { ...deshacer(movidas, origen), [origen]: "pasa" };
 }
 
 /** Deshacer lo hecho con una sesion: vuelve a su dia y libera el que cedio. */
@@ -153,6 +155,11 @@ export function pendienteDeRecolocar({ dias, movidas, checked, hoyIso }) {
   if (i <= 0) return null;
   const ayer = dias[i - 1];
   const m = movidas || {};
+  // Una sesion que llego movida a ayer y no se hizo, tambien cuenta.
+  const llegada = Object.keys(m).filter(o => m[o] === ayer.isoDate && !(checked || {})[o])
+    .map(o => dias.find(d => d.isoDate === o)).filter(Boolean)
+    .find(d => ["prueba", "calidad", "tirada", "suave", "fuerza", "tenis"].includes(claseDe(d)));
+  if (llegada) return llegada;
   if (["prueba", "calidad", "tirada", "suave", "fuerza", "tenis"].includes(claseDe(ayer)) && !(checked || {})[ayer.isoDate] && !m[ayer.isoDate]) return ayer;
   return null;
 }

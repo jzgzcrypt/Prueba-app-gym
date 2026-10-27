@@ -90,3 +90,16 @@ test("sin ninguna carrera apuntada y el plan ya empezado: vuelta desde el inicio
   const antes = estadoCarga({ dias: FLAT_DAYS, checked: {}, hoyIso: "2026-09-01" });
   assert.deepEqual(antes.vuelta, {});
 });
+
+test("una sesion movida se ajusta por el dia en que cae, y lo movido a proposito no es falta de constancia", () => {
+  const e = estadoCarga({ dias: FLAT_DAYS, checked: hastaEl11, hoyIso: "2026-10-25" });
+  // Las series del 22 (ya pasadas sin hacer) movidas al 27, dentro de la vuelta.
+  const movida = diaAjustado(dia("2026-10-22"), e, "2026-10-27");
+  assert.ok(movida.ajuste);
+  const pocas = { ...hastaEl11, ...hechos("2026-10-15") };
+  const sinMover = estadoCarga({ dias: FLAT_DAYS, checked: pocas, gps: { "2026-10-20": { m: 3000 } }, hoyIso: "2026-10-26" });
+  const conMovidas = estadoCarga({ dias: FLAT_DAYS, checked: pocas, gps: { "2026-10-20": { m: 3000 } }, hoyIso: "2026-10-26",
+    movidas: { "2026-10-13": "pasa", "2026-10-18": "pasa", "2026-10-22": "pasa" } });
+  assert.ok(sinMover.constancia);
+  assert.equal(conMovidas.constancia, null);
+});

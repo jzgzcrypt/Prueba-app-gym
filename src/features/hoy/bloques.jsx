@@ -1,7 +1,7 @@
 "use client";
 
 import { claveDia, todayLocalIso } from "@/domain/plan/calendario";
-import { destinoDe, llegadasA, moverSesion } from "@/lib/estado/mover-sesion";
+import { llegadasA, moverSesion } from "@/lib/estado/mover-sesion";
 
 import { useState } from "react";
 import { A, C, CARD, CAT, R, SP, TAP_MIN, TYPE } from "@/design/tokens";
@@ -369,40 +369,31 @@ export function ListBlock({ id, expandedBlock, toggleBlock, icono, tono = "gris"
   );
 }
 
-export function MoveDayBlock({ dayKey, day, week, postponed, setPostponed }) {
+export function MoveDayBlock({ dayKey, day, dias, checked, hoyIso, postponed, setPostponed }) {
   const [open, setOpen] = useState(false);
   const [error, setError] = useState(null);
-  const destino = destinoDe(postponed, dayKey);
-  const otros = week.days.filter(d => claveDia(d) !== dayKey);
+  const ch = checked || {}, mov = postponed || {};
+  // Solo dias que de verdad pueden recibirla: de hoy en adelante, en los 7
+  // siguientes, sin hacer, libres (o cuya sesion se dejo pasar) y sin otra
+  // sesion recibida. Antes salian dias pasados, hechos u ocupados.
+  const libres = (dias || []).filter(d => {
+    const iso = claveDia(d);
+    if (iso === dayKey || iso < hoyIso || iso <= dayKey || iso > masDias(dayKey, 7) || ch[iso]) return false;
+    if (llegadasA(mov, iso).length) return false;
+    return d.tipo === "libre" || mov[iso] === "pasa";
+  });
 
   const mover = (dia) => {
-    const r = moverSesion(postponed, dayKey, claveDia(dia));
+    const r = moverSesion(mov, dayKey, claveDia(dia));
     if (!r.ok) { setError(r.motivo); return; }
     setPostponed(r.movidas);
     setError(null);
     setOpen(false);
   };
 
-  const devolver = () => setPostponed(moverSesion(postponed, dayKey, null).movidas);
-
-  if (destino) {
-    const diaDestino = week.days.find(d => claveDia(d) === destino);
-    return (
-      <div style={{ ...CARD, background: A.fondo.naranja, padding: "12px 16px" }}>
-        <div style={{ fontSize: 12, fontWeight: 700, color: "#171717" }}>
-          Movida a {diaDestino ? diaDestino.dow + " " + diaDestino.date : destino}
-        </div>
-        <div style={{ fontSize: 10.5, color: "#787774", marginTop: 2 }}>
-          Ese día la verás ahí, no aquí.
-        </div>
-        <button className="btn" onClick={devolver} style={{ fontSize: 11, color: "#787774", fontWeight: 700, marginTop: 4 }}>Devolver a su día</button>
-      </div>
-    );
-  }
-
   return (
     <div style={{ background: "transparent", borderRadius: 12, overflow: "hidden" }}>
-      <button onClick={() => { setOpen(!open); setError(null); }} style={{ padding: "6px 4px", cursor: "pointer" }}>
+      <button data-mover-dia onClick={() => { setOpen(!open); setError(null); }} style={{ padding: "6px 4px", cursor: "pointer" }}>
         <div style={{ fontSize: 13, fontWeight: 600, color: A.azul }}>¿Mover a otro día? &rsaquo;</div>
       </button>
       {open && (
@@ -410,21 +401,29 @@ export function MoveDayBlock({ dayKey, day, week, postponed, setPostponed }) {
           {error && (
             <div style={{ fontSize: 11.5, color: CAT.running, fontWeight: 600, padding: "2px 4px" }}>{error}</div>
           )}
-          {otros.map((d) => {
-            const ocupado = llegadasA(postponed, claveDia(d)).length > 0;
-            return (
-              <button key={claveDia(d)} className="btn" onClick={() => mover(d)} style={{
-                textAlign: "left", padding: "12px 14px", background: C.card, borderRadius: 14,
-                fontSize: 13, fontWeight: 600, color: ocupado ? "#A8A8A5" : C.text,
-              }}>
-                Mover a {d.dow} ({d.date}){ocupado && " — ya ha recibido una sesión"}
-              </button>
-            );
-          })}
+          {libres.length === 0 && (
+            <div style={{ fontSize: 13, color: C.textDim, padding: "2px 4px", lineHeight: 1.4 }}>
+              No hay ningún día libre en los próximos 7. Mejor dejarla pasar que juntar dos sesiones.
+            </div>
+          )}
+          {libres.map((d) => (
+            <button key={claveDia(d)} className="btn" data-mover-a={claveDia(d)} onClick={() => mover(d)} style={{
+              textAlign: "left", padding: "12px 14px", background: C.card, borderRadius: 14,
+              fontSize: 13, fontWeight: 600, color: C.text,
+            }}>
+              Mover a {d.dow} ({d.date})
+            </button>
+          ))}
         </div>
       )}
     </div>
   );
+}
+
+/** "2026-10-27" + 7 dias, en UTC para que no baile con el cambio de hora. */
+function masDias(iso, n) {
+  const [y, m, d] = iso.split("-").map(Number);
+  return new Date(Date.UTC(y, m - 1, d + n)).toISOString().slice(0, 10);
 }
 
 export function BigBlock({ label, title, sub, accent, icon, children }) {

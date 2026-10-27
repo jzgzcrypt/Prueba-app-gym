@@ -44,7 +44,8 @@ const minutos = (txt) => { const m = /(\d+)\s*min/.exec(String(txt || "")); retu
  * @returns {{ paro:number, vuelta:Object<string,{n:number,de:number,factor:number,sinSeries:boolean,paro:number}>,
  *             constancia:null|{hechas:number,de:number}, suavizar:Object<string,"series"|"tirada"> }}
  */
-export function estadoCarga({ dias, checked, gps, ritmoReal, hoyIso }) {
+export function estadoCarga({ dias, checked, gps, ritmoReal, movidas, hoyIso }) {
+  const mov = movidas || {};
   const ch = checked || {}, g = gps || {}, rr = ritmoReal || {};
   const hecha = (d) => !!ch[d.isoDate] || !!(g[d.isoDate] && g[d.isoDate].m > 0) || !!String(rr[d.isoDate] || "").trim();
   const carreras = (dias || []).filter(esCarrera);
@@ -85,7 +86,8 @@ export function estadoCarga({ dias, checked, gps, ritmoReal, hoyIso }) {
   const vueltaPorDelante = Object.keys(vuelta).some(iso => iso >= hoyIso);
   if (!vueltaPorDelante) {
     const desde = masDias(hoyIso, -14);
-    const tocaban = carreras.filter(d => d.isoDate >= desde && d.isoDate < hoyIso && !d.vispera);
+    // Lo movido, cedido o dejado pasar a proposito no cuenta como fallo.
+    const tocaban = carreras.filter(d => d.isoDate >= desde && d.isoDate < hoyIso && !d.vispera && (!mov[d.isoDate] || hecha(d)));
     const hechasRec = tocaban.filter(hecha).length;
     if (tocaban.length >= 3 && hechasRec / tocaban.length < 0.5) {
       constancia = { hechas: hechasRec, de: tocaban.length };
@@ -143,9 +145,11 @@ function menosSeries(day, f) {
  * El dia con el ajuste aplicado (o el mismo si no toca). El ajustado lleva
  * `ajuste: { motivo }` para decir por que.
  */
-export function diaAjustado(day, estado) {
+export function diaAjustado(day, estado, fechaReal) {
   if (!day || !estado || day.tipo === "objetivo" || !esCarrera(day)) return day;
-  const v = estado.vuelta[day.isoDate];
+  // Una sesion movida se ajusta por el dia en que de verdad cae.
+  const sig = fechaReal && Object.keys(estado.vuelta).sort().find(iso => iso >= fechaReal);
+  const v = (fechaReal && (estado.vuelta[fechaReal] || (sig && estado.vuelta[sig]))) || estado.vuelta[day.isoDate];
   if (v) {
     const pct = Math.round(v.factor * 100);
     const motivo = v.sinNada
@@ -156,7 +160,7 @@ export function diaAjustado(day, estado) {
       : acortar(day, v.factor);
     return { ...out, ajuste: { motivo } };
   }
-  const s = estado.suavizar[day.isoDate];
+  const s = (fechaReal && estado.suavizar[fechaReal]) || estado.suavizar[day.isoDate];
   if (s && estado.constancia) {
     const c = estado.constancia;
     const base = "Últimas 2 semanas: " + c.hechas + " de " + c.de + " salidas.";

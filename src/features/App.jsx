@@ -287,8 +287,9 @@ export default function App() {
   // La prueba de 2 semanas es una capa encima del plan: el plan no se toca.
   const prueba = pruebaDe(pruebaSemana);
   // Y otra capa: lo que de verdad has corrido (paron, constancia) ajusta lo que toca.
-  const carga = estadoCarga({ dias: FLAT_DAYS, checked, gps, ritmoReal, hoyIso: todayLocalIso() });
-  const capas = (d) => diaAjustado(diaEnPrueba(d, prueba), carga);
+  const carga = estadoCarga({ dias: FLAT_DAYS, checked, gps, ritmoReal, movidas: postponed, hoyIso: todayLocalIso() });
+  // fechaReal: el dia en que de verdad cae (una sesion movida se ajusta por ahi).
+  const capas = (d, fechaReal) => d && diaAjustado(diaEnPrueba(d, prueba), carga, fechaReal);
   const currentDay = capas(FLAT_DAYS[flatIdx] || FLAT_DAYS[todayIdx] || FLAT_DAYS[0]);
   const isToday = flatIdx === todayIdx;
   const dayKey = claveDia(currentDay);
@@ -473,7 +474,11 @@ export default function App() {
   }
 
   if (activeWorkout) {
-    const wDay = diaAjustado(FLAT_DAYS.find(d => claveDia(d) === activeWorkout), carga);
+    // El entreno usa el mismo dia que ve HOY: con la prueba de 2 semanas, el
+    // ajuste por paron y, si se movio, el dia al que se movio.
+    const destinoW = postponed[activeWorkout];
+    const wDay = capas(FLAT_DAYS.find(d => claveDia(d) === activeWorkout), /^\d{4}-/.test(destinoW || "") ? destinoW : undefined);
+    if (!wDay) { queueMicrotask(() => setActiveWorkout(null)); return null; }
     const wMov = getMovilidadDelDia(wDay);
     /** Guarda lo que midio el GPS en este dia. false si no hay nada que guardar. */
     const guardarGps = (res) => {
@@ -630,7 +635,7 @@ export default function App() {
             pesoHoy={pesosDiarios[todayLocalIso()] ?? null} guardarPeso={guardarPeso}
             pesoDia={pesosDiarios[dayKey] ?? null} comidaDia={(comidasLog[dayKey] || []).length > 0}
             comidaApuntada={(comidasLog[todayLocalIso()] || []).length > 0}
-            onStartWorkoutDe={(k) => setActiveWorkout(k)}
+            onStartWorkoutDe={(k) => setActiveWorkout(k)} capas={capas}
             parte={parteDelCoach({ dias: FLAT_DAYS, semanas: WEEKS, checked, cuelloChecks, painLog, ritmoReal, pesos: workoutWeights,
               reps: workoutReps, medidas, fechaInicio: FECHA_INICIO, hoyIso: todayLocalIso() })} />
         )}

@@ -73,3 +73,21 @@ test("la fuerza sin dia libre cerca: se deja pasar, con su motivo; en la prueba 
   const r2 = proponerHueco({ dia: mie, dias: enPrueba, movidas: {}, checked: {}, hoyIso: "2026-10-14" });
   assert.equal(r2.mejor.dia.isoDate, "2026-10-17");
 });
+
+test("devolver una sesion movida deshace tambien el cede; recolocar una ya movida no deja restos", async () => {
+  const { moverSesion } = await import("../src/lib/estado/mover-sesion.js");
+  const m = { "2026-10-11": "2026-10-13", "2026-10-13": "cede:2026-10-11" };
+  assert.deepEqual(moverSesion(m, "2026-10-11", null).movidas, {});
+  // La tirada recibida el 13 tampoco se hizo: recolocarla al 14 limpia lo anterior.
+  assert.deepEqual(recolocar(m, "2026-10-11", "2026-10-14", null), { "2026-10-11": "2026-10-14" });
+  assert.deepEqual(dejarPasar(m, "2026-10-11"), { "2026-10-11": "pasa" });
+  // Se puede mover a un dia cuya sesion se dejo pasar.
+  assert.equal(moverSesion({ "2026-10-17": "pasa" }, "2026-10-16", "2026-10-17").ok, true);
+});
+
+test("una sesion recibida ayer y no hecha tambien se pregunta", () => {
+  const m = { "2026-10-11": "2026-10-13", "2026-10-13": "cede:2026-10-11" };
+  const p = pendienteDeRecolocar({ dias: FLAT_DAYS, movidas: m, checked: {}, hoyIso: "2026-10-14" });
+  assert.equal(p.isoDate, "2026-10-11");
+  assert.equal(pendienteDeRecolocar({ dias: FLAT_DAYS, movidas: m, checked: { "2026-10-11": true }, hoyIso: "2026-10-14" }), null);
+});
