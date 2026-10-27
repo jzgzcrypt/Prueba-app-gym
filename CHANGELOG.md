@@ -21,6 +21,12 @@ Todo cambio que se haga en la app se anota aquí. Sin excepciones.
 
 ## [Sin publicar]
 
+### Arreglado (revisión completa, tanda 3: el plan ajustado, igual en todas partes)
+- Grave: una prueba o unas series que la vuelta tras un parón convierte en suave ya no se guardan como resultado. Se apuntan con "(suave)" y quien lee resultados (ritmo de las series, previsión, Coach) lo ignora. Antes ese ritmo frenaba todas las series siguientes.
+- La pantalla de cierre usa el día ajustado (título, lo que apuntar, calendario), como el entreno y HOY. Si el día no existe, sale "Volver a hoy" en vez de una pantalla en blanco.
+- "¿Ayer…?" y recolocar miran el día ajustado: durante una vuelta ya no te pide recolocar una "calidad" que era un suave.
+- "Hoy" pasa al día nuevo si la app se queda abierta pasada la medianoche.
+
 ### Arreglado (revisión completa, tanda 2: sesiones movidas)
 - "Ahora toca" y "Empezar" usan la sesión que de verdad toca hoy: una que llegó movida a hoy manda sobre la del día (antes "Empezar" abría la que había cedido el sitio). En "Hoy:" una sesión movida sale como "(movida)", no como hecha.
 - Una sesión movida pasa por los mismos ajustes que el resto (prueba de 2 semanas y vuelta tras parón, por el día en que cae), también en el entreno.

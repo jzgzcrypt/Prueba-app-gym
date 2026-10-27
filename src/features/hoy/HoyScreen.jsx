@@ -61,6 +61,10 @@ export function HoyScreen(props) {
   const hoyIso = todayLocalIso();
   const prueba = props.prueba || null;
   const diasConPrueba = FLAT_DAYS.map(d => diaEnPrueba(d, prueba));
+  // Los dias como se ven (prueba de 2 semanas + ajuste por paron): para
+  // recolocar y preguntar por lo de ayer, una "calidad" que hoy es un suave
+  // se trata como suave.
+  const diasPlan = props.capas ? FLAT_DAYS.map(d => props.capas(d)) : diasConPrueba;
   // Lo movido: si esta sesión se fue a otro día no se enseña aquí, y si han
   // venido sesiones de otros días se enseñan (con los mismos ajustes que el resto).
   const movidaA = destinoDe(props.postponed, dayKey);
@@ -137,7 +141,7 @@ export function HoyScreen(props) {
   const marcarRepaso = (id, v) => {
     if (id === "sesion") {
       if (checked[dayKey] && v !== "si") toggleCheck(dayKey);
-      if (v === "no" && esClave(day) && proponerHueco({ dia: day, dias: diasConPrueba, movidas: props.postponed, checked, hoyIso }).mejor) {
+      if (v === "no" && esClave(day) && proponerHueco({ dia: day, dias: diasPlan, movidas: props.postponed, checked, hoyIso }).mejor) {
         setRecolocarPasado(dayKey);
         return;
       }
@@ -198,8 +202,8 @@ export function HoyScreen(props) {
       {isToday && (
         <div style={{ display: "flex", flexDirection: "column", gap: 12, marginTop: 14 }}>
           {(() => {
-            const falta = pendienteDeRecolocar({ dias: diasConPrueba, movidas: props.postponed, checked, hoyIso });
-            return falta ? <Recolocar dias={diasConPrueba} key={falta.isoDate} dia={falta} movidas={props.postponed} setMovidas={props.setPostponed} checked={checked} ayer
+            const falta = pendienteDeRecolocar({ dias: diasPlan, movidas: props.postponed, checked, hoyIso });
+            return falta ? <Recolocar dias={diasPlan} key={falta.isoDate} dia={falta} movidas={props.postponed} setMovidas={props.setPostponed} checked={checked} ayer
               onHecha={esClave(falta) ? null : () => toggleCheck(claveDia(falta))} /> : null;
           })()}
           {prueba && tocaDecidir(prueba, hoyIso) && (
@@ -220,10 +224,10 @@ export function HoyScreen(props) {
             esTenis={diaSesion.tipo === "compromiso"} saltadas={noHechasHoy} onDeshacerNo={(id) => marcarNo(id, false)}
             onNoHecha={(a) => a.accion === "sesion" ? ((llegadaPend || !movidaA) && setNoHecha(true)) : marcarNo(a.id, true)} />
           {noHecha && (llegadaPend || (!movidaA && !checked[dayKey])) && (
-            <Recolocar dias={diasConPrueba} key={"nh" + diaSesion.isoDate} dia={diaSesion} movidas={props.postponed} setMovidas={props.setPostponed} checked={checked}
+            <Recolocar dias={diasPlan} key={"nh" + diaSesion.isoDate} dia={diaSesion} movidas={props.postponed} setMovidas={props.setPostponed} checked={checked}
               abiertaInicial onCerrar={() => setNoHecha(false)}>
               {!esClave(diaSesion) && diaSesion.tipo !== "compromiso" && !llegadaPend && (
-                <MoveDayBlock dayKey={dayKey} day={day} dias={diasConPrueba} checked={checked} hoyIso={hoyIso}
+                <MoveDayBlock dayKey={dayKey} day={day} dias={diasPlan} checked={checked} hoyIso={hoyIso}
                   postponed={props.postponed} setPostponed={props.setPostponed} />
               )}
             </Recolocar>
@@ -259,7 +263,7 @@ export function HoyScreen(props) {
           <RepasoDia filas={filasRepaso} onMarcar={marcarRepaso} onTodoNo={repasoTodoNo} />
         )}
         {esPasado && recolocarPasado === dayKey && !movidaA && !checked[dayKey] && (
-          <Recolocar dias={diasConPrueba} key={"p" + dayKey} dia={day} movidas={props.postponed} setMovidas={props.setPostponed} checked={checked}
+          <Recolocar dias={diasPlan} key={"p" + dayKey} dia={day} movidas={props.postponed} setMovidas={props.setPostponed} checked={checked}
             abiertaInicial titulo={"Faltó " + nombreDe(day) + ": aún cabe"} onCerrar={() => setRecolocarPasado(null)} />
         )}
 
@@ -612,10 +616,10 @@ export function HoyScreen(props) {
 
         {/* ═══ MOVER SESIÓN — colapsable, muy discreto ═══ */}
         {esClave(day) && !movidaA && !checked[dayKey] && day.isoDate >= todayLocalIso() && (
-          <Recolocar dias={diasConPrueba} key={"h" + dayKey} dia={day} movidas={props.postponed} setMovidas={props.setPostponed} checked={checked} />
+          <Recolocar dias={diasPlan} key={"h" + dayKey} dia={day} movidas={props.postponed} setMovidas={props.setPostponed} checked={checked} />
         )}
         {(isRunDay || isFuerzaDay) && !esClave(day) && !movidaA && !checked[dayKey] && day.isoDate >= hoyIso && (
-          <MoveDayBlock dayKey={dayKey} day={day} dias={diasConPrueba} checked={checked} hoyIso={hoyIso}
+          <MoveDayBlock dayKey={dayKey} day={day} dias={diasPlan} checked={checked} hoyIso={hoyIso}
             postponed={props.postponed} setPostponed={props.setPostponed} />
         )}
 

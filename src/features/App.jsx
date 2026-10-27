@@ -46,6 +46,22 @@ export default function App() {
   const [flatIdx, setFlatIdx] = useState(todayIdx);
   const [screen, setScreen] = useState("hoy");
   const [weekIdx, setWeekIdx] = useState(FLAT_DAYS[todayIdx].weekIdx);
+  // Si la app se queda abierta pasada la medianoche, "Hoy" pasa al dia nuevo
+  // (antes seguia mostrando el de ayer hasta cerrarla).
+  const hoyRef = useRef(todayIdx);
+  const [, setHoyTic] = useState(0);
+  useEffect(() => {
+    const mirar = () => {
+      const n = findTodayIndex();
+      if (n === hoyRef.current) return;
+      setFlatIdx(f => (f === hoyRef.current ? n : f));
+      hoyRef.current = n;
+      setHoyTic(x => x + 1);
+    };
+    const t = setInterval(mirar, 60000);
+    document.addEventListener("visibilitychange", mirar);
+    return () => { clearInterval(t); document.removeEventListener("visibilitychange", mirar); };
+  }, []);
   const [checked, setChecked] = useState({});
   const [cuelloChecks, setCuelloChecks] = useState({});
   const [notes, setNotes] = useState({});
@@ -469,7 +485,8 @@ export default function App() {
   }
 
   if (cierre) {
-    return <CierreSesion dayKey={cierre} workoutWeights={workoutWeights} workoutReps={workoutReps} ritmoReal={ritmoReal} gps={gps[cierre]}
+    const destinoC = postponed[cierre];
+    return <CierreSesion day={capas(FLAT_DAYS.find(d => claveDia(d) === cierre), /^\d{4}-/.test(destinoC || "") ? destinoC : undefined)} dayKey={cierre} workoutWeights={workoutWeights} workoutReps={workoutReps} ritmoReal={ritmoReal} gps={gps[cierre]}
       onGuardarRitmo={guardarRitmo} onVolver={() => { setCierre(null); setExpandedBlock("main"); }} />;
   }
 
@@ -504,9 +521,11 @@ export default function App() {
         onFinish={(res) => {
           setChecked(p => Object.assign({}, p, { [activeWorkout]: true }));
           // Lo del GPS se apunta solo, salvo que ya hubiera algo escrito a mano.
+          // Un dia de prueba convertido en suave: lo apuntado lo dice, para que no cuente como prueba.
+          const exPrueba = !wDay.prueba && !wDay.intervalos && wDay.original && (wDay.original.prueba || wDay.original.intervalos);
           if (guardarGps(res)) {
             const texto = textoParaLibreta({ day: wDay, ...res });
-            if (texto && !(ritmoReal[activeWorkout] || "").trim()) guardarRitmo(activeWorkout, texto);
+            if (texto && !(ritmoReal[activeWorkout] || "").trim()) guardarRitmo(activeWorkout, exPrueba ? texto + " (suave)" : texto);
           } else if (res && res.crono >= 60 && !wDay.prueba && !(ritmoReal[activeWorkout] || "").trim()) {
             // Sin GPS: el tiempo del cronometro, que es lo que si se sabe.
             guardarRitmo(activeWorkout, Math.round(res.crono / 60) + " min");

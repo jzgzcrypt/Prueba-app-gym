@@ -31,12 +31,13 @@ function trazaCompleta(dayKey) {
 }
 const mmss = (s) => Math.floor(s / 60) + ":" + String(Math.round(s % 60)).padStart(2, "0");
 
-export function CierreSesion({ dayKey, workoutWeights, workoutReps, ritmoReal, gps, onGuardarRitmo, onVolver }) {
-  const day = FLAT_DAYS.find(d => claveDia(d) === dayKey);
+export function CierreSesion({ day: diaAjustado, dayKey, workoutWeights, workoutReps, ritmoReal, gps, onGuardarRitmo, onVolver }) {
+  // El dia como lo viste en HOY (ajustado); si no llega, el del plan.
+  const day = diaAjustado || FLAT_DAYS.find(d => claveDia(d) === dayKey);
   const [texto, setTexto] = useState(ritmoReal[dayKey] || "");
   const [guardado, setGuardado] = useState(ritmoReal[dayKey] || "");
   const [anadido, setAnadido] = useState(() => !!enCalendario()[dayKey]);
-  if (!day) return null;
+  if (!day) return <button className="btn" onClick={onVolver} style={{ margin: 40, fontSize: 16, fontWeight: 700 }}>Volver a hoy</button>;
 
   const esFuerza = day.tipo === "fuerza";
   const acento = esFuerza ? CAT.fuerza : CAT.running;
@@ -51,7 +52,11 @@ export function CierreSesion({ dayKey, workoutWeights, workoutReps, ritmoReal, g
   const subidas = filas.filter(f => f.prog && (f.prog.tipo === "peso" || f.prog.tipo === "reps")).length;
   const apuntar = queApuntar(day);
 
-  const guardar = () => { onGuardarRitmo(dayKey, texto); setGuardado(texto); };
+  const exPrueba = !day.prueba && !day.intervalos && day.original && (day.original.prueba || day.original.intervalos);
+  const guardar = () => {
+    const t = exPrueba && !/suave/i.test(texto) ? texto + " (suave)" : texto;
+    onGuardarRitmo(dayKey, t); setGuardado(t);
+  };
 
   return (
     <div style={{ minHeight: "100vh", background: C.bg, fontFamily: "-apple-system, 'Inter', sans-serif" }}>

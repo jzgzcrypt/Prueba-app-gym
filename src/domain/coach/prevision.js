@@ -11,7 +11,7 @@
  * Puro: sin React, se prueba sin navegador.
  */
 
-import { OBJETIVO_7K, equivalente, leerRitmo, textoTiempo } from "../progreso/libreta.js";
+import { OBJETIVO_7K, equivalente, leerRitmo, leerTiempo, textoTiempo } from "../progreso/libreta.js";
 import { suaveHabitual } from "../running/objetivo.js";
 import { tuContraElPlan } from "../progreso/plan-vs-real.js";
 
@@ -102,7 +102,7 @@ export function hitos(dias, ritmoReal, hoyIso) {
  */
 export function estimacionPorRodajes({ dias, ritmoReal, hoyIso }) {
   const rr = ritmoReal || {};
-  if (dias.some(d => d.prueba && d.prueba.distKm && rr[d.isoDate])) return null;
+  if (dias.some(d => d.prueba && d.prueba.distKm && leerTiempo(rr[d.isoDate], d.prueba.distKm))) return null;
   // Tus ultimos rodajes suaves, el de hoy incluido.
   let suave = suaveHabitual({ dias, ritmoReal: rr, antesDe: hoyIso + "z", cuantos: 3 });
   let fuente = "tus rodajes suaves";

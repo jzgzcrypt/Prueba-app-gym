@@ -103,3 +103,9 @@ test("una sesion movida se ajusta por el dia en que cae, y lo movido a proposito
   assert.ok(sinMover.constancia);
   assert.equal(conMovidas.constancia, null);
 });
+
+test("una prueba corrida como suave (vuelta) no cuenta como prueba", async () => {
+  const { ultimaPrueba } = await import("../src/domain/running/adaptar.js");
+  assert.equal(ultimaPrueba("2026-10-20", FLAT_DAYS, { "2026-10-15": "6:35/km (suave)" }), null);
+  assert.equal(ultimaPrueba("2026-10-20", FLAT_DAYS, { "2026-10-15": "14:50" }).total, 890);
+});

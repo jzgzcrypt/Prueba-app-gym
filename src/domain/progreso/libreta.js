@@ -31,6 +31,9 @@ export function textoTiempo(seg) {
 function leer(str) {
   if (!str) return null;
   const t = String(str).trim();
+  // "(suave)": una prueba o unas series que se corrieron como suave (vuelta
+  // tras un paron). No es un resultado: no se lee como tal.
+  if (/suave/i.test(t)) return null;
   const partes = t.match(/(\d+):(\d{1,2})(?::(\d{1,2}))?/);
   if (!partes) return null;
   const [, a, b, c] = partes.map(Number);
