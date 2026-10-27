@@ -77,7 +77,9 @@ export function textoCuadre(c) {
     return null;
   }
   const n = c.restantes;
-  const cuando = n === 1 ? "hoy" : "hoy y " + (n === 2 ? "mañana" : "los " + (n - 1) + " días que quedan");
+  // Sin decir "hoy": puede que mires otro dia, o que hoy este protegido
+  // (vispera o dia de prueba) y no entre en el reparto.
+  const cuando = n === 1 ? "el día que queda" : "los " + n + " días que quedan";
   const base = c.saldo > 0
     ? "Esta semana llevas " + signo(c.saldo) + " kcal: " + cuando + ", " + Math.abs(c.ajuste) + " menos cada día."
     : "Esta semana te faltan " + Math.abs(c.saldo) + " kcal: " + cuando + ", " + c.ajuste + " más cada día.";

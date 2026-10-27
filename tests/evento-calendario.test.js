@@ -36,3 +36,9 @@ test("el enlace de Google Calendar: plantilla, fechas en UTC y texto codificado"
   assert.equal(u.searchParams.get("text"), "🏃 Suave");
   assert.equal(u.searchParams.get("details"), "a\nb");
 });
+
+test("con pausas, el evento acaba en el ultimo punto de la ruta, no en el tiempo en movimiento", () => {
+  const t0 = Date.UTC(2026, 9, 8, 16, 0);
+  const ev = eventoSesion({ day: dia("2026-10-13"), gps: { m: 3000, seg: 1200, ruta: { t0, p: [[0, 0, 0], [0, 0, 1500]] } }, ahora: t0 });
+  assert.equal(ev.fin.getTime(), t0 + 1500e3);
+});

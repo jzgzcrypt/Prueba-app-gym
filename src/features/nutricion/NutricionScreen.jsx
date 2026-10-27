@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { A, C } from "@/design/tokens";
-import { leerComidas, leerMicros, leerTotalDelDia, mensajeCargar, mensajeDelDia, sumaDelDia } from "@/domain/nutricion/pegar-ia";
+import { leerComidas, leerMicros, leerTotalDelDia, macrosApunte, mensajeCargar, mensajeDelDia, sumaDelDia } from "@/domain/nutricion/pegar-ia";
 import { ORDEN_MICROS, REFERENCIAS, avisosMicros, estadoMicro, perfilDia, perfilSemana } from "@/domain/nutricion/micros";
 import { cargarHabituales, recomendar } from "@/domain/nutricion/recomendar";
 import { ScreenHeader } from "@/features/ui/headers";
@@ -29,7 +29,28 @@ const campo = {
   fontSize: 15, padding: "11px 12px", borderRadius: 10, background: C.surfaceMuted, border: "none",
   color: C.text, outline: "none", fontFamily: "inherit", width: "100%", boxSizing: "border-box",
 };
-const numero = (v) => { const n = Number(String(v).replace(",", ".")); return Number.isFinite(n) && n >= 0 ? Math.round(n) : null; };
+// Con un decimal: "2,5 g" de grasa es un dato valido.
+const numero = (v) => { const n = Number(String(v).replace(",", ".")); return Number.isFinite(n) && n >= 0 ? Math.round(n * 10) / 10 : null; };
+
+/**
+ * Un numero que se edita con calma: lo que escribes se queda tal cual
+ * mientras escribes ("2,", vacio...) y se lee al salir del campo. Antes cada
+ * tecla se redondeaba y un campo vaciado pasaba a 0 al momento.
+ */
+function CampoNum({ valor, alCambiar, etiqueta }) {
+  const [borrador, setBorrador] = useState(null);
+  const confirmar = () => {
+    if (borrador == null) return;
+    const n = numero(borrador);
+    if (n != null && borrador.trim() !== "") alCambiar(n);
+    setBorrador(null);
+  };
+  return (
+    <input inputMode="decimal" value={borrador ?? (valor ?? "")} placeholder={etiqueta} aria-label={etiqueta}
+      onChange={e => setBorrador(e.target.value)} onBlur={confirmar} onKeyDown={e => { if (e.key === "Enter") e.currentTarget.blur(); }}
+      style={{ ...campo, flex: 1, minWidth: 0, textAlign: "center", padding: "9px 4px" }} />
+  );
+}
 
 /** Barra fina de "llevas X de Y". */
 function Barra({ titulo, llevas, objetivo, unidad, color }) {
@@ -55,7 +76,7 @@ function MisComidas({ habituales, setHabituales, apuntar, cerrar }) {
   const [todas, setTodas] = useState(false);
   const [busca, setBusca] = useState("");
   const [nueva, setNueva] = useState({ nombre: "", kcal: "", prot: "", hc: "", grasa: "" });
-  const cambiar = (id, k, v) => setHabituales(habituales.map(h => h.id === id ? { ...h, [k]: k === "nombre" ? v : (numero(v) ?? 0) } : h));
+  const cambiar = (id, k, v) => setHabituales(habituales.map(h => h.id === id ? { ...h, [k]: v } : h));
   const borrar = (id) => setHabituales(habituales.filter(h => h.id !== id));
   const crear = () => {
     const kcal = numero(nueva.kcal);
@@ -94,10 +115,10 @@ function MisComidas({ habituales, setHabituales, apuntar, cerrar }) {
             </button>
           </div>
           <div style={{ display: "flex", gap: 6, paddingRight: 38 }}>
-            {numCampo(h.kcal, e => cambiar(h.id, "kcal", e.target.value), "kcal")}
-            {numCampo(h.prot, e => cambiar(h.id, "prot", e.target.value), "prot.")}
-            {numCampo(h.hc ?? "", e => cambiar(h.id, "hc", e.target.value), "hidr.")}
-            {numCampo(h.grasa ?? "", e => cambiar(h.id, "grasa", e.target.value), "grasa")}
+            <CampoNum valor={h.kcal} alCambiar={v => cambiar(h.id, "kcal", v)} etiqueta="kcal" />
+            <CampoNum valor={h.prot} alCambiar={v => cambiar(h.id, "prot", v)} etiqueta="prot." />
+            <CampoNum valor={h.hc} alCambiar={v => cambiar(h.id, "hc", v)} etiqueta="hidr." />
+            <CampoNum valor={h.grasa} alCambiar={v => cambiar(h.id, "grasa", v)} etiqueta="grasa" />
           </div>
         </div>
       ) : (
@@ -265,14 +286,15 @@ const num1 = (v) => (v < 10 ? String(Math.round(v * 10) / 10).replace(".", ",") 
 /** Una comida apuntada: al tocarla, sus macros y micros; la estrella la guarda en Mis comidas. */
 function ApunteFila({ a, primera, quitar, favorita, alternarFavorita }) {
   const [abierta, setAbierta] = useState(false);
+  const mA = macrosApunte(a);
   return (
     <div data-apunte style={{ borderTop: primera ? "none" : "1px solid " + C.divider }}>
       <div style={{ display: "flex", alignItems: "center", gap: 10, padding: "10px 8px 10px 16px", minHeight: 56 }}>
         <button className="btn" data-abrir-apunte onClick={() => setAbierta(!abierta)} style={{ flex: 1, minWidth: 0, display: "flex", alignItems: "center", gap: 12, textAlign: "left" }}>
           <IconoCaja nombre={a.desde === "ia" ? "portapapeles" : "plato"} tono={a.desde === "ia" ? "morado" : "verde"} tam={34} />
           <div style={{ flex: 1, minWidth: 0 }}>
-            <div style={{ fontSize: 15, fontWeight: 600, color: C.text }}>{a.nombre || "Comida"}</div>
-            <div style={{ fontSize: 12.5, color: C.textDim, fontVariantNumeric: "tabular-nums" }}>{miles(a.kcal || 0)} kcal · {Math.round(a.prot || 0)} g proteína</div>
+            <div style={{ fontSize: 15, fontWeight: 600, color: C.text }}>{a.nombre || a.id || "Comida"}</div>
+            <div style={{ fontSize: 12.5, color: C.textDim, fontVariantNumeric: "tabular-nums" }}>{miles(Math.round(mA.kcal))} kcal · {Math.round(mA.prot)} g proteína</div>
           </div>
           <Chevron abierto={abierta} />
         </button>
@@ -299,7 +321,8 @@ function ApunteFila({ a, primera, quitar, favorita, alternarFavorita }) {
 }
 
 /** Los macros en cuadros y, si los hay, los micros en una linea. */
-function DetalleMacros({ a }) {
+function DetalleMacros({ a: bruto }) {
+  const a = { ...bruto, ...macrosApunte(bruto) };
   return (
     <>
       <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 6, marginBottom: a.micros ? 8 : 0 }}>
@@ -382,7 +405,9 @@ export function NutricionScreen({ comida, esHoy, cuadre = null, apuntes = [], ap
   // Mis comidas: al usar una, cuenta (las mas usadas van primero en el mensaje para la IA).
   const apuntarHabitual = (ap) => {
     apuntarNuevo(ap);
-    if (ap.de) setHabituales(habituales.map(h => h.id === ap.de ? { ...h, usos: (h.usos || 0) + 1 } : h));
+    // Con actualizador: una sugerencia de dos comidas cuenta las dos (antes la
+    // segunda pisaba a la primera y solo sumaba una).
+    if (ap.de) setHabituales(p => (p || habituales).map(h => h.id === ap.de ? { ...h, usos: (h.usos || 0) + 1 } : h));
   };
   const color = comida && comida.id === "comer" ? A.verde : A.naranja;
   const conCintura = medidas.filter(x => x && x.cintura != null);

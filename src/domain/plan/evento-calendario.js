@@ -29,7 +29,11 @@ export function eventoSesion({ day, gps, series, ahora }) {
   let inicio, fin;
   if (gps && gps.ruta && gps.ruta.t0 && gps.seg > 0) {
     inicio = new Date(gps.ruta.t0);
-    fin = new Date(gps.ruta.t0 + gps.seg * 1000);
+    // El fin es el ultimo punto de la ruta (con las pausas dentro); seg es el
+    // tiempo en movimiento y dejaba el evento corto.
+    const p = gps.ruta.p || [];
+    const ultimo = p.length ? Number(p[p.length - 1][2]) || 0 : 0;
+    fin = new Date(gps.ruta.t0 + Math.max(gps.seg, ultimo) * 1000);
   } else {
     const dur = gps && gps.seg > 0 ? gps.seg * 1000 : minutosDe(day.dur) * 60000;
     fin = new Date(ahora);

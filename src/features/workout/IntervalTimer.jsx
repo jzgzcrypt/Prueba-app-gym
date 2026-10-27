@@ -100,6 +100,15 @@ export function IntervalTimer({ intervalos, ritmo, resultadoRef }) {
     gps.parar(); guardarResultado();
     hablar("Terminado. Buen trabajo.");
   };
+  /** Pasa del tramo `desde` al `n` (o termina si no hay mas). */
+  const avanzadoRef = useRef(-1);
+  const pasarA = (n, desde, conVoz) => {
+    if (n >= tramos.length) { terminar(desde); return; }
+    cerrarTramo(desde);
+    setRestante(tramos[n].seg);
+    if (conVoz) anunciar(n);
+    setIdx(n);
+  };
   const audioCtxRef = useRef(null);
 
   const pitar = (frecuencia, duracionMs) => {
@@ -144,16 +153,12 @@ export function IntervalTimer({ intervalos, ritmo, resultadoRef }) {
         ultimoAvisado = seg;
         pitar(880, 140); vibrar(90);
       }
-      if (seg <= 0) {
+      if (seg <= 0 && avanzadoRef.current !== idx) {
+        // Fuera del actualizador de estado y una sola vez por tramo: dentro,
+        // React podia ejecutarlo dos veces y la voz avisaba doble.
+        avanzadoRef.current = idx;
         pitar(1320, 450); vibrar([180, 90, 180]);
-        setIdx(prevIdx => {
-          const nuevoIdx = prevIdx + 1;
-          if (nuevoIdx >= tramos.length) { terminar(prevIdx); return prevIdx; }
-          cerrarTramo(prevIdx);
-          setRestante(tramos[nuevoIdx].seg);
-          anunciar(nuevoIdx);
-          return nuevoIdx;
-        });
+        pasarA(idx + 1, idx, true);
       }
       // A mitad de una serie larga, un aviso: ayuda a no cebarse al principio.
       const t0 = tramos[idx];
@@ -263,16 +268,7 @@ export function IntervalTimer({ intervalos, ritmo, resultadoRef }) {
           border: "1px solid " + (corriendo ? "#D4D4D1" : "#171717"),
           fontSize: 13, fontWeight: 700, color: corriendo ? "#171717" : "#FAFAF9", letterSpacing: 0.5,
         }}>{corriendo ? "PAUSAR" : (idx === 0 && restante === (tramos[0] ? tramos[0].seg : 0) ? "EMPEZAR" : "REANUDAR")}</button>
-        <button className="nb" onClick={() => {
-          setIdx(prev => {
-            const n = prev + 1;
-            if (n >= tramos.length) { terminar(prev); return prev; }
-            cerrarTramo(prev);
-            setRestante(tramos[n].seg);
-            if (corriendo) anunciar(n);
-            return n;
-          });
-        }} style={{
+        <button className="nb" onClick={() => pasarA(idx + 1, idx, corriendo)} style={{
           width: 88, height: 46, borderRadius: 4, background: "#F2F2F0", border: "1px solid #D4D4D1",
           fontSize: 12, fontWeight: 700, color: "#787774",
         }}>SALTAR</button>

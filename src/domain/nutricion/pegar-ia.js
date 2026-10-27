@@ -11,11 +11,16 @@
  *   · leerTotalDelDia: lo que hay que sumar de lo que pegas.
  */
 
+import { macrosDelDia } from "./iifym.js";
+
 const NUM = "(\\d{1,3}\\.\\d{3}(?![\\d.,])|\\d+(?:[.,]\\d+)?)";
 // "2.010" con tres cifras tras el punto es un millar a la española, no 2,01.
 const aNum = (s) => {
   const t = String(s);
   if (/^\d{1,3}\.\d{3}$/.test(t)) return Number(t.replace(".", ""));
+  // "1,050" a la inglesa (como lo escriben muchas IA) tambien es un millar.
+  // "0,125" no: con cero delante es un decimal (B12, omega-3...).
+  if (/^[1-9]\d{0,2},\d{3}$/.test(t)) return Number(t.replace(",", ""));
   return Number(t.replace(",", "."));
 };
 
@@ -258,8 +263,22 @@ export function veredictoDia(total, objetivo) {
 /** Lo que suman los apuntes de un dia (de Mis comidas, de tu IA o de antes). */
 export function sumaDelDia(apuntes) {
   const t = { kcal: 0, prot: 0, hc: 0, grasa: 0 };
-  for (const a of apuntes || []) if (a) for (const k of Object.keys(t)) t[k] += Number(a[k]) || 0;
+  for (const a of apuntes || []) {
+    const m = macrosApunte(a);
+    for (const k of Object.keys(t)) t[k] += m[k];
+  }
   return t;
+}
+
+/**
+ * Las macros de un apunte, sea del formato de ahora ({ kcal, prot... }) o del
+ * antiguo ({ origen: "casa", id, gramos } / cantina / rapida), que se calcula.
+ * Antes los antiguos sumaban 0 y el cuadre semanal los tomaba por un ayuno.
+ */
+export function macrosApunte(a) {
+  if (!a) return { kcal: 0, prot: 0, hc: 0, grasa: 0 };
+  if (a.kcal == null && a.origen && a.origen !== "texto") return macrosDelDia([a]);
+  return { kcal: Number(a.kcal) || 0, prot: Number(a.prot) || 0, hc: Number(a.hc) || 0, grasa: Number(a.grasa) || 0 };
 }
 
 /**
@@ -293,7 +312,7 @@ const ETIQUETAS_MICRO = {
   vitD: "vitamina\\s*d|vit\\.?\\s*d",
   b12: "(?:vitamina\\s*|vit\\.?\\s*)?b\\s*-?\\s*12",
   omega3: "omega\\s*-?\\s*3",
-  sodio: "sodio|sal\\b",
+  sodio: "sodio",
 };
 
 /**
@@ -305,7 +324,8 @@ const ETIQUETAS_MICRO = {
 export function leerMicros(texto) {
   const lineas = String(texto || "").split(/\r?\n/).map(limpiar);
   for (let i = lineas.length - 1; i >= 0; i--) {
-    if (!/micro/i.test(lineas[i])) continue;
+    // Solo la linea que EMPIEZA por "micros" ("arroz al microondas" no lo es).
+    if (!/^\W*micros?\b/i.test(lineas[i])) continue;
     const resto = lineas[i].replace(/^[^|:]*micro[^|:]*[|:]?/i, "");
     const out = {};
     // Por etiquetas: "fibra 28 g", "vitamina D: 4 µg", "12 mg de hierro".

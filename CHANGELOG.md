@@ -21,6 +21,16 @@ Todo cambio que se haga en la app se anota aquí. Sin excepciones.
 
 ## [Sin publicar]
 
+### Arreglado (revisión completa, tanda 4: nutrición y detalles)
+- "1,050 kcal" pegado de la IA se lee como 1050 (antes, 1). "0,125" sigue siendo un decimal.
+- Las comidas apuntadas con el formato antiguo suman sus kcal y macros, en la lista y en el cuadre semanal. Antes contaban 0 y el cuadre te subía hasta +300 kcal/día.
+- Una sugerencia de dos comidas cuenta el uso de las dos.
+- Editar números en Mis comidas: el campo se lee al salir de él, así que vaciarlo ya no pone 0 al momento y deja escribir "2,5".
+- El texto del cuadre semanal ya no dice "hoy" cuando miras otro día o cuando hoy está protegido: "los N días que quedan".
+- "Arroz al microondas" ya no se confunde con la línea de micros, y "sal" ya no se lee como sodio.
+- "Salir" del entreno calla la voz, y el aviso de cambio de serie ya no se repite.
+- El evento de calendario acaba en el último punto de la ruta, con las pausas dentro.
+
 ### Arreglado (revisión completa, tanda 3: el plan ajustado, igual en todas partes)
 - Grave: una prueba o unas series que la vuelta tras un parón convierte en suave ya no se guardan como resultado. Se apuntan con "(suave)" y quien lee resultados (ritmo de las series, previsión, Coach) lo ignora. Antes ese ritmo frenaba todas las series siguientes.
 - La pantalla de cierre usa el día ajustado (título, lo que apuntar, calendario), como el entreno y HOY. Si el día no existe, sale "Volver a hoy" en vez de una pantalla en blanco.

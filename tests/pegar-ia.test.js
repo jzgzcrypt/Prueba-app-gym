@@ -186,3 +186,12 @@ test("el mensaje para cargar pide líneas COMIDA y añade las que faltan por com
   assert.match(r, /COMIDA \| nombre \| kcal/);
   assert.doesNotMatch(mensajeCargar([]), /complétame/);
 });
+
+test("revision: miles con coma, linea de micros solo si empieza por micros, y apuntes antiguos suman", async () => {
+  const { leerComidas, leerMicros, sumaDelDia } = await import("../src/domain/nutricion/pegar-ia.js");
+  const c = leerComidas("COMIDA | Paella | 1,050 | 40 | 120 | 35");
+  assert.equal(c[0].kcal, 1050);
+  assert.equal(leerMicros("Arroz al microondas | 300 | 6 | 60 | 2 | 1 | 2 | 20 | 0 | 0 | 0 | 400"), null);
+  const s = sumaDelDia([{ origen: "casa", id: "pollo", gramos: 100 }, { nombre: "x", kcal: 100, prot: 5 }]);
+  assert.ok(s.kcal > 100, "el pollo antiguo suma");
+});

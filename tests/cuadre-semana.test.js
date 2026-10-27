@@ -15,7 +15,7 @@ test("te pasas 800 el lunes: de miércoles a domingo, 160 menos cada día", () =
   assert.equal(c.ajuste, -160);
   assert.equal(c.restantes, 5);
   assert.equal(c.sinCompensar, 0);
-  assert.match(textoCuadre(c), /llevas \+800 kcal: hoy y los 4 días que quedan, 160 menos cada día\. La proteína no se toca\.$/);
+  assert.match(textoCuadre(c), /llevas \+800 kcal: los 5 días que quedan, 160 menos cada día\. La proteína no se toca\.$/);
 });
 
 test("te quedas corto: los días que quedan suben", () => {

@@ -51,6 +51,8 @@ export function WorkoutMode({ day, mov, progress, onUpdateProgress, onFinish, on
     if (phaseIdx < phases.length - 1) setPhaseIdx(phaseIdx + 1);
     else onFinish(gpsRef.current);
   };
+  // Salir calla la voz: antes seguia leyendo avisos en cola ya fuera.
+  const salir = () => { try { window.speechSynthesis && window.speechSynthesis.cancel(); } catch { /* sin voz */ } onExit(gpsRef.current); };
   const goPrevPhase = () => { if (phaseIdx > 0) setPhaseIdx(phaseIdx - 1); };
   // Volver a la carrera desde los estiramientos la empezaba de cero y se
   // perdia lo corrido: si ya hay algo medido, no se ofrece volver.
@@ -90,7 +92,7 @@ export function WorkoutMode({ day, mov, progress, onUpdateProgress, onFinish, on
         <div style={containerStyle}>
 
           <div style={{ padding: "12px 16px 8px", display: "flex", justifyContent: "space-between", alignItems: "center", gap: 10 }}>
-            <button className="rb" onClick={() => onExit(gpsRef.current)} style={{ fontSize: 16, color: "#0A84FF", fontWeight: 500, minHeight: 40 }}>Salir</button>
+            <button className="rb" onClick={salir} style={{ fontSize: 16, color: "#0A84FF", fontWeight: 500, minHeight: 40 }}>Salir</button>
             <div style={{ fontSize: 13, color: "#8E8E93", fontWeight: 600, textAlign: "center", flex: 1, minWidth: 0, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{day.titulo}</div>
             <div style={{ fontSize: 13, color: "#8E8E93", fontWeight: 600, fontVariantNumeric: "tabular-nums" }}>{phaseIdx+1}/{phases.length}</div>
           </div>
@@ -175,7 +177,7 @@ export function WorkoutMode({ day, mov, progress, onUpdateProgress, onFinish, on
         <div style={containerStyle}>
 
           <div style={{ padding: "12px 16px 8px", display: "flex", justifyContent: "space-between", alignItems: "center", gap: 10 }}>
-            <button className="rb" onClick={() => onExit(gpsRef.current)} style={{ fontSize: 16, color: "#0A84FF", fontWeight: 500, minHeight: 40 }}>Salir</button>
+            <button className="rb" onClick={salir} style={{ fontSize: 16, color: "#0A84FF", fontWeight: 500, minHeight: 40 }}>Salir</button>
             <div style={{ fontSize: 13, color: "#8E8E93", fontWeight: 600, textAlign: "center", flex: 1, minWidth: 0, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{day.titulo}</div>
             <div style={{ fontSize: 13, color: "#8E8E93", fontWeight: 600, fontVariantNumeric: "tabular-nums" }}>{phaseIdx+1}/{phases.length}</div>
           </div>
@@ -269,7 +271,7 @@ export function WorkoutMode({ day, mov, progress, onUpdateProgress, onFinish, on
       <div style={containerStyle}>
 
         <div style={{ padding: "12px 16px 8px", display: "flex", justifyContent: "space-between", alignItems: "center", gap: 10 }}>
-          <button className="rb" onClick={() => onExit(gpsRef.current)} style={{ fontSize: 16, color: "#0A84FF", fontWeight: 500, minHeight: 40 }}>Salir</button>
+          <button className="rb" onClick={salir} style={{ fontSize: 16, color: "#0A84FF", fontWeight: 500, minHeight: 40 }}>Salir</button>
           <div style={{ fontSize: 13, color: "#8E8E93", fontWeight: 600, textAlign: "center", flex: 1, minWidth: 0, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{day.titulo}</div>
           <div style={{ fontSize: 13, color: "#8E8E93", fontWeight: 600, fontVariantNumeric: "tabular-nums" }}>{phaseIdx+1}/{phases.length}</div>
         </div>
