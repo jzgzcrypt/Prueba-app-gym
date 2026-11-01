@@ -14,7 +14,7 @@ import { A, C, CARD, CAT } from "@/design/tokens";
 import { ScreenHeader } from "@/features/ui/headers";
 import { Boton, Chevron, Fila, Icono, IconoCaja, Pastilla, Tarjeta } from "@/features/ui/aire";
 import { QuickFieldInput, SimpleLineChart } from "@/features/ui/charts";
-export function ProgresoScreen({ medidas, setMedidas, ritmoReal, weeks, checked, workoutWeights, workoutReps, onVerInforme, cuelloChecks, painLog, gps, pesosDiarios, avanzo }) {
+export function ProgresoScreen({ medidas, setMedidas, ritmoReal, weeks, checked, workoutWeights, workoutReps, onVerInforme, cuelloChecks, painLog, gps, pesosDiarios, avanzo, onAbrir }) {
   const [showForm, setShowForm] = useState(false);
   const [form, setForm] = useState({ peso: "", cintura: "", anchoHombro: "", cadera: "", hombro: "", cadenaPosterior: "", columna: "", caderaMov: "", foto: null });
   const [quickField, setQuickField] = useState(null); // "peso" | "cintura" | "cadera" | "hombro" | "cadenaPosterior" | "columna" | "caderaMov" | null (menu)
@@ -170,12 +170,13 @@ export function ProgresoScreen({ medidas, setMedidas, ritmoReal, weeks, checked,
     <div style={{ padding: "16px 16px 28px" }}>
       <ScreenHeader title="Progreso" subtitle={semanaActual ? "Semana " + semanaActual.n + " de " + weeks.length : ""} />
 
-      {avanzo && <div style={{ marginBottom: 12 }}>{avanzo}</div>}
+      {/* Cada cosa una sola vez: el objetivo con su frase, los 4 objetivos
+          (¿Avanzo?), la proxima prueba, el peso y la constancia. */}
       <TuObjetivo veredicto={parte.veredicto} />
+      {avanzo && <div style={{ marginBottom: 12 }}>{avanzo}</div>}
       <ProximaPrueba ritmoReal={ritmoReal} />
       <TuPeso datos={pesoData} onApuntar={() => { setShowForm(false); setQuickField("peso"); }} />
       <Constancia c={parte.constancia} />
-      <Objetivos parte={parte} onAbrir={abrir} />
 
       <div style={{ display: "flex", gap: 8, margin: "14px 0 12px" }}>
         <Boton tipo={showForm ? "suave" : "oscuro"} onClick={() => { setQuickField(null); setShowForm(!showForm); }} style={{ flex: 1, fontSize: 15 }}>
@@ -366,6 +367,18 @@ export function ProgresoScreen({ medidas, setMedidas, ritmoReal, weeks, checked,
       <Seccion id="meses" titulo="Tus meses" resumen="informe de cada mes" abierta={abierta} setAbierta={setAbierta}>
         <TusMeses onVer={onVerInforme} />
       </Seccion>
+
+      {onAbrir && (
+        <>
+          <div style={{ fontSize: 19, fontWeight: 700, color: C.text, margin: "20px 4px 8px" }}>Más</div>
+          <Tarjeta data-mas style={{ padding: 0, overflow: "hidden" }}>
+            {[["coach", "grafica", "azul", "Previsión, plan y ajustes", "el coach, la bitácora y la copia"],
+              ["ejercicios", "mancuerna", "azul", "Ejercicios", "cómo se hace cada uno"]].map(([k, ic, tono, t, sub], i) => (
+              <Fila key={k} primera={i === 0} icono={ic} tono={tono} titulo={t} sub={sub} derecha={<Chevron />} onClick={() => onAbrir(k)} />
+            ))}
+          </Tarjeta>
+        </>
+      )}
 
       <div style={{ marginTop: 14 }}>
       <button className="btn" onClick={() => setShowExport(!showExport)} style={{

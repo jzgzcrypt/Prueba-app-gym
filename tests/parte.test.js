@@ -91,9 +91,9 @@ test("veredicto: vas bien, o vigila, o falta la clave", () => {
   for (const d of FLAT_DAYS) if (d.isoDate < "2026-10-09" && d.tipo !== "libre") todo[d.isoDate] = true;
   assert.equal(parteDelCoach({ ...base, checked: todo, hoyIso: "2026-10-09" }).veredicto.tono, "bien");
   const sinJueves = { ...todo }; delete sinJueves["2026-10-08"];
-  assert.match(parteDelCoach({ ...base, checked: sinJueves, hoyIso: "2026-10-09" }).veredicto.texto, /falta el jueves/);
+  assert.match(parteDelCoach({ ...base, checked: sinJueves, hoyIso: "2026-10-09" }).veredicto.texto, /Lo que más pesa esta semana: el jueves/);
   const conMolestia = parteDelCoach({ ...base, checked: todo, painLog: { "2026-10-07": { hombro: 3 } }, hoyIso: "2026-10-09" });
-  assert.match(conMolestia.veredicto.texto, /^Vas bien, pero vigila hombro/);
+  assert.match(conMolestia.veredicto.texto, /^Vas bien. Ojo con hombro/);
 });
 
 test("cintura sin cambios: dice igual, no -0", () => {

@@ -86,3 +86,9 @@ test("al acabar: toca decidir; quedarse alarga la prueba y volver la apaga", asy
   assert.equal(enPrueba(v, "2026-10-14"), false);
   assert.equal(diaDePrueba(PRUEBA_DEFECTO, "2026-10-13"), 2);
 });
+
+test("la lista del dia incluye la pierna de 10 min y medir cuando tocan", () => {
+  const r = ahoraToca({ hora: 18, day: dia("2026-10-13"), sesionHecha: false, cuello: {}, pesado: false, comidaApuntada: false,
+    noHechas: ["medir"], extras: { pierna: true, piernaHecha: true, medir: true } });
+  assert.deepEqual(r.dia.map(x => x.id + ":" + x.estado), ["sesion:pendiente", "cuello:pendiente", "pierna:hecho", "medir:no", "peso:pendiente", "comida:pendiente"]);
+});

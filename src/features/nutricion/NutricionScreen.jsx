@@ -418,7 +418,7 @@ export function NutricionScreen({ comida, esHoy, cuadre = null, apuntes = [], ap
 
   return (
     <div style={{ padding: "16px 16px 24px" }}>
-      <ScreenHeader title="Nutrición" subtitle={comida ? (esHoy ? "Hoy toca " : "Ese día tocaba ") + comida.etiqueta : ""} />
+      <ScreenHeader title="Comida" subtitle={comida ? (esHoy ? "Hoy: " : "Ese día: ") + (comida.id === "comer" ? "día de comer más" : "día de comer menos") : ""} />
 
       {m && (
         <Tarjeta data-hoy-comida style={{ padding: "18px 16px" }}>
@@ -441,11 +441,9 @@ export function NutricionScreen({ comida, esHoy, cuadre = null, apuntes = [], ap
               <span>{cuadre}{comida.cuadre ? <b> Hoy: {miles(m.kcal)} kcal.</b> : null}</span>
             </div>
           )}
-          <div style={{ marginTop: 16 }}>
-            <Barra titulo="Kcal" llevas={llevas.kcal} objetivo={m.kcal} unidad="kcal" color={color} />
-            <Barra titulo="Proteína" llevas={llevas.prot} objetivo={m.prot} unidad="g" color={A.azul} />
-            <Barra titulo="Hidratos" llevas={llevas.hc} objetivo={m.hc} unidad="g" color={A.naranja} />
-            <Barra titulo="Grasa" llevas={llevas.grasa} objetivo={m.grasa} unidad="g" color={A.morado} />
+          {/* Kcal y proteina ya estan en el anillo: hidratos y grasa, en una linea. */}
+          <div data-hc-grasa style={{ marginTop: 12, fontSize: 13.5, color: C.textDim, fontVariantNumeric: "tabular-nums" }}>
+            Hidratos <b style={{ color: C.text }}>{miles(llevas.hc)}</b> / {m.hc} g · Grasa <b style={{ color: C.text }}>{miles(llevas.grasa)}</b> / {m.grasa} g
           </div>
         </Tarjeta>
       )}
@@ -516,12 +514,6 @@ export function NutricionScreen({ comida, esHoy, cuadre = null, apuntes = [], ap
 
       <Micros apuntes={apuntes} semanaApuntes={semanaApuntes} esHoy={esHoy} />
 
-      {motor && esHoy && (
-        <>
-          <Seccion>Peso</Seccion>
-          <TuMotor {...motor} />
-        </>
-      )}
 
       <Seccion>Cintura y foto</Seccion>
       <Tarjeta data-cintura style={{ padding: "14px 16px", display: "flex", alignItems: "center", gap: 12 }}>

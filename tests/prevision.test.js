@@ -26,8 +26,8 @@ test("un 3 km en 15:30: por detrás, con la cuenta explicada", () => {
   assert.ok(p.diferencia > 60, "dif " + p.diferencia);
   assert.ok(p.seg > 33 * 60 + 15);
   const v = veredictoCoach(p);
-  assert.equal(v.tono, "ojo");
-  assert.match(v.texto, /Por detrás del plan/);
+  assert.equal(v.tono, "neutro", "sin culpa: en neutro");
+  assert.match(v.texto, /Hoy llegarías en .* decide si se mantiene la fecha/);
   const pq = porQue(p);
   assert.match(pq[0], /prueba de 3 km en 15:30/);
   assert.match(pq[1], /33:15 \+ .* = /);
@@ -65,4 +65,12 @@ test("antes de la primera prueba, una estimación por tus rodajes", async () => 
   assert.equal(p.suave, 436);
   assert.equal(estimacionPorRodajes({ dias: FLAT_DAYS, ritmoReal: { [s4.isoDate]: "14:50", [suave.isoDate]: "6:40/km" }, hoyIso: "2026-10-16" }), null, "con prueba manda la previsión");
   assert.equal(estimacionPorRodajes({ dias: FLAT_DAYS, ritmoReal: {}, hoyIso: "2026-10-09" }), null);
+});
+
+test("con solo series, el veredicto es una estimacion en neutro, sin 'por detras'", async () => {
+  const { veredictoCoach: v } = await import("../src/domain/coach/prevision.js");
+  const r = v({ base: "series", diferencia: 985, texto: "49:40", ritmo: "7:06" }, { prueba: { distKm: 5 }, date: "15 Nov" });
+  assert.equal(r.tono, "neutro");
+  assert.match(r.texto, /^Estimación con tus series: 7 km en unos 49:40\. El 5 km del 15 Nov da el primer dato fiable\.$/);
+  assert.doesNotMatch(r.texto, /detrás/);
 });

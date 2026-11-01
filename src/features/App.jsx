@@ -676,6 +676,12 @@ export default function App() {
             pausedRanges={pausedRanges} setPausedRanges={setPausedRanges} />
         )}
 
+        {(screen === "ejercicios" || screen === "coach") && (
+          <button className="btn" data-volver-progreso onClick={() => setScreen("progreso")}
+            style={{ margin: "12px 16px 0", fontSize: 16, fontWeight: 600, color: A.azul, minHeight: 36, display: "flex", alignItems: "center", gap: 2 }}>
+            ‹ Progreso
+          </button>
+        )}
         {screen === "ejercicios" && (
           <EjerciciosScreen selectedId={catalogoSelected} setSelectedId={setCatalogoSelected}
             youtubeLinks={youtubeLinks} setYoutubeLinks={setYoutubeLinks}
@@ -714,6 +720,7 @@ export default function App() {
           <ProgresoScreen medidas={medidas} setMedidas={setMedidas}
             ritmoReal={ritmoReal} weeks={WEEKS} checked={checked} workoutWeights={workoutWeights} workoutReps={workoutReps}
             onVerInforme={setInformeMes} cuelloChecks={cuelloChecks} painLog={painLog} gps={gps} pesosDiarios={pesosDiarios}
+            onAbrir={(k) => setScreen(k)}
             avanzo={(() => {
               // "¿Avanzo?" vive aqui: en HOY solo queda lo que hay que hacer.
               const parte = parteDelCoach({ dias: FLAT_DAYS, semanas: WEEKS, checked, cuelloChecks, painLog, ritmoReal, pesos: workoutWeights,
@@ -761,12 +768,11 @@ export default function App() {
           {[
             { k: "hoy", label: "Hoy" },
             { k: "semana", label: "Semana" },
-            { k: "ejercicios", label: "Ejercicios" },
-            { k: "nutricion", label: "Nutrición" },
+            { k: "nutricion", label: "Comida" },
             { k: "progreso", label: "Progreso" },
-            { k: "coach", label: "Coach" },
           ].map(t => {
-            const active = screen === t.k;
+            // Coach y Ejercicios viven dentro de Progreso (en "Más").
+            const active = screen === t.k || (t.k === "progreso" && (screen === "coach" || screen === "ejercicios"));
             const color = active ? A.azul : A.gris;
             return (
               <button key={t.k} className="btn" onClick={() => { setScreen(t.k); if (t.k === "semana") setWeekIdx(currentDay.weekIdx); }}

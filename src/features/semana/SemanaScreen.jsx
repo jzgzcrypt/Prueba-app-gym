@@ -80,7 +80,7 @@ export function SemanaScreen({ weekIdx, setWeekIdx, jumpToDay, checked, todayIso
                 <div style={{ fontSize: 15, fontWeight: 600, color: done || paused ? C.textDim : C.text, textDecoration: paused ? "line-through" : "none",
                               overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{tituloLargo(day)}</div>
                 <div style={{ fontSize: 12, fontWeight: 600, marginTop: 1, color: comida && comida.id === "comer" ? C.ok : C.textDim }}>
-                  {isT ? "Hoy · " : ""}{paused ? "Pausa" : comida ? (comida.id === "comer" ? "Comer" : "Recortar") : "Descanso"}
+                  {isT ? "Hoy · " : ""}{paused ? "Pausa" : comida ? (comida.id === "comer" ? "Comer más" : "Comer menos") : "Descanso"}
                   {day.tipo === "fuerza" && !paused ? <span style={{ color: C.textDim, fontWeight: 500 }}> · {day.ejercicios.length} ejercicios · {day.dur}</span> : null}
                 </div>
               </div>

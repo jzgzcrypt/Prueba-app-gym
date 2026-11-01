@@ -15,13 +15,12 @@ function trazaCompletaDe(dayKey) {
   } catch { return null; }
 }
 import { TarjetaResumen } from "@/features/ui/resumen";
-import { TarjetaCalendario } from "@/features/ui/calendario";
 import { nombreMes } from "@/domain/progreso/informe";
 import { parseSeries } from "@/domain/fuerza/series";
-import { BLOQUE, FECHA_FIN, FECHA_INICIO, FLAT_DAYS, WEEKS, claveDia, todayLocalIso } from "@/domain/plan/calendario";
+import { BLOQUE, FECHA_FIN, FECHA_INICIO, FLAT_DAYS, claveDia, todayLocalIso } from "@/domain/plan/calendario";
 import { getFraseHoy } from "@/domain/running/frases";
 import { getTecnicaEj } from "@/domain/salud/tecnica";
-import { GuerreroBlock, HabitBlock, ListBlock, MagiaBlock, MoveDayBlock, PainBlock } from "@/features/hoy/bloques";
+import { GuerreroBlock, ListBlock, MagiaBlock, MoveDayBlock, PainBlock } from "@/features/hoy/bloques";
 import { progresoMagia } from "@/domain/habilidades/magia";
 import { WeekDots } from "@/features/ui/WeekDots";
 import { destinoDe, llegadasA } from "@/lib/estado/mover-sesion";
@@ -31,7 +30,7 @@ import { FinPrueba, SentirSemana } from "@/features/hoy/AhoraYAvance";
 import { ListaHoy } from "@/features/hoy/ListaHoy";
 import { ahoraToca } from "@/domain/hoy/ahora";
 import { ritmoEsperado } from "@/domain/running/esperado";
-import { compararPrueba, diaDePrueba, diaEnPrueba, diasCumplidos, lunesDe, quedarse, tocaDecidir, volverAlPlan } from "@/domain/hoy/prueba";
+import { compararPrueba, diaDePrueba, diaEnPrueba, lunesDe, quedarse, tocaDecidir, volverAlPlan } from "@/domain/hoy/prueba";
 export function HoyScreen(props) {
   const { day, dayKey, isToday, flatIdx, goDay, goToday, isFuerzaDay, isRunDay, isCompromisoDay, mov,
           comida, vaciarDia, cosasEnElDia,
@@ -82,10 +81,16 @@ export function HoyScreen(props) {
     const l = (p[dayKey] || []).filter(x => x !== id);
     return { ...p, [dayKey]: si ? [...l, id] : l };
   });
+  const startDate = new Date(FECHA_INICIO);
+  const thisDate = new Date(day.isoDate || startDate);
+  const daysSinceStart = Math.round((thisDate - startDate) / (1000*60*60*24));
+  const isMedicionDay = daysSinceStart >= 0 && daysSinceStart % 14 === 0;
   const planAhora = ahoraToca({ hora: new Date().getHours(), day: diaSesion,
     sesionHecha: !llegadaPend && (day.tipo === "libre" || !!checked[dayKey] || !!movidaA),
     sesionNo: !llegadaPend && !checked[dayKey] && movidaA === "pasa",
     sesionMovida: !llegadaPend && !checked[dayKey] && /^\d{4}-/.test(movidaA || ""),
+    extras: { pierna: !!day.pierna10 && !movidaA, piernaHecha: !!checked[dayKey + "-pierna"],
+              medir: isMedicionDay, medirHecho: !!checked[dayKey + "-medir"] },
     cuello: { m: cM, t: cT, n: cN }, pesado: props.pesoDia != null, comidaApuntada: !!props.comidaDia, noHechas: noHechasHoy });
   const lunesHoy = lunesDe(hoyIso);
   const sentir = props.semanaSentir || {};
@@ -156,6 +161,8 @@ export function HoyScreen(props) {
         titulo: t === "compromiso" ? "Tenis" : t === "fuerza" ? "Fuerza · " + diaSesion.titulo : diaSesion.titulo, sub: subSesion() };
     }
     if (x.id === "cuello") return { ...x, ahora: ahoraId === "cuello", sub: cuelloEj.nombre + (cuelloTotal ? " · " + cuelloTotal + " de 3 tomas" : "") };
+    if (x.id === "pierna") return { ...x, sub: "Después de correr: " + day.pierna10.map(e => e.nombre.split(" ")[0].toLowerCase()).join(", ") };
+    if (x.id === "medir") return { ...x, sub: "Cada 2 semanas, en ayunas" };
     if (x.id === "peso") return { ...x, ahora: ahoraId === "peso", sub: props.pesoDia != null ? String(props.pesoDia).replace(".", ",") + " kg" : "En ayunas" };
     return { ...x, ahora: ahoraId === "comida", sub: props.comidaDia ? "Apuntada" : "Lo que has comido" };
   });
@@ -179,6 +186,7 @@ export function HoyScreen(props) {
       return toggleCuello(pref.find(k => !hechas[k]) || "m");
     }
     if (e === "no") return marcarNo(id, false);
+    if (id === "pierna" || id === "medir") return toggleCheck(dayKey + "-" + id);
     return abrir();
   };
   const enlace = { fontSize: 14, fontWeight: 600, color: A.azul, minHeight: 36, padding: "0 2px" };
@@ -234,6 +242,25 @@ export function HoyScreen(props) {
         {!cuelloTotal && <button className="btn" data-no-hoy onClick={() => { if (props.setNoHechas) props.setNoHechas(p => ({ ...p, [dayKey]: [...new Set([...(p[dayKey] || []), "cuello-m", "cuello-t", "cuello-n"])] })); cerrar(); }} style={enlace}>No hoy</button>}
       </div>
     );
+    if (id === "pierna") return (
+      <div>
+        {day.pierna10.map(e => (
+          <div key={e.nombre} style={{ display: "flex", justifyContent: "space-between", fontSize: 14, color: C.text, padding: "4px 0" }}>
+            <span>{e.nombre}</span><span style={{ color: C.textDim }}>{e.series}</span>
+          </div>
+        ))}
+        <button className="btn" data-no-hoy onClick={() => { marcarNo("pierna", true); cerrar(); }} style={enlace}>No hoy</button>
+      </div>
+    );
+    if (id === "medir") return (
+      <div>
+        <div style={{ fontSize: 14, color: C.text, lineHeight: 1.45, marginBottom: 8 }}>Cintura, ancho de hombro y una foto de frente y otra de lado. En ayunas, con la misma luz que la última vez.</div>
+        <div style={{ display: "flex", alignItems: "center", gap: 14 }}>
+          <Boton tipo="color" color={A.morado} onClick={props.onVerProgreso} style={{ flex: 1 }}>Apuntar en Progreso</Boton>
+          <button className="btn" data-no-hoy onClick={() => { marcarNo("medir", true); cerrar(); }} style={enlace}>No hoy</button>
+        </div>
+      </div>
+    );
     if (id === "peso") return <PesoFila valor={props.pesoDia} guardar={(kg) => props.guardarPeso(kg, dayKey)} noHoy={() => { marcarNo("peso", true); cerrar(); }} />;
     return (
       <div style={{ display: "flex", alignItems: "center", gap: 14 }}>
@@ -243,10 +270,6 @@ export function HoyScreen(props) {
     );
   };
 
-  const startDate = new Date(FECHA_INICIO);
-  const thisDate = new Date(day.isoDate || startDate);
-  const daysSinceStart = Math.round((thisDate - startDate) / (1000*60*60*24));
-  const isMedicionDay = daysSinceStart >= 0 && daysSinceStart % 14 === 0;
 
 
   const toggleBlock = (id) => setExpandedBlock(prev => prev === id ? null : id);
@@ -302,7 +325,7 @@ export function HoyScreen(props) {
 
         <button className="btn" data-todo-hoy onClick={() => setVerTodo(!verTodo)}
           style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 6, minHeight: 44, width: "100%", fontSize: 14.5, fontWeight: 600, color: A.azul }}>
-          {verTodo ? "Ocultar notas, molestias y extras" : "Notas, molestias y extras"} <Chevron abierto={verTodo} />
+          {verTodo ? "Ocultar" : "Notas, molestias, magia y guerrero"} <Chevron abierto={verTodo} />
         </button>
       </div>
 
@@ -310,18 +333,6 @@ export function HoyScreen(props) {
       <div style={{ display: "flex", flexDirection: "column", gap: 12, marginTop: 14 }}>
 
 
-
-        {isMedicionDay && (
-          <Tarjeta style={{ padding: "13px 16px", display: "flex", gap: 12, alignItems: "center" }}>
-            <IconoCaja nombre="regla" tono="azul" />
-            <div>
-              <div style={{ fontSize: 15, fontWeight: 700, color: C.text }}>Hoy toca medir</div>
-              <div style={{ fontSize: 12.5, color: C.textDim, marginTop: 2, lineHeight: 1.4 }}>
-                Cintura, ancho de hombro y una foto de frente y otra de lado. En ayunas, con la misma luz que la última vez. Se apunta en Progreso.
-              </div>
-            </div>
-          </Tarjeta>
-        )}
 
         {props.informePendiente && (
           <button className="btn" onClick={() => props.onVerInforme(props.informePendiente)} style={{
@@ -339,7 +350,6 @@ export function HoyScreen(props) {
         {props.resumenSemana && <TarjetaResumen resumen={props.resumenSemana} nombreBloque="Base 7K" />}
 
 
-        {isToday && <TarjetaCalendario modo="hoy" />}
 
         {isToday && props.copia && props.copia.toca && (
           <Tarjeta style={{ padding: "13px 16px", display: "flex", alignItems: "center", gap: 12 }}>
@@ -358,7 +368,9 @@ export function HoyScreen(props) {
         )}
 
         {/* ═══ LA SESION — manda la pantalla: mapa, titulo, datos y empezar ═══ */}
-        {isRunDay && !movidaA && (
+        {/* Antes de hacerla, todo esta en la fila de la lista: aqui solo el
+            resultado y lo que apuntas despues. */}
+        {isRunDay && !movidaA && mainDone && (
           <Tarjeta data-sesion style={{ overflow: "hidden" }}>
             {salidaPortada && salidaPortada.ruta && (
               <MapaRuta mini alto={220} ruta={salidaPortada.ruta} objetivo={salidaPortada.obj} titulo={day.titulo} fecha={day.isoDate}
@@ -475,67 +487,6 @@ export function HoyScreen(props) {
           </Tarjeta>
         )}
 
-        {isFuerzaDay && !movidaA && (
-          <Tarjeta data-sesion style={{ padding: 16 }}>
-            <div style={{ display: "flex", gap: 12, alignItems: "center" }}>
-              <IconoCaja nombre="mancuerna" tono="verde" tam={46} />
-              <div style={{ minWidth: 0 }}>
-                <Etiqueta color={C.ok}>Fuerza</Etiqueta>
-                <div style={{ fontSize: 22, fontWeight: 800, letterSpacing: -0.4, lineHeight: 1.15, color: C.text, marginTop: 1 }}>{day.titulo}</div>
-              </div>
-            </div>
-            <div style={{ display: "flex", gap: 20, margin: "14px 0 14px" }}>
-              <Dato v={day.ejercicios.length} l="ejercicios" />
-              {durNum && <Dato v={durNum} l={durUd || ""} />}
-              <Dato v={doneSeries + "/" + totalSeries} l="series" />
-            </div>
-            {!mainDone && <Boton onClick={onStartWorkout}>{doneSeries > 0 ? "Continuar sesión" : "Empezar sesión"}</Boton>}
-            {mainDone && (
-              <div style={{ minHeight: 50, borderRadius: 999, background: A.fondo.verde, display: "flex", alignItems: "center", justifyContent: "center", gap: 8,
-                            fontSize: 15, fontWeight: 700, color: C.ok }}><Icono nombre="check" tam={18} grosor={2.6} /> Entreno completado</div>
-            )}
-            {mainDone && <BotonDesmarcar onClick={() => toggleCheck(dayKey)} />}
-          </Tarjeta>
-        )}
-
-        {isCompromisoDay && (
-          <Tarjeta data-sesion style={{ padding: 16 }}>
-            <div style={{ display: "flex", gap: 12, alignItems: "center" }}>
-              <IconoCaja nombre="tenis" tono="verde" tam={46} />
-              <div style={{ flex: 1, minWidth: 0 }}>
-                <Etiqueta color={C.ok}>Compromiso · {day.hora}</Etiqueta>
-                <div style={{ fontSize: 22, fontWeight: 800, letterSpacing: -0.4, color: C.text, marginTop: 1 }}>{day.titulo}</div>
-              </div>
-            </div>
-            <div style={{ fontSize: 14, color: "#3A3A3C", lineHeight: 1.5, marginTop: 10 }}>{day.what}</div>
-            {day.notaPlan && (
-              <div style={{ fontSize: 13.5, fontWeight: 600, color: C.ok, marginTop: 10, padding: "10px 12px", background: A.fondo.verde, borderRadius: 12 }}>{day.notaPlan}</div>
-            )}
-            {day.reglas && (
-              <div style={{ marginTop: 10 }}>
-                {day.reglas.map((r, i) => (
-                  <div key={i} style={{ fontSize: 13.5, color: "#3A3A3C", lineHeight: 1.45, display: "flex", gap: 8, marginTop: i ? 4 : 0 }}>
-                    <span style={{ color: A.verde, fontWeight: 800 }}>·</span><span>{r}</span>
-                  </div>
-                ))}
-              </div>
-            )}
-            <div style={{ marginTop: 14 }}>
-              <Boton tipo={checked[dayKey] ? "color" : "oscuro"} color={A.verde} onClick={() => toggleCheck(dayKey)}>{checked[dayKey] ? "Hecho ✓" : "Marcar como hecho"}</Boton>
-            </div>
-          </Tarjeta>
-        )}
-
-        {day.tipo === "libre" && (
-          <Tarjeta style={{ padding: "14px 16px", display: "flex", gap: 12, alignItems: "center" }}>
-            <IconoCaja nombre="reloj" tono="gris" />
-            <div>
-              <div style={{ fontSize: 15, fontWeight: 700, color: C.text }}>Descanso</div>
-              <div style={{ fontSize: 12.5, color: C.textDim, marginTop: 2 }}>Sin fuerza, running ni movilidad. Descansar también es el plan.</div>
-            </div>
-          </Tarjeta>
-        )}
-
         {/* ═══ TENIS — su movilidad, en la pista ═══ */}
         {isCompromisoDay && (mov.cal.length + mov.enf.length) > 0 && (
           <ListBlock id="mov" expandedBlock={expandedBlock} toggleBlock={toggleBlock}
@@ -563,26 +514,13 @@ export function HoyScreen(props) {
 
         {/* ═══ LO DE CADA DIA, EN 4 CUADROS: toca uno y se abre debajo ═══ */}
         <div data-habitos style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
-          {comida && (
-            <Cuadro icono="plato" tono="verde" v={comida.macros.kcal.toLocaleString("es-ES")} l={"kcal · " + comida.etiqueta.toLowerCase()} onClick={props.irANutricion} />
-          )}
-          <Cuadro icono="cuello" tono="azul" v={cuelloTotal + "/3"} l={enLaPrueba ? "cuello · con 1 cuenta" : "cuello"} hecho={enLaPrueba ? cuelloTotal >= 1 : cuelloTotal === 3} activo={expandedBlock === "cuello"} onClick={() => habito("cuello")} />
-          {(!enLaPrueba || verExtras) && (
+          {(
             <>
               <Cuadro icono="magia" tono="morado" v={magiaProg.dominados + "/" + magiaProg.total} l={enLaPrueba ? "magia · extra" : "magia"} activo={expandedBlock === "magia"} onClick={() => habito("magia")} />
               <Cuadro icono="escudo" tono="gris" v={props.guerreroLog[dayKey] ? "✓" : "—"} l={enLaPrueba ? "guerrero · extra" : "guerrero"} hecho={!!props.guerreroLog[dayKey]} activo={expandedBlock === "guerrero"} onClick={() => habito("guerrero")} />
             </>
           )}
         </div>
-        {enLaPrueba && !verExtras && (
-          <button className="btn" data-extras onClick={() => setVerExtras(true)} style={{ fontSize: 14, fontWeight: 600, color: A.azul, padding: "2px 4px", textAlign: "left" }}>
-            Extras: magia y guerrero, si te apetece ›
-          </button>
-        )}
-        {expandedBlock === "cuello" && (
-          <HabitBlock cuelloEj={cuelloEj} cM={cM} cT={cT} cN={cN} cuelloTotal={cuelloTotal} toggleCuello={toggleCuello}
-            expandedBlock={expandedBlock} toggleBlock={toggleBlock} />
-        )}
         {expandedBlock === "magia" && (
           <MagiaBlock day={day} magiaRepaso={props.magiaRepaso}
             dominarTruco={props.dominarTruco} responderRepaso={props.responderRepaso}

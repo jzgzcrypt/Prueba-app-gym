@@ -27,7 +27,7 @@
  * @returns {{ ahora: {id,titulo,sub,accion}, despues: {id,titulo}[], dia: {id,titulo,estado}[] }}
  */
 /** Todo lo del dia, sin mirar la hora: { id, titulo, estado: "hecho"|"no"|"pendiente" }. */
-function todoElDia({ day, sesionHecha, sesionNo, sesionMovida, cuello, pesado, comidaApuntada, no }) {
+function todoElDia({ day, sesionHecha, sesionNo, sesionMovida, cuello, pesado, comidaApuntada, no, extras = {} }) {
   const c = cuello || {};
   const out = [];
   if (day && day.tipo !== "libre") {
@@ -36,12 +36,16 @@ function todoElDia({ day, sesionHecha, sesionNo, sesionMovida, cuello, pesado, c
   }
   const cuelloNo = ["cuello-m", "cuello-t", "cuello-n"].every(k => no.has(k));
   out.push({ id: "cuello", titulo: "Cuello", estado: c.m || c.t || c.n ? "hecho" : cuelloNo ? "no" : "pendiente" });
+  // Lo que antes se escondia en "extras": la pierna de 10 min tras el rodaje
+  // y medir (cada 2 semanas). Son tareas del dia: van en la lista.
+  if (extras.pierna) out.push({ id: "pierna", titulo: "Pierna 10 min", estado: extras.piernaHecha ? "hecho" : no.has("pierna") ? "no" : "pendiente" });
+  if (extras.medir) out.push({ id: "medir", titulo: "Medir: cintura y foto", estado: extras.medirHecho ? "hecho" : no.has("medir") ? "no" : "pendiente" });
   out.push({ id: "peso", titulo: "Pesarte", estado: pesado ? "hecho" : no.has("peso") ? "no" : "pendiente" });
   out.push({ id: "comida", titulo: "Comida", estado: comidaApuntada ? "hecho" : no.has("comida") ? "no" : "pendiente" });
   return out;
 }
 
-export function ahoraToca({ hora, day, sesionHecha, sesionNo = false, sesionMovida = false, cuello, pesado, comidaApuntada, noHechas = [] }) {
+export function ahoraToca({ hora, day, sesionHecha, sesionNo = false, sesionMovida = false, extras, cuello, pesado, comidaApuntada, noHechas = [] }) {
   const hay = day && day.tipo !== "libre";
   const esTenis = day && day.tipo === "compromiso";
   const lista = [];
@@ -65,7 +69,7 @@ export function ahoraToca({ hora, day, sesionHecha, sesionNo = false, sesionMovi
   if (hora >= 21 && !c.n) lista.push({ id: "cuello-n", titulo: "Cuello", sub: "Al acostarte. 2 minutos.", accion: "cuello" });
   const no = new Set(noHechas);
   const pendientes = lista.filter(x => !no.has(x.id));
-  const dia = todoElDia({ day, sesionHecha, sesionNo, sesionMovida, cuello, pesado, comidaApuntada, no });
+  const dia = todoElDia({ day, sesionHecha, sesionNo, sesionMovida, extras, cuello, pesado, comidaApuntada, no });
   if (!pendientes.length) {
     return { ahora: { id: "extras", titulo: "Todo lo de hoy, hecho", sub: "Si te apetece: 5 min de magia en el sofá en vez del móvil, o la respiración de guerrero.", accion: "extras" }, despues: [], dia };
   }

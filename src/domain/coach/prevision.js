@@ -38,10 +38,16 @@ export function veredictoCoach(prev, proxima) {
       : "Aún sin datos para prever el 7K." };
   }
   const d = prev.diferencia;
+  // Con solo series no hay dato fiable: se dice como estimacion y en neutro,
+  // sin "por detras" (asusta y luego la prueba lo cambia todo).
+  if (prev.base !== "prueba") {
+    return { tono: "neutro", texto: "Estimación con tus series: 7 km en unos " + prev.texto + ". " +
+      (proxima ? "El " + proxima.prueba.distKm + " km del " + proxima.date + " da el primer dato fiable." : "La próxima prueba lo confirma.") };
+  }
   if (Math.abs(d) <= 5) return { tono: "bien", texto: "Vas en el plan: el 6 de diciembre, 7 km en " + prev.texto + "." };
   if (d < 0) return { tono: "bien", texto: "Vas " + dif(d) + " por delante del plan. Con esto, 7 km en " + prev.texto + " (" + prev.ritmo + "/km)." };
-  if (d <= 60) return { tono: "ojo", texto: "Un poco por detrás (" + dif(d) + "). Es recuperable: hoy llegarías en " + prev.texto + " (" + prev.ritmo + "/km)." };
-  return { tono: "ojo", texto: "Por detrás del plan (" + dif(d) + "): hoy llegarías en " + prev.texto + ". El 5 km del 15 de noviembre decide si se mantiene la fecha." };
+  if (d <= 60) return { tono: "neutro", texto: "Cerca del plan: hoy llegarías en " + prev.texto + " (" + prev.ritmo + "/km). Es recuperable." };
+  return { tono: "neutro", texto: "Hoy llegarías en " + prev.texto + " (" + prev.ritmo + "/km). El 5 km del 15 de noviembre decide si se mantiene la fecha." };
 }
 
 /** En que se basa la prevision, en frases cortas. */

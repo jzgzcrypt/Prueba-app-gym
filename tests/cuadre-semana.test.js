@@ -15,21 +15,21 @@ test("te pasas 800 el lunes: de miércoles a domingo, 160 menos cada día", () =
   assert.equal(c.ajuste, -160);
   assert.equal(c.restantes, 5);
   assert.equal(c.sinCompensar, 0);
-  assert.match(textoCuadre(c), /llevas \+800 kcal: los 5 días que quedan, 160 menos cada día\. La proteína no se toca\.$/);
+  assert.equal(textoCuadre(c), "Esta semana vas +800 kcal: 160 menos cada día que queda.");
 });
 
 test("te quedas corto: los días que quedan suben", () => {
   const c = cuadreSemana({ dias: semana, comidasLog: log([["2026-10-05", 1700], ["2026-10-06", 1900]]), objetivoDe: obj, hoyIso: "2026-10-07" });
   assert.equal(c.saldo, -600);
   assert.equal(c.ajuste, 120);
-  assert.match(textoCuadre(c), /te faltan 600 kcal/);
+  assert.equal(textoCuadre(c), "Esta semana tienes margen: 120 kcal más cada día que queda.");
 });
 
 test("tope de 300 al día y suelo de 1.800: lo que no cabe se queda sin compensar", () => {
   const c = cuadreSemana({ dias: semana, comidasLog: log([["2026-10-08", 3800]]), objetivoDe: obj, hoyIso: "2026-10-10" });
   assert.equal(c.ajuste, -300);
   assert.equal(c.sinCompensar, 1700 - 600);
-  assert.match(textoCuadre(c), /1100 kcal se quedan sin compensar: no pasa nada/);
+  assert.match(textoCuadre(c), /300 menos/);
 });
 
 test("poco saldo o días sin apuntar: no se mueve nada", () => {
@@ -53,4 +53,10 @@ test("aplicar: la proteína igual, y nunca por debajo de 1.800", () => {
   assert.ok(m.hc < 214 && m.grasa <= 65);
   assert.ok(Math.abs(m.prot * 4 + m.hc * 4 + m.grasa * 9 - m.kcal) <= 6);
   assert.equal(aplicarCuadre({ kcal: 1900, prot: 165, hc: 180, grasa: 60 }, -300).kcal, 1800);
+});
+
+test("un dia apuntado a medias no cuenta como comer de menos", () => {
+  const c = cuadreSemana({ dias: semana, comidasLog: log([["2026-10-05", 650]]), objetivoDe: obj, hoyIso: "2026-10-07" });
+  assert.equal(c.saldo, 0);
+  assert.equal(c.ajuste, 0);
 });

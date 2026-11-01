@@ -80,10 +80,13 @@ export function objetivos({ dias, ritmoReal, pesos, reps, medidas, cuelloChecks,
   // 7K
   const pvr = tuContraElPlan(dias, ritmoReal || {});
   const prox = dias.find(d => d.prueba && d.prueba.distKm && d.prueba.distKm !== 7 && d.isoDate >= hoyIso && !(ritmoReal || {})[d.isoDate]);
-  out.push(pvr.ultimo
+  // Solo una prueba es un dato fiable del 7K: unas series dan una estimacion
+  // que asusta mas que informa ("16:25 por detras"). Hasta la prueba, se dice
+  // cuando llega el primer dato y nada mas.
+  out.push(pvr.ultimo && pvr.ultimo.tipo === "prueba"
     ? { id: "7k", nombre: "7K", valor: textoTiempo(pvr.ultimo.seg), tendencia: textoDiferencia(pvr.diferencia),
         flecha: pvr.diferencia <= 5 ? "▲" : "▼", tono: pvr.diferencia <= 5 ? "bien" : "ojo", seccion: "running" }
-    : { id: "7k", nombre: "7K", valor: null, accion: prox ? "Primer dato: " + prox.prueba.distKm + " km, " + prox.date : "Sin pruebas aún", tono: "gris", seccion: "running" });
+    : { id: "7k", nombre: "7K", valor: null, accion: prox ? "Primer dato fiable: " + prox.prueba.distKm + " km, " + prox.date : "Sin pruebas aún", tono: "gris", seccion: "running" });
 
   // Panza: cintura
   const anio = Number(hoyIso.slice(0, 4));
@@ -197,11 +200,12 @@ export function veredicto({ c, objs, alarmasLista, semanaN }) {
   const siete = objs.find(o => o.id === "7k");
   if (!c.hechas) return { texto: "Semana " + semanaN + ". Lo que hagas ahora es tu punto de partida.", tono: "neutro" };
   const clave = alarmasLista.find(a => a.tipo === "clave");
-  if (clave) return { texto: "Esta semana falta " + clave.tema + ": es la sesión que más pesa.", tono: "ojo" };
+  // Sin culpa: lo que importa, dicho en positivo y en neutro.
+  if (clave) return { texto: "Lo que más pesa esta semana: " + clave.tema + ".", tono: "neutro" };
   const bien = c.pct == null || c.pct >= 80;
   const otra = alarmasLista[0];
-  if (bien && otra) return { texto: "Vas bien, pero vigila " + otra.tema + ".", tono: "ojo" };
-  if (!bien) return { texto: "Te faltan sesiones. Jueves y domingo primero; lo demás, si puedes.", tono: "ojo" };
+  if (bien && otra) return { texto: "Vas bien. Ojo con " + otra.tema + ".", tono: "neutro" };
+  if (!bien) return { texto: "Esta semana, jueves y domingo primero; lo demás, si puedes.", tono: "neutro" };
   const extra = siete && siete.valor && siete.tono === "bien" ? " y el 7K va " + siete.tendencia.replace(" del plan", "") + "." : ".";
   return { texto: "Vas bien. Cumples" + extra, tono: "bien" };
 }

@@ -37,7 +37,11 @@ export function cuadreSemana({ dias, comidasLog, objetivoDe, hoyIso, claveDe = (
     if (d.isoDate >= hoyIso) continue;
     const aps = (comidasLog || {})[claveDe(d)];
     if (!aps || !aps.filter(Boolean).length) continue;
-    saldo += sumaDelDia(aps).kcal - objetivoDe(d).kcal;
+    // Un dia apuntado a medias (menos del 60 % de su objetivo) no esta
+    // cerrado: contarlo como "comiste de menos" subia las kcal sin motivo.
+    const comido = sumaDelDia(aps).kcal;
+    if (comido < objetivoDe(d).kcal * 0.6) continue;
+    saldo += comido - objetivoDe(d).kcal;
     cerrados++;
   }
   saldo = Math.round(saldo);
@@ -72,21 +76,12 @@ export function aplicarCuadre(macros, ajuste) {
 
 /** La frase del cuadre, o null si no hay nada que cuadrar. */
 export function textoCuadre(c) {
-  if (!c || !c.ajuste) {
-    if (c && Math.abs(c.sinCompensar) >= CUADRE.minimoSaldo && !c.restantes) return "Semana cerrada con " + signo(c.saldo) + " kcal. El lunes empieza de cero.";
-    return null;
-  }
-  const n = c.restantes;
-  // Sin decir "hoy": puede que mires otro dia, o que hoy este protegido
-  // (vispera o dia de prueba) y no entre en el reparto.
-  const cuando = n === 1 ? "el día que queda" : "los " + n + " días que quedan";
-  const base = c.saldo > 0
-    ? "Esta semana llevas " + signo(c.saldo) + " kcal: " + cuando + ", " + Math.abs(c.ajuste) + " menos cada día."
-    : "Esta semana te faltan " + Math.abs(c.saldo) + " kcal: " + cuando + ", " + c.ajuste + " más cada día.";
-  const resto = Math.abs(c.sinCompensar) >= CUADRE.minimoSaldo
-    ? " " + Math.abs(c.sinCompensar) + " kcal se quedan sin compensar: no pasa nada."
-    : "";
-  return base + " La proteína no se toca." + resto;
+  // Una linea, sin cuentas que haya que descifrar.
+  if (!c || !c.ajuste) return null;
+  const cada = c.restantes === 1 ? "hoy" : "cada día que queda";
+  return c.saldo > 0
+    ? "Esta semana vas " + signo(c.saldo) + " kcal: " + Math.abs(c.ajuste) + " menos " + cada + "."
+    : "Esta semana tienes margen: " + c.ajuste + " kcal más " + cada + ".";
 }
 
 const signo = (n) => (n > 0 ? "+" : "−") + Math.abs(Math.round(n)).toLocaleString("es-ES");

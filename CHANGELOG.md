@@ -21,6 +21,23 @@ Todo cambio que se haga en la app se anota aquí. Sin excepciones.
 
 ## [Sin publicar]
 
+### Cambiado: la app, más simple (audit como usuario)
+- **4 pestañas en vez de 6: Hoy · Semana · Comida · Progreso.** Coach (previsión, plan, bitácora, ajustes y copia) y Ejercicios pasan a "Más", al final de Progreso, con un "‹ Progreso" para volver.
+- **HOY:**
+  - "Pierna 10 min" y "Medir" son filas de la lista; antes estaban escondidas.
+  - Las notas y extras ya no repiten la sesión ni los cuadros de comida y cuello. Quedan el informe, la copia, magia y guerrero, molestias y nota.
+  - El aviso del calendario vive en Ajustes.
+- **Progreso, cada cosa una vez:** objetivo con su frase, ¿Avanzo?, próxima prueba, peso, constancia, detalle y Más. Se quitan la lista de objetivos repetida y el aviso naranja "Falta el jueves".
+- **Sin culpa y sin sustos:**
+  - Con solo series, el 7K dice "Primer dato fiable: 5 km, 15 Nov" en vez de "16:25 por detrás".
+  - El veredicto va en neutro ("Lo que más pesa esta semana: el jueves").
+  - La previsión del coach con series es una estimación, no un "por detrás".
+- **Comida:**
+  - El anillo con kcal y proteína; hidratos y grasa en una línea, sin las 4 barras repetidas.
+  - El cuadre semanal en una línea, y sin contar como "comido de menos" un día apuntado a medias (menos del 60 %).
+  - El peso se apunta desde HOY.
+- **Semana:** "Comer más / Comer menos" en vez de "Comer / Recortar".
+
 ### Cambiado: HOY es una lista
 - **HOY pasa a ser una lista con una fila por cosa del día:** la sesión, el cuello, pesarte y la comida. Se quitan "Ahora toca", la línea "Hoy:", "Después:", el banner azul y "Todo lo de hoy".
 - **El círculo marca y desmarca:** un toque pone ✓ y otro lo quita. Lo marcado como "no" sale tachado con ↺, y un toque lo devuelve.

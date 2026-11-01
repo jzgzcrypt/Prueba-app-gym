@@ -15,7 +15,7 @@ import { Chevron, IconoCaja } from "@/features/ui/aire";
  * Presentacional: que pasa al tocar lo decide HoyScreen (`onCirculo`) y que
  * se ve al abrir una fila tambien (`detalle(id)`).
  */
-const ICONO = { sesion: ["correr", "rojo"], fuerza: ["mancuerna", "azul"], tenis: ["tenis", "verde"], cuello: ["cuello", "azul"], peso: ["peso", "azul"], comida: ["plato", "verde"] };
+const ICONO = { sesion: ["correr", "rojo"], fuerza: ["mancuerna", "azul"], tenis: ["tenis", "verde"], cuello: ["cuello", "azul"], peso: ["peso", "azul"], comida: ["plato", "verde"], pierna: ["pierna", "rojo"], medir: ["regla", "morado"] };
 
 export function ListaHoy({ filas, onCirculo, detalle, abiertaInicial = null }) {
   const [abierta, setAbierta] = useState(abiertaInicial);
