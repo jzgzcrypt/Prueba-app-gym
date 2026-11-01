@@ -55,6 +55,13 @@
  */
 export const FECHA_INICIO = "2026-09-21"; // lunes
 
+/** Lo que dice el 5 km que decide la fecha: hasta este tiempo, tantas semanas extra. */
+export const DECIDE_FECHA = [
+  { hasta: 23 * 60 + 30, semanasExtra: 0 },
+  { hasta: 25 * 60, semanasExtra: 4 },
+  { hasta: Infinity, semanasExtra: 8 },
+];
+
 export const BLOQUE = {
   numero: 1,
   nombre: "Bloque 1 — Base 7K",
@@ -72,7 +79,7 @@ export const REGLAS_BLOQUE = [
   { t: "Si pierdes el jueves",
     d: "Pásalo al viernes o al sábado. Si no cabe, se pierde. Nunca dos días duros seguidos, ni la calidad el día antes de la tirada." },
   { t: "Si pierdes el martes", d: "No se recupera. Es descarga, no entrenamiento." },
-  { t: "Si enfermas 4 días o más", d: "Se repite la semana, no se salta. Eso empuja la fecha." },
+  { t: "Si enfermas o paras 4 días o más", d: "Lo perdido se pierde y se sigue: la vuelta tras el parón ajusta la carga. La fecha solo la mueve el 5 km." },
   { t: "Si vas cansado", d: "Se recorta primero la fuerza. El 7K tiene fecha; el hombro aguanta una semana floja." },
   { t: "Suave es suave", d: "En los rodajes suaves tienes que poder hablar con frases completas. El ritmo de Strava se apunta, pero no manda." },
   { t: "Si algo molesta el cuello", d: "Ese día se cambia el ejercicio por una variante que no cargue el cuello. No se aprieta." },

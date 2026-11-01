@@ -1,28 +1,25 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { asignarSemanas } from "../src/domain/plan/calendario.js";
-import { WEEKS as PLAN, FECHA_INICIO } from "../src/domain/plan/bloque-1-base-7k.js";
+import { asignarSemanas, semanasExtraDe } from "../src/domain/plan/calendario.js";
+import { WEEKS as PLAN } from "../src/domain/plan/bloque-1-base-7k.js";
 
-// Las sesiones (no libres) de una semana del plan, como fechas del calendario.
-const sesiones = (pi, c) => PLAN[pi].days.map((d, di) => [d, di]).filter(([d]) => d.tipo && d.tipo !== "libre")
-  .map(([, di]) => { const t = new Date(Date.UTC(2026, 8, 21 + c * 7 + di)); return t.toISOString().slice(0, 10); });
-
-test("si cumples cada semana, el plan va en orden y no se mueve", () => {
-  const hechas = new Set(); PLAN.forEach((_, i) => sesiones(i, i).forEach(iso => hechas.add(iso)));
-  const a = asignarSemanas({ plan: PLAN, inicio: FECHA_INICIO, hoyIso: "2026-12-07", hecho: (iso) => hechas.has(iso), primerDato: "2026-09-21" });
-  assert.deepEqual(a, PLAN.map((_, i) => i));
+test("sin el 5 km apuntado, el plan va en orden: lo perdido se pierde, no se repite", () => {
+  assert.deepEqual(asignarSemanas({ plan: PLAN }), PLAN.map((_, i) => i));
 });
 
-test("semanas sin cumplir se repiten y la fecha final se corre", () => {
-  // Cumple las 3 primeras; la 4 (12-18 oct) y la 5 (19-25 oct), nada.
-  const hechas = new Set(); [0, 1, 2].forEach(i => sesiones(i, i).forEach(iso => hechas.add(iso)));
-  const a = asignarSemanas({ plan: PLAN, inicio: FECHA_INICIO, hoyIso: "2026-11-01", hecho: (iso) => hechas.has(iso), primerDato: "2026-09-21" });
-  assert.deepEqual(a.slice(0, 6), [0, 1, 2, 3, 3, 3], "la semana del 26 oct sigue en la 4 del plan");
-  assert.equal(a.length, PLAN.length + 2, "el 7K se corre 2 semanas");
+test("el 5 km decide: 23:30 se mantiene; 24:30 mete 4 semanas; 26:00, 8", () => {
+  assert.equal(semanasExtraDe("23:20"), 0);
+  assert.equal(semanasExtraDe("24:30"), 4);
+  assert.equal(semanasExtraDe("26:00"), 8);
+  assert.equal(semanasExtraDe("4:54/km"), 4, "como ritmo: 24:30");
+  assert.equal(semanasExtraDe("6:30/km (suave)"), 0, "corrido como suave no decide");
+  assert.equal(semanasExtraDe(""), 0);
 });
 
-test("lo de antes de tu primer dato no te castiga", () => {
-  const a = asignarSemanas({ plan: PLAN, inicio: FECHA_INICIO, hoyIso: "2026-11-01", hecho: () => false, primerDato: "2026-10-25" });
-  // Hasta el 18 oct cuenta como hecho; la del 19-25 (con tu primer dato) sin cumplir se repite.
-  assert.deepEqual(a.slice(0, 6), [0, 1, 2, 3, 4, 4]);
+test("las semanas extra van despues de la prueba que decide, antes de la recta final", () => {
+  const a = asignarSemanas({ plan: PLAN, extra: 4 });
+  assert.equal(a.length, PLAN.length + 4);
+  const decide = PLAN.findIndex(w => w.days.some(d => d.prueba && d.prueba.decide));
+  assert.deepEqual(a.slice(decide, decide + 6), [decide, decide + 1, decide + 1, decide + 1, decide + 1, decide + 1]);
+  assert.equal(a[a.length - 1], PLAN.length - 1, "el 7K sigue siendo lo ultimo");
 });

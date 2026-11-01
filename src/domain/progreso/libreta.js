@@ -14,11 +14,8 @@ import { FECHA_OBJETIVO_TXT } from "../plan/calendario.js";
 export const OBJETIVO_7K = 7 * 285;
 
 /** Umbrales del 5 km de S8 (ver REGLAS_BLOQUE en el plan). */
-export const DECIDE_FECHA = [
-  { hasta: 23 * 60 + 30, semanasExtra: 0 },
-  { hasta: 25 * 60, semanasExtra: 4 },
-  { hasta: Infinity, semanasExtra: 8 },
-];
+export { DECIDE_FECHA } from "../plan/bloque-1-base-7k.js";
+import { DECIDE_FECHA } from "../plan/bloque-1-base-7k.js";
 
 /** 1995 -> "33:15"; 4000 -> "1:06:40". */
 export function textoTiempo(seg) {

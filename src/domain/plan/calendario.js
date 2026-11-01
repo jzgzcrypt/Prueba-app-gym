@@ -1,5 +1,5 @@
 import { compromisoDelDia } from "../compromisos.js";
-import { BLOQUE, FECHA_INICIO, WEEKS as PLAN } from "./bloque-1-base-7k.js";
+import { BLOQUE, DECIDE_FECHA, FECHA_INICIO, WEEKS as PLAN } from "./bloque-1-base-7k.js";
 
 /**
  * El calendario ata el plan a fechas reales.
@@ -50,40 +50,34 @@ function etiquetaRango(isoIni, isoFin) {
 }
 
 /**
- * EL PLAN SIGUE DESDE DONDE ESTAS, Y LA FECHA SE MUEVE.
+ * LA FECHA LA DECIDEN LOS DATOS.
  *
- * Antes cada semana del plan caia en una semana fija del calendario, la
- * hicieras o no: tras dos semanas paradas el plan seguia en la semana 6 y el
- * 7K seguia el 6 de diciembre, como si nada. Ahora:
+ * El plan va siempre en orden: lo que te saltas se pierde y la vuelta tras un
+ * paron (ajuste.js) ajusta la carga. La fecha del 7K no se mueve por fallar
+ * dias: la mueve la prueba de 5 km que decide (DECIDE_FECHA). Si dice que hace
+ * falta mas tiempo, esas semanas extra se meten despues de ella, repitiendo la
+ * semana de construccion que la sigue, antes de la recta final.
  *
- *   - Una semana ya pasada en la que hiciste al menos la mitad de sus
- *     sesiones, cuenta: la siguiente es la siguiente del plan.
- *   - Si no, la siguiente REPITE esa semana del plan: se sigue desde donde
- *     estas y el final (el 7K) se corre una semana.
- *   - Las semanas de antes de tu primer dato apuntado cuentan como hechas:
- *     no se castiga lo que aun no apuntabas en la app.
- *   - La semana en curso y las que vienen siguen el plan en orden.
- *
- * Puro: `hecho(iso)` dice si ese dia se hizo lo suyo.
  * @returns {number[]} el indice de la semana del plan para cada semana del calendario
  */
-export function asignarSemanas({ plan, inicio, hoyIso, hecho, primerDato }) {
-  const asignadas = [];
-  let p = 0, c = 0;
-  while (p < plan.length && c < plan.length + 26) {
-    asignadas.push(p);
-    const lunes = sumarDias(inicio, c * 7), domingo = sumarDias(inicio, c * 7 + 6);
-    let avanza = true;
-    if (domingo < hoyIso && (!primerDato || domingo >= primerDato)) {
-      const sesiones = plan[p].days.map((d, di) => ({ d, iso: sumarDias(lunes, di) }))
-        .filter(({ d }) => d.tipo && d.tipo !== "libre");
-      const hechas = sesiones.filter(({ iso }) => hecho(iso)).length;
-      avanza = !sesiones.length || hechas * 2 >= sesiones.length;
-    }
-    if (avanza) p++;
-    c++;
-  }
-  return asignadas;
+export function asignarSemanas({ plan, extra = 0 }) {
+  const decide = plan.findIndex(w => w.days.some(d => d.prueba && d.prueba.decide));
+  const orden = plan.map((_, i) => i);
+  if (!extra || decide < 0 || decide + 1 >= plan.length) return orden;
+  const construir = decide + 1;
+  return [...orden.slice(0, construir), ...Array(extra).fill(construir), ...orden.slice(construir)];
+}
+
+/** Las semanas extra que pide el 5 km apuntado (0 si aun no hay, o si se corrio como suave). */
+export function semanasExtraDe(texto) {
+  const t = String(texto || "").trim();
+  if (!t || /suave/i.test(t)) return 0;
+  const m = t.match(/(\d+):(\d{2})/);
+  if (!m) return 0;
+  let seg = Number(m[1]) * 60 + Number(m[2]);
+  if (/\/\s*km/i.test(t) || Number(m[1]) < 10) seg *= 5; // vino como ritmo
+  const tramo = DECIDE_FECHA.find(x => seg <= x.hasta);
+  return tramo ? tramo.semanasExtra : 0;
 }
 
 /** Lo apuntado en este movil, leido al arrancar (en el servidor no hay nada). */
@@ -96,17 +90,17 @@ function leerDatos() {
 
 const DATOS = leerDatos();
 const ASIGNADAS = (() => {
-  if (!DATOS) return PLAN.map((_, i) => i);
-  const ch = DATOS.checked || {}, gps = DATOS.gps || {}, rr = DATOS.ritmoReal || {};
-  const hecho = (iso) => !!ch[iso] || !!(gps[iso] && gps[iso].m > 0) || !!String(rr[iso] || "").trim();
-  const fechas = [...Object.keys(ch), ...Object.keys(gps), ...Object.keys(rr)].filter(k => /^\d{4}-\d{2}-\d{2}/.test(k)).map(k => k.slice(0, 10)).sort();
-  return asignarSemanas({ plan: PLAN, inicio: FECHA_INICIO, hoyIso: todayLocalIso(), hecho, primerDato: fechas[0] || null });
+  const wi = PLAN.findIndex(w => w.days.some(d => d.prueba && d.prueba.decide));
+  if (!DATOS || wi < 0) return PLAN.map((_, i) => i);
+  const di = PLAN[wi].days.findIndex(d => d.prueba && d.prueba.decide);
+  const iso = sumarDias(FECHA_INICIO, wi * 7 + di);
+  return asignarSemanas({ plan: PLAN, extra: semanasExtraDe((DATOS.ritmoReal || {})[iso]) });
 })();
 
 /** El plan con sus fechas puestas. Es este WEEKS, y no el del plan, el que usa
  *  toda la app: incluye `date` por dia y `dates` por semana ya calculados.
  *  Cada semana del calendario lleva la del plan que le toca (`planN`); `n` es
- *  su numero en el calendario y `repite` dice si repite la anterior. */
+ *  su numero en el calendario y `extra` dice si es una semana extra del 5 km. */
 export const WEEKS = ASIGNADAS.map((pi, wi) => {
   const wk = PLAN[pi];
   const days = wk.days.map((d, di) => {
@@ -117,11 +111,11 @@ export const WEEKS = ASIGNADAS.map((pi, wi) => {
     if (wk.sinDeficit) dia.sinDeficit = true;
     return aplicarCompromiso(dia, di);
   });
-  return { ...wk, n: wi + 1, planN: wk.n, repite: wi > 0 && ASIGNADAS[wi - 1] === pi, days,
+  return { ...wk, n: wi + 1, planN: wk.n, extra: wi > 0 && ASIGNADAS[wi - 1] === pi, days,
            dates: etiquetaRango(days[0].isoDate, days[days.length - 1].isoDate) };
 });
 
-/** Cuantas semanas se ha movido el final por semanas repetidas. */
+/** Cuantas semanas extra ha metido el 5 km que decide la fecha. */
 export const SEMANAS_MOVIDAS = WEEKS.length - PLAN.length;
 
 /** Superpone el compromiso fijo del dia, si lo hay, sobre lo que diga el plan.

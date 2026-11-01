@@ -21,11 +21,12 @@ Todo cambio que se haga en la app se anota aquí. Sin excepciones.
 
 ## [Sin publicar]
 
-### Cambiado: el plan sigue desde donde estás y el 7K se mueve
-- Una semana pasada en la que no se hizo al menos la mitad de sus sesiones se repite la semana siguiente, en vez de saltar a la otra. Las semanas anteriores al primer dato apuntado cuentan como hechas.
-- El final del plan y el 7K se mueven con ello: contador de días, "Tu objetivo" (con "Fecha movida N semanas: el plan sigue desde donde estás"), previsión y textos. Ya no hay "6 de diciembre" ni "15 de noviembre" escritos a mano.
-- Semana muestra la semana del plan que toca y avisa si se repite.
-- Al cambiar de día con la app abierta se recarga para recalcularlo.
+### Cambiado: la fecha del 7K la deciden los datos
+- El plan va siempre en orden: lo que te saltas se pierde, sin repetir semanas, y la vuelta tras un parón ajusta la carga.
+- La fecha del 7K la mueve la prueba de 5 km que decide (≤23:30 se mantiene; hasta 25:00, +4 semanas; más, +8). Hasta ahora ese resultado no se aplicaba. Ahora esas semanas se meten después de la prueba, repitiendo la semana de construcción, antes de la recta final.
+- Contador de días, "Tu objetivo" ("Fecha movida N semanas: lo decidió tu 5 km"), previsión y textos usan la fecha que toque. Ya no hay fechas escritas a mano.
+- Un 5 km corrido como suave (en la vuelta) no decide nada.
+- Semana marca las semanas extra.
 - Limitación: el calendario descargable (.ics) sigue con las fechas originales.
 
 ### Arreglado

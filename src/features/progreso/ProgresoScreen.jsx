@@ -1,6 +1,6 @@
 "use client";
 
-import { FECHA_FIN, FECHA_INICIO, FLAT_DAYS, claveDia, todayLocalIso, SEMANAS_MOVIDAS, WEEKS } from "@/domain/plan/calendario";
+import { FECHA_FIN, FECHA_INICIO, FLAT_DAYS, claveDia, todayLocalIso, SEMANAS_MOVIDAS } from "@/domain/plan/calendario";
 import { useEffect, useRef, useState } from "react";
 import { lecturaPrueba } from "@/domain/progreso/libreta";
 import { parteDelCoach } from "@/domain/progreso/parte";
@@ -507,16 +507,11 @@ function TuObjetivo({ veredicto }) {
       <div style={{ height: 6, borderRadius: 3, background: "rgba(255,255,255,.18)" }}>
         <div style={{ width: dia / total * 100 + "%", height: "100%", borderRadius: 3, background: A.verde }} />
       </div>
-      {SEMANAS_MOVIDAS > 0 && (() => {
-        // El plan sigue desde donde estas: semanas sin cumplir se repiten y la fecha se corre.
-        const hoy = todayLocalIso();
-        const wk = WEEKS.find(w => w.days[0].isoDate <= hoy && w.days[6].isoDate >= hoy);
-        return (
-          <div data-fecha-movida style={{ fontSize: 13.5, lineHeight: 1.45, marginTop: 12, padding: "9px 11px", borderRadius: 12, background: "rgba(255,255,255,.1)" }}>
-            Fecha movida {SEMANAS_MOVIDAS} {SEMANAS_MOVIDAS === 1 ? "semana" : "semanas"}: el plan sigue desde donde estás{wk ? " (semana " + wk.planN + " de " + (WEEKS[WEEKS.length - 1].planN) + ")" : ""}. Si cumples, no se mueve más.
-          </div>
-        );
-      })()}
+      {SEMANAS_MOVIDAS > 0 && (
+        <div data-fecha-movida style={{ fontSize: 13.5, lineHeight: 1.45, marginTop: 12, padding: "9px 11px", borderRadius: 12, background: "rgba(255,255,255,.1)" }}>
+          Fecha movida {SEMANAS_MOVIDAS} semanas: lo decidió tu 5 km. Se mueve la fecha, no el ritmo.
+        </div>
+      )}
       {veredicto && <div style={{ fontSize: 14, lineHeight: 1.45, marginTop: 14, opacity: 0.9 }}>{veredicto.texto}</div>}
     </div>
   );
