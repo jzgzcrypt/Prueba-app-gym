@@ -21,6 +21,21 @@ Todo cambio que se haga en la app se anota aquí. Sin excepciones.
 
 ## [Sin publicar]
 
+### Cambiado: HOY es una lista
+- **HOY pasa a ser una lista con una fila por cosa del día:** la sesión, el cuello, pesarte y la comida. Se quitan "Ahora toca", la línea "Hoy:", "Después:", el banner azul y "Todo lo de hoy".
+- **El círculo marca y desmarca:** un toque pone ✓ y otro lo quita. Lo marcado como "no" sale tachado con ↺, y un toque lo devuelve.
+- **Tocar una fila la abre ahí mismo:**
+  - **Sesión:** qué toca, ritmo esperado, Empezar y "No hoy / moverla".
+  - **Cuello:** cómo se hace y las tres tomas.
+  - **Peso:** el campo, quitarlo y "No hoy".
+  - **Comida:** lleva a Nutrición.
+- **Lo que toca ahora** va resaltado en azul.
+- **La vuelta tras un parón** se ve en la línea de la sesión.
+- **Días pasados:** la misma lista sustituye a "¿Qué hiciste este día?".
+- **Lo demás del día** (mapa, notas, molestias, magia y guerrero, vaciar) queda en "Notas, molestias y extras".
+- **"¿Avanzo?"** pasa a Progreso, arriba.
+- **Peso:** se puede apuntar o quitar en cualquier día.
+
 ### Arreglado (revisión completa, tanda 4: nutrición y detalles)
 - "1,050 kcal" pegado de la IA se lee como 1050 (antes, 1). "0,125" sigue siendo un decimal.
 - Las comidas apuntadas con el formato antiguo suman sus kcal y macros, en la lista y en el cuadre semanal. Antes contaban 0 y el cuadre te subía hasta +300 kcal/día.

@@ -34,7 +34,8 @@ import { textoParaLibreta } from "@/domain/running/gps";
 import { ajustePorPeso, objetivosConAjuste, tendenciaPeso } from "@/domain/nutricion/adaptativo";
 import { habitualesIniciales } from "@/domain/nutricion/recomendar";
 import { suaveHabitual } from "@/domain/running/objetivo";
-import { diaEnPrueba, pruebaDe } from "@/domain/hoy/prueba";
+import { diaDePrueba, diaEnPrueba, diasCumplidos, lunesDe, pruebaDe } from "@/domain/hoy/prueba";
+import { Avanzo } from "@/features/hoy/AhoraYAvance";
 import { parteDelCoach } from "@/domain/progreso/parte";
 import { aplicarCuadre, cuadreSemana, textoCuadre } from "@/domain/nutricion/cuadre-semana";
 import { semanaNutricion } from "@/domain/nutricion/pegar-ia";
@@ -340,7 +341,12 @@ export default function App() {
     return { ...base, macros, kcal: macros.kcal.toLocaleString("es-ES") + " kcal", cuadre: macros.kcal - base.macros.kcal };
   })();
   const programa = { ...ajusteSemana, objetivos: objetivosConAjuste(OBJETIVO_MACROS, ajusteSemana.ajuste) };
-  const guardarPeso = (kg) => setPesosDiarios(p => Object.assign({}, p, { [todayLocalIso()]: kg }));
+  // El peso de un dia (hoy si no se dice); null lo quita.
+  const guardarPeso = (kg, iso) => setPesosDiarios(p => {
+    const n = Object.assign({}, p), k = iso || todayLocalIso();
+    if (kg == null) delete n[k]; else n[k] = kg;
+    return n;
+  });
   const mainDone = currentDay.tipo === "libre" ? true : !!checked[dayKey];
   const isCompromisoDay = currentDay.tipo === "compromiso";
 
@@ -655,8 +661,7 @@ export default function App() {
             pesoDia={pesosDiarios[dayKey] ?? null} comidaDia={(comidasLog[dayKey] || []).length > 0}
             comidaApuntada={(comidasLog[todayLocalIso()] || []).length > 0}
             onStartWorkoutDe={(k) => setActiveWorkout(k)} capas={capas}
-            parte={parteDelCoach({ dias: FLAT_DAYS, semanas: WEEKS, checked, cuelloChecks, painLog, ritmoReal, pesos: workoutWeights,
-              reps: workoutReps, medidas, fechaInicio: FECHA_INICIO, hoyIso: todayLocalIso() })} />
+            />
         )}
 
         {screen === "magia-catalogo" && (
@@ -708,7 +713,20 @@ export default function App() {
         {screen === "progreso" && (
           <ProgresoScreen medidas={medidas} setMedidas={setMedidas}
             ritmoReal={ritmoReal} weeks={WEEKS} checked={checked} workoutWeights={workoutWeights} workoutReps={workoutReps}
-            onVerInforme={setInformeMes} cuelloChecks={cuelloChecks} painLog={painLog} gps={gps} pesosDiarios={pesosDiarios} />
+            onVerInforme={setInformeMes} cuelloChecks={cuelloChecks} painLog={painLog} gps={gps} pesosDiarios={pesosDiarios}
+            avanzo={(() => {
+              // "¿Avanzo?" vive aqui: en HOY solo queda lo que hay que hacer.
+              const parte = parteDelCoach({ dias: FLAT_DAYS, semanas: WEEKS, checked, cuelloChecks, painLog, ritmoReal, pesos: workoutWeights,
+                reps: workoutReps, medidas, fechaInicio: FECHA_INICIO, hoyIso: todayLocalIso() });
+              const hoy = todayLocalIso();
+              const ult = Object.keys(semanaSentir || {}).sort().pop();
+              return (
+                <Avanzo objetivos={parte.objetivos} onVer={() => {}}
+                  cumplidos={diasCumplidos(FLAT_DAYS.map(d => diaEnPrueba(d, prueba)), lunesDe(hoy), hoy, { checked, cuelloChecks })}
+                  sentir={ult ? semanaSentir[ult].nota : null}
+                  prueba={diaDePrueba(prueba, hoy) ? { dia: diaDePrueba(prueba, hoy) } : null} />
+              );
+            })()} />
         )}
 
         {screen === "coach" && (

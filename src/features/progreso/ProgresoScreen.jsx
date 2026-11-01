@@ -14,7 +14,7 @@ import { A, C, CARD, CAT } from "@/design/tokens";
 import { ScreenHeader } from "@/features/ui/headers";
 import { Boton, Chevron, Fila, Icono, IconoCaja, Pastilla, Tarjeta } from "@/features/ui/aire";
 import { QuickFieldInput, SimpleLineChart } from "@/features/ui/charts";
-export function ProgresoScreen({ medidas, setMedidas, ritmoReal, weeks, checked, workoutWeights, workoutReps, onVerInforme, cuelloChecks, painLog, gps, pesosDiarios }) {
+export function ProgresoScreen({ medidas, setMedidas, ritmoReal, weeks, checked, workoutWeights, workoutReps, onVerInforme, cuelloChecks, painLog, gps, pesosDiarios, avanzo }) {
   const [showForm, setShowForm] = useState(false);
   const [form, setForm] = useState({ peso: "", cintura: "", anchoHombro: "", cadera: "", hombro: "", cadenaPosterior: "", columna: "", caderaMov: "", foto: null });
   const [quickField, setQuickField] = useState(null); // "peso" | "cintura" | "cadera" | "hombro" | "cadenaPosterior" | "columna" | "caderaMov" | null (menu)
@@ -170,6 +170,7 @@ export function ProgresoScreen({ medidas, setMedidas, ritmoReal, weeks, checked,
     <div style={{ padding: "16px 16px 28px" }}>
       <ScreenHeader title="Progreso" subtitle={semanaActual ? "Semana " + semanaActual.n + " de " + weeks.length : ""} />
 
+      {avanzo && <div style={{ marginBottom: 12 }}>{avanzo}</div>}
       <TuObjetivo veredicto={parte.veredicto} />
       <ProximaPrueba ritmoReal={ritmoReal} />
       <TuPeso datos={pesoData} onApuntar={() => { setShowForm(false); setQuickField("peso"); }} />

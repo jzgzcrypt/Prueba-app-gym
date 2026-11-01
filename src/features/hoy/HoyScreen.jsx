@@ -27,7 +27,8 @@ import { WeekDots } from "@/features/ui/WeekDots";
 import { destinoDe, llegadasA } from "@/lib/estado/mover-sesion";
 import { dejarPasar, deshacer, diaHablado, esClave, nombreDe, pendienteDeRecolocar, proponerHueco } from "@/domain/plan/reprogramar";
 import { Recolocar } from "@/features/hoy/Recolocar";
-import { AhoraToca, Avanzo, FinPrueba, RepasoDia, SentirSemana } from "@/features/hoy/AhoraYAvance";
+import { FinPrueba, SentirSemana } from "@/features/hoy/AhoraYAvance";
+import { ListaHoy } from "@/features/hoy/ListaHoy";
 import { ahoraToca } from "@/domain/hoy/ahora";
 import { ritmoEsperado } from "@/domain/running/esperado";
 import { compararPrueba, diaDePrueba, diaEnPrueba, diasCumplidos, lunesDe, quedarse, tocaDecidir, volverAlPlan } from "@/domain/hoy/prueba";
@@ -57,7 +58,7 @@ export function HoyScreen(props) {
   // ── Lo de arriba de HOY: ahora toca, ¿avanzo?, la pregunta del domingo y el
   //    final de la prueba. Lo demas, plegado en "Todo lo de hoy". ──
   const [verTodo, setVerTodo] = useState(false);
-  const plegado = isToday && !verTodo;
+  const plegado = !verTodo;
   const hoyIso = todayLocalIso();
   const prueba = props.prueba || null;
   const diasConPrueba = FLAT_DAYS.map(d => diaEnPrueba(d, prueba));
@@ -85,24 +86,16 @@ export function HoyScreen(props) {
     sesionHecha: !llegadaPend && (day.tipo === "libre" || !!checked[dayKey] || !!movidaA),
     sesionNo: !llegadaPend && !checked[dayKey] && movidaA === "pasa",
     sesionMovida: !llegadaPend && !checked[dayKey] && /^\d{4}-/.test(movidaA || ""),
-    cuello: { m: cM, t: cT, n: cN }, pesado: props.pesoHoy != null, comidaApuntada: !!props.comidaApuntada, noHechas: noHechasHoy });
+    cuello: { m: cM, t: cT, n: cN }, pesado: props.pesoDia != null, comidaApuntada: !!props.comidaDia, noHechas: noHechasHoy });
   const lunesHoy = lunesDe(hoyIso);
-  const cumplidos = diasCumplidos(diasConPrueba, lunesHoy, hoyIso, { checked, cuelloChecks });
   const sentir = props.semanaSentir || {};
   const dowHoy = new Date(hoyIso + "T12:00:00").getDay();
   const lunesPregunta = dowHoy === 0 ? lunesHoy : dowHoy === 1 ? lunesDe(FLAT_DAYS[Math.max(0, flatIdx - 1)].isoDate) : null;
   const preguntaSentir = isToday && lunesPregunta && !sentir[lunesPregunta] && lunesPregunta >= FECHA_INICIO;
-  const ultimoSentir = Object.keys(sentir).sort().pop();
   const enLaPrueba = !!diaDePrueba(prueba, day.isoDate) || (prueba && prueba.decidido && !prueba.volver && day.isoDate >= prueba.desde);
   const [verExtrasEstado, setVerExtras] = useState(false);
   const verExtras = verExtrasEstado || expandedBlock === "magia" || expandedBlock === "guerrero";
-  // Abre lo plegado y baja hasta los cuadros de habitos: se abria muy abajo y
-  // parecia que el boton no hacia nada.
-  const abrirTodo = (bloque) => {
-    setVerTodo(true);
-    if (bloque) { setVerExtras(true); setExpandedBlock(bloque); }
-    setTimeout(() => { const el = document.querySelector("[data-habitos]"); if (el) el.scrollIntoView({ behavior: "smooth", block: "start" }); }, 60);
-  };
+
 
 
   // Lo de este día se recolocó, cedió su sitio o se dejó pasar.
@@ -120,22 +113,6 @@ export function HoyScreen(props) {
 
   // Un dia pasado: marcar que hiciste y que no.
   const esPasado = day.isoDate < hoyIso;
-  const filasRepaso = [];
-  if (esPasado) {
-    if (day.tipo !== "libre") {
-      filasRepaso.push({ id: "sesion", titulo: day.tipo === "compromiso" ? "Tenis" : day.titulo,
-        estado: checked[dayKey] ? "si" : movidaA === "pasa" ? "no" : null,
-        fija: movidaA && movidaA !== "pasa" && !checked[dayKey]
-          ? (/^\d{4}-/.test(movidaA) && FLAT_DAYS.find(d => d.isoDate === movidaA) ? "Movida al " + diaHablado(FLAT_DAYS.find(d => d.isoDate === movidaA)).slice(3) : "Movida") : null });
-    }
-    for (const [k, t] of [["m", "Cuello mañana"], ["t", "Cuello tarde"], ["n", "Cuello noche"]]) {
-      filasRepaso.push({ id: "cuello-" + k, titulo: t, estado: cuelloChecks[dayKey + "-" + k] ? "si" : noHechasHoy.includes("cuello-" + k) ? "no" : null });
-    }
-    filasRepaso.push({ id: "peso", titulo: "Pesarte", soloNo: true, estado: props.pesoDia != null ? "si" : noHechasHoy.includes("peso") ? "no" : null,
-      fija: props.pesoDia != null ? String(props.pesoDia).replace(".", ",") + " kg" : null });
-    filasRepaso.push({ id: "comida", titulo: "Apuntar la comida", soloNo: true, estado: props.comidaDia ? "si" : noHechasHoy.includes("comida") ? "no" : null,
-      fija: props.comidaDia ? "Apuntada" : null });
-  }
   // Una clave pasada que aun cabe en los proximos dias: se ofrece recolocarla.
   const [recolocarPasado, setRecolocarPasado] = useState(null);
   const marcarRepaso = (id, v) => {
@@ -157,7 +134,114 @@ export function HoyScreen(props) {
     }
     marcarNo(id, v === "no");
   };
-  const repasoTodoNo = () => filasRepaso.filter(f => f.estado == null && !f.fija).forEach(f => marcarRepaso(f.id, "no"));
+
+
+  // ── La lista del dia: filas, que hace el circulo y que se ve al abrir ──
+  const ahoraId = isToday ? (planAhora.ahora.accion === "cuello" ? "cuello" : planAhora.ahora.id) : null;
+  const esp = ritmoEsperado({ day: diaSesion, dias: FLAT_DAYS, ritmoReal: props.ritmoReal, gps: props.gps });
+  const destinoTxt = (iso) => { const d = FLAT_DAYS.find(x => x.isoDate === iso); return d ? diaHablado(d).replace(/^el /, "") : iso; };
+  const subSesion = () => {
+    if (!llegadaPend && movidaA === "pasa") return "La dejaste pasar. Sin drama.";
+    if (!llegadaPend && /^\d{4}-/.test(movidaA || "")) return "Movida al " + destinoTxt(movidaA);
+    const partes = [];
+    if (llegadaPend) partes.push("viene del " + destinoTxt(llegadaPend.isoDate));
+    if (diaSesion.ajuste) partes.push(diaSesion.ajuste.motivo.split(":")[0]);
+    if (esp && esp.desde) partes.push(esp.texto);
+    return partes.join(" · ");
+  };
+  const filasLista = planAhora.dia.map(x => {
+    if (x.id === "sesion") {
+      const t = diaSesion.tipo;
+      return { ...x, ahora: x.id === ahoraId, icono: t === "fuerza" ? "fuerza" : t === "compromiso" ? "tenis" : "sesion",
+        titulo: t === "compromiso" ? "Tenis" : t === "fuerza" ? "Fuerza · " + diaSesion.titulo : diaSesion.titulo, sub: subSesion() };
+    }
+    if (x.id === "cuello") return { ...x, ahora: ahoraId === "cuello", sub: cuelloEj.nombre + (cuelloTotal ? " · " + cuelloTotal + " de 3 tomas" : "") };
+    if (x.id === "peso") return { ...x, ahora: ahoraId === "peso", sub: props.pesoDia != null ? String(props.pesoDia).replace(".", ",") + " kg" : "En ayunas" };
+    return { ...x, ahora: ahoraId === "comida", sub: props.comidaDia ? "Apuntada" : "Lo que has comido" };
+  });
+  const estadoDe = (id) => (filasLista.find(f => f.id === id) || {}).estado;
+  const sinNoCuello = () => props.setNoHechas && props.setNoHechas(p => ({ ...p, [dayKey]: (p[dayKey] || []).filter(x => !x.startsWith("cuello-")) }));
+  const circulo = (id, abrir) => {
+    const e = estadoDe(id);
+    if (id === "sesion") {
+      if (e === "movida") return abrir();
+      if (e === "no") return props.setPostponed(deshacer(props.postponed, dayKey));
+      const llegadaHecha = recibidas.find(o => checked[o.isoDate]);
+      if (e === "hecho") return toggleCheck(llegadaHecha && !checked[dayKey] ? llegadaHecha.isoDate : dayKey);
+      return toggleCheck(llegadaPend ? llegadaPend.isoDate : dayKey);
+    }
+    if (id === "cuello") {
+      if (e === "no") return sinNoCuello();
+      if (e === "hecho") { const k = cN ? "n" : cT ? "t" : "m"; return toggleCuello(k); }
+      const h = new Date().getHours();
+      const pref = !isToday ? ["m", "t", "n"] : h < 12 ? ["m", "t", "n"] : h < 21 ? ["t", "n", "m"] : ["n", "t", "m"];
+      const hechas = { m: cM, t: cT, n: cN };
+      return toggleCuello(pref.find(k => !hechas[k]) || "m");
+    }
+    if (e === "no") return marcarNo(id, false);
+    return abrir();
+  };
+  const enlace = { fontSize: 14, fontWeight: 600, color: A.azul, minHeight: 36, padding: "0 2px" };
+  const detalleFila = (id, cerrar) => {
+    if (id === "sesion") {
+      if (!llegadaPend && movidaA) return estadoMovida;
+      const t = diaSesion.tipo;
+      const puedeEmpezar = !checked[diaSesion.isoDate] && (isToday || day.isoDate > hoyIso) && /^(run|test|objetivo|fuerza)$/.test(t);
+      return (
+        <div>
+          {diaSesion.what && <div style={{ fontSize: 14, color: "#3A3A3C", lineHeight: 1.45, marginBottom: 6 }}>{diaSesion.what}</div>}
+          {esp && esp.desde && <div data-ritmo-esperado style={{ fontSize: 14, fontWeight: 700, color: C.text, marginBottom: 8 }}>Ritmo esperado: {esp.texto} <span style={{ fontWeight: 400, color: C.textDim, fontSize: 12.5 }}>· {esp.fuente}</span></div>}
+          {diaSesion.ajuste && <div style={{ fontSize: 13, color: C.textDim, lineHeight: 1.4, marginBottom: 8 }}>{diaSesion.ajuste.motivo}</div>}
+          {puedeEmpezar && isToday && (
+            <Boton tipo="color" color={A.rojo} data-empezar onClick={llegadaPend ? () => props.onStartWorkoutDe(llegadaPend.isoDate) : onStartWorkout} style={{ marginBottom: 6 }}>Empezar</Boton>
+          )}
+          {!checked[diaSesion.isoDate] && !noHecha && (
+            <button className="btn" data-no-hoy onClick={() => (esPasado && !llegadaPend ? marcarRepaso("sesion", "no") : setNoHecha(true))} style={enlace}>
+              {esPasado ? "No la hice" : t === "compromiso" ? "Hoy no voy" : "No hoy / moverla"}
+            </button>
+          )}
+          {noHecha && (llegadaPend || (!movidaA && !checked[dayKey])) && (
+            <Recolocar dias={diasPlan} key={"nh" + diaSesion.isoDate} dia={diaSesion} movidas={props.postponed} setMovidas={props.setPostponed} checked={checked}
+              abiertaInicial onCerrar={() => setNoHecha(false)}>
+              {!esClave(diaSesion) && t !== "compromiso" && !llegadaPend && (
+                <MoveDayBlock dayKey={dayKey} day={day} dias={diasPlan} checked={checked} hoyIso={hoyIso}
+                  postponed={props.postponed} setPostponed={props.setPostponed} />
+              )}
+            </Recolocar>
+          )}
+          {esPasado && recolocarPasado === dayKey && !movidaA && !checked[dayKey] && (
+            <Recolocar dias={diasPlan} key={"p" + dayKey} dia={day} movidas={props.postponed} setMovidas={props.setPostponed} checked={checked}
+              abiertaInicial titulo={"Faltó " + nombreDe(day) + ": aún cabe"} onCerrar={() => setRecolocarPasado(null)} />
+          )}
+        </div>
+      );
+    }
+    if (id === "cuello") return (
+      <div>
+        {cuelloEj.pasos.map((p, i) => (
+          <div key={i} style={{ display: "flex", gap: 8, marginBottom: 5 }}>
+            <span style={{ fontSize: 13, fontWeight: 800, color: A.azul, flexShrink: 0 }}>{i + 1}.</span>
+            <span style={{ fontSize: 14, color: C.text, lineHeight: 1.45 }}>{p}</span>
+          </div>
+        ))}
+        {cuelloEj.sensacion && <div style={{ fontSize: 13, color: C.textDim, lineHeight: 1.4, margin: "4px 0 8px" }}>Debe sentirse: {cuelloEj.sensacion}</div>}
+        <div style={{ display: "flex", gap: 6, marginBottom: 4 }}>
+          {[["m", "Mañana", cM], ["t", "Tarde", cT], ["n", "Noche", cN]].map(([k, l, v]) => (
+            <button key={k} className="btn" data-toma={k} onClick={() => toggleCuello(k)} style={{ flex: 1, minHeight: 38, borderRadius: 10, fontSize: 13.5, fontWeight: 700,
+              background: v ? A.azul : C.surfaceMuted, color: v ? "#fff" : C.text }}>{l}{v ? " ✓" : ""}</button>
+          ))}
+        </div>
+        {!cuelloTotal && <button className="btn" data-no-hoy onClick={() => { if (props.setNoHechas) props.setNoHechas(p => ({ ...p, [dayKey]: [...new Set([...(p[dayKey] || []), "cuello-m", "cuello-t", "cuello-n"])] })); cerrar(); }} style={enlace}>No hoy</button>}
+      </div>
+    );
+    if (id === "peso") return <PesoFila valor={props.pesoDia} guardar={(kg) => props.guardarPeso(kg, dayKey)} noHoy={() => { marcarNo("peso", true); cerrar(); }} />;
+    return (
+      <div style={{ display: "flex", alignItems: "center", gap: 14 }}>
+        <Boton tipo="color" color={A.verde} onClick={props.irANutricion} style={{ flex: 1 }}>{props.comidaDia ? "Ver en Nutrición" : "Apuntar en Nutrición"}</Boton>
+        {!props.comidaDia && <button className="btn" data-no-hoy onClick={() => { marcarNo("comida", true); cerrar(); }} style={enlace}>No hoy</button>}
+      </div>
+    );
+  };
 
   const startDate = new Date(FECHA_INICIO);
   const thisDate = new Date(day.isoDate || startDate);
@@ -199,73 +283,32 @@ export function HoyScreen(props) {
       <WeekDots day={day} checked={checked} onJumpDay={props.onJumpDay} aplicar={(d) => diaEnPrueba(d, prueba)} movidas={props.postponed || {}} />
 
 
-      {isToday && (
-        <div style={{ display: "flex", flexDirection: "column", gap: 12, marginTop: 14 }}>
-          {(() => {
-            const falta = pendienteDeRecolocar({ dias: diasPlan, movidas: props.postponed, checked, hoyIso });
-            return falta ? <Recolocar dias={diasPlan} key={falta.isoDate} dia={falta} movidas={props.postponed} setMovidas={props.setPostponed} checked={checked} ayer
-              onHecha={esClave(falta) ? null : () => toggleCheck(claveDia(falta))} /> : null;
-          })()}
-          {prueba && tocaDecidir(prueba, hoyIso) && (
-            <FinPrueba comp={compararPrueba({ dias: FLAT_DAYS, prueba, checked, cuelloChecks, sentir, aplicar: (d) => diaEnPrueba(d, prueba) })}
-              onQuedarme={() => props.setPrueba(quedarse(prueba, FECHA_FIN))} onVolver={() => props.setPrueba(volverAlPlan(prueba))} />
-          )}
-          {day.ajuste && (
-            <div data-ajuste style={{ ...CARD, padding: "11px 16px", fontSize: 14, color: C.text, lineHeight: 1.45, background: A.fondo.azul, boxShadow: "none" }}>
-              {day.ajuste.motivo}
-            </div>
-          )}
-          <AhoraToca plan={planAhora} tituloSesion={diaSesion.tipo !== "libre" && diaSesion.tipo !== "compromiso" ? diaSesion.titulo : ""}
-            onSesion={llegadaPend ? () => props.onStartWorkoutDe(llegadaPend.isoDate)
-              : day.tipo === "compromiso" ? () => toggleCheck(dayKey) : onStartWorkout}
-            onCuello={(k) => toggleCuello(k)} onPeso={props.guardarPeso} onComida={props.irANutricion} onExtras={() => abrirTodo("magia")}
-            cuelloEj={cuelloEj}
-            onVerDia={(id) => id === "comida" ? props.irANutricion() : abrirTodo(id === "cuello" ? "cuello" : null)}
-            esTenis={diaSesion.tipo === "compromiso"} saltadas={noHechasHoy} onDeshacerNo={(id) => marcarNo(id, false)}
-            onNoHecha={(a) => a.accion === "sesion" ? ((llegadaPend || !movidaA) && setNoHecha(true)) : marcarNo(a.id, true)} />
-          {noHecha && (llegadaPend || (!movidaA && !checked[dayKey])) && (
-            <Recolocar dias={diasPlan} key={"nh" + diaSesion.isoDate} dia={diaSesion} movidas={props.postponed} setMovidas={props.setPostponed} checked={checked}
-              abiertaInicial onCerrar={() => setNoHecha(false)}>
-              {!esClave(diaSesion) && diaSesion.tipo !== "compromiso" && !llegadaPend && (
-                <MoveDayBlock dayKey={dayKey} day={day} dias={diasPlan} checked={checked} hoyIso={hoyIso}
-                  postponed={props.postponed} setPostponed={props.setPostponed} />
-              )}
-            </Recolocar>
-          )}
-          {estadoMovida}
-          {preguntaSentir && (
-            <SentirSemana onGuardar={(v) => props.setSemanaSentir(p => ({ ...p, [lunesPregunta]: v }))} />
-          )}
-          {props.parte && (
-            <Avanzo objetivos={props.parte.objetivos} cumplidos={cumplidos} onVer={props.onVerProgreso}
-              sentir={ultimoSentir ? sentir[ultimoSentir].nota : null}
-              prueba={diaDePrueba(prueba, hoyIso) ? { dia: diaDePrueba(prueba, hoyIso) } : null} />
-          )}
-          <button className="btn" data-todo-hoy onClick={() => setVerTodo(!verTodo)}
-            style={{ ...CARD, display: "flex", alignItems: "center", gap: 10, padding: "0 16px", minHeight: 50, width: "100%", textAlign: "left" }}>
-            <span style={{ flex: 1, fontSize: 15, fontWeight: 600, color: C.text }}>Todo lo de hoy</span>
-            <span style={{ fontSize: 13, color: C.textDim }}>sesión, hábitos, notas</span>
-            <Chevron abierto={verTodo} />
-          </button>
-        </div>
-      )}
+      <div style={{ display: "flex", flexDirection: "column", gap: 12, marginTop: 14 }}>
+        {isToday && (() => {
+          const falta = pendienteDeRecolocar({ dias: diasPlan, movidas: props.postponed, checked, hoyIso });
+          return falta ? <Recolocar dias={diasPlan} key={falta.isoDate} dia={falta} movidas={props.postponed} setMovidas={props.setPostponed} checked={checked} ayer
+            onHecha={esClave(falta) ? null : () => toggleCheck(claveDia(falta))} /> : null;
+        })()}
+        {isToday && prueba && tocaDecidir(prueba, hoyIso) && (
+          <FinPrueba comp={compararPrueba({ dias: FLAT_DAYS, prueba, checked, cuelloChecks, sentir, aplicar: (d) => diaEnPrueba(d, prueba) })}
+            onQuedarme={() => props.setPrueba(quedarse(prueba, FECHA_FIN))} onVolver={() => props.setPrueba(volverAlPlan(prueba))} />
+        )}
+
+        <ListaHoy key={dayKey} filas={filasLista} onCirculo={circulo} detalle={detalleFila} />
+
+        {preguntaSentir && (
+          <SentirSemana onGuardar={(v) => props.setSemanaSentir(p => ({ ...p, [lunesPregunta]: v }))} />
+        )}
+
+        <button className="btn" data-todo-hoy onClick={() => setVerTodo(!verTodo)}
+          style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 6, minHeight: 44, width: "100%", fontSize: 14.5, fontWeight: 600, color: A.azul }}>
+          {verTodo ? "Ocultar notas, molestias y extras" : "Notas, molestias y extras"} <Chevron abierto={verTodo} />
+        </button>
+      </div>
 
       {!plegado && (
       <div style={{ display: "flex", flexDirection: "column", gap: 12, marginTop: 14 }}>
 
-        {!isToday && day.ajuste && (
-          <div data-ajuste style={{ ...CARD, padding: "11px 16px", fontSize: 14, color: C.text, lineHeight: 1.45, background: A.fondo.azul, boxShadow: "none" }}>
-            {day.ajuste.motivo}
-          </div>
-        )}
-
-        {esPasado && filasRepaso.length > 0 && (
-          <RepasoDia filas={filasRepaso} onMarcar={marcarRepaso} onTodoNo={repasoTodoNo} />
-        )}
-        {esPasado && recolocarPasado === dayKey && !movidaA && !checked[dayKey] && (
-          <Recolocar dias={diasPlan} key={"p" + dayKey} dia={day} movidas={props.postponed} setMovidas={props.setPostponed} checked={checked}
-            abiertaInicial titulo={"Faltó " + nombreDe(day) + ": aún cabe"} onCerrar={() => setRecolocarPasado(null)} />
-        )}
 
 
         {isMedicionDay && (
@@ -295,7 +338,6 @@ export function HoyScreen(props) {
 
         {props.resumenSemana && <TarjetaResumen resumen={props.resumenSemana} nombreBloque="Base 7K" />}
 
-        {!isToday && estadoMovida}
 
         {isToday && <TarjetaCalendario modo="hoy" />}
 
@@ -614,15 +656,6 @@ export function HoyScreen(props) {
           </div>
         ))}
 
-        {/* ═══ MOVER SESIÓN — colapsable, muy discreto ═══ */}
-        {esClave(day) && !movidaA && !checked[dayKey] && day.isoDate >= todayLocalIso() && (
-          <Recolocar dias={diasPlan} key={"h" + dayKey} dia={day} movidas={props.postponed} setMovidas={props.setPostponed} checked={checked} />
-        )}
-        {(isRunDay || isFuerzaDay) && !esClave(day) && !movidaA && !checked[dayKey] && day.isoDate >= hoyIso && (
-          <MoveDayBlock dayKey={dayKey} day={day} dias={diasPlan} checked={checked} hoyIso={hoyIso}
-            postponed={props.postponed} setPostponed={props.setPostponed} />
-        )}
-
         {/* ═══ MOLESTIAS — colapsable ═══ */}
         <PainBlock dayKey={dayKey} expandedBlock={expandedBlock} toggleBlock={toggleBlock}
           painLog={props.painLog} setPainLog={props.setPainLog} />
@@ -691,5 +724,25 @@ function BotonDesmarcar({ onClick }) {
       width: "100%", marginTop: 8, padding: "10px", minHeight: TAP_MIN,
       fontSize: 13, fontWeight: 600, color: C.textDim,
     }}>Me equivoqué — desmarcar para repetirla</button>
+  );
+}
+
+/** El peso del dia: escribirlo, cambiarlo o quitarlo. */
+function PesoFila({ valor, guardar, noHoy }) {
+  const [kg, setKg] = useState(valor != null ? String(valor).replace(".", ",") : "");
+  const ok = () => { const n = Number(String(kg).replace(",", ".")); if (n > 40 && n < 200) guardar(Math.round(n * 10) / 10); };
+  return (
+    <div>
+      <div style={{ display: "flex", gap: 8 }}>
+        <input inputMode="decimal" value={kg} placeholder="86,0" data-peso onChange={e => setKg(e.target.value.replace(/[^\d.,]/g, ""))}
+          onKeyDown={e => { if (e.key === "Enter") ok(); }}
+          style={{ flex: 1, minWidth: 0, padding: "11px 14px", borderRadius: 999, border: "none", background: C.surfaceMuted, fontSize: 17, fontWeight: 700, textAlign: "center", fontFamily: "inherit" }} />
+        <Boton tipo="color" color={A.azul} onClick={ok} style={{ width: "auto", padding: "0 22px" }}>OK</Boton>
+      </div>
+      <div style={{ display: "flex", gap: 16, marginTop: 4 }}>
+        {valor != null && <button className="btn" onClick={() => { guardar(null); setKg(""); }} style={{ fontSize: 14, fontWeight: 600, color: C.textDim, minHeight: 36 }}>Quitar</button>}
+        {valor == null && <button className="btn" data-no-hoy onClick={noHoy} style={{ fontSize: 14, fontWeight: 600, color: A.azul, minHeight: 36 }}>No hoy</button>}
+      </div>
+    </div>
   );
 }
