@@ -68,6 +68,17 @@ export function estadoCarga({ dias, checked, gps, ritmoReal, movidas, hoyIso }) 
     }
   }
 
+  // No basta con el ultimo hueco: una carrera suelta en medio de semanas
+  // paradas no te devuelve la forma. Se miran las 4 semanas antes de volver:
+  // cada semana sin al menos una carrera cuenta como semana parada.
+  let pocas = false;
+  if (inicio) {
+    const desde4 = masDias(inicio, -28);
+    const en4 = hechas.filter(iso => iso >= desde4 && iso < inicio).length;
+    const efectivo = 28 - 7 * en4;
+    if (efectivo > paro) { paro = efectivo; pocas = true; }
+  }
+
   const vuelta = {};
   if (inicio) {
     const de = Math.min(6, Math.max(2, Math.ceil(paro / 5)));
@@ -76,7 +87,7 @@ export function estadoCarga({ dias, checked, gps, ritmoReal, movidas, hoyIso }) 
     // (las que se pasaron sin hacer no cuentan).
     const salidas = carreras.filter(d => d.isoDate >= inicio && (d.isoDate >= hoyIso || hecha(d))).slice(0, de);
     salidas.forEach((d, k) => {
-      vuelta[d.isoDate] = { n: k + 1, de, paro, sinNada, factor: Math.round((f0 + (1 - f0) * k / de) * 100) / 100, sinSeries: k < de / 2 };
+      vuelta[d.isoDate] = { n: k + 1, de, paro, sinNada, pocas, factor: Math.round((f0 + (1 - f0) * k / de) * 100) / 100, sinSeries: k < de / 2 };
     });
   }
 
@@ -112,7 +123,9 @@ function acortar(day, f) {
   const out = { ...day };
   if (corre != null && /^\s*\d+\s*min/.test(day.what || "")) {
     const n = escalar(corre, f);
-    out.what = conMin(day.what, n).replace(/\s*\(~[^)]*km\)/, ""); // los km del plan ya no valen
+    // Recortada, solo vale la primera frase: lo demas ("ya corres la
+    // distancia del objetivo", los km) hablaba de la sesion entera.
+    out.what = conMin(day.what, n).replace(/\s*\(~[^)]*km\)/, "").replace(/^([^.]*\.).*$/s, "$1");
     if (minutos(day.titulo) === corre) out.titulo = conMin(day.titulo, n);
   } else if (total != null) {
     out.what = "Hoy, " + escalar(total, f) + " min en total. " + (day.what || "");
@@ -154,6 +167,7 @@ export function diaAjustado(day, estado, fechaReal) {
     const pct = Math.round(v.factor * 100);
     const motivo = v.sinNada
       ? "No hay ninguna carrera apuntada: salida " + v.n + " de " + v.de + " de vuelta, al " + pct + " %. Si corriste, márcalo en su día y se recalcula."
+      : v.pocas ? "Pocas carreras en las últimas 4 semanas: salida " + v.n + " de " + v.de + " de vuelta, al " + pct + " %. Sin drama: así se vuelve bien."
       : v.paro + " días sin correr: salida " + v.n + " de " + v.de + " de vuelta, al " + pct + " %. Sin drama: así se vuelve bien.";
     const out = esSeries(day) || day.prueba
       ? (v.sinSeries || day.prueba ? aSuave(day, v.factor) : menosSeries(day, v.factor))

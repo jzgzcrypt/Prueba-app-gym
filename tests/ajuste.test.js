@@ -78,7 +78,8 @@ test("el dia del objetivo no se toca nunca", () => {
 
 test("lo apuntado en la libreta (de Strava) cuenta como carrera hecha", () => {
   const e = estadoCarga({ dias: FLAT_DAYS, checked: {}, ritmoReal: { "2026-10-11": "30:10 · 4,2 km" }, hoyIso: "2026-10-25" });
-  assert.equal(e.paro, 14);
+  // Cuenta como hecha: con esa sola carrera en 4 semanas, son 3 semanas de poco correr.
+  assert.equal(e.paro, 21);
 });
 
 test("sin ninguna carrera apuntada y el plan ya empezado: vuelta desde el inicio, diciendo por que", () => {
@@ -108,4 +109,26 @@ test("una prueba corrida como suave (vuelta) no cuenta como prueba", async () =>
   const { ultimaPrueba } = await import("../src/domain/running/adaptar.js");
   assert.equal(ultimaPrueba("2026-10-20", FLAT_DAYS, { "2026-10-15": "6:35/km (suave)" }), null);
   assert.equal(ultimaPrueba("2026-10-20", FLAT_DAYS, { "2026-10-15": "14:50" }).total, 890);
+});
+
+test("una carrera suelta tras semanas paradas no cuenta como estar en forma", () => {
+  // Solo corrio el 25 de octubre en un mes: el 1 de noviembre no es "7 dias
+  // sin correr" (al 83 %), son 3 semanas de poco correr.
+  const e = estadoCarga({ dias: FLAT_DAYS, checked: hechos("2026-10-25"), hoyIso: "2026-11-01" });
+  const v = e.vuelta["2026-11-01"];
+  assert.ok(v.pocas);
+  assert.ok(v.factor <= 0.5, "factor " + v.factor);
+  // Con dos carreras en el mes (el 11 y el 25) tambien baja: como 2 semanas paradas.
+  const dos = estadoCarga({ dias: FLAT_DAYS, checked: hechos("2026-10-11", "2026-10-25"), hoyIso: "2026-11-01" });
+  assert.equal(dos.vuelta["2026-11-01"].factor, 0.65);
+  const d = diaAjustado(dia("2026-11-01"), e);
+  assert.match(d.ajuste.motivo, /^Pocas carreras en las últimas 4 semanas/);
+  assert.ok(objetivoCarrera(d).seg <= 25 * 60, "tirada " + objetivoCarrera(d).seg / 60 + " min");
+});
+
+test("una sesion recortada no promete lo de la entera", () => {
+  const e = estadoCarga({ dias: FLAT_DAYS, checked: hechos("2026-10-25"), hoyIso: "2026-11-01" });
+  const d = diaAjustado(dia("2026-11-01"), e);
+  assert.doesNotMatch(d.what, /distancia del objetivo/);
+  assert.match(d.what, /^\d+ min suave continuo\.$/);
 });

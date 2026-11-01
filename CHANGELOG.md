@@ -21,6 +21,10 @@ Todo cambio que se haga en la app se anota aquí. Sin excepciones.
 
 ## [Sin publicar]
 
+### Arreglado
+- La vuelta tras un parón ya no se fija solo en el último hueco. También cuenta las carreras de las 4 semanas anteriores: cada semana sin correr cuenta como semana parada. Antes, una carrera suelta tras dos semanas paradas y luego 7 días sin correr daba "7 días, al 83 %" (tirada de 42 min). Ahora da "Pocas carreras en las últimas 4 semanas, salida 1 de 5, al 48 %" (24 min).
+- Una sesión recortada ya no arrastra frases de la entera ("ya corres la distancia del objetivo").
+
 ### Cambiado: la app, más simple (audit como usuario)
 - **4 pestañas en vez de 6: Hoy · Semana · Comida · Progreso.** Coach (previsión, plan, bitácora, ajustes y copia) y Ejercicios pasan a "Más", al final de Progreso, con un "‹ Progreso" para volver.
 - **HOY:**
