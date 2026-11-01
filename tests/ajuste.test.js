@@ -132,3 +132,15 @@ test("una sesion recortada no promete lo de la entera", () => {
   assert.doesNotMatch(d.what, /distancia del objetivo/);
   assert.match(d.what, /^\d+ min suave continuo\.$/);
 });
+
+test("el bloque 2 empieza en vuelta: sus dos primeras semanas no se recortan otra vez", () => {
+  // Un mes casi sin correr y vuelve el 3 de noviembre: el plan ya es suave.
+  const e = estadoCarga({ dias: FLAT_DAYS, checked: hechos("2026-10-25"), hoyIso: "2026-11-03" });
+  assert.deepEqual(e.vuelta, {});
+  assert.equal(diaAjustado(dia("2026-11-03"), e), dia("2026-11-03"));
+  // Si el paron sigue hasta la semana 3 del bloque, la vuelta si se aplica.
+  const tarde = estadoCarga({ dias: FLAT_DAYS, checked: hechos("2026-10-25"), hoyIso: "2026-11-17" });
+  const v = tarde.vuelta["2026-11-17"];
+  assert.ok(v && v.factor < 1, "sin vuelta en la semana 3");
+  assert.match(diaAjustado(dia("2026-11-17"), tarde).ajuste.motivo, /de vuelta/);
+});

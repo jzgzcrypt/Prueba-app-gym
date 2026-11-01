@@ -37,6 +37,24 @@ const sumarDias = (iso, n) => {
 const distanciaDias = (a, b) => Math.round((Date.parse(b + "T12:00:00Z") - Date.parse(a + "T12:00:00Z")) / 86400000);
 const coma = (n) => String(Math.round(n * 10) / 10).replace(".", ",");
 
+/**
+ * EL NUMERO QUE MANDA: carreras hechas esta semana, de las que tocan.
+ *
+ * Es lo que predice si llegas al 7K. Cuentan martes, jueves y domingo (las
+ * activaciones de vispera no son una carrera mas). Hecha: marcada, con GPS o
+ * apuntada en la libreta. Una movida a otro dia de la misma semana cuenta
+ * en el dia al que fue (se marca con la clave de su dia original).
+ * @returns {null | { hechas:number, de:number, dias:{iso:string,dow:string,hecha:boolean,pasada:boolean}[] }}
+ */
+export function carrerasSemana({ semana, checked, gps, ritmoReal, hoyIso }) {
+  if (!semana) return null;
+  const ch = checked || {}, g = gps || {}, rr = ritmoReal || {};
+  const hecha = (iso) => !!ch[iso] || !!(g[iso] && g[iso].m > 0) || !!String(rr[iso] || "").trim();
+  const dias = semana.days.filter(d => CORRER.includes(d.tipo) && !d.vispera)
+    .map(d => ({ iso: d.isoDate, dow: d.dow, hecha: hecha(d.isoDate), pasada: d.isoDate < hoyIso }));
+  return { hechas: dias.filter(d => d.hecha).length, de: dias.length, dias };
+}
+
 /** 1. Constancia: la tira del bloque, semana a semana. */
 export function constancia(semanas, checked, hoyIso) {
   const ch = checked || {};

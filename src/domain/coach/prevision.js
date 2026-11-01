@@ -1,5 +1,5 @@
 /**
- * LO QUE DICE EL COACH: COMO LLEGAS AL 6 DE DICIEMBRE.
+ * LO QUE DICE EL COACH: COMO LLEGAS AL DIA DEL 7K.
  *
  * Una frase y un numero. El numero es la prevision de tu 7K el dia del
  * objetivo: tu ultimo dato (prueba o series, pasado a 7K) comparado con lo que
@@ -89,7 +89,9 @@ export function riesgos({ alarmas, prev }) {
 export function hitos(dias, ritmoReal, hoyIso) {
   const rr = ritmoReal || {};
   let proximoMarcado = false;
-  return dias.filter(d => d.prueba).map(d => {
+  // Las pruebas del bloque en curso (y la de partida, que es de donde vienes).
+  const activo = Math.max(0, ...dias.map(d => d.bloque || 0));
+  return dias.filter(d => d.prueba && (d.prueba.partida || (d.bloque || 0) === activo)).map(d => {
     const r = rr[d.isoDate];
     let estado = r ? "hecho" : "futuro";
     if (!r && !proximoMarcado && d.isoDate >= hoyIso) { estado = "proximo"; proximoMarcado = true; }

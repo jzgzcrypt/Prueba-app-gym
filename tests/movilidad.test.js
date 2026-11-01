@@ -9,6 +9,9 @@ import { getMovilidadDelDia } from "../src/domain/salud/movilidad.js";
 import { PATRONES_POR_SESION, MOVILIDAD_PATRON_ORDEN, getPatronesDeSesion } from "../src/domain/salud/patrones.js";
 
 const dia = (n, dow) => WEEKS[n - 1].days.find(d => d.dow === dow);
+// El bloque 2 (desde el 2 de noviembre), con su propia numeracion.
+const B2 = WEEKS.filter(w => w.bloque === 2);
+const dia2 = (n, dow) => B2[n - 1].days.find(d => d.dow === dow);
 
 test("los dias de descanso no llevan movilidad para casa", () => {
   for (const wk of WEEKS) for (const d of wk.days) {
@@ -20,8 +23,9 @@ test("los dias de descanso no llevan movilidad para casa", () => {
 
 test("los cuatro patrones se trabajan cada semana en el gimnasio", () => {
   assert.deepEqual([...Object.values(PATRONES_POR_SESION).flat()].sort(), [...MOVILIDAD_PATRON_ORDEN].sort());
-  for (const wk of WEEKS.slice(0, 7)) {
-    const hechos = new Set(wk.days.filter(d => d.tipo === "fuerza").flatMap(d => getPatronesDeSesion(d.cat, wk.n).map(p => p.key)));
+  // Hasta la recta final: en la semana del 7K solo queda el hombro expres.
+  for (const wk of WEEKS.slice(0, -1)) {
+    const hechos = new Set(wk.days.filter(d => d.tipo === "fuerza").flatMap(d => getPatronesDeSesion(d.cat, wk.n, d.patrones).map(p => p.key)));
     assert.equal(hechos.size, 4, `S${wk.n}: ${[...hechos]}`);
   }
 });
@@ -32,7 +36,7 @@ test("el running no lleva patron de movilidad, solo su calentamiento", () => {
 });
 
 test("las series y las pruebas a tope calientan lo que pide el plan", () => {
-  for (const d of [dia(4, "Jueves"), dia(6, "Jueves"), dia(8, "Domingo")]) {
+  for (const d of [dia2(4, "Jueves"), dia2(6, "Jueves"), dia2(8, "Domingo")]) {
     const cal = getMovilidadDelDia(d).cal;
     assert.match(cal[0].t, /15 min/, d.titulo);
     assert.match(cal.at(-1).ex, /Progresivos/, d.titulo + ": los progresivos van al final");
@@ -41,14 +45,14 @@ test("las series y las pruebas a tope calientan lo que pide el plan", () => {
 });
 
 test("las activaciones y la prueba de partida no llevan el calentamiento largo", () => {
-  for (const d of [dia(8, "Jueves"), dia(9, "Sabado"), dia(11, "Jueves"), dia(1, "Domingo"), dia(2, "Martes")]) {
+  for (const d of [dia2(8, "Jueves"), dia2(8, "Sabado"), dia2(13, "Jueves"), dia(1, "Domingo"), dia(2, "Martes")]) {
     const cal = getMovilidadDelDia(d).cal;
     assert.ok(!cal.some(x => /15 min/.test(x.t)), d.titulo);
   }
 });
 
 test("el dia D calienta 10 minutos", () => {
-  assert.match(getMovilidadDelDia(dia(11, "Domingo")).cal[0].t, /10 min/);
+  assert.match(getMovilidadDelDia(dia2(13, "Domingo")).cal[0].t, /10 min/);
 });
 
 test("el tenis lleva su movilidad antes y despues", () => {

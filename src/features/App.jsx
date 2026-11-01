@@ -6,7 +6,7 @@ import { storage, CLAVE_DATOS, VERSION_ESQUEMA, migrar } from "@/lib/storage";
 import { cuantoHayEn, limpiarDia } from "@/lib/estado/limpiar-dia";
 import { ICON_CUELLO, ICON_MOVILIDAD, ICON_NUTRICION } from "@/domain/assets/icons";
 import { NUTRICION } from "@/domain/nutricion/nutricion";
-import { BLOQUE, FECHA_FIN, FECHA_INICIO, FLAT_DAYS, WEEKS, claveDia, findTodayIndex, todayLocalIso } from "@/domain/plan/calendario";
+import { BLOQUE, FECHA_FIN, FECHA_INICIO, FLAT_DAYS, WEEKS, claveDia, conBloqueEnCurso, findTodayIndex, todayLocalIso } from "@/domain/plan/calendario";
 import { getCuelloEj } from "@/domain/salud/cuello";
 import { OBJETIVO_MACROS, comidaDelDia } from "@/domain/nutricion/dias";
 import { getMovilidadDelDia } from "@/domain/salud/movilidad";
@@ -129,10 +129,9 @@ export default function App() {
   const [comidasFuera, setComidasFuera] = useState(FUERA_POR_DEFECTO);
   // El historial arranca con el bloque en curso, con sus fechas sacadas del
   // calendario: si se mueve FECHA_INICIO, el historial se mueve con el.
-  const [bloquesHistorial, setBloquesHistorial] = useState([
-    { numero: BLOQUE.numero, nombre: BLOQUE.nombre, inicio: FECHA_INICIO, fin: FECHA_FIN,
-      objetivoRunning: BLOQUE.objetivo, estado: "activo", revision: "" }
-  ]); // historial de bloques de entrenamiento encadenados
+  const [bloquesHistorial, setBloquesHistorialCrudo] = useState(() => conBloqueEnCurso([])); // historial de bloques de entrenamiento encadenados
+  // Lo cargado o importado siempre lleva el bloque en curso (ver conBloqueEnCurso).
+  const setBloquesHistorial = (v) => setBloquesHistorialCrudo(p => conBloqueEnCurso(typeof v === "function" ? v(p) : v));
   // Fecha del ultimo backup descargado. Sin esto no hay forma de saber cuanto
   // hace que los datos no salen del dispositivo, que es el unico riesgo
   // irreversible que tiene hoy la app.

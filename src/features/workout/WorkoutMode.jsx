@@ -77,7 +77,7 @@ export function WorkoutMode({ day, mov, progress, onUpdateProgress, onFinish, on
     // (hombro con empuje, columna con tiron, cadera y cadena posterior con
     // pierna), progresando de nivel por semana. En running no hay patron: el
     // calentamiento es el que pide el plan.
-    const patrones = phase === "cal" ? getPatronesDeSesion(day.cat, day.weekN) : [];
+    const patrones = phase === "cal" ? getPatronesDeSesion(day.cat, day.weekN, day.patrones) : [];
     const bloque = [
       ...patrones.map(p => ({ ex: p.nivelNombre, t: "", patron: p.nombre, habito: true, objetivo: p.objetivo, pasos: p.pasos })),
       ...baseBloque,

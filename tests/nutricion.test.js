@@ -60,15 +60,16 @@ test("la tirada larga del domingo siempre se come", () => {
 test("la vispera del test de 5 km y del objetivo se come", () => {
   // El glucogeno se carga el dia antes. Antes el sabado previo al objetivo
   // era un dia de recorte a 2.100 kcal.
-  for (const n of [8, 11]) {
-    const sabado = WEEKS[n - 1].days[5];
+  const B2 = WEEKS.filter(w => w.bloque === 2);
+  for (const n of [8, 13]) {
+    const sabado = B2[n - 1].days[5];
     assert.equal(comidaDelDia(sabado).id, "comer", `el sabado de S${n} recorta`);
   }
 });
 
 test("las dos ultimas semanas van sin deficit", () => {
   const sin = WEEKS.filter(w => w.sinDeficit).map(w => w.n);
-  assert.deepEqual(sin, [10, 11]);
+  assert.deepEqual(sin, [WEEKS.length - 1, WEEKS.length]);
   for (const n of sin) for (const d of WEEKS[n - 1].days) {
     assert.equal(comidaDelDia(d).id, "comer", `S${n}/${d.dow} recorta`);
   }

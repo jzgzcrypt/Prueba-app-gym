@@ -80,10 +80,12 @@ export const PATRONES_POR_SESION = {
   pierna: ["cadera", "cadenaPosterior"],
 };
 
-/** Los patrones de una sesion, con el nivel que toca por semana. */
-export function getPatronesDeSesion(cat, weekN) {
+/** Los patrones de una sesion, con el nivel que toca por semana. Un dia del
+ *  plan puede traer los suyos (`patrones`): en el bloque 2 no hay dia de
+ *  pierna, y cadera y cadena posterior van en los dias de hombro. */
+export function getPatronesDeSesion(cat, weekN, propios) {
   const nivel = (() => { const w = semanaHabito(weekN); return w <= 4 ? 1 : w <= 8 ? 2 : 3; })();
-  return (PATRONES_POR_SESION[cat] || []).map(key => {
+  return (propios || PATRONES_POR_SESION[cat] || []).map(key => {
     const patron = MOVILIDAD_PATRONES[key];
     const nivelData = patron.niveles.find(n => n.nivel === nivel);
     return { key, nombre: patron.nombre, color: patron.color, objetivo: patron.objetivo, test: patron.test, nivel, nivelNombre: nivelData.nombre, pasos: nivelData.pasos, verificable: nivelData.verificable };

@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { C, R, SP } from "@/design/tokens";
+import { FECHA_OBJETIVO_TXT } from "@/domain/plan/calendario";
 import { ICON_CUELLO, ICON_FUERZA, ICON_RUNNING, LOGO_7K } from "@/domain/assets/icons";
 
 
@@ -10,7 +11,7 @@ export function OnboardingScreen({ onFinish }) {
   const pasos = [
     {
       titulo: "Bienvenido a Programa 7K",
-      texto: "11 semanas hasta el 6 de diciembre: 7km a 4:45/km. En paralelo, físico visible y salud de cuello real. Todo en un solo sitio, sin presión ni rachas.",
+      texto: "Hasta el " + FECHA_OBJETIVO_TXT + ": 7km a 4:45/km. En paralelo, físico visible y salud de cuello real. Todo en un solo sitio, sin presión ni rachas.",
       icono: LOGO_7K,
     },
     {

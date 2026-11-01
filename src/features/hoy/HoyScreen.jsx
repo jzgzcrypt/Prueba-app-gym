@@ -28,6 +28,8 @@ import { dejarPasar, deshacer, diaHablado, esClave, nombreDe, pendienteDeRecoloc
 import { Recolocar } from "@/features/hoy/Recolocar";
 import { FinPrueba, SentirSemana } from "@/features/hoy/AhoraYAvance";
 import { ListaHoy } from "@/features/hoy/ListaHoy";
+import { CarrerasSemana } from "@/features/ui/CarrerasSemana";
+import { carrerasSemana } from "@/domain/progreso/parte";
 import { ahoraToca } from "@/domain/hoy/ahora";
 import { ritmoEsperado } from "@/domain/running/esperado";
 import { compararPrueba, diaDePrueba, diaEnPrueba, lunesDe, quedarse, tocaDecidir, volverAlPlan } from "@/domain/hoy/prueba";
@@ -307,6 +309,9 @@ export function HoyScreen(props) {
 
 
       <div style={{ display: "flex", flexDirection: "column", gap: 12, marginTop: 14 }}>
+        {/* El numero que manda: si esta semana salen las 3, vas en camino. */}
+        <CarrerasSemana hoyIso={hoyIso} c={carrerasSemana({ semana: { days: FLAT_DAYS.filter(d => d.weekIdx === day.weekIdx) },
+          checked, gps: props.gps, ritmoReal: props.ritmoReal, hoyIso })} />
         {isToday && (() => {
           const falta = pendienteDeRecolocar({ dias: diasPlan, movidas: props.postponed, checked, hoyIso });
           return falta ? <Recolocar dias={diasPlan} key={falta.isoDate} dia={falta} movidas={props.postponed} setMovidas={props.setPostponed} checked={checked} ayer

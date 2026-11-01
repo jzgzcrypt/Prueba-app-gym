@@ -23,3 +23,21 @@ test("las semanas extra van despues de la prueba que decide, antes de la recta f
   assert.deepEqual(a.slice(decide, decide + 6), [decide, decide + 1, decide + 1, decide + 1, decide + 1, decide + 1]);
   assert.equal(a[a.length - 1], PLAN.length - 1, "el 7K sigue siendo lo ultimo");
 });
+
+import { WEEKS as BLOQUE_2 } from "../src/domain/plan/bloque-2-7k.js";
+
+test("bloque 2: 22:45 o menos adelanta una semana, quitando la que sigue a la prueba", () => {
+  assert.equal(semanasExtraDe("22:40"), -1);
+  assert.equal(semanasExtraDe("22:46"), 0);
+  const a = asignarSemanas({ plan: BLOQUE_2, extra: -1 });
+  assert.equal(a.length, BLOQUE_2.length - 1);
+  assert.ok(!a.includes(8), "la semana 9 (la que sigue al 5 km) se quita");
+  assert.deepEqual(a.slice(-2), [11, 12], "la recta final no se toca");
+});
+
+test("bloque 2: con 24:30 el 7K se mueve 4 semanas, despues del 5 km", () => {
+  const a = asignarSemanas({ plan: BLOQUE_2, extra: 4 });
+  assert.equal(a.length, BLOQUE_2.length + 4);
+  assert.deepEqual(a.slice(7, 13), [7, 8, 8, 8, 8, 8]);
+  assert.equal(a.at(-1), 12);
+});

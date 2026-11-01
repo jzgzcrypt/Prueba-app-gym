@@ -11,6 +11,9 @@ import {
 } from "../src/domain/progreso/libreta.js";
 
 const dia = (n, dow) => WEEKS[n - 1].days.find(d => d.dow === dow);
+// El bloque 2 (desde el 2 de noviembre), con su propia numeracion.
+const B2 = WEEKS.filter(w => w.bloque === 2);
+const dia2 = (n, dow) => B2[n - 1].days.find(d => d.dow === dow);
 
 test("el objetivo son 33:15", () => {
   assert.equal(textoTiempo(OBJETIVO_7K), "33:15");
@@ -42,16 +45,19 @@ test("el 3 km de S4 dice si vas en linea", () => {
 });
 
 test("el 5 km de S8 decide la fecha con los umbrales escritos en el plan", () => {
-  const p = dia(8, "Domingo").prueba;
+  const p = dia2(8, "Domingo").prueba;
+  assert.equal(lecturaPrueba(p, "22:45").semanasExtra, -1);
+  assert.match(lecturaPrueba(p, "22:45").titular, /se adelanta una semana/);
+  assert.equal(lecturaPrueba(p, "22:46").semanasExtra, 0);
   assert.equal(lecturaPrueba(p, "23:30").semanasExtra, 0);
   assert.equal(lecturaPrueba(p, "23:31").semanasExtra, 4);
   assert.equal(lecturaPrueba(p, "25:00").semanasExtra, 4);
   assert.equal(lecturaPrueba(p, "25:01").semanasExtra, 8);
-  assert.match(dia(8, "Domingo").what, /23:30/, "el texto del plan y la cuenta tienen que decir lo mismo");
+  assert.match(dia2(8, "Domingo").what, /22:45.*23:30.*25:00/, "el texto del plan y la cuenta tienen que decir lo mismo");
 });
 
 test("el dia D dice si se consiguio", () => {
-  const p = dia(11, "Domingo").prueba;
+  const p = dia2(13, "Domingo").prueba;
   assert.equal(lecturaPrueba(p, "33:15").tono, "bien");
   assert.equal(lecturaPrueba(p, "33:40").tono, "ajuste");
 });
@@ -62,7 +68,7 @@ test("la prueba de partida no se cronometra, y lo ilegible se dice", () => {
 });
 
 test("el ritmo de las series se compara con lo pedido y con la vez anterior", () => {
-  const s6 = dia(6, "Jueves"), s7 = dia(7, "Jueves");
+  const s6 = dia2(6, "Jueves"), s7 = dia2(7, "Jueves");
   const primera = lecturaRitmo(s6, "4:50", []);
   assert.equal(primera.dif, 5);
   assert.match(primera.detalle, /Primera sesión/);

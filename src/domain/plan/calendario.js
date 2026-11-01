@@ -1,12 +1,22 @@
 import { compromisoDelDia } from "../compromisos.js";
-import { BLOQUE, DECIDE_FECHA, FECHA_INICIO, WEEKS as PLAN } from "./bloque-1-base-7k.js";
+import { FECHA_INICIO, WEEKS as BLOQUE_1 } from "./bloque-1-base-7k.js";
+import { BLOQUE, DECIDE_FECHA, FECHA_INICIO_BLOQUE, WEEKS as BLOQUE_2 } from "./bloque-2-7k.js";
+
+/** Semanas del bloque 1 que se quedan como historia (21 Sep - 1 Nov). Despues
+ *  sigue el bloque 2, que empieza el lunes siguiente. */
+const SEMANAS_BLOQUE_1 = 6;
+const PLAN = [
+  ...BLOQUE_1.slice(0, SEMANAS_BLOQUE_1).map(w => ({ ...w, bloque: 1 })),
+  ...BLOQUE_2.map(w => ({ ...w, bloque: 2 })),
+];
 
 /**
  * El calendario ata el plan a fechas reales.
  *
- * El plan (bloque-1-base-7k.js) no sabe en que fechas cae: solo dice que hay 11
- * semanas de 7 dias en un orden. Aqui se le suman los dias a FECHA_INICIO y
- * salen las fechas de todo el bloque.
+ * El plan no sabe en que fechas cae: solo dice que hay semanas de 7 dias en un
+ * orden. Aqui se le suman los dias a FECHA_INICIO y salen las fechas de todo.
+ * El calendario es el bloque 1 hasta el 1 de noviembre (historia) y el bloque
+ * 2 (bloque-2-7k.js) desde el 2.
  *
  * Por eso mover el bloque entero es cambiar una constante, y por eso el dia que
  * los bloques se creen desde la app (Fase 3) no hay que tocar nada de esto: se
@@ -65,6 +75,9 @@ export function asignarSemanas({ plan, extra = 0 }) {
   const orden = plan.map((_, i) => i);
   if (!extra || decide < 0 || decide + 1 >= plan.length) return orden;
   const construir = decide + 1;
+  // Negativo: el 5 km fue mejor de lo previsto y el 7K se adelanta. Se quita
+  // la semana que sigue a la prueba (nunca la recta final).
+  if (extra < 0) return orden.filter(i => i < construir || i >= construir - extra || i >= plan.length - 2);
   return [...orden.slice(0, construir), ...Array(extra).fill(construir), ...orden.slice(construir)];
 }
 
@@ -105,17 +118,18 @@ export const WEEKS = ASIGNADAS.map((pi, wi) => {
   const wk = PLAN[pi];
   const days = wk.days.map((d, di) => {
     const isoDate = sumarDias(FECHA_INICIO, wi * 7 + di);
-    const dia = { ...d, isoDate, date: etiquetaCorta(isoDate), dayIdx: di, weekN: wi + 1 };
+    const dia = { ...d, isoDate, date: etiquetaCorta(isoDate), dayIdx: di, weekN: wi + 1, bloque: wk.bloque };
     // La semana sin deficit se marca en la semana, pero la comida se decide
     // por dia: cada dia lleva la marca de su semana.
     if (wk.sinDeficit) dia.sinDeficit = true;
+    if (wk.vuelta) dia.vueltaPlan = true;
     return aplicarCompromiso(dia, di);
   });
   return { ...wk, n: wi + 1, planN: wk.n, extra: wi > 0 && ASIGNADAS[wi - 1] === pi, days,
            dates: etiquetaRango(days[0].isoDate, days[days.length - 1].isoDate) };
 });
 
-/** Cuantas semanas extra ha metido el 5 km que decide la fecha. */
+/** Cuantas semanas extra ha metido el 5 km que decide la fecha (negativo: adelantado). */
 export const SEMANAS_MOVIDAS = WEEKS.length - PLAN.length;
 
 /** Superpone el compromiso fijo del dia, si lo hay, sobre lo que diga el plan.
@@ -167,7 +181,7 @@ WEEKS.forEach((wk, wi) => wk.days.forEach((d, di) =>
 
 /** Fechas clave del bloque, derivadas igual que el resto. */
 export const FECHA_FIN = FLAT_DAYS[FLAT_DAYS.length - 1].isoDate;
-export const RANGO_BLOQUE = etiquetaCorta(FECHA_INICIO) + " - " + etiquetaCorta(FECHA_FIN);
+export const RANGO_BLOQUE = etiquetaCorta(FECHA_INICIO_BLOQUE) + " - " + etiquetaCorta(FECHA_FIN);
 
 const MESES_LARGOS = ["enero", "febrero", "marzo", "abril", "mayo", "junio", "julio", "agosto", "septiembre", "octubre", "noviembre", "diciembre"];
 /** "2026-12-06" -> "6 de diciembre". */
@@ -179,7 +193,23 @@ export function fechaLarga(iso) {
 /** El dia del 7K y el de la prueba que decide la fecha, como se dicen. */
 export const FECHA_OBJETIVO_TXT = fechaLarga((FLAT_DAYS.find(d => d.tipo === "objetivo") || {}).isoDate || FECHA_FIN);
 export const FECHA_DECIDE_TXT = fechaLarga((FLAT_DAYS.find(d => d.prueba && d.prueba.decide) || {}).isoDate);
-export { BLOQUE, FECHA_INICIO };
+export { BLOQUE, FECHA_INICIO, FECHA_INICIO_BLOQUE };
+
+/**
+ * El historial de bloques con el bloque en curso dentro. Lo guardado antes del
+ * 2 de noviembre solo trae el bloque 1 como activo: se cierra el 1 de
+ * noviembre y se abre el bloque 2. Lo que ya traiga el bloque 2 no se toca.
+ */
+export function conBloqueEnCurso(historial) {
+  const h = Array.isArray(historial) ? historial : [];
+  if (h.some(b => b.numero === BLOQUE.numero)) return h;
+  const antes = h.map(b => (b.estado === "activo"
+    ? { ...b, estado: "cerrado", fin: sumarDias(FECHA_INICIO_BLOQUE, -1),
+        revision: b.revision || "Cerrado al empezar el bloque 2: plan nuevo desde donde estás de verdad." }
+    : b));
+  return [...antes, { numero: BLOQUE.numero, nombre: BLOQUE.nombre, inicio: FECHA_INICIO_BLOQUE, fin: FECHA_FIN,
+    objetivoRunning: BLOQUE.objetivo, estado: "activo", revision: "" }];
+}
 
 /** Indice del dia de hoy. Antes de empezar el bloque devuelve el primer dia;
  *  despues de acabarlo, el ultimo. */

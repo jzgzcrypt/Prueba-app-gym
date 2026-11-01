@@ -1,9 +1,10 @@
 "use client";
 
-import { FECHA_FIN, FECHA_INICIO, FLAT_DAYS, claveDia, todayLocalIso, SEMANAS_MOVIDAS } from "@/domain/plan/calendario";
+import { FECHA_FIN, FECHA_INICIO, FECHA_INICIO_BLOQUE, FLAT_DAYS, claveDia, todayLocalIso, SEMANAS_MOVIDAS } from "@/domain/plan/calendario";
 import { useEffect, useRef, useState } from "react";
 import { lecturaPrueba } from "@/domain/progreso/libreta";
-import { parteDelCoach } from "@/domain/progreso/parte";
+import { carrerasSemana, parteDelCoach } from "@/domain/progreso/parte";
+import { CarrerasSemana } from "@/features/ui/CarrerasSemana";
 import { mesesDelBloque, nombreMes } from "@/domain/progreso/informe";
 import { GraficoPlan } from "@/features/ui/plan-vs-real";
 import { MapaRuta } from "@/features/ui/MapaRuta";
@@ -168,10 +169,16 @@ export function ProgresoScreen({ medidas, setMedidas, ritmoReal, weeks, checked,
 
   return (
     <div style={{ padding: "16px 16px 28px" }}>
-      <ScreenHeader title="Progreso" subtitle={semanaActual ? "Semana " + semanaActual.n + " de " + weeks.length : ""} />
+      <ScreenHeader title="Progreso" subtitle={semanaActual ? (semanaActual.bloque === 2
+        ? "Semana " + semanaActual.planN + " de " + weeks.filter(w => w.bloque === 2).length + " · bloque 2"
+        : "Semana " + semanaActual.n + " de " + weeks.length) : ""} />
 
-      {/* Cada cosa una sola vez: el objetivo con su frase, los 4 objetivos
-          (¿Avanzo?), la proxima prueba, el peso y la constancia. */}
+      {/* Primero el numero que manda (las carreras de la semana); luego el
+          objetivo con su frase, los 4 objetivos (¿Avanzo?), la proxima
+          prueba, el peso y la constancia. */}
+      <div style={{ marginBottom: 12 }}>
+        <CarrerasSemana hoyIso={hoyIso} c={carrerasSemana({ semana: semanaActual, checked, gps, ritmoReal, hoyIso })} />
+      </div>
       <TuObjetivo veredicto={parte.veredicto} />
       {avanzo && <div style={{ marginBottom: 12 }}>{avanzo}</div>}
       <ProximaPrueba ritmoReal={ritmoReal} />
@@ -486,8 +493,9 @@ const MESES = ["enero", "febrero", "marzo", "abril", "mayo", "junio", "julio", "
 /** La tarjeta oscura: el objetivo, cuanto falta y por donde vas del plan. */
 function TuObjetivo({ veredicto }) {
   const hoy = todayLocalIso();
-  const total = Math.round((aMs(FECHA_FIN) - aMs(FECHA_INICIO)) / DIA) + 1;
-  const dia = Math.max(1, Math.min(total, Math.round((aMs(hoy) - aMs(FECHA_INICIO)) / DIA) + 1));
+  // Por donde vas: cuenta desde que empezo el bloque en curso.
+  const total = Math.round((aMs(FECHA_FIN) - aMs(FECHA_INICIO_BLOQUE)) / DIA) + 1;
+  const dia = Math.max(1, Math.min(total, Math.round((aMs(hoy) - aMs(FECHA_INICIO_BLOQUE)) / DIA) + 1));
   const faltan = Math.max(0, Math.round((aMs(FECHA_FIN) - aMs(hoy)) / DIA));
   const meta = FLAT_DAYS.find(d => d.tipo === "objetivo");
   return (
@@ -507,9 +515,9 @@ function TuObjetivo({ veredicto }) {
       <div style={{ height: 6, borderRadius: 3, background: "rgba(255,255,255,.18)" }}>
         <div style={{ width: dia / total * 100 + "%", height: "100%", borderRadius: 3, background: A.verde }} />
       </div>
-      {SEMANAS_MOVIDAS > 0 && (
+      {SEMANAS_MOVIDAS !== 0 && (
         <div data-fecha-movida style={{ fontSize: 13.5, lineHeight: 1.45, marginTop: 12, padding: "9px 11px", borderRadius: 12, background: "rgba(255,255,255,.1)" }}>
-          Fecha movida {SEMANAS_MOVIDAS} semanas: lo decidió tu 5 km. Se mueve la fecha, no el ritmo.
+          {SEMANAS_MOVIDAS > 0 ? "Fecha movida " + SEMANAS_MOVIDAS + " semanas: lo decidió tu 5 km. Se mueve la fecha, no el ritmo." : "Fecha adelantada " + -SEMANAS_MOVIDAS + " semana: tu 5 km fue mejor de lo previsto."}
         </div>
       )}
       {veredicto && <div style={{ fontSize: 14, lineHeight: 1.45, marginTop: 14, opacity: 0.9 }}>{veredicto.texto}</div>}

@@ -8,7 +8,7 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import { WEEKS, FLAT_DAYS, FECHA_INICIO, FECHA_FIN, colisiones } from "../src/domain/plan/calendario.js";
-import { BLOQUE } from "../src/domain/plan/bloque-1-base-7k.js";
+import { BLOQUE } from "../src/domain/plan/bloque-2-7k.js";
 import { COMPROMISOS } from "../src/domain/compromisos.js";
 
 /** El RPE viene como "3/10", "7-8/10" o "2-3/10": el esfuerzo es lo que va
@@ -22,10 +22,32 @@ function rpeMaximo(rpe) {
 const diaSemana = (iso) =>
   ["Domingo","Lunes","Martes","Miercoles","Jueves","Viernes","Sabado"][new Date(iso + "T12:00:00Z").getUTCDay()];
 
-test("el bloque tiene las semanas que dice tener, de 7 dias cada una", () => {
-  assert.equal(WEEKS.length, BLOQUE.semanas);
+// El calendario: 6 semanas del bloque 1 (historia) y el bloque 2 entero.
+const B1 = WEEKS.filter(w => w.bloque === 1);
+const B2 = WEEKS.filter(w => w.bloque === 2);
+
+test("el calendario es el bloque 1 hasta el 1 de noviembre y el bloque 2 desde el 2", () => {
+  assert.equal(B1.length, 6);
+  assert.equal(B2.length, BLOQUE.semanas);
+  assert.equal(WEEKS.length, 6 + BLOQUE.semanas);
   for (const wk of WEEKS) assert.equal(wk.days.length, 7, `la semana ${wk.n} no tiene 7 dias`);
-  assert.equal(FLAT_DAYS.length, BLOQUE.semanas * 7);
+  assert.equal(FLAT_DAYS.length, WEEKS.length * 7);
+  assert.equal(B1.at(-1).days[6].isoDate, "2026-11-01");
+  assert.equal(B2[0].days[0].isoDate, "2026-11-02");
+});
+
+test("el 7K es el domingo 31 de enero de 2027, y es el ultimo dia", () => {
+  const obj = FLAT_DAYS.filter(d => d.tipo === "objetivo");
+  assert.equal(obj.length, 1);
+  assert.equal(obj[0].isoDate, "2027-01-31");
+  assert.equal(FECHA_FIN, "2027-01-31");
+});
+
+test("cada semana del bloque 2: martes, jueves y domingo se corre, el sabado es libre", () => {
+  for (const wk of B2) {
+    for (const i of [1, 3, 6]) assert.ok(["run", "test", "objetivo"].includes(wk.days[i].tipo), `S${wk.planN} ${wk.days[i].dow} no es de correr`);
+    if (wk.planN !== 8 && wk.planN !== 13) assert.equal(wk.days[5].tipo, "libre", `S${wk.planN}: el sabado no es libre`);
+  }
 });
 
 test("todas las semanas van de lunes a domingo", () => {
@@ -109,48 +131,66 @@ const minutosCorriendo = (wk) => wk.days
   .filter(d => ["run", "test", "objetivo"].includes(d.tipo))
   .reduce((s, d) => s + minutos(d), 0);
 
-test("la rampa es UNA semana, no dos", () => {
-  const rampa = WEEKS.filter(w => w.fase === "RAMPA");
-  assert.equal(rampa.length, 1, "la rampa vuelve a ocupar dos semanas");
-  assert.equal(rampa[0].n, 1);
-});
-
-test("hay tres pruebas: la de partida, el 3 km de S4 y el 5 km de S8", () => {
-  // Sin ellas los ritmos del plan son una suposicion sobre un punto de
-  // partida que nadie ha medido.
-  const tests = WEEKS.flatMap(w => w.days.filter(d => d.tipo === "test").map(d => [w.n, d.dow]));
-  assert.deepEqual(tests, [[1, "Domingo"], [4, "Jueves"], [8, "Domingo"]]);
-  const s8 = WEEKS[7].days.find(d => d.tipo === "test");
+test("el bloque 2 trae sus dos pruebas: el 3 km en S4 y el 5 km que decide en S8", () => {
+  // Sin ellas los ritmos del plan son una suposicion.
+  const tests = B2.flatMap(w => w.days.filter(d => d.tipo === "test").map(d => [w.planN, d.dow]));
+  assert.deepEqual(tests, [[4, "Jueves"], [8, "Domingo"]]);
+  const s8 = B2[7].days.find(d => d.tipo === "test");
+  assert.ok(s8.prueba.decide);
   assert.match(s8.titulo, /5 km/);
   assert.match(s8.what, /23:30/, "el test de S8 tiene que decir que tiempo decide la fecha");
+  // La prueba de partida del bloque 1 sigue en el calendario, como historia.
+  assert.ok(B1[0].days[6].prueba.partida);
+});
+
+test("las dos primeras semanas son volver: solo suave, nada de series", () => {
+  for (const wk of B2.slice(0, 2)) {
+    assert.equal(wk.fase, "VOLVER");
+    for (const d of wk.days) assert.ok(!d.intervalos && !d.esCalidad, `S${wk.planN} ${d.dow} lleva calidad`);
+  }
 });
 
 test("las series al ritmo objetivo se alargan semana a semana", () => {
-  // Antes el ritmo se tocaba por primera vez en S9, de golpe. Ahora se
-  // aprende en tramos cortos y se alargan: 800 m -> 1 km -> 2 km -> 3 km.
+  // 800 m -> 1 km -> 2 km -> 3 km: 4:45 deja de ser una sorpresa.
   const tramo = (n) => {
-    const d = WEEKS[n - 1].days.find(x => x.esCalidad);
+    const d = B2[n - 1].days.find(x => x.esCalidad);
     assert.match(d.titulo, /4:45/, `la calidad de S${n} no va al ritmo objetivo`);
     return Math.max(...d.intervalos.flatMap(b => b.s.filter(([t]) => t === "rapido").map(([, seg]) => seg)));
   };
-  const tramos = [6, 7, 9, 10].map(tramo);
+  const tramos = [6, 9, 10, 11].map(tramo);
   for (let i = 1; i < tramos.length; i++) assert.ok(tramos[i] > tramos[i - 1], "los tramos no crecen: " + tramos);
 });
 
-test("la carga maxima de running esta en S9 y luego baja de verdad", () => {
-  // Antes S10, a 10 dias del objetivo, era la semana con mas running.
-  const carga = WEEKS.map(minutosCorriendo);
-  const pico = Math.max(...carga);
-  assert.equal(carga[8], pico, "el pico no esta en S9: " + carga);
-  assert.ok(carga[9] <= carga[8] * 0.8, "S10 no baja al menos un 20%");
-  assert.ok(carga[10] < carga[9], "S11 no baja respecto a S10");
+test("la carga de running sube como mucho un 15 % sobre la mejor semana anterior", () => {
+  const carga = B2.map(minutosCorriendo);
+  for (let i = 1; i < carga.length; i++) {
+    const mejor = Math.max(...carga.slice(0, i));
+    assert.ok(carga[i] <= mejor * 1.15, `S${i + 1} sube a ${carga[i]} min desde ${mejor}: ` + carga);
+  }
 });
 
-test("la semana que entra el ritmo no se dispara nada mas", () => {
-  // S5 duplicaba la fuerza la misma semana que subia un 30% el running.
-  const series = (wk) => wk.days.flatMap(d => d.ejercicios || []).reduce((s, e) => s + parseInt(e.series, 10), 0);
-  assert.ok(series(WEEKS[4]) <= series(WEEKS[3]) * 1.15, "la fuerza de S5 sube demasiado");
-  assert.ok(minutosCorriendo(WEEKS[4]) <= minutosCorriendo(WEEKS[3]) * 1.2, "el running de S5 sube demasiado");
+test("el pico de running esta en S10 y luego baja de verdad", () => {
+  const carga = B2.map(minutosCorriendo);
+  assert.equal(carga[9], Math.max(...carga), "el pico no esta en S10: " + carga);
+  assert.ok(carga[10] <= carga[9] * 0.9, "S11 no baja");
+  assert.ok(carga[11] <= carga[9] * 0.7, "S12 no baja al menos un 30 %");
+  assert.ok(carga[12] < carga[10], "la semana del 7K no es ligera");
+});
+
+test("la tirada del domingo crece hasta 60 min y no salta mas de 10 min de una semana a otra", () => {
+  const tiradas = B2.slice(0, 10).filter(w => w.days[6].tipo === "run").map(w => minutos(w.days[6]));
+  assert.equal(Math.max(...tiradas), 60);
+  for (let i = 1; i < tiradas.length; i++) assert.ok(tiradas[i] - tiradas[i - 1] <= 10, "salto: " + tiradas);
+});
+
+test("ninguna area se queda fuera: hombro dos veces, pecho, espalda y prevencion cada semana", () => {
+  for (const wk of B2.slice(0, 12)) {
+    const ej = wk.days.flatMap(d => d.ejercicios || []);
+    assert.equal(wk.days.filter(d => d.tipo === "fuerza").length, 2, `S${wk.planN}`);
+    for (const g of ["Hombro", "Pecho", "Espalda", "Pierna", "Cadera", "Core"]) {
+      assert.ok(ej.some(e => e.grupo === g), `S${wk.planN} no trae ${g}`);
+    }
+  }
 });
 
 test("el hombro se trabaja todas las semanas hasta S10", () => {
@@ -180,7 +220,7 @@ test("nada va a fallo en todas las series", () => {
 
 test("el reparto del dia D cuadra con 33:15", () => {
   // El reparto anterior (5:00, 5:00, 4:50x3) dejaba los dos ultimos km a 4:22.
-  const dia = WEEKS[10].days.find(d => d.tipo === "objetivo");
+  const dia = FLAT_DAYS.find(d => d.tipo === "objetivo");
   assert.match(dia.what, /Km 1 a 4:48/);
   const hastaKm6 = 288 + 5 * 285;
   const km7 = 33 * 60 + 15 - hastaKm6;
@@ -191,4 +231,13 @@ test("el taper es una sola semana", () => {
   // Dos semanas de taper para un objetivo de 33 minutos es desentrenar.
   const taper = WEEKS.filter(w => /TAPER|OBJETIVO/.test(w.fase));
   assert.ok(taper.length <= 2, "demasiadas semanas sin carga al final");
+});
+
+import { conBloqueEnCurso } from "../src/domain/plan/calendario.js";
+
+test("el historial guardado con el bloque 1 activo lo cierra el 1 de noviembre y abre el 2", () => {
+  const h = conBloqueEnCurso([{ numero: 1, nombre: "Bloque 1", inicio: "2026-09-21", fin: "2026-12-06", estado: "activo", revision: "" }]);
+  assert.deepEqual(h.map(b => [b.numero, b.estado, b.fin]), [[1, "cerrado", "2026-11-01"], [2, "activo", "2027-01-31"]]);
+  assert.equal(conBloqueEnCurso(h), h, "si ya esta el bloque 2, no se toca");
+  assert.equal(conBloqueEnCurso(null).length, 1);
 });

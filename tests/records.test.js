@@ -48,7 +48,10 @@ test("el resumen cuenta lo hecho, no lo planificado", () => {
   assert.match(textoResumen(r, "Base 7K"), /^Semana 2 · Base 7K\n3\/7 sesiones/);
 });
 
-const s4 = dia(4, "Jueves"), s5 = dia(5, "Jueves"), s6 = dia(6, "Jueves"), s8 = dia(8, "Domingo"), s9 = dia(9, "Jueves");
+// Las pruebas y series del bloque 2, que es el que esta en curso.
+const B2 = WEEKS.filter(w => w.bloque === 2);
+const dia2 = (n, dow) => B2[n - 1].days.find(d => d.dow === dow);
+const s4 = dia2(4, "Jueves"), s5 = dia2(5, "Jueves"), s6 = dia2(6, "Jueves"), s8 = dia2(8, "Domingo"), s9 = dia2(9, "Jueves");
 
 test("sin prueba, las series van al ritmo del plan", () => {
   assert.deepEqual(ritmoDelDia(s6, FLAT_DAYS, {}), { ritmo: 285, plan: 285, ajustado: false, fuente: null });
@@ -73,7 +76,7 @@ test("manda la ultima prueba, y el dia D no se toca", () => {
   const ritmoReal = { [s4.isoDate]: "16:00", [s8.isoDate]: "23:20" };
   assert.equal(ultimaPrueba(s9.isoDate, FLAT_DAYS, ritmoReal).isoDate, s8.isoDate);
   assert.equal(ritmoDelDia(s9, FLAT_DAYS, ritmoReal).ajustado, false, "23:20 en 5 km ya es 4:40/km");
-  const diaD = dia(11, "Domingo");
+  const diaD = dia2(13, "Domingo");
   assert.equal(ritmoDelDia(diaD, FLAT_DAYS, { [s8.isoDate]: "26:00" }).ritmo, 285);
 });
 

@@ -6,7 +6,8 @@ import assert from "node:assert/strict";
 import { hitos, porQue, prevision, riesgos, veredictoCoach } from "../src/domain/coach/prevision.js";
 import { FLAT_DAYS } from "../src/domain/plan/calendario.js";
 
-const s4 = FLAT_DAYS.find(d => d.prueba && d.prueba.enLinea);
+// El 3 km del bloque en curso (el del bloque 1 ya es historia).
+const s4 = FLAT_DAYS.filter(d => d.prueba && d.prueba.enLinea).at(-1);
 
 test("sin pruebas no hay previsión, y la frase dice cuándo la habrá", () => {
   assert.equal(prevision(FLAT_DAYS, {}), null);
@@ -43,7 +44,7 @@ test("un 3 km rápido: por delante", () => {
 
 test("hitos: hecho, el próximo y los futuros, con su meta", () => {
   const partida = FLAT_DAYS.find(d => d.prueba && d.prueba.partida);
-  const h = hitos(FLAT_DAYS, { [partida.isoDate]: "25 min a 6:50/km" }, "2026-10-08");
+  const h = hitos(FLAT_DAYS, { [partida.isoDate]: "25 min a 6:50/km" }, "2026-11-03");
   assert.deepEqual(h.map(x => x.estado), ["hecho", "proximo", "futuro", "futuro"]);
   assert.match(h[1].meta, /14:30/);
   assert.match(h[2].meta, /23:30/);

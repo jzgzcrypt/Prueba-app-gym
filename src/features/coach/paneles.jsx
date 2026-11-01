@@ -2,8 +2,8 @@
 
 import { useState } from "react";
 import { C, CAT, R, SP, TAP_MIN, TYPE } from "@/design/tokens";
-import { BLOQUE, DATE_MAP, FECHA_FIN, RANGO_BLOQUE, WEEKS, claveDia, claveSemana, todayLocalIso } from "@/domain/plan/calendario";
-import { REGLAS_BLOQUE } from "@/domain/plan/bloque-1-base-7k";
+import { BLOQUE, DATE_MAP, FECHA_FIN, FECHA_OBJETIVO_TXT, RANGO_BLOQUE, WEEKS, claveDia, claveSemana, todayLocalIso } from "@/domain/plan/calendario";
+import { REGLAS_BLOQUE } from "@/domain/plan/bloque-2-7k";
 import { SectionHeader } from "@/features/ui/headers";
 import { TarjetaCalendario } from "@/features/ui/calendario";
 /** Dias enteros transcurridos desde una fecha "YYYY-MM-DD" hasta hoy. */
@@ -391,13 +391,14 @@ function resumenSemana(wk, { checked, ritmoReal, painLog, cuelloChecks, magiaLog
 
 export function PlanGlobalContent({ jumpToDay, setWeekIdx, onJumpAway, checked }) {
   const FASES_INFO = [
-    { fase: "RAMPA", color: CAT.fuerza, semanas: "S1", texto: "Correr/caminar y fuerza corta, para volver del parón. El domingo, la prueba de partida: cuánto aguantas corriendo seguido." },
-    { fase: "ESTETICA", color: CAT.cuello, semanas: "S2-S4", texto: "Base aeróbica con fartlek suave. Hombro dos veces por semana y mínimo fijo de pecho y espalda. El jueves de S4, 3 km a tope: de ahí salen tus ritmos." },
-    { fase: "CALIDAD", color: "#946800", semanas: "S5", texto: "Primeras series algo más rápidas que el objetivo. La fuerza no sube a la vez." },
-    { fase: "ESPECIFICIDAD", color: CAT.running, semanas: "S6-S9", texto: "Series al ritmo objetivo que se alargan: 800 m, 1 km, 2 km. Tirada de hasta 60 min. El 5 km de S8 decide la fecha. S9 es la semana más cargada del bloque." },
-    { fase: "PUENTE", color: "#6B4C8A", semanas: "S10", texto: "Baja el volumen, se mantiene el ritmo: 2x3 km a 4:45. Sin déficit de comida." },
-    { fase: "OBJETIVO", color: CAT.running, semanas: "S11", texto: "Taper y el día: km 1 a 4:48, km 2-6 a 4:45, km 7 a tope." },
+    { fase: "VOLVER", color: CAT.fuerza, semanas: "S1-S2", texto: "Tres suaves cortos por semana. Lo único que importa es salir: crear el hábito sin romperte." },
+    { fase: "BASE", color: CAT.cuello, semanas: "S3-S4", texto: "Fartlek suave el jueves y tirada a 35 min. El jueves de S4, 3 km a tope: de ahí salen tus ritmos." },
+    { fase: "CONSTRUIR", color: "#946800", semanas: "S5-S8", texto: "Series de 400 y 800 m, tirada a 55 min. El 5 km de S8 decide la fecha." },
+    { fase: "ESPECÍFICO", color: CAT.running, semanas: "S9-S11", texto: "Series al ritmo objetivo que se alargan: 1 km, 2 km, 3 km. Tirada de 60 min. S10 es la semana más cargada." },
+    { fase: "RECTA FINAL", color: "#6B4C8A", semanas: "S12", texto: "Baja el volumen, se mantiene el ritmo. Sin déficit de comida." },
+    { fase: "OBJETIVO", color: CAT.running, semanas: "S13", texto: "Taper y el día: km 1 a 4:48, km 2-6 a 4:45, km 7 a tope." },
   ];
+
 
   const todayIso = todayLocalIso();
   const objetivoDate = new Date(FECHA_FIN);
@@ -425,11 +426,11 @@ export function PlanGlobalContent({ jumpToDay, setWeekIdx, onJumpAway, checked }
         <div style={{ background: C.card, border: "1px solid " + C.cardBorder, borderRadius: 14, padding: "14px 16px" }}>
           <div style={{ fontSize: 10, fontWeight: 800, color: C.accent, letterSpacing: 0.8, marginBottom: 6 }}>OBJETIVO A LARGO PLAZO</div>
           <div style={{ fontSize: 13, color: "#4A4A47", lineHeight: 1.55, marginBottom: 10 }}>
-            Correr 7km a 4:45/km el domingo 6 de diciembre, o más tarde si el 5 km de S8 dice que hace falta más tiempo: se mueve la fecha, no se baja el ritmo. En paralelo, construir hombro/pecho/brazos visiblemente más definidos y resolver la rigidez de cuello/clavícula heredada del accidente — sin que ninguno de los tres objetivos sacrifique a los otros dos.
+            Correr 7km a 4:45/km el {FECHA_OBJETIVO_TXT}, o en otra fecha si el 5 km de la semana 8 lo dice: se mueve la fecha, no se baja el ritmo. En paralelo, construir hombro/pecho/brazos visiblemente más definidos y resolver la rigidez de cuello/clavícula heredada del accidente — sin que ninguno de los tres objetivos sacrifique a los otros dos.
           </div>
           <div style={{ fontSize: 10, fontWeight: 800, color: C.accent, letterSpacing: 0.8, marginBottom: 6 }}>CÓMO SE LLEGA</div>
           <div style={{ fontSize: 13, color: "#4A4A47", lineHeight: 1.55 }}>
-            El running manda siempre — nunca se sacrifica una sesión de calidad por fuerza. Tres carreras y el tenis. La fuerza es empuje/tirón/pierna con hombro dos veces por semana hasta S10, y un bloque de prevención (gemelo, glúteo medio, core) todos los sábados. La movilidad va dentro de cada sesión, en el gimnasio o donde corres: nada suelto para casa. El cuello se trabaja todos los días, sin excepción — es el hábito de menor esfuerzo y mayor constancia de todo el plan.
+            Lo que manda: 3 carreras por semana (martes, jueves y domingo) y el tenis del lunes. Hombro dos veces por semana, miércoles y viernes, 30 min, con pecho, espalda y la prevención (gemelo, glúteo medio, core) dentro. El sábado, libre. La movilidad va dentro de cada sesión, en el gimnasio o donde corres: nada suelto para casa. El cuello se trabaja todos los días, sin excepción — es el hábito de menor esfuerzo y mayor constancia de todo el plan.
           </div>
         </div>
       </div>
@@ -497,7 +498,7 @@ export function PlanGlobalContent({ jumpToDay, setWeekIdx, onJumpAway, checked }
             }}>
               <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
                 <div style={{ display: "flex", alignItems: "baseline", gap: 8 }}>
-                  <span style={{ fontSize: 13.5, fontWeight: 800, color: C.text }}>S{wk.n} · {wk.dates}</span>
+                  <span style={{ fontSize: 13.5, fontWeight: 800, color: C.text }}>{wk.bloque === 1 ? "B1 · " : ""}S{wk.planN || wk.n} · {wk.dates}</span>
                   <span style={{ fontSize: 9, fontWeight: 800, color: temporalColor, letterSpacing: 0.5 }}>{temporalLabel}</span>
                 </div>
                 <span style={{ fontSize: 9.5, fontWeight: 700, color: fc, letterSpacing: 0.5 }}>{wk.fase}</span>

@@ -12,7 +12,7 @@
  */
 
 import { parseRitmoToSeconds } from "./ritmo.js";
-import { DECIDE_FECHA, textoTiempo } from "../progreso/libreta.js";
+import { MANTIENE_FECHA, textoTiempo } from "../progreso/libreta.js";
 import { FECHA_OBJETIVO_TXT } from "../plan/calendario.js";
 
 /**
@@ -121,7 +121,7 @@ export function ritmoDePrueba(day) {
   if (!p || p.partida || !p.distKm) return null;
   if (day.ritmo) return day.ritmo;
   if (p.enLinea) return Math.round(p.enLinea / p.distKm);
-  if (p.decide) return Math.round(DECIDE_FECHA[0].hasta / p.distKm);
+  if (p.decide) return Math.round(MANTIENE_FECHA / p.distKm);
   return null;
 }
 
@@ -132,7 +132,7 @@ export function estrategiaPrueba(day) {
   const ritmo = ritmoDePrueba(day);
   if (!ritmo) return null;
   const p = day.prueba;
-  const meta = p.enLinea ? "En línea: " + textoTiempo(p.enLinea) : p.decide ? "Mantiene la fecha: " + textoTiempo(DECIDE_FECHA[0].hasta)
+  const meta = p.enLinea ? "En línea: " + textoTiempo(p.enLinea) : p.decide ? "Mantiene la fecha: " + textoTiempo(MANTIENE_FECHA)
     : "Objetivo: " + textoTiempo(ritmo * p.distKm);
   return meta + " (" + mmss(ritmo) + "/km). Sal a " + mmss(ritmo + 5) + " el primer km, regular después y aprieta el último.";
 }
@@ -142,7 +142,7 @@ export function vozFinPrueba(day, seg) {
   const p = day && day.prueba;
   if (!p || !p.distKm || !seg) return null;
   const base = p.distKm + " kilómetros en " + mmss(seg).replace(":", " ") + ".";
-  const linea = p.enLinea || (p.decide ? DECIDE_FECHA[0].hasta : (day.ritmo ? day.ritmo * p.distKm : null));
+  const linea = p.enLinea || (p.decide ? MANTIENE_FECHA : (day.ritmo ? day.ritmo * p.distKm : null));
   if (!linea) return base;
   const dif = Math.round(seg - linea);
   if (dif <= 0) return base + (p.decide ? " Se mantiene el " + FECHA_OBJETIVO_TXT + "." : " Dentro de la línea. Muy bien.") + " Ahora, suave para soltar.";

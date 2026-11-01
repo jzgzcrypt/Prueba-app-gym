@@ -13,6 +13,8 @@
  *       cada una sube hasta llegar al 100 % despues de la ultima.
  *       Primera mitad: sin series (suave + progresivos). Segunda: series con
  *       menos repeticiones. Una prueba no se hace en la vuelta.
+ *     Si la vuelta empieza en semanas que el plan ya escribe como vuelta
+ *     (`vueltaPlan`, bloque 2 S1-S2), no se recorta mas.
  *  2. Constancia baja sin paron (menos de la mitad de las salidas de las 2
  *     ultimas semanas): las series de los 7 dias siguientes, mas cortas, y la
  *     tirada no crece respecto a la anterior.
@@ -86,6 +88,9 @@ export function estadoCarga({ dias, checked, gps, ritmoReal, movidas, hoyIso }) 
     // Las salidas de vuelta: las hechas desde que volviste y las que vienen
     // (las que se pasaron sin hacer no cuentan).
     const salidas = carreras.filter(d => d.isoDate >= inicio && (d.isoDate >= hoyIso || hecha(d))).slice(0, de);
+    // Si la vuelta cae en semanas que el plan ya escribio como vuelta (suaves
+    // cortos), no se recorta encima: el plan ya vuelve despacio.
+    if (salidas.length && salidas[0].vueltaPlan) salidas.length = 0;
     salidas.forEach((d, k) => {
       vuelta[d.isoDate] = { n: k + 1, de, paro, sinNada, pocas, factor: Math.round((f0 + (1 - f0) * k / de) * 100) / 100, sinSeries: k < de / 2 };
     });

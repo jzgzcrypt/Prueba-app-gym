@@ -100,3 +100,14 @@ test("cintura sin cambios: dice igual, no -0", () => {
   const o = objetivos({ ...base, hoyIso: "2026-10-20", medidas: [{ iso: "2026-09-28", cintura: 95 }, { iso: "2026-10-19", cintura: 95 }] }).lista;
   assert.equal(o.find(x => x.id === "panza").tendencia, "igual en 3 semanas");
 });
+
+import { carrerasSemana } from "../src/domain/progreso/parte.js";
+
+test("carreras esta semana: martes, jueves y domingo; la vispera no cuenta", () => {
+  const s1 = WEEKS.find(w => w.days[0].isoDate === "2026-11-02");
+  const r = carrerasSemana({ semana: s1, checked: { "2026-11-03": true }, gps: { "2026-11-05": { m: 3000 } }, ritmoReal: {}, hoyIso: "2026-11-06" });
+  assert.deepEqual([r.hechas, r.de], [2, 3]);
+  assert.deepEqual(r.dias.map(d => d.dow), ["Martes", "Jueves", "Domingo"]);
+  const s8 = WEEKS.filter(w => w.bloque === 2)[7];
+  assert.equal(carrerasSemana({ semana: s8, checked: {}, hoyIso: "2026-12-21" }).de, 3, "el sabado de activacion no es una carrera mas");
+});

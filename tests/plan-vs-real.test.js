@@ -9,6 +9,9 @@ import { lineaPlan, planEn, puntosReales, tuContraElPlan, textoDiferencia } from
 import { OBJETIVO_7K } from "../src/domain/progreso/libreta.js";
 
 const dia = (n, dow) => WEEKS[n - 1].days.find(d => d.dow === dow);
+// El bloque 2 (desde el 2 de noviembre), con su propia numeracion.
+const B2 = WEEKS.filter(w => w.bloque === 2);
+const dia2 = (n, dow) => B2[n - 1].days.find(d => d.dow === dow);
 
 test("la linea del plan baja hasta 33:15 el dia D", () => {
   const l = lineaPlan(FLAT_DAYS);
@@ -20,8 +23,8 @@ test("la linea del plan baja hasta 33:15 el dia D", () => {
 
 test("el plan en S4 es tu 3 km en linea pasado a 7K", () => {
   const l = lineaPlan(FLAT_DAYS);
-  const s4 = dia(4, "Jueves");
-  assert.equal(planEn(4 + 3 / 7, l), l[1].seg);
+  const s4 = dia2(4, "Jueves");
+  assert.equal(planEn(s4.weekN + 3 / 7, l), l[1].seg);
   const r = tuContraElPlan(FLAT_DAYS, { [s4.isoDate]: "14:30" });
   assert.equal(r.diferencia, 0, "14:30 es justo lo que pide el plan");
   assert.ok(tuContraElPlan(FLAT_DAYS, { [s4.isoDate]: "14:00" }).diferencia < 0, "mas rapido = por delante");

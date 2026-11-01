@@ -16,22 +16,25 @@
  *             5 s), la misma equivalencia con la que se ajustan las series
  *             (running/adaptar.js). Es una estimacion: se pinta hueca.
  */
-import { DECIDE_FECHA, OBJETIVO_7K, equivalente, equivalente7k, leerRitmo, leerTiempo } from "./libreta.js";
+import { MANTIENE_FECHA, OBJETIVO_7K, equivalente, equivalente7k, leerRitmo, leerTiempo } from "./libreta.js";
 
 /** Posicion de un dia en el eje: semana + fraccion de semana. */
 export const posicion = (d) => d.weekN + d.dayIdx / 7;
 
 /** La linea del plan: [{x, seg}] ordenada. */
 export function lineaPlan(dias) {
-  const s4 = dias.find(d => d.prueba && d.prueba.enLinea);
   const s8 = dias.find(d => d.prueba && d.prueba.decide);
+  // La prueba de 3 km del bloque que decide (la ultima antes del 5 km).
+  const s4 = s8 && dias.filter(d => d.prueba && d.prueba.enLinea && d.isoDate < s8.isoDate).pop();
   const obj = dias.find(d => d.tipo === "objetivo");
   if (!s4 || !s8 || !obj) return [];
   const a = { x: posicion(s4), seg: equivalente7k(s4.prueba.distKm, s4.prueba.enLinea) };
-  const b = { x: posicion(s8), seg: equivalente7k(s8.prueba.distKm, DECIDE_FECHA[0].hasta) };
+  const b = { x: posicion(s8), seg: equivalente7k(s8.prueba.distKm, MANTIENE_FECHA) };
   const c = { x: posicion(obj), seg: OBJETIVO_7K };
   const pendiente = (b.seg - a.seg) / (b.x - a.x);
-  const inicio = { x: 1, seg: Math.round(a.seg - pendiente * (a.x - 1)) };
+  // La linea empieza el primer dia del bloque de esa prueba: lo de antes es historia.
+  const x0 = posicion(dias.find(d => d.bloque === s4.bloque) || dias[0]);
+  const inicio = { x: x0, seg: Math.round(a.seg - pendiente * (a.x - x0)) };
   return [inicio, a, b, c];
 }
 

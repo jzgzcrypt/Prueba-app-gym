@@ -172,7 +172,7 @@ export function CierreSesion({ day: diaAjustado, dayKey, workoutWeights, workout
         )}
 
         {day.prueba && day.prueba.distKm && guardado && (() => {
-          // Con el resultado recien apuntado, como llegas al 6 de diciembre.
+          // Con el resultado recien apuntado, como llegas al dia del 7K.
           const prev = prevision(FLAT_DAYS, { ...ritmoReal, [dayKey]: guardado });
           if (!prev) return null;
           const v = veredictoCoach(prev);

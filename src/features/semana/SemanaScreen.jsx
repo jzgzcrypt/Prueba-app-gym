@@ -31,7 +31,7 @@ export function SemanaScreen({ weekIdx, setWeekIdx, jumpToDay, checked, todayIso
 
   return (
     <div style={{ padding: "12px 20px 0" }}>
-      <div style={{ fontSize: 14, fontWeight: 600, color: C.textDim }}>{week.dates} · {String(week.fase || "").charAt(0) + String(week.fase || "").slice(1).toLowerCase()}{week.extra ? " · semana extra que pidió el 5 km" : ""}</div>
+      <div style={{ fontSize: 14, fontWeight: 600, color: C.textDim }}>{week.dates} · {String(week.fase || "").charAt(0) + String(week.fase || "").slice(1).toLowerCase()}{week.bloque === 1 ? " · bloque 1" : ""}{week.extra ? " · semana extra que pidió el 5 km" : ""}</div>
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-end" }}>
         <div style={{ ...TYPE.screenTitle, color: C.text }}>Semana {week.planN || week.n}</div>
         <button className="btn" onClick={() => { setPauseMode(!pauseMode); setPauseSelection([]); }} style={{
@@ -53,7 +53,10 @@ export function SemanaScreen({ weekIdx, setWeekIdx, jumpToDay, checked, todayIso
           <button key={w.n} className="btn" onClick={() => setWeekIdx(i)} style={{
             flex: "1 0 auto", minWidth: 42, minHeight: 32, borderRadius: 8, fontSize: 13, fontWeight: 600,
             background: weekIdx === i ? "#fff" : "transparent", color: weekIdx === i ? C.text : "#3A3A3C",
-            boxShadow: weekIdx === i ? "0 1px 3px rgba(0,0,0,.1)" : "none" }}>S{w.n}</button>
+            boxShadow: weekIdx === i ? "0 1px 3px rgba(0,0,0,.1)" : "none",
+            // El bloque 1 queda como historia: se ve, pero apagado.
+            opacity: w.bloque === 1 && weekIdx !== i ? 0.5 : 1 }}
+            aria-label={(w.bloque === 1 ? "Bloque 1, semana " : "Semana ") + (w.planN || w.n)}>S{w.planN || w.n}</button>
         ))}
       </div>
 
@@ -91,7 +94,7 @@ export function SemanaScreen({ weekIdx, setWeekIdx, jumpToDay, checked, todayIso
       </Tarjeta>
 
       <div style={{ display: "flex", flexDirection: "column", gap: 12, marginTop: 14 }}>
-        <KpiBlock title={"Resumen de la semana " + week.n} isOpen={kpiOpen === "semana"}
+        <KpiBlock title={"Resumen de la semana " + (week.planN || week.n)} isOpen={kpiOpen === "semana"}
           onToggle={() => setKpiOpen(kpiOpen === "semana" ? null : "semana")}
           weeks={[week]} checked={checked} workoutWeights={workoutWeights} ritmoReal={ritmoReal} />
 

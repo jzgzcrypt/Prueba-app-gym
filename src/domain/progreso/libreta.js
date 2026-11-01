@@ -14,8 +14,8 @@ import { FECHA_OBJETIVO_TXT } from "../plan/calendario.js";
 export const OBJETIVO_7K = 7 * 285;
 
 /** Umbrales del 5 km de S8 (ver REGLAS_BLOQUE en el plan). */
-export { DECIDE_FECHA } from "../plan/bloque-1-base-7k.js";
-import { DECIDE_FECHA } from "../plan/bloque-1-base-7k.js";
+export { DECIDE_FECHA, MANTIENE_FECHA } from "../plan/bloque-2-7k.js";
+import { DECIDE_FECHA } from "../plan/bloque-2-7k.js";
 
 /** 1995 -> "33:15"; 4000 -> "1:06:40". */
 export function textoTiempo(seg) {
@@ -97,6 +97,9 @@ export function lecturaPrueba(prueba, texto) {
 
   if (prueba.decide) {
     const tramo = DECIDE_FECHA.find(t => total <= t.hasta);
+    if (tramo.semanasExtra < 0) return { ...base, tono: "bien", semanasExtra: tramo.semanasExtra,
+      titular: "El 7K se adelanta " + (tramo.semanasExtra === -1 ? "una semana" : -tramo.semanasExtra + " semanas"),
+      detalle: textoTiempo(total) + " en 5 km: mejor de lo previsto. " + eqTxt };
     return tramo.semanasExtra === 0
       ? { ...base, tono: "bien", semanasExtra: 0, titular: "Se mantiene el " + FECHA_OBJETIVO_TXT,
           detalle: textoTiempo(total) + " en 5 km. " + eqTxt }

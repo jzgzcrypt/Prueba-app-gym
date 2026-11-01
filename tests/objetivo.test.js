@@ -73,7 +73,7 @@ test("tu suave de siempre: media de los últimos rodajes suaves, sin series ni p
 
 test("las pruebas tienen su ritmo: 3 km a 4:50, el 5 km que decide a 4:42, el objetivo a 4:45", async () => {
   const { ritmoDePrueba, estrategiaPrueba, vozFinPrueba } = await import("../src/domain/running/objetivo.js");
-  const tres = FLAT_DAYS.find(d => d.prueba && d.prueba.enLinea);
+  const tres = FLAT_DAYS.filter(d => d.prueba && d.prueba.enLinea).at(-1);
   const cinco = FLAT_DAYS.find(d => d.prueba && d.prueba.decide);
   const siete = FLAT_DAYS.find(d => d.tipo === "objetivo");
   const partida = FLAT_DAYS.find(d => d.prueba && d.prueba.partida);
@@ -85,5 +85,5 @@ test("las pruebas tienen su ritmo: 3 km a 4:50, el 5 km que decide a 4:42, el ob
   assert.match(estrategiaPrueba(tres), /^En línea: 14:30 \(4:50\/km\)\. Sal a 4:55 el primer km/);
   assert.match(vozFinPrueba(tres, 860), /^3 kilómetros en 14 20\. Dentro de la línea/);
   assert.match(vozFinPrueba(tres, 910), /40 segundos por encima de la línea/);
-  assert.match(vozFinPrueba(cinco, 1400), /Se mantiene el 6 de diciembre/);
+  assert.match(vozFinPrueba(cinco, 1400), /Se mantiene el 31 de enero/);
 });
