@@ -15,7 +15,7 @@ function diasDesde(iso) {
   return Math.max(0, Math.round((now - then) / 86400000));
 }
 
-export function PhaseAdjustContent({ currentWeekN, currentWeekOverride, setCurrentWeekOverride, phaseAdjustNote, setPhaseAdjustNote, exportData, importData, storageStatus, ultimoBackup, ultimoGuardado }) {
+export function PhaseAdjustContent({ currentWeekN, currentWeekOverride, setCurrentWeekOverride, phaseAdjustNote, setPhaseAdjustNote, exportData, importData, storageStatus, ultimoBackup, ultimoGuardado, horasCarrera, setHorasCarrera }) {
   const [noteDraft, setNoteDraft] = useState(phaseAdjustNote);
   const autoWeek = (() => {
     const todayIso = todayLocalIso();
@@ -89,7 +89,7 @@ export function PhaseAdjustContent({ currentWeekN, currentWeekOverride, setCurre
       </div>
 
       <div style={{ marginBottom: SP.md }}>
-        <TarjetaCalendario modo="ajustes" />
+        <TarjetaCalendario modo="ajustes" horasCarrera={horasCarrera} setHorasCarrera={setHorasCarrera} />
       </div>
 
       <div style={{ background: C.card, border: "1px solid " + C.cardBorder, borderRadius: R.xl, padding: SP.lg + "px" }}>

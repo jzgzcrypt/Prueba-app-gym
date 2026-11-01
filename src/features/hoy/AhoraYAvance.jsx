@@ -142,14 +142,42 @@ export function Avanzo({ objetivos, cumplidos, sentir, prueba, onVer }) {
 }
 
 /** Domingo (o el lunes, si se paso): como te has sentido contigo esta semana. */
-export function SentirSemana({ onGuardar }) {
+/**
+ * EL REPASO DEL DOMINGO: 2 minutos para ajustar la semana que viene.
+ * Carreras hechas, que fallo y que cambias; y dentro, como te has sentido
+ * (que es tu objetivo de verdad). Se guarda en semanaSentir, por su lunes.
+ */
+const FALLOS = ["Nada: salieron", "Sofá y móvil", "Cansancio o trabajo", "Otra cosa"];
+
+export function SentirSemana({ onGuardar, carreras }) {
   const [nota, setNota] = useState(null);
   const [frase, setFrase] = useState("");
+  const [fallo, setFallo] = useState(null);
+  const [cambio, setCambio] = useState("");
+  const todas = carreras && carreras.de && carreras.hechas >= carreras.de;
+  const campo = { width: "100%", boxSizing: "border-box", marginTop: 8, padding: "11px 12px", borderRadius: 10, border: "none", background: C.surfaceMuted, fontSize: 14, fontFamily: "inherit" };
+  const sub = (t) => <div style={{ fontSize: 14, fontWeight: 700, color: C.text, marginTop: 14 }}>{t}</div>;
   return (
     <Tarjeta data-sentir style={{ padding: "14px 16px" }}>
-      <div style={{ fontSize: 16, fontWeight: 700, color: C.text }}>¿Cómo te has sentido contigo esta semana?</div>
-      <div style={{ fontSize: 13, color: C.textDim, marginTop: 2 }}>Es tu objetivo de verdad. Un toque.</div>
-      <div style={{ display: "flex", gap: 8, marginTop: 10 }}>
+      <div style={{ fontSize: 16, fontWeight: 700, color: C.text }}>Repaso de la semana · 2 min</div>
+      {carreras && carreras.de > 0 && (
+        <div data-repaso-carreras style={{ fontSize: 14, color: C.textDim, marginTop: 2 }}>
+          Carreras: <b style={{ color: C.text }}>{carreras.hechas} de {carreras.de}</b>{todas ? ". Así se llega." : "."}
+        </div>
+      )}
+      {sub(todas ? "¿Qué te ayudó a salir?" : "¿Qué falló?")}
+      <div style={{ display: "flex", flexWrap: "wrap", gap: 6, marginTop: 8 }}>
+        {FALLOS.map(f => (
+          <button key={f} className="btn" data-fallo={f} onClick={() => setFallo(f)} style={{
+            minHeight: 36, padding: "0 12px", borderRadius: 999, fontSize: 13.5, fontWeight: 600,
+            background: fallo === f ? A.azul : C.surfaceMuted, color: fallo === f ? "#fff" : C.text }}>{f}</button>
+        ))}
+      </div>
+      {sub("¿Qué cambias la semana que viene?")}
+      <input value={cambio} onChange={e => setCambio(e.target.value)} data-repaso-cambio
+        placeholder="Una cosa. Ej: dejo la ropa en la entrada el lunes por la noche" style={campo} />
+      {sub("¿Cómo te has sentido contigo?")}
+      <div style={{ display: "flex", gap: 8, marginTop: 8 }}>
         {[1, 2, 3, 4, 5].map(n => (
           <button key={n} className="btn" data-nota={n} onClick={() => setNota(n)} style={{
             flex: 1, height: 46, borderRadius: 14, fontSize: 18, fontWeight: 700,
@@ -158,9 +186,10 @@ export function SentirSemana({ onGuardar }) {
       </div>
       {nota != null && (
         <>
-          <input value={frase} onChange={e => setFrase(e.target.value)} placeholder="Una frase, si quieres (qué te ha pesado, qué ha ido bien)"
-            style={{ width: "100%", boxSizing: "border-box", marginTop: 10, padding: "11px 12px", borderRadius: 10, border: "none", background: C.surfaceMuted, fontSize: 14, fontFamily: "inherit" }} />
-          <Boton tipo="color" color={A.azul} data-sentir-guardar onClick={() => onGuardar({ nota, frase: frase.trim() })} style={{ marginTop: 10, minHeight: 44, fontSize: 15 }}>Guardar</Boton>
+          <input value={frase} onChange={e => setFrase(e.target.value)} placeholder="Una frase, si quieres (qué te ha pesado, qué ha ido bien)" style={campo} />
+          <Boton tipo="color" color={A.azul} data-sentir-guardar style={{ marginTop: 10, minHeight: 44, fontSize: 15 }}
+            onClick={() => onGuardar({ nota, frase: frase.trim(), fallo, cambio: cambio.trim(),
+              ...(carreras ? { carreras: { hechas: carreras.hechas, de: carreras.de } } : {}) })}>Guardar</Boton>
         </>
       )}
     </Tarjeta>

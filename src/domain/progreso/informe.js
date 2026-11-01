@@ -150,7 +150,7 @@ export function fraseDelMes(inf) {
     : inf.cintura && inf.cintura.despues < inf.cintura.antes ? "la cintura ha bajado " + (inf.cintura.antes - inf.cintura.despues).toFixed(1) + " cm"
     : null;
   if (inf.enCurso) {
-    return ratio >= 0.8 ? "Vas bien, y el mes aún no ha acabado." : "El mes aún no ha acabado: jueves y domingo, y lo demás sale.";
+    return ratio >= 0.8 ? "Vas bien, y el mes aún no ha acabado." : "El mes aún no ha acabado: las 3 carreras de cada semana, y lo demás sale.";
   }
   const siguiente = nombreMes(siguienteMes(inf.mes), true);
   if (ratio >= 0.9) return "Mes redondo" + (logro ? ": " + logro + "." : ".");

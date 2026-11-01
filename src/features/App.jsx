@@ -113,6 +113,8 @@ export default function App() {
   const [comidasHabituales, setComidasHabituales] = useState(null);
   const [pruebaSemana, setPruebaSemana] = useState(undefined); // la prueba de 2 semanas; undefined = la de por defecto, null = quitada
   const [noHechas, setNoHechas] = useState({}); // { iso: [id] } lo de "Ahora toca" que dijiste que no hiciste
+  // A que hora sales a correr el martes, el jueves y el domingo (domain/hoy/cita.js). null: sin elegir.
+  const [horasCarrera, setHorasCarrera] = useState(null);
   const [semanaSentir, setSemanaSentir] = useState({}); // { lunesIso: { nota 1-5, frase } } // [{id,nombre,kcal,prot,hc,grasa}]; null = las del menu de casa
   // Los cambios de alimento sobre el menu del dia: "hoy no hay salmon, hay
   // merluza". { dayKey: { "cena:salmon": "merluza" } }
@@ -179,6 +181,7 @@ export default function App() {
     ["semanaSentir", setSemanaSentir, {}], ["noHechas", setNoHechas, {}], ["cambiosMenu", setCambiosMenu, {}],
     ["menuEditado", setMenuEditado, {}], ["compraMarcada", setCompraMarcada, {}], ["comidasFuera", setComidasFuera, FUERA_POR_DEFECTO],
     ["bloquesHistorial", setBloquesHistorial, null], ["ultimoBackup", setUltimoBackup, null], ["cuelloFaseManual", setCuelloFaseManual, null],
+    ["horasCarrera", setHorasCarrera, null],
   ];
   /** Pone los datos en la app. `reemplazar`: lo que no venga vuelve a su valor de partida (importar una copia). */
   const aplicarDatos = (d, reemplazar) => {
@@ -288,7 +291,7 @@ export default function App() {
       flaggedExercises, pausedRanges, workoutProgress, magiaProgress, magiaRepaso, magiaLog,
       guerreroLog, workoutWeights, workoutReps, medidas, ritmoReal, ritmoTramos, gps, pesosDiarios, sensaciones, postponed, phaseAdjustNote,
       currentWeekOverride, weeklyLog, comidasLog, comidasHabituales, pruebaSemana, semanaSentir, noHechas, cambiosMenu, menuEditado, compraMarcada, comidasFuera,
-      bloquesHistorial, ultimoBackup, cuelloFaseManual, onboardingVisto,
+      bloquesHistorial, ultimoBackup, cuelloFaseManual, onboardingVisto, horasCarrera,
     };
     // Se deja a mano el ultimo estado conocido para poder guardarlo de golpe
     // si la app se cierra antes de que venza la espera de abajo.
@@ -299,7 +302,7 @@ export default function App() {
       flaggedExercises, pausedRanges, workoutProgress, magiaProgress, magiaRepaso, magiaLog,
       guerreroLog, workoutWeights, workoutReps, medidas, ritmoReal, ritmoTramos, gps, pesosDiarios, sensaciones, postponed, phaseAdjustNote,
       currentWeekOverride, weeklyLog, comidasLog, comidasHabituales, pruebaSemana, semanaSentir, noHechas, cambiosMenu, menuEditado, compraMarcada, comidasFuera,
-      bloquesHistorial, ultimoBackup, cuelloFaseManual, onboardingVisto, storageReady, cargaFallida]);
+      bloquesHistorial, ultimoBackup, cuelloFaseManual, onboardingVisto, horasCarrera, storageReady, cargaFallida]);
 
   // La prueba de 2 semanas es una capa encima del plan: el plan no se toca.
   const prueba = pruebaDe(pruebaSemana);
@@ -423,7 +426,7 @@ export default function App() {
       flaggedExercises, pausedRanges, workoutProgress, workoutWeights, workoutReps, medidas,
       ritmoReal, ritmoTramos, gps, pesosDiarios, sensaciones, postponed, phaseAdjustNote, currentWeekOverride, weeklyLog,
       comidasLog, comidasHabituales, pruebaSemana, semanaSentir, noHechas, cambiosMenu, menuEditado, compraMarcada, comidasFuera, magiaProgress, magiaRepaso,
-      magiaLog, guerreroLog, bloquesHistorial, ultimoBackup, cuelloFaseManual, onboardingVisto,
+      magiaLog, guerreroLog, bloquesHistorial, ultimoBackup, cuelloFaseManual, onboardingVisto, horasCarrera,
     };
     const nombre = "programa-7k-backup-" + todayLocalIso() + ".json";
     const blob = new Blob([JSON.stringify(payload, null, 2)], { type: "application/json" });
@@ -656,6 +659,7 @@ export default function App() {
             guerreroLog={guerreroLog} setGuerreroLog={setGuerreroLog}
             bloquesHistorial={bloquesHistorial}
             prueba={prueba} setPrueba={setPruebaSemana} semanaSentir={semanaSentir} setSemanaSentir={setSemanaSentir}
+            horasCarrera={horasCarrera} setHorasCarrera={setHorasCarrera}
             noHechas={noHechas} setNoHechas={setNoHechas}
             pesoHoy={pesosDiarios[todayLocalIso()] ?? null} guardarPeso={guardarPeso}
             pesoDia={pesosDiarios[dayKey] ?? null} comidaDia={(comidasLog[dayKey] || []).length > 0}
@@ -745,7 +749,8 @@ export default function App() {
             exportData={exportData} importData={importData} ultimoBackup={ultimoBackup} ultimoGuardado={ultimoGuardado} painLog={painLog} medidas={medidas}
             bloquesHistorial={bloquesHistorial} setBloquesHistorial={setBloquesHistorial}
             storageStatus={storageStatus}
-            cuelloChecks={cuelloChecks} magiaLog={magiaLog} guerreroLog={guerreroLog} />
+            cuelloChecks={cuelloChecks} magiaLog={magiaLog} guerreroLog={guerreroLog}
+            horasCarrera={horasCarrera} setHorasCarrera={setHorasCarrera} />
         )}
 
       </div>

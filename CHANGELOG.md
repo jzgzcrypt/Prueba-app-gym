@@ -21,6 +21,23 @@ Todo cambio que se haga en la app se anota aquí. Sin excepciones.
 
 ## [Sin publicar]
 
+### Cambiado: Bloque 2, todo al servicio del 7K a 4:45
+- Plan nuevo desde el lunes 2 de noviembre, hecho para el punto de partida real (una carrera suelta desde el 12 de octubre). 13 semanas: volver, base (3 km en S4), construir (5 km que decide en S8), específico (1, 2 y 3 km a 4:45) y recta final. El 7K, el domingo 31 de enero de 2027. Del 21 de septiembre al 1 de noviembre queda como historia.
+- Martes, jueves y domingo se corre; miércoles y viernes, hombro de 30 min con pecho, espalda y la prevención dentro; sábado libre. No se quita ningún área: la cadera y la cadena posterior pasan a los días de hombro.
+- La carga de running no sube más de un 15 % sobre la mejor semana anterior (hay prueba que lo vigila).
+- El 5 km puede adelantar el 7K una semana (22:45 o menos), además de moverlo.
+- Las semanas de vuelta del plan no se recortan otra vez por el parón.
+
+### Añadido
+- **Carreras esta semana: X de 3**, arriba en HOY y en Progreso. Es lo que predice si llegas; la previsión pasa a segundo plano.
+- **Las carreras son citas.** Eliges a qué hora sales el martes, el jueves y el domingo. El calendario del móvil avisa 15 min antes, y en HOY la fila de la carrera dice «Ropa puesta · móvil en la entrada · sales a las 17:30».
+- **Repaso del domingo, 2 minutos**: carreras hechas, qué falló y qué cambias. Dentro sigue la pregunta de cómo te has sentido.
+
+### Datos
+- Campo nuevo opcional `horasCarrera` (`{ "1": "17:30", "3": "17:30", "6": "10:00" }`). Se guarda, se exporta y se importa. Sin migración: si no está, vale `null` (sin elegir).
+- `semanaSentir` guarda además `fallo`, `cambio` y `carreras` en cada semana. Lo anterior se sigue leyendo igual.
+- El historial de bloques cierra el bloque 1 el 1 de noviembre y abre el 2.
+
 ### Cambiado: la fecha del 7K la deciden los datos
 - El plan va siempre en orden: lo que te saltas se pierde, sin repetir semanas, y la vuelta tras un parón ajusta la carga.
 - La fecha del 7K la mueve la prueba de 5 km que decide (≤23:30 se mantiene; hasta 25:00, +4 semanas; más, +8). Hasta ahora ese resultado no se aplicaba. Ahora esas semanas se meten después de la prueba, repitiendo la semana de construcción, antes de la recta final.

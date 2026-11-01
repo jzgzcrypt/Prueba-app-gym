@@ -92,3 +92,11 @@ test("la lista del dia incluye la pierna de 10 min y medir cuando tocan", () => 
     noHechas: ["medir"], extras: { pierna: true, piernaHecha: true, medir: true } });
   assert.deepEqual(r.dia.map(x => x.id + ":" + x.estado), ["sesion:pendiente", "cuello:pendiente", "pierna:hecho", "medir:no", "peso:pendiente", "comida:pendiente"]);
 });
+
+test("la prueba de 2 semanas no toca el bloque 2: ya trae su pierna y su sabado libre", async () => {
+  const { diaEnPrueba } = await import("../src/domain/hoy/prueba.js");
+  const { FLAT_DAYS } = await import("../src/domain/plan/calendario.js");
+  const martes = FLAT_DAYS.find(d => d.isoDate === "2026-11-03");
+  const prueba = { desde: "2026-10-12", hasta: "2027-01-31", decidido: true };
+  assert.equal(diaEnPrueba(martes, prueba), martes);
+});

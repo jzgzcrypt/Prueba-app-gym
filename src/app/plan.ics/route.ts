@@ -1,8 +1,9 @@
 import { FLAT_DAYS } from "@/domain/plan/calendario";
 import { HORAS_SESION, calendarioIcs } from "@/domain/plan/ics";
+import { horasDeParam } from "@/domain/hoy/cita";
 
 /**
- * /plan.ics?hora=17:00&desde=2026-09-24
+ * /plan.ics?hora=17:00&desde=2026-09-24&carreras=1-17:30,3-17:30,6-10:00
  *
  * El plan como calendario. Se sirve desde el servidor y no como descarga de
  * la app porque asi el iPhone lo abre con su propio "Añadir todo", que es un
@@ -17,6 +18,7 @@ export function GET(req: Request) {
   const ics = calendarioIcs(FLAT_DAYS, {
     hora: HORAS_SESION.includes(hora) ? hora : "17:00",
     desde: /^\d{4}-\d{2}-\d{2}$/.test(desde) ? desde : null,
+    horasCarrera: horasDeParam(url.searchParams.get("carreras")),
   });
   return new Response(ics, {
     headers: {

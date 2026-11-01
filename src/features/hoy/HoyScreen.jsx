@@ -29,6 +29,8 @@ import { Recolocar } from "@/features/hoy/Recolocar";
 import { FinPrueba, SentirSemana } from "@/features/hoy/AhoraYAvance";
 import { ListaHoy } from "@/features/hoy/ListaHoy";
 import { CarrerasSemana } from "@/features/ui/CarrerasSemana";
+import { TarjetaCalendario } from "@/features/ui/calendario";
+import { citaCarrera } from "@/domain/hoy/cita";
 import { carrerasSemana } from "@/domain/progreso/parte";
 import { ahoraToca } from "@/domain/hoy/ahora";
 import { ritmoEsperado } from "@/domain/running/esperado";
@@ -152,6 +154,10 @@ export function HoyScreen(props) {
     if (!llegadaPend && /^\d{4}-/.test(movidaA || "")) return "Movida al " + destinoTxt(movidaA);
     const partes = [];
     if (llegadaPend) partes.push("viene del " + destinoTxt(llegadaPend.isoDate));
+    // La carrera es una cita: a su hora, ropa puesta y movil en la entrada.
+    const cita = isToday && citaCarrera({ day: { ...diaSesion, dayIdx: day.dayIdx }, horas: props.horasCarrera,
+      hecha: !!checked[claveDia(diaSesion)], ahoraMin: new Date().getHours() * 60 + new Date().getMinutes() });
+    if (cita) partes.push(cita);
     if (diaSesion.ajuste) partes.push(diaSesion.ajuste.motivo.split(":")[0]);
     if (esp && esp.desde) partes.push(esp.texto);
     return partes.join(" · ");
@@ -312,6 +318,7 @@ export function HoyScreen(props) {
         {/* El numero que manda: si esta semana salen las 3, vas en camino. */}
         <CarrerasSemana hoyIso={hoyIso} c={carrerasSemana({ semana: { days: FLAT_DAYS.filter(d => d.weekIdx === day.weekIdx) },
           checked, gps: props.gps, ritmoReal: props.ritmoReal, hoyIso })} />
+        {isToday && <TarjetaCalendario modo="hoy" horasCarrera={props.horasCarrera} setHorasCarrera={props.setHorasCarrera} />}
         {isToday && (() => {
           const falta = pendienteDeRecolocar({ dias: diasPlan, movidas: props.postponed, checked, hoyIso });
           return falta ? <Recolocar dias={diasPlan} key={falta.isoDate} dia={falta} movidas={props.postponed} setMovidas={props.setPostponed} checked={checked} ayer
@@ -325,7 +332,9 @@ export function HoyScreen(props) {
         <ListaHoy key={dayKey} filas={filasLista} onCirculo={circulo} detalle={detalleFila} />
 
         {preguntaSentir && (
-          <SentirSemana onGuardar={(v) => props.setSemanaSentir(p => ({ ...p, [lunesPregunta]: v }))} />
+          <SentirSemana onGuardar={(v) => props.setSemanaSentir(p => ({ ...p, [lunesPregunta]: v }))}
+            carreras={carrerasSemana({ semana: { days: FLAT_DAYS.filter(d => lunesDe(d.isoDate) === lunesPregunta) },
+              checked, gps: props.gps, ritmoReal: props.ritmoReal, hoyIso })} />
         )}
 
         <button className="btn" data-todo-hoy onClick={() => setVerTodo(!verTodo)}

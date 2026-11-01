@@ -15,7 +15,7 @@ import { HitosContent, PaceComparisonChart, PhaseAdjustContent, PlanGlobalConten
 import { KpiBlock } from "@/features/semana/KpiBlock";
 import { SimpleLineChart } from "@/features/ui/charts";
 import { FECHA_OBJETIVO_TXT } from "@/domain/plan/calendario";
-export function CoachScreen({ jumpToDay, setWeekIdx, checked, workoutWeights, ritmoReal, setScreen, weeklyLog, setWeeklyLog, phaseAdjustNote, setPhaseAdjustNote, currentWeekOverride, setCurrentWeekOverride, exportData, importData, ultimoBackup, ultimoGuardado, painLog, medidas, bloquesHistorial, setBloquesHistorial, storageStatus, cuelloChecks, magiaLog, guerreroLog }) {
+export function CoachScreen({ jumpToDay, setWeekIdx, checked, workoutWeights, ritmoReal, setScreen, weeklyLog, setWeeklyLog, phaseAdjustNote, setPhaseAdjustNote, currentWeekOverride, setCurrentWeekOverride, exportData, importData, ultimoBackup, ultimoGuardado, painLog, medidas, bloquesHistorial, setBloquesHistorial, storageStatus, cuelloChecks, magiaLog, guerreroLog, horasCarrera, setHorasCarrera }) {
   // "coach" es la pantalla nueva; el resto son las vistas de siempre, a las
   // que se llega desde "Más" (nada se pierde: plan, bitacora, ajustes y copia).
   const [subTab, setSubTab] = useState("coach");
@@ -438,7 +438,8 @@ export function CoachScreen({ jumpToDay, setWeekIdx, checked, workoutWeights, ri
           setCurrentWeekOverride={setCurrentWeekOverride}
           phaseAdjustNote={phaseAdjustNote} setPhaseAdjustNote={setPhaseAdjustNote}
           exportData={exportData} importData={importData} storageStatus={storageStatus}
-          ultimoBackup={ultimoBackup} ultimoGuardado={ultimoGuardado} />
+          ultimoBackup={ultimoBackup} ultimoGuardado={ultimoGuardado}
+          horasCarrera={horasCarrera} setHorasCarrera={setHorasCarrera} />
       )}
     </div>
   );

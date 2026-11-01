@@ -40,6 +40,9 @@ export const PIERNA_10 = [
 /** El dia tal y como queda en la prueba (el plan original no se toca). */
 export function diaEnPrueba(day, prueba) {
   if (!day || !enPrueba(prueba, day.isoDate)) return day;
+  // El bloque 2 ya trae lo que la prueba cambiaba: sabado libre y la pierna
+  // esencial (bulgara, gemelo, plancha) dentro de los dias de hombro.
+  if (day.bloque === 2) return day;
   if (day.tipo === "fuerza" && day.cat === "pierna") {
     return { ...day, tipo: "libre", titulo: "Libre", dur: "", ejercicios: undefined, original: day,
              what: "Día libre de la prueba de 2 semanas. La pierna va en 10 min detrás de los rodajes del martes y del domingo." };

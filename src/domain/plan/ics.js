@@ -6,6 +6,8 @@
  * calendario del movil ya sabe avisar, y avisa aunque la app este cerrada.
  * Asi que cada sesion del bloque va como un evento con su aviso.
  *
+ *   Carreras   a su hora (martes, jueves y domingo, ver domain/hoy/cita.js),
+ *              aviso 15 min antes: es la hora de ponerse la ropa.
  *   Sesiones   a la hora elegida (por defecto 17:00), aviso 30 min antes.
  *   Tenis      20:00-21:30, aviso 45 min antes (hay que ir hasta la pista).
  *   Descanso   no se crea nada.
@@ -18,6 +20,8 @@
 const SESION = ["run", "test", "objetivo", "fuerza"];
 const AVISO_MIN = 30;
 const AVISO_TENIS_MIN = 45;
+const AVISO_CARRERA_MIN = 15;
+const CORRER = ["run", "test", "objetivo"];
 
 const minutos = (d) => {
   const m = String(d.dur || "").match(/(\d+)/);
@@ -54,23 +58,27 @@ function fechaHora(iso, hhmm, masMin = 0) {
 }
 
 /** Que evento lleva un dia, o null si no lleva ninguno. */
-export function eventoDelDia(dia, hora) {
+export function eventoDelDia(dia, hora, horasCarrera) {
   if (dia.tipo === "compromiso") {
     const [ini] = String(dia.hora || "20:00").split(/\s*-\s*/);
     return { inicio: ini, min: 90, titulo: dia.titulo, aviso: AVISO_TENIS_MIN, nota: dia.notaPlan || dia.what };
   }
   if (!SESION.includes(dia.tipo)) return null;
   const titulo = dia.tipo === "objetivo" ? "EL DÍA · 7 km a 4:45" : dia.titulo;
+  const suHora = CORRER.includes(dia.tipo) && horasCarrera && horasCarrera[dia.dayIdx];
+  if (suHora) return { inicio: suHora, min: minutos(dia), titulo, aviso: AVISO_CARRERA_MIN,
+    nota: "Ropa puesta · móvil en la entrada. " + (dia.what || "") };
   return { inicio: hora, min: minutos(dia), titulo, aviso: AVISO_MIN, nota: dia.what || (dia.ejercicios || []).map(e => e.nombre).join(", ") };
 }
 
 /**
  * El calendario del bloque en formato .ics.
  * @param {Array} dias   los dias del bloque, con fecha (FLAT_DAYS)
- * @param {{hora?:string, desde?:string|null}} opciones
- *        hora: hora de las sesiones ("17:00"); desde: fecha ISO, se omite lo anterior
+ * @param {{hora?:string, desde?:string|null, horasCarrera?:object|null}} opciones
+ *        hora: hora de las sesiones ("17:00"); desde: fecha ISO, se omite lo anterior;
+ *        horasCarrera: la hora de cada carrera por indice de dia ({ "1": "17:30" })
  */
-export function calendarioIcs(dias, { hora = "17:00", desde = null } = {}) {
+export function calendarioIcs(dias, { hora = "17:00", desde = null, horasCarrera = null } = {}) {
   const lineas = [
     "BEGIN:VCALENDAR", "VERSION:2.0", "PRODID:-//Sistema 7K//Plan//ES", "CALSCALE:GREGORIAN",
     "METHOD:PUBLISH", "X-WR-CALNAME:Sistema 7K",
@@ -78,7 +86,7 @@ export function calendarioIcs(dias, { hora = "17:00", desde = null } = {}) {
   const sello = "20260101T000000Z";
   for (const d of dias) {
     if (desde && d.isoDate < desde) continue;
-    const ev = eventoDelDia(d, hora);
+    const ev = eventoDelDia(d, hora, horasCarrera);
     if (!ev) continue;
     lineas.push(
       "BEGIN:VEVENT",
@@ -89,7 +97,7 @@ export function calendarioIcs(dias, { hora = "17:00", desde = null } = {}) {
       "SUMMARY:" + esc("7K · " + ev.titulo),
       "DESCRIPTION:" + esc((ev.nota || "") + "\n\nÁbrela en la app y dale a empezar."),
       "BEGIN:VALARM", "ACTION:DISPLAY",
-      "DESCRIPTION:" + esc("Hoy toca: " + ev.titulo),
+      "DESCRIPTION:" + esc((ev.aviso === AVISO_CARRERA_MIN ? "En 15 min sales: ropa puesta. " : "Hoy toca: ") + ev.titulo),
       "TRIGGER:-PT" + ev.aviso + "M",
       "END:VALARM",
       "END:VEVENT",

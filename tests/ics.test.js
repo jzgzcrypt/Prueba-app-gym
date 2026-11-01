@@ -42,3 +42,16 @@ test("el formato es valido: CRLF, lineas plegadas y texto escapado", () => {
   for (const l of ics.split("\r\n")) assert.ok(new TextEncoder().encode(l).length <= 75, l);
   assert.ok(!/SUMMARY:[^\r]*[^\\],/.test(ics), "las comas del texto van escapadas");
 });
+
+test("con hora de carrera, la carrera va a su hora y avisa 15 min antes", async () => {
+  const { calendarioIcs } = await import("../src/domain/plan/ics.js");
+  const { FLAT_DAYS } = await import("../src/domain/plan/calendario.js");
+  const ics = calendarioIcs(FLAT_DAYS, { desde: "2026-11-02", horasCarrera: { 1: "17:30", 3: "18:30", 6: "10:00" } });
+  const ev = (iso) => ics.split("BEGIN:VEVENT").find(b => b.includes("UID:" + iso + "@"));
+  assert.match(ev("2026-11-03"), /DTSTART:20261103T173000/);
+  assert.match(ev("2026-11-03"), /TRIGGER:-PT15M/);
+  assert.match(ev("2026-11-05"), /DTSTART:20261105T183000/);
+  assert.match(ev("2026-11-08"), /DTSTART:20261108T100000/);
+  assert.match(ev("2026-11-04"), /DTSTART:20261104T170000/, "la fuerza sigue a la hora general");
+  assert.match(ev("2026-11-04"), /TRIGGER:-PT30M/);
+});

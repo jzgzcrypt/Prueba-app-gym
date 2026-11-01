@@ -10,8 +10,24 @@ cuenta a dónde vamos.
 
 ## 1. El objetivo
 
-**7 km a 4:45/km el 6 de diciembre de 2026.** Bloque 1 — Base 7K, 11 semanas,
-del 21 de septiembre al 6 de diciembre.
+**7 km a 4:45/km el domingo 31 de enero de 2027.** Bloque 2 — 7K a 4:45, 13
+semanas, del 2 de noviembre al 31 de enero. La fecha la mueve el 5 km de la
+semana 8 (27 de diciembre): 22:45 o menos la adelanta una semana; hasta 23:30
+se mantiene; hasta 25:00, +4 semanas; más, +8.
+
+**Por qué se movió del 6 de diciembre (revisión del 1 de noviembre).** El
+bloque 1 daba por hechas sus semanas 1-5 y no salieron: desde el 12 de octubre,
+una carrera suelta. Con el suave a ~6:40/km el 5 km ronda los 26-27 min y el
+objetivo pide 23:30: falta un 12-15 %. Constante, se mejora un 1-2 % por
+semana, así que hacen falta ~13 semanas. Se decidió planificarlo bien ahora en
+vez de descubrirlo en mitad del plan. Las semanas del 21 de septiembre al 1 de
+noviembre quedan en el calendario como historia.
+
+**Lo que decide si llegas es la constancia: 3 carreras por semana** (martes,
+jueves y domingo). Por eso es el número que sale arriba en HOY y en Progreso.
+Lo que tiene hora fija y gente esperando (el tenis) sale; lo que depende del
+sofá a las 16:00, no. Por eso cada carrera tiene su hora y su aviso en el
+calendario, 15 min antes.
 
 Pero el 7K no es el objetivo de verdad. El objetivo de verdad, en sus palabras:
 
@@ -142,6 +158,10 @@ Cada una costó una vuelta entera. Romperlas es repetir un error ya cometido.
       sesión eterna es una invitación a no ir.
     Antes de añadir algo, preguntarse: ¿esto se lo hace más fácil, o le da
     una excusa?
+14. **Congelada del 1 al 29 de noviembre de 2026: 4 semanas sin cosas nuevas.**
+    Solo se arregla lo que falle. La app ya tiene de sobra; lo que falta es
+    salir a correr. Cada domingo, el repaso de 2 minutos (carreras hechas, qué
+    falló y qué cambias) dice qué tocar después, y no antes.
 
 ---
 
@@ -221,7 +241,8 @@ iCloud) y **Progreso con cintura, hombro/cintura, laterales y fotos**.
 
 ### Lo grande, para cuando acabe el bloque
 
-El 6 de diciembre se acaba el Bloque 1, y ahí es donde se comprueba si la app
+El Bloque 2 se escribió a mano el 1 de noviembre, como el 1. Para el próximo,
+ahí es donde se comprueba si la app
 sirve de verdad: **empezar un Bloque 2 no debería requerir tocar código.** Hoy
 requiere escribir un archivo de plan nuevo a mano. El modelo general
 —Área / Bloque / Práctica / Registro / Revisión— está en `docs/ROADMAP.md`, y
@@ -235,8 +256,9 @@ es lo que convierte esto en una app de vida en vez de una app de running.
 
 | Si quieres cambiar… | Toca |
 |---|---|
-| Qué toca cada día del bloque | `src/domain/plan/bloque-1-base-7k.js` |
-| Las fechas | `FECHA_INICIO` en ese mismo archivo. Todo lo demás se deriva |
+| Qué toca cada día del bloque | `src/domain/plan/bloque-2-7k.js` (el 1 queda como historia) |
+| Las fechas | `FECHA_INICIO` (bloque 1) y `FECHA_INICIO_BLOQUE` (bloque 2); cómo se encadenan, en `calendario.js` |
+| La hora de cada carrera y su aviso | `src/domain/hoy/cita.js` y `src/domain/plan/ics.js` |
 | El tenis u otro compromiso fijo | `src/domain/compromisos.js` |
 | Las calorías o los macros objetivo | `src/domain/nutricion/dias.js` |
 | El menú de partida | `src/domain/nutricion/menu-dia.js` |

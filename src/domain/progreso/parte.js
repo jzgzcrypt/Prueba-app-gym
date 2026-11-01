@@ -223,7 +223,7 @@ export function veredicto({ c, objs, alarmasLista, semanaN }) {
   const bien = c.pct == null || c.pct >= 80;
   const otra = alarmasLista[0];
   if (bien && otra) return { texto: "Vas bien. Ojo con " + otra.tema + ".", tono: "neutro" };
-  if (!bien) return { texto: "Esta semana, jueves y domingo primero; lo demás, si puedes.", tono: "neutro" };
+  if (!bien) return { texto: "Esta semana, las 3 carreras primero; lo demás, si puedes.", tono: "neutro" };
   const extra = siete && siete.valor && siete.tono === "bien" ? " y el 7K va " + siete.tendencia.replace(" del plan", "") + "." : ".";
   return { texto: "Vas bien. Cumples" + extra, tono: "bien" };
 }
