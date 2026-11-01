@@ -14,6 +14,7 @@ import { MOVILIDAD } from "@/domain/salud/movilidad";
 import { HitosContent, PaceComparisonChart, PhaseAdjustContent, PlanGlobalContent, WeeklyLogContent } from "@/features/coach/paneles";
 import { KpiBlock } from "@/features/semana/KpiBlock";
 import { SimpleLineChart } from "@/features/ui/charts";
+import { FECHA_OBJETIVO_TXT } from "@/domain/plan/calendario";
 export function CoachScreen({ jumpToDay, setWeekIdx, checked, workoutWeights, ritmoReal, setScreen, weeklyLog, setWeeklyLog, phaseAdjustNote, setPhaseAdjustNote, currentWeekOverride, setCurrentWeekOverride, exportData, importData, ultimoBackup, ultimoGuardado, painLog, medidas, bloquesHistorial, setBloquesHistorial, storageStatus, cuelloChecks, magiaLog, guerreroLog }) {
   // "coach" es la pantalla nueva; el resto son las vistas de siempre, a las
   // que se llega desde "Más" (nada se pierde: plan, bitacora, ajustes y copia).
@@ -162,7 +163,7 @@ export function CoachScreen({ jumpToDay, setWeekIdx, checked, workoutWeights, ri
       <Tarjeta data-prevision style={{ padding: "14px 16px", marginBottom: 14 }}>
         <div style={{ display: "flex", alignItems: "baseline", gap: 8 }}>
           <div style={{ flex: 1 }}>
-            <div style={{ fontSize: 12.5, fontWeight: 600, color: C.textDim }}>Previsión 6 de diciembre · 7 km</div>
+            <div style={{ fontSize: 12.5, fontWeight: 600, color: C.textDim }}>Previsión {FECHA_OBJETIVO_TXT} · 7 km</div>
             {prev && (
               <div style={{ fontSize: 30, fontWeight: 800, color: C.text, letterSpacing: -0.8, fontVariantNumeric: "tabular-nums" }}>
                 {prev.texto}<span style={{ fontSize: 15, fontWeight: 600, color: C.textDim }}>{"  " + prev.ritmo + "/km"}</span>

@@ -14,6 +14,7 @@
 import { OBJETIVO_7K, equivalente, leerRitmo, leerTiempo, textoTiempo } from "../progreso/libreta.js";
 import { suaveHabitual } from "../running/objetivo.js";
 import { tuContraElPlan } from "../progreso/plan-vs-real.js";
+import { FECHA_DECIDE_TXT, FECHA_OBJETIVO_TXT } from "../plan/calendario.js";
 
 const ritmoDe = (seg7k) => { const s = Math.round(seg7k / 7); return Math.floor(s / 60) + ":" + String(s % 60).padStart(2, "0"); };
 const dif = (s) => { const a = Math.abs(Math.round(s)); return a >= 60 ? Math.floor(a / 60) + ":" + String(a % 60).padStart(2, "0") : a + " s"; };
@@ -44,16 +45,16 @@ export function veredictoCoach(prev, proxima) {
     return { tono: "neutro", texto: "Estimación con tus series: 7 km en unos " + prev.texto + ". " +
       (proxima ? "El " + proxima.prueba.distKm + " km del " + proxima.date + " da el primer dato fiable." : "La próxima prueba lo confirma.") };
   }
-  if (Math.abs(d) <= 5) return { tono: "bien", texto: "Vas en el plan: el 6 de diciembre, 7 km en " + prev.texto + "." };
+  if (Math.abs(d) <= 5) return { tono: "bien", texto: "Vas en el plan: el " + FECHA_OBJETIVO_TXT + ", 7 km en " + prev.texto + "." };
   if (d < 0) return { tono: "bien", texto: "Vas " + dif(d) + " por delante del plan. Con esto, 7 km en " + prev.texto + " (" + prev.ritmo + "/km)." };
   if (d <= 60) return { tono: "neutro", texto: "Cerca del plan: hoy llegarías en " + prev.texto + " (" + prev.ritmo + "/km). Es recuperable." };
-  return { tono: "neutro", texto: "Hoy llegarías en " + prev.texto + " (" + prev.ritmo + "/km). El 5 km del 15 de noviembre decide si se mantiene la fecha." };
+  return { tono: "neutro", texto: "Hoy llegarías en " + prev.texto + " (" + prev.ritmo + "/km). El 5 km del " + FECHA_DECIDE_TXT + " decide si se mantiene la fecha." };
 }
 
 /** En que se basa la prevision, en frases cortas. */
 export function porQue(prev) {
   const base = [
-    "La línea del plan sale de sus propias pruebas: 3 km en 14:30 en la semana 4, 5 km en 23:30 en la 8 y 7 km en 33:15 el 6 de diciembre.",
+    "La línea del plan sale de sus propias pruebas: 3 km en 14:30 en la semana 4, 5 km en 23:30 en la 8 y 7 km en 33:15 el " + FECHA_OBJETIVO_TXT + ".",
     "Cada prueba se pasa a lo que harías en 7 km (fórmula de Riegel, la que usan las calculadoras de carrera).",
     "Las series cuentan menos: su ritmo se lee como tu ritmo de 5 km y se pinta hueco, como estimación.",
   ];

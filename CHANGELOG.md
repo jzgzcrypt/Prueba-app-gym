@@ -21,6 +21,13 @@ Todo cambio que se haga en la app se anota aquí. Sin excepciones.
 
 ## [Sin publicar]
 
+### Cambiado: el plan sigue desde donde estás y el 7K se mueve
+- Una semana pasada en la que no se hizo al menos la mitad de sus sesiones se repite la semana siguiente, en vez de saltar a la otra. Las semanas anteriores al primer dato apuntado cuentan como hechas.
+- El final del plan y el 7K se mueven con ello: contador de días, "Tu objetivo" (con "Fecha movida N semanas: el plan sigue desde donde estás"), previsión y textos. Ya no hay "6 de diciembre" ni "15 de noviembre" escritos a mano.
+- Semana muestra la semana del plan que toca y avisa si se repite.
+- Al cambiar de día con la app abierta se recarga para recalcularlo.
+- Limitación: el calendario descargable (.ics) sigue con las fechas originales.
+
 ### Arreglado
 - La vuelta tras un parón ya no se fija solo en el último hueco. También cuenta las carreras de las 4 semanas anteriores: cada semana sin correr cuenta como semana parada. Antes, una carrera suelta tras dos semanas paradas y luego 7 días sin correr daba "7 días, al 83 %" (tirada de 42 min). Ahora da "Pocas carreras en las últimas 4 semanas, salida 1 de 5, al 48 %" (24 min).
 - Una sesión recortada ya no arrastra frases de la entera ("ya corres la distancia del objetivo").

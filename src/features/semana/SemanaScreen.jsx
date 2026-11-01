@@ -31,9 +31,9 @@ export function SemanaScreen({ weekIdx, setWeekIdx, jumpToDay, checked, todayIso
 
   return (
     <div style={{ padding: "12px 20px 0" }}>
-      <div style={{ fontSize: 14, fontWeight: 600, color: C.textDim }}>{week.dates} · {String(week.fase || "").charAt(0) + String(week.fase || "").slice(1).toLowerCase()}</div>
+      <div style={{ fontSize: 14, fontWeight: 600, color: C.textDim }}>{week.dates} · {String(week.fase || "").charAt(0) + String(week.fase || "").slice(1).toLowerCase()}{week.repite ? " · se repite: la anterior no se completó" : ""}</div>
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-end" }}>
-        <div style={{ ...TYPE.screenTitle, color: C.text }}>Semana {week.n}</div>
+        <div style={{ ...TYPE.screenTitle, color: C.text }}>Semana {week.planN || week.n}</div>
         <button className="btn" onClick={() => { setPauseMode(!pauseMode); setPauseSelection([]); }} style={{
           fontSize: 15, fontWeight: 600, color: A.azul, minHeight: TAP_MIN, marginBottom: 2,
         }}>{pauseMode ? "Cancelar" : "Pausa"}</button>

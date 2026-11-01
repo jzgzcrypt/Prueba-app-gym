@@ -1,3 +1,4 @@
+import { FECHA_OBJETIVO_TXT } from "../plan/calendario.js";
 /**
  * LA LIBRETA
  *
@@ -100,7 +101,7 @@ export function lecturaPrueba(prueba, texto) {
   if (prueba.decide) {
     const tramo = DECIDE_FECHA.find(t => total <= t.hasta);
     return tramo.semanasExtra === 0
-      ? { ...base, tono: "bien", semanasExtra: 0, titular: "Se mantiene el 6 de diciembre",
+      ? { ...base, tono: "bien", semanasExtra: 0, titular: "Se mantiene el " + FECHA_OBJETIVO_TXT,
           detalle: textoTiempo(total) + " en 5 km. " + eqTxt }
       : { ...base, tono: "ajuste", semanasExtra: tramo.semanasExtra,
           titular: "El bloque se alarga unas " + tramo.semanasExtra + " semanas",
@@ -114,7 +115,7 @@ export function lecturaPrueba(prueba, texto) {
     // numero parece contradecir al titular.
     const umbral = textoTiempo(prueba.enLinea);
     return { ...base, tono: ok ? "bien" : "ajuste", enLinea: ok,
-      titular: ok ? "Vas en línea con el 6 de diciembre" : "Por ahora, por detrás del 6 de diciembre",
+      titular: ok ? "Vas en línea con el " + FECHA_OBJETIVO_TXT : "Por ahora, por detrás del " + FECHA_OBJETIVO_TXT,
       detalle: textoTiempo(total) + " en " + prueba.distKm + " km. " + eqTxt +
         " A estas alturas es normal estar por encima de 33:15: lo que cuenta es bajar de " + umbral +
         " en esta prueba, y " + (ok ? "lo has hecho." : "faltan " + textoTiempo(total - prueba.enLinea) + ". El 5 km de S8 decide.") };

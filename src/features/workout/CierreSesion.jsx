@@ -10,6 +10,7 @@ import { veredictoCadencia } from "@/domain/running/cadencia";
 import { MapaRuta } from "@/features/ui/MapaRuta";
 import { prevision, veredictoCoach } from "@/domain/coach/prevision";
 import { eventoSesion, urlGoogleCalendar } from "@/domain/plan/evento-calendario";
+import { FECHA_OBJETIVO_TXT } from "@/domain/plan/calendario";
 
 const CLAVE_CAL = "programa7k:en-calendario";
 function enCalendario() { try { return JSON.parse(window.localStorage.getItem(CLAVE_CAL) || "{}"); } catch { return {}; } }
@@ -178,7 +179,7 @@ export function CierreSesion({ day: diaAjustado, dayKey, workoutWeights, workout
           return (
             <div data-prevision-cierre style={{ marginTop: 14, background: C.card, borderRadius: 18, padding: "14px 16px",
                                                  borderLeft: "4px solid " + (v.tono === "bien" ? C.ok : C.amber) }}>
-              <div style={{ fontSize: 12.5, fontWeight: 600, color: C.textDim }}>Previsión 6 de diciembre · 7 km</div>
+              <div style={{ fontSize: 12.5, fontWeight: 600, color: C.textDim }}>Previsión {FECHA_OBJETIVO_TXT} · 7 km</div>
               <div style={{ fontSize: 26, fontWeight: 800, color: C.text, letterSpacing: -0.5 }}>{prev.texto} <span style={{ fontSize: 14, fontWeight: 600, color: C.textDim }}>{prev.ritmo}/km</span></div>
               <div style={{ fontSize: 14, color: C.text, lineHeight: 1.45, marginTop: 4 }}>{v.texto}</div>
               <div style={{ fontSize: 12.5, color: C.textDim, marginTop: 6 }}>De dónde sale, paso a paso: Coach → Por qué.</div>

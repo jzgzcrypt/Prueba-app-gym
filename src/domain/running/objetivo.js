@@ -13,6 +13,7 @@
 
 import { parseRitmoToSeconds } from "./ritmo.js";
 import { DECIDE_FECHA, textoTiempo } from "../progreso/libreta.js";
+import { FECHA_OBJETIVO_TXT } from "../plan/calendario.js";
 
 /**
  * Lo que hay que correr en un rodaje continuo, leido del principio de `what`:
@@ -144,6 +145,6 @@ export function vozFinPrueba(day, seg) {
   const linea = p.enLinea || (p.decide ? DECIDE_FECHA[0].hasta : (day.ritmo ? day.ritmo * p.distKm : null));
   if (!linea) return base;
   const dif = Math.round(seg - linea);
-  if (dif <= 0) return base + (p.decide ? " Se mantiene el 6 de diciembre." : " Dentro de la línea. Muy bien.") + " Ahora, suave para soltar.";
+  if (dif <= 0) return base + (p.decide ? " Se mantiene el " + FECHA_OBJETIVO_TXT + "." : " Dentro de la línea. Muy bien.") + " Ahora, suave para soltar.";
   return base + " " + (dif >= 60 ? mmss(dif).replace(":", " minuto ") : dif + " segundos") + " por encima de la línea. Es un dato, no un juicio: con él se ajusta el plan. Ahora, suave para soltar.";
 }

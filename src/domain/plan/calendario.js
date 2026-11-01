@@ -49,19 +49,80 @@ function etiquetaRango(isoIni, isoFin) {
     : etiquetaCorta(isoIni) + "-" + etiquetaCorta(isoFin);
 }
 
+/**
+ * EL PLAN SIGUE DESDE DONDE ESTAS, Y LA FECHA SE MUEVE.
+ *
+ * Antes cada semana del plan caia en una semana fija del calendario, la
+ * hicieras o no: tras dos semanas paradas el plan seguia en la semana 6 y el
+ * 7K seguia el 6 de diciembre, como si nada. Ahora:
+ *
+ *   - Una semana ya pasada en la que hiciste al menos la mitad de sus
+ *     sesiones, cuenta: la siguiente es la siguiente del plan.
+ *   - Si no, la siguiente REPITE esa semana del plan: se sigue desde donde
+ *     estas y el final (el 7K) se corre una semana.
+ *   - Las semanas de antes de tu primer dato apuntado cuentan como hechas:
+ *     no se castiga lo que aun no apuntabas en la app.
+ *   - La semana en curso y las que vienen siguen el plan en orden.
+ *
+ * Puro: `hecho(iso)` dice si ese dia se hizo lo suyo.
+ * @returns {number[]} el indice de la semana del plan para cada semana del calendario
+ */
+export function asignarSemanas({ plan, inicio, hoyIso, hecho, primerDato }) {
+  const asignadas = [];
+  let p = 0, c = 0;
+  while (p < plan.length && c < plan.length + 26) {
+    asignadas.push(p);
+    const lunes = sumarDias(inicio, c * 7), domingo = sumarDias(inicio, c * 7 + 6);
+    let avanza = true;
+    if (domingo < hoyIso && (!primerDato || domingo >= primerDato)) {
+      const sesiones = plan[p].days.map((d, di) => ({ d, iso: sumarDias(lunes, di) }))
+        .filter(({ d }) => d.tipo && d.tipo !== "libre");
+      const hechas = sesiones.filter(({ iso }) => hecho(iso)).length;
+      avanza = !sesiones.length || hechas * 2 >= sesiones.length;
+    }
+    if (avanza) p++;
+    c++;
+  }
+  return asignadas;
+}
+
+/** Lo apuntado en este movil, leido al arrancar (en el servidor no hay nada). */
+function leerDatos() {
+  try {
+    if (typeof window === "undefined" || !window.localStorage) return null;
+    return JSON.parse(window.localStorage.getItem("programa7k:datos") || "null");
+  } catch { return null; }
+}
+
+const DATOS = leerDatos();
+const ASIGNADAS = (() => {
+  if (!DATOS) return PLAN.map((_, i) => i);
+  const ch = DATOS.checked || {}, gps = DATOS.gps || {}, rr = DATOS.ritmoReal || {};
+  const hecho = (iso) => !!ch[iso] || !!(gps[iso] && gps[iso].m > 0) || !!String(rr[iso] || "").trim();
+  const fechas = [...Object.keys(ch), ...Object.keys(gps), ...Object.keys(rr)].filter(k => /^\d{4}-\d{2}-\d{2}/.test(k)).map(k => k.slice(0, 10)).sort();
+  return asignarSemanas({ plan: PLAN, inicio: FECHA_INICIO, hoyIso: todayLocalIso(), hecho, primerDato: fechas[0] || null });
+})();
+
 /** El plan con sus fechas puestas. Es este WEEKS, y no el del plan, el que usa
- *  toda la app: incluye `date` por dia y `dates` por semana ya calculados. */
-export const WEEKS = PLAN.map((wk, wi) => {
+ *  toda la app: incluye `date` por dia y `dates` por semana ya calculados.
+ *  Cada semana del calendario lleva la del plan que le toca (`planN`); `n` es
+ *  su numero en el calendario y `repite` dice si repite la anterior. */
+export const WEEKS = ASIGNADAS.map((pi, wi) => {
+  const wk = PLAN[pi];
   const days = wk.days.map((d, di) => {
     const isoDate = sumarDias(FECHA_INICIO, wi * 7 + di);
-    const dia = { ...d, isoDate, date: etiquetaCorta(isoDate), dayIdx: di, weekN: wk.n };
+    const dia = { ...d, isoDate, date: etiquetaCorta(isoDate), dayIdx: di, weekN: wi + 1 };
     // La semana sin deficit se marca en la semana, pero la comida se decide
     // por dia: cada dia lleva la marca de su semana.
     if (wk.sinDeficit) dia.sinDeficit = true;
     return aplicarCompromiso(dia, di);
   });
-  return { ...wk, days, dates: etiquetaRango(days[0].isoDate, days[days.length - 1].isoDate) };
+  return { ...wk, n: wi + 1, planN: wk.n, repite: wi > 0 && ASIGNADAS[wi - 1] === pi, days,
+           dates: etiquetaRango(days[0].isoDate, days[days.length - 1].isoDate) };
 });
+
+/** Cuantas semanas se ha movido el final por semanas repetidas. */
+export const SEMANAS_MOVIDAS = WEEKS.length - PLAN.length;
 
 /** Superpone el compromiso fijo del dia, si lo hay, sobre lo que diga el plan.
  *  El compromiso manda: es algo que ocurre si o si. */
@@ -113,6 +174,17 @@ WEEKS.forEach((wk, wi) => wk.days.forEach((d, di) =>
 /** Fechas clave del bloque, derivadas igual que el resto. */
 export const FECHA_FIN = FLAT_DAYS[FLAT_DAYS.length - 1].isoDate;
 export const RANGO_BLOQUE = etiquetaCorta(FECHA_INICIO) + " - " + etiquetaCorta(FECHA_FIN);
+
+const MESES_LARGOS = ["enero", "febrero", "marzo", "abril", "mayo", "junio", "julio", "agosto", "septiembre", "octubre", "noviembre", "diciembre"];
+/** "2026-12-06" -> "6 de diciembre". */
+export function fechaLarga(iso) {
+  if (!iso) return "";
+  const [, m, d] = iso.split("-").map(Number);
+  return d + " de " + MESES_LARGOS[m - 1];
+}
+/** El dia del 7K y el de la prueba que decide la fecha, como se dicen. */
+export const FECHA_OBJETIVO_TXT = fechaLarga((FLAT_DAYS.find(d => d.tipo === "objetivo") || {}).isoDate || FECHA_FIN);
+export const FECHA_DECIDE_TXT = fechaLarga((FLAT_DAYS.find(d => d.prueba && d.prueba.decide) || {}).isoDate);
 export { BLOQUE, FECHA_INICIO };
 
 /** Indice del dia de hoy. Antes de empezar el bloque devuelve el primer dia;

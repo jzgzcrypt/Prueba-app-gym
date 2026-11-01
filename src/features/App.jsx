@@ -55,9 +55,10 @@ export default function App() {
     const mirar = () => {
       const n = findTodayIndex();
       if (n === hoyRef.current) return;
-      setFlatIdx(f => (f === hoyRef.current ? n : f));
-      hoyRef.current = n;
-      setHoyTic(x => x + 1);
+      // Dia nuevo: se guarda y se recarga, para que el plan se recalcule con
+      // lo hecho (que semana toca y donde cae el 7K).
+      guardarYa();
+      window.location.reload();
     };
     const t = setInterval(mirar, 60000);
     document.addEventListener("visibilitychange", mirar);
