@@ -162,6 +162,11 @@ Cada una costó una vuelta entera. Romperlas es repetir un error ya cometido.
     Solo se arregla lo que falle. La app ya tiene de sobra; lo que falta es
     salir a correr. Cada domingo, el repaso de 2 minutos (carreras hechas, qué
     falló y qué cambias) dice qué tocar después, y no antes.
+15. **Simple como Apple Notes.** Sin taglines, sin texto de ayuda, sin
+    etiquetas secundarias. Cada fila dice qué es y su dato (hora, kg, minutos);
+    si una pantalla necesita una explicación para entenderse, se arregla el
+    layout, no se añade texto. Lo que no se usa se borra (imports, variables,
+    componentes): ESLint lo marca con `no-unused-vars`.
 
 ---
 

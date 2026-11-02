@@ -4,7 +4,6 @@ import { useState } from "react";
 import { A, C, TAP_MIN, TYPE } from "@/design/tokens";
 import { Boton, Check, Chevron, IconoCaja, Tarjeta } from "@/features/ui/aire";
 import { DATE_MAP, FLAT_DAYS, WEEKS, claveDia } from "@/domain/plan/calendario";
-import { comidaDelDia } from "@/domain/nutricion/dias";
 import { KpiBlock } from "@/features/semana/KpiBlock";
 const DIAS_C = ["domingo", "lunes", "martes", "miércoles", "jueves", "viernes", "sábado"];
 /** "2026-11-02" -> "lunes 2". */
@@ -29,13 +28,12 @@ export function SemanaScreen({ weekIdx, setWeekIdx, jumpToDay, checked, todayIso
     setPauseMode(false);
   };
 
-  const tituloLargo = (day) => day.titulo;
   const iconoDe = (day) => day.tipo === "fuerza" ? ["mancuerna", "azul"] : day.tipo === "compromiso" ? ["tenis", "verde"]
     : day.tipo === "libre" ? ["reloj", "gris"] : day.tipo === "test" || day.tipo === "objetivo" ? ["meta", "naranja"] : ["correr", "rojo"];
 
   return (
     <div style={{ padding: "12px 20px 0" }}>
-      <div style={{ fontSize: 14, fontWeight: 600, color: C.textDim }}>{week.dates} · {String(week.fase || "").charAt(0) + String(week.fase || "").slice(1).toLowerCase()}{week.bloque === 1 ? " · bloque 1" : ""}{week.extra ? " · semana extra que pidió el 5 km" : ""}</div>
+      <div style={{ fontSize: 14, fontWeight: 600, color: C.textDim }}>{week.dates}{week.extra ? " · +5 km" : ""}</div>
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-end" }}>
         <div style={{ ...TYPE.screenTitle, color: C.text }}>Semana {week.planN || week.n}</div>
         <button className="btn" onClick={() => { setPauseMode(!pauseMode); setPauseSelection([]); }} style={{
@@ -80,7 +78,6 @@ export function SemanaScreen({ weekIdx, setWeekIdx, jumpToDay, checked, todayIso
           const isT = DATE_MAP[day.date] === todayIso;
           const paused = isPaused(key);
           const selected = pauseSelection.includes(key);
-          const comida = day.tipo !== "libre" ? comidaDelDia(day) : null;
           const [ico, tono] = iconoDe(day);
           return (
             <button key={i} className="btn" onClick={() => pauseMode ? toggleDaySelection(key) : jumpToDay(weekIdx, i)} style={{
@@ -94,11 +91,13 @@ export function SemanaScreen({ weekIdx, setWeekIdx, jumpToDay, checked, todayIso
               <IconoCaja nombre={ico} tono={tono} tam={34} />
               <div style={{ flex: 1, minWidth: 0 }}>
                 <div style={{ fontSize: 15, fontWeight: 600, color: done || paused ? C.textDim : C.text, textDecoration: paused ? "line-through" : "none",
-                              overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{tituloLargo(day)}</div>
-                <div style={{ fontSize: 12, fontWeight: 600, marginTop: 1, color: comida && comida.id === "comer" ? C.ok : C.textDim }}>
-                  {isT ? "Hoy · " : ""}{notaMov}{paused ? "Pausa" : comida ? (comida.id === "comer" ? "Comer más" : "Comer menos") : "Descanso"}
-                  {day.tipo === "fuerza" && !paused ? <span style={{ color: C.textDim, fontWeight: 500 }}> · {day.ejercicios.length} ejercicios · {day.dur}</span> : null}
-                </div>
+                              overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{day.titulo}</div>
+                {(() => {
+                  // La duracion solo si el titulo no la dice ya ("Tirada 25 min").
+                  const dur = day.tipo !== "libre" && day.dur && !String(day.titulo).includes(day.dur) ? day.dur : "";
+                  const sub = (notaMov + (paused ? "Pausa" : dur)).replace(/ · $/, "");
+                  return sub ? <div style={{ fontSize: 12.5, fontWeight: 500, marginTop: 1, color: C.textDim }}>{sub}</div> : null;
+                })()}
               </div>
               {pauseMode ? <Check hecho={selected} color={A.azul} /> : day.tipo === "libre" ? <Chevron /> : <Check hecho={done} />}
             </button>

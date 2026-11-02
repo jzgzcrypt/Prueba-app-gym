@@ -10,7 +10,6 @@ import { GraficoPlan } from "@/features/ui/plan-vs-real";
 import { Check, Chevron, Fila, Icono, IconoCaja, Pastilla, Segmentado, Tarjeta } from "@/features/ui/aire";
 import { RITMO_ESPERADO, parseRitmoToSeconds } from "@/domain/running/ritmo";
 import { leerTiempo } from "@/domain/progreso/libreta";
-import { MOVILIDAD } from "@/domain/salud/movilidad";
 import { HitosContent, PaceComparisonChart, PhaseAdjustContent, PlanGlobalContent, WeeklyLogContent } from "@/features/coach/paneles";
 import { KpiBlock } from "@/features/semana/KpiBlock";
 import { SimpleLineChart } from "@/features/ui/charts";

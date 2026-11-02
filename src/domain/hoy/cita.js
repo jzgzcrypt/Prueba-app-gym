@@ -4,8 +4,8 @@
  * Lo que sale es lo que tiene hora fija (el tenis de los lunes); lo que
  * depende del sofa a las 16:00, no. Por eso cada carrera tiene su hora: el
  * martes, el jueves y el domingo. Con ella el calendario del movil avisa 15
- * min antes, y en HOY la fila de la carrera dice lo que hay que hacer para
- * salir: ropa puesta, movil en la entrada.
+ * min antes (el aviso dice lo de la ropa), y en HOY la fila de la carrera
+ * lleva su hora.
  *
  * horasCarrera: { "1": "17:30", "3": "17:30", "6": "10:00" } (indice del dia:
  * 0 = lunes ... 6 = domingo). null mientras no se han elegido.
@@ -43,16 +43,13 @@ export function horasDeParam(txt) {
   return limpiarHoras(h);
 }
 
-const enMin = (hhmm) => { const [h, m] = hhmm.split(":").map(Number); return h * 60 + m; };
-
 /**
- * Lo que dice la fila de la carrera de hoy, o null si no toca.
- * @param {{ day:object, horas:object|null, hecha:boolean, ahoraMin:number }} p
+ * La hora de la carrera de hoy, o null si no toca.
+ * @param {{ day:object, horas:object|null, hecha:boolean }} p
  */
-export function citaCarrera({ day, horas, hecha, ahoraMin }) {
+export function citaCarrera({ day, horas, hecha }) {
   if (!day || hecha || !/^(run|test|objetivo)$/.test(day.tipo || "")) return null;
   const hora = (limpiarHoras(horas) || {})[day.dayIdx];
   if (!hora) return null;
-  if (ahoraMin <= enMin(hora)) return "Ropa puesta · móvil en la entrada · sales a las " + hora;
-  return "Era a las " + hora + ": ropa puesta y sal, aunque sea corta";
+  return hora;
 }

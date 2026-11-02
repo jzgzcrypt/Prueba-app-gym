@@ -71,7 +71,7 @@ export const REGLAS_BLOQUE = [
 ];
 
 const LUNES_TENIS = { dow: "Lunes", tipo: "libre", cat: "descanso", titulo: "Tenis — compromiso fijo" };
-const SABADO_LIBRE = { dow: "Sabado", tipo: "libre", cat: "descanso", titulo: "Libre — descanso de verdad" };
+const SABADO_LIBRE = { dow: "Sabado", tipo: "libre", cat: "descanso", titulo: "Libre" };
 
 // ─── Piezas ─────────────────────────────────────────────────────────────────
 const LAT_POLEA = (n) => ({ grupo: "Hombro", nombre: "Elevaciones laterales polea muñequera cruzadas", series: n + "x12-15 (última al fallo)" });

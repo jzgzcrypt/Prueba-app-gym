@@ -21,6 +21,14 @@ Todo cambio que se haga en la app se anota aquí. Sin excepciones.
 
 ## [Sin publicar]
 
+### Cambiado: simple como Apple Notes
+- Fuera taglines, texto de ayuda y etiquetas secundarias en HOY, Semana, Comida y Progreso. Cada fila dice qué es y su dato.
+- HOY: «Carreras 0/3» en una línea; la carrera lleva su hora y su ritmo («17:30 · 6:40–7:00/km»). Lo de la ropa va en el aviso del calendario. «Más» en vez de «Notas, molestias, magia y guerrero».
+- Progreso: las carreras viven solo en HOY. El objetivo es la meta, la fecha, los días y la barra. Sin la frase del coach, sin resúmenes en las secciones y sin subtítulos en «Coach» y «Ejercicios».
+- Semana: cada día con su duración (si el título no la dice ya). Lo de comer más o menos vive en Comida.
+- Comida: «Comer más/menos» arriba; sin frases de ayuda.
+- Código: fuera imports, variables y un componente que no se usaban (53 → 35 avisos de ESLint).
+
 ### Arreglado
 - Lo que faltó del bloque 1 ya no se propone encima del bloque 2: «Era del bloque 1: se queda ahí».
 

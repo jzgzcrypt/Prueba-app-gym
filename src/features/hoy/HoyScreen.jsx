@@ -156,9 +156,8 @@ export function HoyScreen(props) {
     if (llegadaPend) partes.push("viene del " + destinoTxt(llegadaPend.isoDate));
     // La carrera es una cita: a su hora, ropa puesta y movil en la entrada.
     const cita = isToday && citaCarrera({ day: { ...diaSesion, dayIdx: day.dayIdx }, horas: props.horasCarrera,
-      hecha: !!checked[claveDia(diaSesion)], ahoraMin: new Date().getHours() * 60 + new Date().getMinutes() });
+      hecha: !!checked[claveDia(diaSesion)] });
     if (cita) partes.push(cita);
-    if (diaSesion.ajuste) partes.push(diaSesion.ajuste.motivo.split(":")[0]);
     if (esp && esp.desde) partes.push(esp.texto);
     return partes.join(" · ");
   };
@@ -168,11 +167,11 @@ export function HoyScreen(props) {
       return { ...x, ahora: x.id === ahoraId, icono: t === "fuerza" ? "fuerza" : t === "compromiso" ? "tenis" : "sesion",
         titulo: t === "compromiso" ? "Tenis" : t === "fuerza" ? "Fuerza · " + diaSesion.titulo : diaSesion.titulo, sub: subSesion() };
     }
-    if (x.id === "cuello") return { ...x, ahora: ahoraId === "cuello", sub: cuelloEj.nombre + (cuelloTotal ? " · " + cuelloTotal + " de 3 tomas" : "") };
+    if (x.id === "cuello") return { ...x, ahora: ahoraId === "cuello", sub: cuelloEj.nombre + (cuelloTotal ? " · " + cuelloTotal + "/3" : "") };
     if (x.id === "pierna") return { ...x, sub: "Después de correr: " + day.pierna10.map(e => e.nombre.split(" ")[0].toLowerCase()).join(", ") };
     if (x.id === "medir") return { ...x, sub: "Cada 2 semanas, en ayunas" };
-    if (x.id === "peso") return { ...x, ahora: ahoraId === "peso", sub: props.pesoDia != null ? String(props.pesoDia).replace(".", ",") + " kg" : "En ayunas" };
-    return { ...x, ahora: ahoraId === "comida", sub: props.comidaDia ? "Apuntada" : "Lo que has comido" };
+    if (x.id === "peso") return { ...x, ahora: ahoraId === "peso", sub: props.pesoDia != null ? String(props.pesoDia).replace(".", ",") + " kg" : "" };
+    return { ...x, ahora: ahoraId === "comida", sub: "" };
   });
   const estadoDe = (id) => (filasLista.find(f => f.id === id) || {}).estado;
   const sinNoCuello = () => props.setNoHechas && props.setNoHechas(p => ({ ...p, [dayKey]: (p[dayKey] || []).filter(x => !x.startsWith("cuello-")) }));
@@ -345,7 +344,7 @@ export function HoyScreen(props) {
 
         <button className="btn" data-todo-hoy onClick={() => setVerTodo(!verTodo)}
           style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 6, minHeight: 44, width: "100%", fontSize: 14.5, fontWeight: 600, color: A.azul }}>
-          {verTodo ? "Ocultar" : "Notas, molestias, magia y guerrero"} <Chevron abierto={verTodo} />
+          {verTodo ? "Menos" : "Más"} <Chevron abierto={verTodo} />
         </button>
       </div>
 

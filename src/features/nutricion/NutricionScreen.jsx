@@ -7,7 +7,6 @@ import { ORDEN_MICROS, REFERENCIAS, avisosMicros, estadoMicro, perfilDia, perfil
 import { cargarHabituales, recomendar } from "@/domain/nutricion/recomendar";
 import { ScreenHeader } from "@/features/ui/headers";
 import { Anillo, Boton, Chevron, Icono, IconoCaja, Seccion, Segmentado, Tarjeta } from "@/features/ui/aire";
-import { TuMotor } from "@/features/nutricion/TuMotor";
 
 /**
  * NUTRICION.
@@ -19,10 +18,6 @@ import { TuMotor } from "@/features/nutricion/TuMotor";
  * cintura.
  */
 const miles = (n) => Math.round(n).toLocaleString("es-ES");
-const QUE_ES = {
-  comer: "Día de entreno: hidratos alrededor de la sesión.",
-  recortar: "Sin sesión intensa: aquí es donde se pierde la grasa.",
-};
 const LETRAS = ["L", "M", "X", "J", "V", "S", "D"];
 const nuevoId = () => "c" + Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
 const campo = {
@@ -418,7 +413,7 @@ export function NutricionScreen({ comida, esHoy, cuadre = null, apuntes = [], ap
 
   return (
     <div style={{ padding: "16px 16px 24px" }}>
-      <ScreenHeader title="Comida" subtitle={comida ? (esHoy ? "Hoy: " : "Ese día: ") + (comida.id === "comer" ? "día de comer más" : "día de comer menos") : ""} />
+      <ScreenHeader title="Comida" subtitle={comida ? (comida.id === "comer" ? "Comer más" : "Comer menos") : ""} />
 
       {m && (
         <Tarjeta data-hoy-comida style={{ padding: "18px 16px" }}>
@@ -432,7 +427,6 @@ export function NutricionScreen({ comida, esHoy, cuadre = null, apuntes = [], ap
               <div style={{ fontSize: 26, fontWeight: 800, color: C.text, letterSpacing: -0.5, fontVariantNumeric: "tabular-nums" }}>
                 {miles(llevas.prot)}<span style={{ fontSize: 15, color: C.textDim, fontWeight: 600 }}> / {m.prot} g</span>
               </div>
-              <div style={{ fontSize: 13, color: C.textDim, lineHeight: 1.4, marginTop: 4 }}>{QUE_ES[comida.id]}</div>
             </div>
           </div>
           {cuadre && (
@@ -457,14 +451,13 @@ export function NutricionScreen({ comida, esHoy, cuadre = null, apuntes = [], ap
           ))}
         </Tarjeta>
       )}
-      {apuntes.length === 0 && <div style={{ fontSize: 14, color: C.textDim, margin: "0 4px 4px" }}>Nada apuntado todavía.</div>}
 
       {ideas.length > 0 && (
         <Tarjeta data-ideas style={{ padding: verIdeas ? "4px 12px 12px" : "0 12px", marginTop: 10, background: A.fondo.azul, boxShadow: "none" }}>
           <button className="btn" data-ver-ideas onClick={() => setVerIdeas(!verIdeas)}
             style={{ width: "100%", minHeight: 44, display: "flex", alignItems: "center", gap: 8, fontSize: 14, fontWeight: 700, color: A.azul, textAlign: "left" }}>
             <Icono nombre="idea" tam={18} />
-            <span style={{ flex: 1 }}>Te quedan {miles(quedan.kcal)} kcal · {Math.max(0, Math.round(quedan.prot))} g · ideas</span>
+            <span style={{ flex: 1 }}>Ideas</span>
             <Chevron abierto={verIdeas} />
           </button>
           {verIdeas && ideas.map((o, i) => (
@@ -503,11 +496,11 @@ export function NutricionScreen({ comida, esHoy, cuadre = null, apuntes = [], ap
                 );
               })}
             </div>
-            <div style={{ fontSize: 13, color: C.textDim, marginTop: 8 }}>
-              {semana.cerrados
-                ? <>Proteína media <b style={{ color: C.text }}>{semana.protMedia} g</b> · {semana.dias.filter(d => d.estado === "bien").length} de {semana.cerrados} días en objetivo</>
-                : "Apunta lo que comes y aquí verás la semana."}
-            </div>
+            {semana.cerrados > 0 && (
+              <div style={{ fontSize: 13, color: C.textDim, marginTop: 8 }}>
+                Proteína <b style={{ color: C.text }}>{semana.protMedia} g</b> · {semana.dias.filter(d => d.estado === "bien").length}/{semana.cerrados} días
+              </div>
+            )}
           </Tarjeta>
         </>
       )}
@@ -515,7 +508,7 @@ export function NutricionScreen({ comida, esHoy, cuadre = null, apuntes = [], ap
       <Micros apuntes={apuntes} semanaApuntes={semanaApuntes} esHoy={esHoy} />
 
 
-      <Seccion>Cintura y foto</Seccion>
+      <Seccion>Cintura</Seccion>
       <Tarjeta data-cintura style={{ padding: "14px 16px", display: "flex", alignItems: "center", gap: 12 }}>
         {ultFoto
           ? <img src={ultFoto.foto} alt="" style={{ width: 48, height: 64, objectFit: "cover", borderRadius: 10, flexShrink: 0 }} />
@@ -525,14 +518,11 @@ export function NutricionScreen({ comida, esHoy, cuadre = null, apuntes = [], ap
             <>
               <div style={{ fontSize: 17, fontWeight: 700, color: C.text }}>{String(ultCintura.cintura).replace(".", ",")} cm</div>
               <div style={{ fontSize: 12.5, color: C.textDim }}>
-                {ultCintura.fecha}{primCintura !== ultCintura ? " · " + (ultCintura.cintura - primCintura.cintura > 0 ? "+" : "") + String(Math.round((ultCintura.cintura - primCintura.cintura) * 10) / 10).replace(".", ",") + " cm desde el inicio" : ""}
+                {ultCintura.fecha}{primCintura !== ultCintura ? " · " + (ultCintura.cintura - primCintura.cintura > 0 ? "+" : "") + String(Math.round((ultCintura.cintura - primCintura.cintura) * 10) / 10).replace(".", ",") + " cm" : ""}
               </div>
             </>
           ) : (
-            <>
-              <div style={{ fontSize: 15, fontWeight: 600, color: C.text }}>Una vez por semana</div>
-              <div style={{ fontSize: 12.5, color: C.textDim }}>Cintura a la altura del ombligo y una foto, el lunes en ayunas.</div>
-            </>
+            <div style={{ fontSize: 17, fontWeight: 700, color: C.textFaint }}>— cm</div>
           )}
         </div>
         <button className="btn" onClick={irAProgreso} style={{ fontSize: 15, fontWeight: 600, color: A.azul, minHeight: 40 }}>Apuntar</button>

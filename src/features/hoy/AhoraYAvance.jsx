@@ -108,12 +108,11 @@ const TONO = { bien: A.verde, ojo: A.naranja, gris: C.textFaint, neutro: C.text 
 const ICONO_OBJ = { "7k": ["correr", "rojo"], panza: ["regla", "morado"], hombro: ["mancuerna", "azul"], cuello: ["cuello", "verde"] };
 
 /** "¿Avanzo?": tus 4 objetivos y tú, una linea cada uno. */
-export function Avanzo({ objetivos, cumplidos, sentir, prueba, onVer }) {
+export function Avanzo({ objetivos, cumplidos, sentir, onVer }) {
   return (
     <Tarjeta data-avanzo style={{ padding: "12px 16px 8px" }}>
       <div style={{ display: "flex", alignItems: "baseline", marginBottom: 4 }}>
         <div style={{ flex: 1, fontSize: 16, fontWeight: 700, color: C.text }}>¿Avanzo?</div>
-        {prueba && <div style={{ fontSize: 12, color: C.textDim }}>Prueba de 2 semanas · día {prueba.dia} de 14</div>}
       </div>
       {objetivos.map(o => {
         const [ic, tono] = ICONO_OBJ[o.id] || ["grafica", "gris"];
@@ -123,18 +122,16 @@ export function Avanzo({ objetivos, cumplidos, sentir, prueba, onVer }) {
             <IconoCaja nombre={ic} tono={tono} tam={28} />
             <span style={{ width: 62, fontSize: 14, fontWeight: 600, color: C.text }}>{o.nombre}</span>
             <span style={{ flex: 1, minWidth: 0, fontSize: 13, color: o.valor ? TONO[o.tono] : C.textDim, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
-              {o.valor ? (o.flecha ? o.flecha + " " : "") + o.tendencia : o.accion}
+              {o.valor ? (o.flecha ? o.flecha + " " : "") + o.tendencia : ""}
             </span>
-            {o.valor && <span style={{ fontSize: 14, fontWeight: 700, color: C.text, flexShrink: 0 }}>{o.valor}</span>}
+            <span style={{ fontSize: 14, fontWeight: 700, color: o.valor ? C.text : C.textFaint, flexShrink: 0 }}>{o.valor || "—"}</span>
           </button>
         );
       })}
       <div data-avanzo-fila="tu" style={{ display: "flex", alignItems: "center", gap: 10, minHeight: 40, borderTop: "1px solid " + C.divider }}>
         <IconoCaja nombre="escudo" tono="gris" tam={28} />
         <span style={{ width: 62, fontSize: 14, fontWeight: 600, color: C.text }}>Tú</span>
-        <span style={{ flex: 1, fontSize: 13, color: C.textDim }}>
-          {cumplidos.total ? "días cumplidos esta semana" : "la semana empieza hoy"}{sentir ? " · te sentiste " + sentir + "/5" : ""}
-        </span>
+        <span style={{ flex: 1, fontSize: 13, color: C.textDim }}>{sentir ? sentir + "/5" : ""}</span>
         {cumplidos.total > 0 && <span style={{ fontSize: 14, fontWeight: 700, color: C.text }}>{cumplidos.hechos}/{cumplidos.total}</span>}
       </div>
     </Tarjeta>

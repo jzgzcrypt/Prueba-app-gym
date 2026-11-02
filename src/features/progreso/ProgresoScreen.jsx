@@ -3,8 +3,7 @@
 import { FECHA_FIN, FECHA_INICIO, FECHA_INICIO_BLOQUE, FLAT_DAYS, claveDia, todayLocalIso, SEMANAS_MOVIDAS } from "@/domain/plan/calendario";
 import { useEffect, useRef, useState } from "react";
 import { lecturaPrueba } from "@/domain/progreso/libreta";
-import { carrerasSemana, parteDelCoach } from "@/domain/progreso/parte";
-import { CarrerasSemana } from "@/features/ui/CarrerasSemana";
+import { parteDelCoach } from "@/domain/progreso/parte";
 import { mesesDelBloque, nombreMes } from "@/domain/progreso/informe";
 import { GraficoPlan } from "@/features/ui/plan-vs-real";
 import { MapaRuta } from "@/features/ui/MapaRuta";
@@ -13,9 +12,9 @@ import { tendenciaPeso } from "@/domain/nutricion/adaptativo";
 import { tablaRecords } from "@/domain/fuerza/registro";
 import { A, C, CARD, CAT } from "@/design/tokens";
 import { ScreenHeader } from "@/features/ui/headers";
-import { Boton, Chevron, Fila, Icono, IconoCaja, Pastilla, Tarjeta } from "@/features/ui/aire";
+import { Boton, Chevron, Fila, IconoCaja, Pastilla, Tarjeta } from "@/features/ui/aire";
 import { QuickFieldInput, SimpleLineChart } from "@/features/ui/charts";
-export function ProgresoScreen({ medidas, setMedidas, ritmoReal, weeks, checked, workoutWeights, workoutReps, onVerInforme, cuelloChecks, painLog, gps, pesosDiarios, avanzo, onAbrir, postponed }) {
+export function ProgresoScreen({ medidas, setMedidas, ritmoReal, weeks, checked, workoutWeights, workoutReps, onVerInforme, cuelloChecks, painLog, gps, pesosDiarios, avanzo, onAbrir }) {
   const [showForm, setShowForm] = useState(false);
   const [form, setForm] = useState({ peso: "", cintura: "", anchoHombro: "", cadera: "", hombro: "", cadenaPosterior: "", columna: "", caderaMov: "", foto: null });
   const [quickField, setQuickField] = useState(null); // "peso" | "cintura" | "cadera" | "hombro" | "cadenaPosterior" | "columna" | "caderaMov" | null (menu)
@@ -30,10 +29,6 @@ export function ProgresoScreen({ medidas, setMedidas, ritmoReal, weeks, checked,
   const [abierta, setAbiertaEstado] = useState(null);
   useEffect(() => { try { setAbiertaEstado(window.localStorage.getItem("programa7k:progreso") || null); } catch { /* sin storage */ } }, []);
   const setAbierta = (s) => { setAbiertaEstado(s); try { window.localStorage.setItem("programa7k:progreso", s || ""); } catch { /* sin storage */ } };
-  const abrir = (s) => {
-    setAbierta(s);
-    setTimeout(() => { const el = document.getElementById("detalle-" + s); if (el) el.scrollIntoView({ behavior: "smooth", block: "start" }); }, 50);
-  };
   const hoyIso = todayLocalIso();
   const semanaActual = weeks.find(w => w.days[0].isoDate <= hoyIso && w.days[w.days.length - 1].isoDate >= hoyIso);
   const parte = parteDelCoach({ dias: FLAT_DAYS, semanas: weeks, checked, cuelloChecks, painLog, ritmoReal,
@@ -102,12 +97,9 @@ export function ProgresoScreen({ medidas, setMedidas, ritmoReal, weeks, checked,
   const ratioData = medidas
     .filter(m => m.anchoHombro != null && m.cintura != null && m.cintura > 0)
     .map(m => ({ fecha: m.fecha, v: Math.round((m.anchoHombro / m.cintura) * 100) / 100 }));
-  const cadenaPosteriorData = medidas.filter(m => m.cadenaPosterior != null).map(m => ({ fecha: m.fecha, v: m.cadenaPosterior }));
-  const columnaData = medidas.filter(m => m.columna != null).map(m => ({ fecha: m.fecha, v: m.columna }));
-  const caderaMovData = medidas.filter(m => m.caderaMov != null).map(m => ({ fecha: m.fecha, v: m.caderaMov }));
   const medidasConFoto = medidas.filter(m => m.foto);
 
-  const ritmosData = Object.entries(ritmoReal).filter(([k,v]) => v).slice(-8);
+  const ritmosData = Object.entries(ritmoReal).filter(([, v]) => v).slice(-8);
   const diasCompletados = Object.values(checked).filter(Boolean).length;
 
   // Cruza workoutWeights (por dayKey) con weeks para agrupar por nombre de ejercicio
@@ -161,7 +153,7 @@ export function ProgresoScreen({ medidas, setMedidas, ritmoReal, weeks, checked,
     }
     if (ritmosData.length > 0) {
       txt += "\nÚltimos ritmos registrados:\n";
-      ritmosData.forEach(([k, v]) => { txt += "- " + v + "\n"; });
+      ritmosData.forEach(([, v]) => { txt += "- " + v + "\n"; });
     }
     return txt;
   };
@@ -170,16 +162,12 @@ export function ProgresoScreen({ medidas, setMedidas, ritmoReal, weeks, checked,
   return (
     <div style={{ padding: "16px 16px 28px" }}>
       <ScreenHeader title="Progreso" subtitle={semanaActual ? (semanaActual.bloque === 2
-        ? "Semana " + semanaActual.planN + " de " + weeks.filter(w => w.bloque === 2).length + " · bloque 2"
+        ? "Semana " + semanaActual.planN + " de " + weeks.filter(w => w.bloque === 2).length
         : "Semana " + semanaActual.n + " de " + weeks.length) : ""} />
 
-      {/* Primero el numero que manda (las carreras de la semana); luego el
-          objetivo con su frase, los 4 objetivos (¿Avanzo?), la proxima
-          prueba, el peso y la constancia. */}
-      <div style={{ marginBottom: 12 }}>
-        <CarrerasSemana hoyIso={hoyIso} c={carrerasSemana({ semana: semanaActual, checked, gps, ritmoReal, movidas: postponed, hoyIso })} />
-      </div>
-      <TuObjetivo veredicto={parte.veredicto} />
+      {/* El objetivo, los 4 objetivos (¿Avanzo?), la proxima prueba, el peso
+          y la constancia. Las carreras de la semana viven en HOY. */}
+      <TuObjetivo />
       {avanzo && <div style={{ marginBottom: 12 }}>{avanzo}</div>}
       <ProximaPrueba ritmoReal={ritmoReal} />
       <TuPeso datos={pesoData} onApuntar={() => { setShowForm(false); setQuickField("peso"); }} />
@@ -187,7 +175,7 @@ export function ProgresoScreen({ medidas, setMedidas, ritmoReal, weeks, checked,
 
       <div style={{ display: "flex", gap: 8, margin: "14px 0 12px" }}>
         <Boton tipo={showForm ? "suave" : "oscuro"} onClick={() => { setQuickField(null); setShowForm(!showForm); }} style={{ flex: 1, fontSize: 15 }}>
-          {showForm ? "Cancelar" : "Medir: cintura, hombro y foto"}
+          {showForm ? "Cancelar" : "Medir"}
         </Boton>
         <Boton tipo="suave" onClick={() => { setShowForm(false); setQuickField(quickField ? null : "menu"); }} style={{ width: "auto", fontSize: 15 }}>
           {quickField ? "Cerrar" : "1 dato"}
@@ -207,7 +195,7 @@ export function ProgresoScreen({ medidas, setMedidas, ritmoReal, weeks, checked,
               ["cadenaPosterior", "Mov. Tocar suelo", "cm", "#3A6EA5"],
               ["columna", "Mov. Puente", "nivel 1-3", "#6B4C8A"],
               ["caderaMov", "Mov. ATG/Cossack", "nivel 1-3", CAT.movilidad],
-            ].map(([key, label, unit, color]) => (
+            ].map(([key, label, unit]) => (
               <button key={key} className="btn" onClick={() => setQuickField(key)} style={{
                 padding: "18px 12px", borderRadius: 14, background: C.card, border: "1px solid " + C.cardBorder,
                 textAlign: "center",
@@ -267,15 +255,15 @@ export function ProgresoScreen({ medidas, setMedidas, ritmoReal, weeks, checked,
         </div>
       )}
 
-      <div style={{ fontSize: 19, fontWeight: 700, color: C.text, margin: "20px 4px 8px" }}>Detalle</div>
+      <div style={{ height: 14 }} />
 
-      <Seccion id="running" titulo="Running" resumen={parte.objetivos[0].valor ? parte.objetivos[0].tendencia : "sin pruebas aún"} abierta={abierta} setAbierta={setAbierta}>
+      <Seccion id="running" titulo="Running" abierta={abierta} setAbierta={setAbierta}>
         <GraficoPlan ritmoReal={ritmoReal} />
         <PruebasCompactas ritmoReal={ritmoReal} />
         <TusSalidas gps={gps} />
       </Seccion>
 
-      <Seccion id="cuerpo" titulo="Cuerpo" resumen={parte.objetivos[1].valor || "sin medidas"} abierta={abierta} setAbierta={setAbierta}>
+      <Seccion id="cuerpo" titulo="Cuerpo" abierta={abierta} setAbierta={setAbierta}>
       <div>
         {ratioData.length > 1 && (
           <div style={{ marginBottom: 16 }}>
@@ -321,7 +309,7 @@ export function ProgresoScreen({ medidas, setMedidas, ritmoReal, weeks, checked,
       )}
       </Seccion>
 
-      <Seccion id="fuerza" titulo="Fuerza" resumen={parte.objetivos[2].valor ? parte.objetivos[2].valor + " laterales" : "sin pesos aún"} abierta={abierta} setAbierta={setAbierta}>
+      <Seccion id="fuerza" titulo="Fuerza" abierta={abierta} setAbierta={setAbierta}>
         <Records pesos={workoutWeights} reps={workoutReps} />
       {stagnantList.length > 0 && (
         <div style={{ background: "#FBF0EF", border: "1px solid #E8C9C6", borderRadius: 14, padding: "13px 16px", marginBottom: 12 }}>
@@ -371,17 +359,15 @@ export function ProgresoScreen({ medidas, setMedidas, ritmoReal, weeks, checked,
       )}
       </Seccion>
 
-      <Seccion id="meses" titulo="Tus meses" resumen="informe de cada mes" abierta={abierta} setAbierta={setAbierta}>
+      <Seccion id="meses" titulo="Tus meses" abierta={abierta} setAbierta={setAbierta}>
         <TusMeses onVer={onVerInforme} />
       </Seccion>
 
       {onAbrir && (
         <>
-          <div style={{ fontSize: 19, fontWeight: 700, color: C.text, margin: "20px 4px 8px" }}>Más</div>
-          <Tarjeta data-mas style={{ padding: 0, overflow: "hidden" }}>
-            {[["coach", "grafica", "azul", "Previsión, plan y ajustes", "el coach, la bitácora y la copia"],
-              ["ejercicios", "mancuerna", "azul", "Ejercicios", "cómo se hace cada uno"]].map(([k, ic, tono, t, sub], i) => (
-              <Fila key={k} primera={i === 0} icono={ic} tono={tono} titulo={t} sub={sub} derecha={<Chevron />} onClick={() => onAbrir(k)} />
+          <Tarjeta data-mas style={{ padding: 0, overflow: "hidden", marginTop: 14 }}>
+            {[["coach", "grafica", "azul", "Coach"], ["ejercicios", "mancuerna", "azul", "Ejercicios"]].map(([k, ic, tono, t], i) => (
+              <Fila key={k} primera={i === 0} icono={ic} tono={tono} titulo={t} derecha={<Chevron />} onClick={() => onAbrir(k)} />
             ))}
           </Tarjeta>
         </>
@@ -390,12 +376,11 @@ export function ProgresoScreen({ medidas, setMedidas, ritmoReal, weeks, checked,
       <div style={{ marginTop: 14 }}>
       <button className="btn" onClick={() => setShowExport(!showExport)} style={{
         width: "100%", padding: "10px", fontSize: 11.5, fontWeight: 700, color: C.textDim,
-      }}>{showExport ? "Ocultar resumen" : "Resumen en texto para Claude"}</button>
+      }}>{showExport ? "Ocultar" : "Texto para Claude"}</button>
 
       {showExport && (
         <div style={{ marginTop: 12, background: C.card, border: "1px solid " + C.cardBorder, borderRadius: 14, padding: "16px 18px" }}>
           <pre style={{ fontSize: 12, color: "#4A4A47", whiteSpace: "pre-wrap", fontFamily: "inherit", lineHeight: 1.6 }}>{resumenTexto()}</pre>
-          <div style={{ fontSize: 11, color: "#8A8A87", marginTop: 8 }}>Copia este texto y pégalo en el chat para que Claude lo revise.</div>
         </div>
       )}
       </div>
@@ -491,7 +476,7 @@ const aMs = (iso) => Date.UTC(+iso.slice(0, 4), +iso.slice(5, 7) - 1, +iso.slice
 const MESES = ["enero", "febrero", "marzo", "abril", "mayo", "junio", "julio", "agosto", "septiembre", "octubre", "noviembre", "diciembre"];
 
 /** La tarjeta oscura: el objetivo, cuanto falta y por donde vas del plan. */
-function TuObjetivo({ veredicto }) {
+function TuObjetivo() {
   const hoy = todayLocalIso();
   // Por donde vas: cuenta desde que empezo el bloque en curso.
   const total = Math.round((aMs(FECHA_FIN) - aMs(FECHA_INICIO_BLOQUE)) / DIA) + 1;
@@ -500,27 +485,15 @@ function TuObjetivo({ veredicto }) {
   const meta = FLAT_DAYS.find(d => d.tipo === "objetivo");
   return (
     <div data-tu-objetivo style={{ background: "#1C1C1E", borderRadius: 22, padding: "18px 18px 16px", color: "#fff", marginBottom: 12 }}>
-      <div style={{ display: "flex", alignItems: "center", gap: 8, fontSize: 13, fontWeight: 600, opacity: 0.7 }}>
-        <Icono nombre="meta" tam={16} /> Tu objetivo
-      </div>
-      <div style={{ fontSize: 30, fontWeight: 800, letterSpacing: -0.8, marginTop: 4 }}>
+      <div style={{ fontSize: 30, fontWeight: 800, letterSpacing: -0.8 }}>
         {meta && meta.prueba ? meta.prueba.distKm : 7} km a {meta && meta.ritmo ? textoRitmoSeg(meta.ritmo) : "4:45"}/km
       </div>
       <div style={{ fontSize: 15, opacity: 0.8, marginTop: 2 }}>
-        {+FECHA_FIN.slice(8)} de {MESES[+FECHA_FIN.slice(5, 7) - 1]} · {faltan === 0 ? "¡es hoy!" : "faltan " + faltan + " días"}
+        {+FECHA_FIN.slice(8)} de {MESES[+FECHA_FIN.slice(5, 7) - 1]} · {faltan === 0 ? "hoy" : faltan + " días"}{SEMANAS_MOVIDAS ? <span data-fecha-movida> · {SEMANAS_MOVIDAS > 0 ? "+" : ""}{SEMANAS_MOVIDAS} sem.</span> : null}
       </div>
-      <div style={{ display: "flex", justifyContent: "space-between", fontSize: 12.5, fontWeight: 600, opacity: 0.7, margin: "14px 0 6px" }}>
-        <span>Día {dia} de {total}</span><span>{Math.round(dia / total * 100)} %</span>
-      </div>
-      <div style={{ height: 6, borderRadius: 3, background: "rgba(255,255,255,.18)" }}>
+      <div role="progressbar" aria-valuenow={dia} aria-valuemax={total} style={{ height: 6, borderRadius: 3, background: "rgba(255,255,255,.18)", marginTop: 14 }}>
         <div style={{ width: dia / total * 100 + "%", height: "100%", borderRadius: 3, background: A.verde }} />
       </div>
-      {SEMANAS_MOVIDAS !== 0 && (
-        <div data-fecha-movida style={{ fontSize: 13.5, lineHeight: 1.45, marginTop: 12, padding: "9px 11px", borderRadius: 12, background: "rgba(255,255,255,.1)" }}>
-          {SEMANAS_MOVIDAS > 0 ? "Fecha movida " + SEMANAS_MOVIDAS + " semanas: lo decidió tu 5 km. Se mueve la fecha, no el ritmo." : "Fecha adelantada " + -SEMANAS_MOVIDAS + " semana: tu 5 km fue mejor de lo previsto."}
-        </div>
-      )}
-      {veredicto && <div style={{ fontSize: 14, lineHeight: 1.45, marginTop: 14, opacity: 0.9 }}>{veredicto.texto}</div>}
     </div>
   );
 }
@@ -533,16 +506,14 @@ function ProximaPrueba({ ritmoReal }) {
   if (!d) return null;
   const dias = Math.round((aMs(d.isoDate) - aMs(hoy)) / DIA);
   const que = d.prueba.partida ? "Prueba de partida" : d.tipo === "objetivo" ? "El día: 7 km" : d.prueba.distKm + " km a tope";
-  const linea = d.prueba.enLinea ? "En línea con el objetivo: " + textoTiempo(d.prueba.enLinea) + " o menos."
-    : d.prueba.decide ? "Esta decide la fecha del 7K." : null;
   return (
     <Tarjeta data-proxima-prueba style={{ padding: "14px 16px", marginBottom: 12, display: "flex", alignItems: "center", gap: 12 }}>
       <IconoCaja nombre="correr" tono="rojo" tam={44} />
       <div style={{ flex: 1, minWidth: 0 }}>
-        <div style={{ fontSize: 12.5, fontWeight: 600, color: C.textDim }}>Próxima prueba · {dias === 0 ? "hoy" : dias === 1 ? "mañana" : "en " + dias + " días"}</div>
-        <div style={{ fontSize: 17, fontWeight: 700, color: C.text }}>{que} · {d.dow ? d.dow.slice(0, 3).toLowerCase() : ""} {d.date}</div>
-        {linea && <div style={{ fontSize: 13, color: C.textDim, marginTop: 2 }}>{linea}</div>}
+        <div style={{ fontSize: 17, fontWeight: 700, color: C.text }}>{que}</div>
+        <div style={{ fontSize: 13.5, color: C.textDim, marginTop: 1 }}>{d.dow ? d.dow.slice(0, 3).toLowerCase() : ""} {d.date}</div>
       </div>
+      <div style={{ fontSize: 15, fontWeight: 700, color: C.text }}>{dias === 0 ? "hoy" : dias === 1 ? "mañana" : dias + " d"}</div>
     </Tarjeta>
   );
 }
@@ -563,7 +534,7 @@ function TuPeso({ datos, onApuntar }) {
     <Tarjeta data-tu-peso style={{ padding: "14px 16px", marginBottom: 12 }}>
       <div style={{ display: "flex", alignItems: "baseline", gap: 8 }}>
         <div style={{ flex: 1 }}>
-          <div style={{ fontSize: 12.5, fontWeight: 600, color: C.textDim }}>Peso · tendencia</div>
+          <div style={{ fontSize: 12.5, fontWeight: 600, color: C.textDim }}>Peso</div>
           <div style={{ fontSize: 26, fontWeight: 800, color: C.text, letterSpacing: -0.5 }}>
             {ult != null ? String(Math.round(ult * 10) / 10).replace(".", ",") + " kg" : "—"}
           </div>
@@ -572,15 +543,13 @@ function TuPeso({ datos, onApuntar }) {
           <Pastilla color={cambio <= 0 ? A.verde : A.naranja}>{(cambio > 0 ? "+" : "") + String(cambio).replace(".", ",")} kg en {ds.length} días</Pastilla>
         )}
       </div>
-      {vals.length > 1 ? (
+      {vals.length > 1 && (
         <svg viewBox={`-4 -4 ${W + 8} ${H + 8}`} width="100%" height={H + 8} style={{ display: "block", marginTop: 8 }} aria-label="Peso y tendencia">
           {ds.map((x, i) => x.v != null && <circle key={i} cx={X(i)} cy={Y(x.v)} r="2.6" fill={A.azul} opacity=".35" />)}
           <path d={camino} fill="none" stroke={A.azul} strokeWidth="2.6" strokeLinecap="round" strokeLinejoin="round" />
         </svg>
-      ) : (
-        <div style={{ fontSize: 13.5, color: C.textDim, marginTop: 6 }}>Pésate cada mañana en ayunas: con unos días sale la tendencia.</div>
       )}
-      <button className="btn" onClick={onApuntar} style={{ fontSize: 14, fontWeight: 600, color: A.azul, minHeight: 36, marginTop: 4 }}>Apuntar peso</button>
+      <button className="btn" onClick={onApuntar} style={{ fontSize: 14, fontWeight: 600, color: A.azul, minHeight: 36, marginTop: 4 }}>Apuntar</button>
     </Tarjeta>
   );
 }
@@ -610,45 +579,6 @@ function Constancia({ c }) {
         ))}
       </div>
     </Tarjeta>
-  );
-}
-
-const TONO_A = { bien: A.verde, ojo: A.naranja, gris: C.textFaint, neutro: C.text };
-const ICONO_OBJ = { "7k": ["correr", "rojo"], panza: ["regla", "morado"], hombro: ["mancuerna", "azul"], cuello: ["cuello", "verde"] };
-
-/** Los objetivos del bloque en filas, y las alarmas si las hay. */
-function Objetivos({ parte, onAbrir }) {
-  const { objetivos, alarmas } = parte;
-  return (
-    <>
-      <Tarjeta data-objetivos style={{ padding: 0, overflow: "hidden", marginBottom: alarmas.length ? 12 : 0 }}>
-        {objetivos.map((o, i) => {
-          const [ic, tono] = ICONO_OBJ[o.id] || ["grafica", "gris"];
-          return (
-            <Fila key={o.id} primera={i === 0} icono={ic} tono={tono} titulo={o.nombre}
-              sub={o.valor ? <span style={{ color: TONO_A[o.tono] }}>{o.flecha ? o.flecha + " " : ""}{o.tendencia}</span> : o.accion}
-              derecha={<span style={{ display: "flex", alignItems: "center", gap: 6 }}>
-                {o.valor && <span style={{ fontSize: 16, fontWeight: 700, color: C.text, fontVariantNumeric: "tabular-nums" }}>{o.valor}</span>}
-                {o.seccion && <Chevron />}
-              </span>}
-              onClick={o.seccion ? () => onAbrir(o.seccion) : undefined} />
-          );
-        })}
-      </Tarjeta>
-      {alarmas.length > 0 && (
-        <Tarjeta data-alarmas style={{ padding: "6px 16px", background: A.fondo.naranja, boxShadow: "none" }}>
-          {alarmas.map((a, i) => (
-            <div key={i} style={{ display: "flex", gap: 10, padding: "8px 0", borderTop: i ? "1px solid rgba(0,0,0,.06)" : "none" }}>
-              <span style={{ color: A.naranja, paddingTop: 1 }}><Icono nombre="aviso" tam={18} /></span>
-              <div>
-                <div style={{ fontSize: 14.5, fontWeight: 700, color: C.text }}>{a.texto}</div>
-                <div style={{ fontSize: 13.5, color: C.textDim, marginTop: 2 }}>{a.accion}</div>
-              </div>
-            </div>
-          ))}
-        </Tarjeta>
-      )}
-    </>
   );
 }
 

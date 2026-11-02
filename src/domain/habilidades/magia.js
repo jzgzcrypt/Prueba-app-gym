@@ -1,4 +1,3 @@
-import { semanaHabito } from "../salud/cuello.js";
 import { colaDeHoy, progresoDe } from "./repaso.js";
 // ─── HÁBITO APARTE — MAGIA CON CARTAS (memoria/matemática) ────────────────────
 // Un truco nuevo cada 1-2 semanas. Practica 10 min/dia. Progreso = dominio del truco, no velocidad.

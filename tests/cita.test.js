@@ -5,9 +5,8 @@ import { citaCarrera, horasAParam, horasDeParam, limpiarHoras } from "../src/dom
 const martes = { tipo: "run", dayIdx: 1, titulo: "Suave 20 min" };
 const horas = { 1: "17:30", 3: "17:30", 6: "10:00" };
 
-test("la carrera con hora dice como salir; antes y despues de la hora", () => {
-  assert.equal(citaCarrera({ day: martes, horas, hecha: false, ahoraMin: 17 * 60 + 15 }), "Ropa puesta · móvil en la entrada · sales a las 17:30");
-  assert.match(citaCarrera({ day: martes, horas, hecha: false, ahoraMin: 18 * 60 }), /^Era a las 17:30/);
+test("la carrera de hoy lleva su hora", () => {
+  assert.equal(citaCarrera({ day: martes, horas, hecha: false }), "17:30");
   assert.equal(citaCarrera({ day: martes, horas, hecha: true, ahoraMin: 0 }), null, "hecha: nada que decir");
   assert.equal(citaCarrera({ day: martes, horas: null, hecha: false, ahoraMin: 0 }), null, "sin horas elegidas");
   assert.equal(citaCarrera({ day: { tipo: "fuerza", dayIdx: 2 }, horas, hecha: false, ahoraMin: 0 }), null);

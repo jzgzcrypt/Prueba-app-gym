@@ -144,7 +144,7 @@ export function objetivos({ dias, ritmoReal, pesos, reps, medidas, cuelloChecks,
   // Cuello: dias con protocolo en los ultimos 7
   const semana = dias7(hoyIso);
   const hechos = semana.filter(iso => ["m", "t", "n"].some(k => (cuelloChecks || {})[iso + "-" + k])).length;
-  out.push({ id: "cuello", nombre: "Cuello", valor: hechos + "/7 días", tendencia: "últimos 7 días",
+  out.push({ id: "cuello", nombre: "Cuello", valor: hechos + "/7 días", tendencia: "",
     flecha: "", tono: hechos >= 6 ? "bien" : hechos >= 4 ? "gris" : "ojo", seccion: null });
 
   return { lista: out, historial: hist, cintura: cint };

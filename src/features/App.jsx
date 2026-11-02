@@ -4,9 +4,7 @@ import { useState, useEffect, useRef } from "react";
 import { C, R, SP, TAP_MIN, A } from "@/design/tokens";
 import { storage, CLAVE_DATOS, VERSION_ESQUEMA, migrar } from "@/lib/storage";
 import { cuantoHayEn, limpiarDia } from "@/lib/estado/limpiar-dia";
-import { ICON_CUELLO, ICON_MOVILIDAD, ICON_NUTRICION } from "@/domain/assets/icons";
-import { NUTRICION } from "@/domain/nutricion/nutricion";
-import { BLOQUE, FECHA_FIN, FECHA_INICIO, FLAT_DAYS, WEEKS, claveDia, conBloqueEnCurso, findTodayIndex, todayLocalIso } from "@/domain/plan/calendario";
+import { FECHA_INICIO, FLAT_DAYS, WEEKS, claveDia, conBloqueEnCurso, findTodayIndex, todayLocalIso } from "@/domain/plan/calendario";
 import { getCuelloEj } from "@/domain/salud/cuello";
 import { OBJETIVO_MACROS, comidaDelDia } from "@/domain/nutricion/dias";
 import { getMovilidadDelDia } from "@/domain/salud/movilidad";
@@ -34,7 +32,7 @@ import { textoParaLibreta } from "@/domain/running/gps";
 import { ajustePorPeso, objetivosConAjuste, tendenciaPeso } from "@/domain/nutricion/adaptativo";
 import { habitualesIniciales } from "@/domain/nutricion/recomendar";
 import { suaveHabitual } from "@/domain/running/objetivo";
-import { diaDePrueba, diaEnPrueba, diasCumplidos, lunesDe, pruebaDe } from "@/domain/hoy/prueba";
+import { diaEnPrueba, diasCumplidos, lunesDe, pruebaDe } from "@/domain/hoy/prueba";
 import { Avanzo } from "@/features/hoy/AhoraYAvance";
 import { parteDelCoach } from "@/domain/progreso/parte";
 import { aplicarCuadre, cuadreSemana, textoCuadre } from "@/domain/nutricion/cuadre-semana";
@@ -723,7 +721,7 @@ export default function App() {
         {screen === "progreso" && (
           <ProgresoScreen medidas={medidas} setMedidas={setMedidas}
             ritmoReal={ritmoReal} weeks={WEEKS} checked={checked} workoutWeights={workoutWeights} workoutReps={workoutReps}
-            onVerInforme={setInformeMes} cuelloChecks={cuelloChecks} painLog={painLog} gps={gps} pesosDiarios={pesosDiarios} postponed={postponed}
+            onVerInforme={setInformeMes} cuelloChecks={cuelloChecks} painLog={painLog} gps={gps} pesosDiarios={pesosDiarios}
             onAbrir={(k) => setScreen(k)}
             avanzo={(() => {
               // "¿Avanzo?" vive aqui: en HOY solo queda lo que hay que hacer.
@@ -734,8 +732,7 @@ export default function App() {
               return (
                 <Avanzo objetivos={parte.objetivos} onVer={() => {}}
                   cumplidos={diasCumplidos(FLAT_DAYS.map(d => diaEnPrueba(d, prueba)), lunesDe(hoy), hoy, { checked, cuelloChecks })}
-                  sentir={ult ? semanaSentir[ult].nota : null}
-                  prueba={diaDePrueba(prueba, hoy) ? { dia: diaDePrueba(prueba, hoy) } : null} />
+                  sentir={ult ? semanaSentir[ult].nota : null} />
               );
             })()} />
         )}

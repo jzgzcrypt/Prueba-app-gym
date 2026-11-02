@@ -3,28 +3,17 @@
 import { A, C, CARD } from "@/design/tokens";
 
 /**
- * EL NUMERO QUE MANDA: "Carreras esta semana: 1 de 3".
- *
- * Es lo que predice si llegas al 7K, por eso va arriba en HOY y en Progreso.
- * Sin culpa: lo que falta se dice como lo siguiente que toca, no como fallo.
+ * EL NUMERO QUE MANDA: las carreras de la semana, "1/3".
+ * Es lo que predice si llegas al 7K. Cada circulo es una carrera, en su dia.
  */
 const CORTO = { Martes: "Mar", Jueves: "Jue", Domingo: "Dom", Sabado: "Sáb", Viernes: "Vie", Miercoles: "Mié", Lunes: "Lun" };
 
 export function CarrerasSemana({ c, hoyIso }) {
   if (!c || !c.de) return null;
-  const siguiente = c.dias.find(d => !d.hecha && d.iso >= hoyIso);
-  const nombre = (d) => (d.iso === hoyIso ? "hoy" : "el " + d.dow.toLowerCase().replace("miercoles", "miércoles").replace("sabado", "sábado"));
-  const frase = c.hechas >= c.de ? "Semana hecha. Así se llega al 7K."
-    : siguiente ? "La siguiente: " + nombre(siguiente) + "."
-    : "La semana que viene, otra vez a por " + c.de + ".";
   return (
     <div data-carreras-semana style={{ ...CARD, padding: "12px 16px", display: "flex", alignItems: "center", gap: 12 }}>
-      <div style={{ flex: 1, minWidth: 0 }}>
-        <div style={{ fontSize: 12.5, fontWeight: 700, color: C.textDim }}>Carreras esta semana</div>
-        <div style={{ fontSize: 24, fontWeight: 800, color: C.text, letterSpacing: -0.4, lineHeight: 1.15 }}>
-          {c.hechas} <span style={{ fontSize: 16, fontWeight: 700, color: C.textDim }}>de {c.de}</span>
-        </div>
-        <div style={{ fontSize: 13, color: C.textDim, marginTop: 1 }}>{frase}</div>
+      <div style={{ flex: 1, fontSize: 17, fontWeight: 700, color: C.text }}>
+        Carreras <span style={{ color: c.hechas >= c.de ? A.verde : C.textDim }}>{c.hechas}/{c.de}</span>
       </div>
       <div style={{ display: "flex", gap: 6, flexShrink: 0 }}>
         {c.dias.map(d => (

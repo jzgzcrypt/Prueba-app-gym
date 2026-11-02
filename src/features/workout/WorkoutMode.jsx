@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { C, CAT } from "@/design/tokens";
+import { CAT } from "@/design/tokens";
 import { CATALOGO } from "@/domain/fuerza/catalogo";
 import { parseSeries } from "@/domain/fuerza/series";
 import { descansoEntreSeries, objetivoSerie, pasoPeso, propuestaSerie, sugerenciaCarga, textoSeries } from "@/domain/fuerza/registro";
