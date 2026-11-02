@@ -677,7 +677,7 @@ export default function App() {
           <SemanaScreen weekIdx={weekIdx} setWeekIdx={setWeekIdx} jumpToDay={jumpToDay} aplicarDia={capas}
             checked={checked} todayIso={FLAT_DAYS[todayIdx].isoDate}
             workoutWeights={workoutWeights} ritmoReal={ritmoReal}
-            pausedRanges={pausedRanges} setPausedRanges={setPausedRanges} />
+            pausedRanges={pausedRanges} setPausedRanges={setPausedRanges} movidas={postponed} />
         )}
 
         {(screen === "ejercicios" || screen === "coach") && (
@@ -723,7 +723,7 @@ export default function App() {
         {screen === "progreso" && (
           <ProgresoScreen medidas={medidas} setMedidas={setMedidas}
             ritmoReal={ritmoReal} weeks={WEEKS} checked={checked} workoutWeights={workoutWeights} workoutReps={workoutReps}
-            onVerInforme={setInformeMes} cuelloChecks={cuelloChecks} painLog={painLog} gps={gps} pesosDiarios={pesosDiarios}
+            onVerInforme={setInformeMes} cuelloChecks={cuelloChecks} painLog={painLog} gps={gps} pesosDiarios={pesosDiarios} postponed={postponed}
             onAbrir={(k) => setScreen(k)}
             avanzo={(() => {
               // "¿Avanzo?" vive aqui: en HOY solo queda lo que hay que hacer.

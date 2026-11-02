@@ -25,7 +25,7 @@ import { progresoMagia } from "@/domain/habilidades/magia";
 import { WeekDots } from "@/features/ui/WeekDots";
 import { destinoDe, llegadasA } from "@/lib/estado/mover-sesion";
 import { dejarPasar, deshacer, diaHablado, esClave, nombreDe, pendienteDeRecolocar, proponerHueco } from "@/domain/plan/reprogramar";
-import { Recolocar } from "@/features/hoy/Recolocar";
+import { Recolocar, TraerCarrera } from "@/features/hoy/Recolocar";
 import { FinPrueba, SentirSemana } from "@/features/hoy/AhoraYAvance";
 import { ListaHoy } from "@/features/hoy/ListaHoy";
 import { CarrerasSemana } from "@/features/ui/CarrerasSemana";
@@ -211,6 +211,9 @@ export function HoyScreen(props) {
           {puedeEmpezar && isToday && (
             <Boton tipo="color" color={A.rojo} data-empezar onClick={llegadaPend ? () => props.onStartWorkoutDe(llegadaPend.isoDate) : onStartWorkout} style={{ marginBottom: 6 }}>Empezar</Boton>
           )}
+          {isToday && t === "compromiso" && !llegadaPend && !checked[dayKey] && !noHecha && (
+            <TraerCarrera dias={diasPlan} movidas={props.postponed} setMovidas={props.setPostponed} checked={checked} hoyEsTenis />
+          )}
           {!checked[diaSesion.isoDate] && !noHecha && (
             <button className="btn" data-no-hoy onClick={() => (esPasado && !llegadaPend ? marcarRepaso("sesion", "no") : setNoHecha(true))} style={enlace}>
               {esPasado ? "No la hice" : t === "compromiso" ? "Hoy no voy" : "No hoy / moverla"}
@@ -317,7 +320,7 @@ export function HoyScreen(props) {
       <div style={{ display: "flex", flexDirection: "column", gap: 12, marginTop: 14 }}>
         {/* El numero que manda: si esta semana salen las 3, vas en camino. */}
         <CarrerasSemana hoyIso={hoyIso} c={carrerasSemana({ semana: { days: FLAT_DAYS.filter(d => d.weekIdx === day.weekIdx) },
-          checked, gps: props.gps, ritmoReal: props.ritmoReal, hoyIso })} />
+          checked, gps: props.gps, ritmoReal: props.ritmoReal, movidas: props.postponed, hoyIso })} />
         {isToday && <TarjetaCalendario modo="hoy" horasCarrera={props.horasCarrera} setHorasCarrera={props.setHorasCarrera} />}
         {isToday && (() => {
           const falta = pendienteDeRecolocar({ dias: diasPlan, movidas: props.postponed, checked, hoyIso });
@@ -330,11 +333,14 @@ export function HoyScreen(props) {
         )}
 
         <ListaHoy key={dayKey} filas={filasLista} onCirculo={circulo} detalle={detalleFila} />
+        {isToday && day.tipo === "libre" && !llegadaPend && !movidaA && (
+          <TraerCarrera dias={diasPlan} movidas={props.postponed} setMovidas={props.setPostponed} checked={checked} hoyEsTenis={false} />
+        )}
 
         {preguntaSentir && (
           <SentirSemana onGuardar={(v) => props.setSemanaSentir(p => ({ ...p, [lunesPregunta]: v }))}
             carreras={carrerasSemana({ semana: { days: FLAT_DAYS.filter(d => lunesDe(d.isoDate) === lunesPregunta) },
-              checked, gps: props.gps, ritmoReal: props.ritmoReal, hoyIso })} />
+              checked, gps: props.gps, ritmoReal: props.ritmoReal, movidas: props.postponed, hoyIso })} />
         )}
 
         <button className="btn" data-todo-hoy onClick={() => setVerTodo(!verTodo)}

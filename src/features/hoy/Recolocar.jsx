@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { A, C, CARD } from "@/design/tokens";
 import { FLAT_DAYS, todayLocalIso } from "@/domain/plan/calendario";
-import { claseDe, dejarPasar, diaHablado, esClave, nombreDe, proponerHueco, recolocar } from "@/domain/plan/reprogramar";
+import { adelantarAHoy, aplicarAdelanto, claseDe, dejarPasar, diaHablado, esClave, nombreDe, proponerHueco, recolocar } from "@/domain/plan/reprogramar";
 import { Boton, Icono } from "@/features/ui/aire";
 
 /**
@@ -66,6 +66,45 @@ export function Recolocar({ dia, movidas, setMovidas, checked, ayer = false, abi
           style={{ fontSize: 14, fontWeight: 600, color: C.textDim, minHeight: 34 }}>{onHecha ? "No, dejarla pasar" : "Dejarla pasar"}</button>
         {children}
         {!ayer && <button className="btn" onClick={() => setAbierta(false)} style={{ fontSize: 13, color: C.textFaint, minHeight: 30 }}>Cancelar</button>}
+      </div>
+    </div>
+  );
+}
+
+/**
+ * HOY TENGO HUECO: no hay tenis, o es un dia libre y te apetece correr.
+ * La app elige que carrera de los proximos dias se trae a hoy (adelantarAHoy)
+ * y lo explica; con "Vale" se mueve y el dia del que sale queda libre.
+ */
+export function TraerCarrera({ dias = FLAT_DAYS, movidas, setMovidas, checked, hoyEsTenis }) {
+  const [abierta, setAbierta] = useState(false);
+  const hoyIso = todayLocalIso();
+  if (!abierta) {
+    return (
+      <button className="btn" data-traer onClick={() => setAbierta(true)} style={{ padding: "6px 4px", fontSize: 14, fontWeight: 600, color: A.azul, minHeight: 36 }}>
+        {hoyEsTenis ? "Hoy no hay tenis" : "Hoy tengo hueco para correr"} ›
+      </button>
+    );
+  }
+  const r = adelantarAHoy({ dias, movidas, checked, hoyIso });
+  return (
+    <div data-traer-propuesta style={{ ...CARD, padding: "14px 16px", background: A.fondo.naranja, boxShadow: "none" }}>
+      <div style={{ display: "flex", alignItems: "center", gap: 8, fontSize: 15, fontWeight: 700, color: C.text }}>
+        <span style={{ color: A.naranja, display: "flex" }}><Icono nombre="calendario" tam={18} /></span>
+        {hoyEsTenis ? "Sin tenis: la semana se reordena" : "Un hueco hoy"}
+      </div>
+      <div data-motivo style={{ fontSize: 14.5, color: C.text, lineHeight: 1.45, marginTop: 6 }}>{r.texto}</div>
+      <div style={{ display: "flex", flexDirection: "column", gap: 8, marginTop: 10 }}>
+        {r.dia && (
+          <Boton tipo="color" color={A.naranja} data-vale onClick={() => setMovidas(aplicarAdelanto(movidas, r.dia, hoyIso, hoyEsTenis))} style={{ minHeight: 44, fontSize: 15 }}>
+            Vale, corro hoy
+          </Boton>
+        )}
+        {hoyEsTenis && (
+          <button className="btn" data-dejar onClick={() => setMovidas(dejarPasar(movidas, hoyIso))}
+            style={{ fontSize: 14, fontWeight: 600, color: C.textDim, minHeight: 34 }}>Mejor descanso hoy</button>
+        )}
+        <button className="btn" onClick={() => setAbierta(false)} style={{ fontSize: 13, color: C.textFaint, minHeight: 30 }}>Cancelar</button>
       </div>
     </div>
   );

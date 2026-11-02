@@ -91,3 +91,35 @@ test("una sesion recibida ayer y no hecha tambien se pregunta", () => {
   assert.equal(p.isoDate, "2026-10-11");
   assert.equal(pendienteDeRecolocar({ dias: FLAT_DAYS, movidas: m, checked: { "2026-10-11": true }, hoyIso: "2026-10-14" }), null);
 });
+
+import { adelantarAHoy, aplicarAdelanto, deshacer as deshacerMov, proponerHueco as hueco } from "../src/domain/plan/reprogramar.js";
+
+test("sin tenis el lunes 2 de noviembre: se adelanta el suave del martes y el resto no se toca", () => {
+  const r = adelantarAHoy({ dias: FLAT_DAYS, movidas: {}, checked: {}, hoyIso: "2026-11-02" });
+  assert.equal(r.dia.isoDate, "2026-11-03");
+  assert.match(r.texto, /^Sin tenis hoy: corre hoy el suave del martes 3 \(20 min\)\. El martes 3 queda libre/);
+  const m = aplicarAdelanto({}, r.dia, "2026-11-02", true);
+  assert.deepEqual(m, { "2026-11-02": "pasa", "2026-11-03": "2026-11-02" });
+  const sinMover = deshacerMov(deshacerMov(m, "2026-11-03"), "2026-11-02");
+  assert.deepEqual(sinMover, {}, "deshacer deja la semana como estaba");
+});
+
+test("si el martes ya esta hecho, adelanta la siguiente que cumpla las reglas", () => {
+  const r = adelantarAHoy({ dias: FLAT_DAYS, movidas: {}, checked: { "2026-11-03": true }, hoyIso: "2026-11-02" });
+  assert.equal(r.dia.isoDate, "2026-11-05", "el jueves (suave + progresivos)");
+});
+
+test("en la semana del 5 km no se adelanta la prueba", () => {
+  // Sabado 26 de diciembre (activacion): con ella hecha, la prueba del domingo no viene.
+  const s8 = FLAT_DAYS.find(d => d.prueba && d.prueba.decide);
+  const sabado = FLAT_DAYS.find(d => d.isoDate === "2026-12-26");
+  const r = adelantarAHoy({ dias: FLAT_DAYS, movidas: {}, checked: { [sabado.isoDate]: true }, hoyIso: "2026-12-25" });
+  assert.notEqual(r.dia && r.dia.isoDate, s8.isoDate);
+});
+
+test("la tirada perdida del bloque 1 no se mete en el bloque 2", () => {
+  const ayer = FLAT_DAYS.find(d => d.isoDate === "2026-11-01");
+  const p = hueco({ dia: ayer, dias: FLAT_DAYS, movidas: {}, checked: {}, hoyIso: "2026-11-02" });
+  assert.equal(p.mejor, null);
+  assert.match(p.motivo, /bloque 1: se queda ahí/);
+});

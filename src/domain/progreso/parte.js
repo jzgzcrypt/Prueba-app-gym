@@ -46,12 +46,19 @@ const coma = (n) => String(Math.round(n * 10) / 10).replace(".", ",");
  * en el dia al que fue (se marca con la clave de su dia original).
  * @returns {null | { hechas:number, de:number, dias:{iso:string,dow:string,hecha:boolean,pasada:boolean}[] }}
  */
-export function carrerasSemana({ semana, checked, gps, ritmoReal, hoyIso }) {
+export function carrerasSemana({ semana, checked, gps, ritmoReal, movidas, hoyIso }) {
   if (!semana) return null;
-  const ch = checked || {}, g = gps || {}, rr = ritmoReal || {};
+  const ch = checked || {}, g = gps || {}, rr = ritmoReal || {}, m = movidas || {};
   const hecha = (iso) => !!ch[iso] || !!(g[iso] && g[iso].m > 0) || !!String(rr[iso] || "").trim();
+  const DOW = ["Domingo", "Lunes", "Martes", "Miercoles", "Jueves", "Viernes", "Sabado"];
+  // Una carrera movida se ensena en el dia al que fue (y se sigue marcando con su clave).
   const dias = semana.days.filter(d => CORRER.includes(d.tipo) && !d.vispera)
-    .map(d => ({ iso: d.isoDate, dow: d.dow, hecha: hecha(d.isoDate), pasada: d.isoDate < hoyIso }));
+    .map(d => {
+      const destino = /^\d{4}-\d{2}-\d{2}$/.test(m[d.isoDate] || "") ? m[d.isoDate] : d.isoDate;
+      const dow = destino === d.isoDate ? d.dow : DOW[new Date(destino + "T12:00:00Z").getUTCDay()];
+      return { iso: destino, clave: d.isoDate, dow, hecha: hecha(d.isoDate), pasada: destino < hoyIso };
+    })
+    .sort((a, b) => (a.iso < b.iso ? -1 : 1));
   return { hechas: dias.filter(d => d.hecha).length, de: dias.length, dias };
 }
 

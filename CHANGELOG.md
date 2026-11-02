@@ -21,6 +21,9 @@ Todo cambio que se haga en la app se anota aquí. Sin excepciones.
 
 ## [Sin publicar]
 
+### Arreglado
+- Lo que faltó del bloque 1 ya no se propone encima del bloque 2: «Era del bloque 1: se queda ahí».
+
 ### Cambiado: Bloque 2, todo al servicio del 7K a 4:45
 - Plan nuevo desde el lunes 2 de noviembre, hecho para el punto de partida real (una carrera suelta desde el 12 de octubre). 13 semanas: volver, base (3 km en S4), construir (5 km que decide en S8), específico (1, 2 y 3 km a 4:45) y recta final. El 7K, el domingo 31 de enero de 2027. Del 21 de septiembre al 1 de noviembre queda como historia.
 - Martes, jueves y domingo se corre; miércoles y viernes, hombro de 30 min con pecho, espalda y la prevención dentro; sábado libre. No se quita ningún área: la cadera y la cadena posterior pasan a los días de hombro.
@@ -29,6 +32,8 @@ Todo cambio que se haga en la app se anota aquí. Sin excepciones.
 - Las semanas de vuelta del plan no se recortan otra vez por el parón.
 
 ### Añadido
+- **Hoy no hay tenis / hoy tengo hueco.** En la fila del tenis (o en un día libre), la app elige qué carrera de los próximos 3 días traer a hoy, con las reglas de recolocar: nunca dos días duros seguidos, la tirada no antes de un día intenso, una prueba no se adelanta, y un suave antes que la calidad. Lo explica («Sin tenis hoy: corre hoy el suave del martes 3. El martes 3 queda libre…»), y con «Vale» se mueve. Se deshace como cualquier movida.
+- Semana enseña lo movido: «Viene del martes», «Movida al lunes 2», «Dejada pasar». «Carreras esta semana» pone cada carrera en el día al que fue.
 - **Los avisos siguen a la fecha.** Si el 5 km mueve o adelanta el 7K, HOY vuelve a enseñar la tarjeta de avisos («Tu 7K se ha movido al…») con las horas ya puestas. El calendario sale con las fechas nuevas y cancela los avisos viejos que ya no tocan. En iPhone puede duplicar en vez de actualizar: la tarjeta lo dice.
 - **Carreras esta semana: X de 3**, arriba en HOY y en Progreso. Es lo que predice si llegas; la previsión pasa a segundo plano.
 - **Las carreras son citas.** Eliges a qué hora sales el martes, el jueves y el domingo. El calendario del móvil avisa 15 min antes, y en HOY la fila de la carrera dice «Ropa puesta · móvil en la entrada · sales a las 17:30».

@@ -89,6 +89,7 @@ export function proponerHueco({ dia, dias, movidas, checked, hoyIso }) {
   for (let k = 1; k <= 3; k++) {
     const c = dias[i0 + k];
     if (!c || c.isoDate < hoyIso) continue;
+    if ((c.bloque || 0) !== (dia.bloque || 0)) continue;      // lo de un bloque no invade el siguiente
     if (ch[c.isoDate] || recibe.has(c.isoDate)) continue;
     const ocupa = ef[c.isoDate];
     const claseOcupa = ocupa ? claseDe(ocupa) : "libre";
@@ -109,6 +110,10 @@ export function proponerHueco({ dia, dias, movidas, checked, hoyIso }) {
   const limpias = opciones.map(({ dia: d, cede, texto }) => ({ dia: d, cede, texto }));
   if (!limpias.length && clase === "fuerza") {
     return { opciones: [], mejor: null, motivo: "La fuerza solo va a un día libre y no hay ninguno en los próximos 3 días. Mejor dejarla pasar." };
+  }
+  const siguiente = dias[i0 + 1];
+  if (!limpias.length && siguiente && (siguiente.bloque || 0) !== (dia.bloque || 0)) {
+    return { opciones: [], mejor: null, motivo: "Era del bloque " + (dia.bloque || 1) + ": se queda ahí. Ya ha empezado el bloque " + (siguiente.bloque || 2) + "." };
   }
   if (!limpias.length) {
     return { opciones: [], mejor: null, motivo: "No cabe en los próximos 3 días sin pisar otra sesión clave o juntar dos días duros. Mejor dejarla pasar que cargar la semana." };
@@ -162,4 +167,63 @@ export function pendienteDeRecolocar({ dias, movidas, checked, hoyIso }) {
   if (llegada) return llegada;
   if (["prueba", "calidad", "tirada", "suave", "fuerza", "tenis"].includes(claseDe(ayer)) && !(checked || {})[ayer.isoDate] && !m[ayer.isoDate]) return ayer;
   return null;
+}
+
+/**
+ * HOY TENGO HUECO (no hay tenis, o es un dia libre): que carrera se adelanta.
+ *
+ * Se mira lo que toca en los proximos 3 dias del mismo bloque, sin hacer ni
+ * mover, y se elige con las mismas reglas que al recolocar:
+ *  - una prueba no se adelanta (tiene su dia por algo);
+ *  - nunca dos dias intensos seguidos; la tirada no va antes de un dia intenso;
+ *  - la mas cercana primero, y un suave antes que la calidad o la tirada.
+ * El dia del que sale queda libre: la semana no se carga, solo se ordena.
+ *
+ * @returns {{ dia:object|null, texto:string }} dia: la carrera a traer a hoy
+ */
+export function adelantarAHoy({ dias, movidas, checked, hoyIso }) {
+  const i0 = dias.findIndex(d => d.isoDate === hoyIso);
+  if (i0 < 0) return { dia: null, texto: "" };
+  const hoy = dias[i0];
+  const ef = efectivo(dias, movidas);
+  const ch = checked || {};
+  const m = movidas || {};
+  const recibe = new Set(Object.values(m).filter(v => /^\d{4}/.test(v)));
+  const ocupaHoy = ef[hoyIso] ? claseDe(ef[hoyIso]) : "libre";
+  if (!["tenis", "libre"].includes(ocupaHoy) || recibe.has(hoyIso)) return { dia: null, texto: "Hoy ya tienes sesión." };
+  const PREFIERE = { suave: 0, tirada: 2, calidad: 4 };
+  const opciones = [];
+  for (let k = 1; k <= 3; k++) {
+    const c = dias[i0 + k];
+    if (!c || (c.bloque || 0) !== (hoy.bloque || 0)) continue;
+    const clase = claseDe(c);
+    if (!(clase in PREFIERE) || ch[c.isoDate] || m[c.isoDate] || recibe.has(c.isoDate)) continue;
+    // Con la carrera ya en hoy: lo de ayer y lo de manana (si sale de manana, queda libre).
+    const ayer = dias[i0 - 1], manana = dias[i0 + 1];
+    const intensa = (d) => !!d && INTENSA.has(claseDe(ef[d.isoDate])) && !(d.isoDate === hoyIso);
+    const ayerIntensa = ayer && intensa(ayer);
+    const mananaIntensa = manana && manana.isoDate !== c.isoDate && intensa(manana);
+    if (INTENSA.has(clase) && (ayerIntensa || mananaIntensa)) continue;
+    if (clase === "tirada" && mananaIntensa) continue;
+    opciones.push({ c, coste: k * 10 + PREFIERE[clase] });
+  }
+  opciones.sort((a, b) => a.coste - b.coste);
+  const sinTenis = ocupaHoy === "tenis" ? "Sin tenis hoy" : "Con el hueco de hoy";
+  if (!opciones.length) {
+    return { dia: null, texto: sinTenis + ": no hay ninguna carrera que quepa hoy sin juntar dos días duros o adelantar una prueba. Descansa: también cuenta." };
+  }
+  const c = opciones[0].c;
+  const sigue = dias.slice(i0 + 1, i0 + 7).find(d => d.isoDate !== c.isoDate && esClave(d) && !ch[d.isoDate]);
+  const texto = sinTenis + ": corre hoy " + nombreDe(c) + " " + de(diaHablado(c)) +
+    " (" + (c.dur || c.titulo) + "). " + diaHablado(c).replace(/^el /, "El ") + " queda libre" +
+    (sigue ? "; " + diaHablado(sigue) + ", " + nombreDe(sigue) + " como estaba." : ".");
+  return { dia: c, texto };
+}
+
+/** Aplica el adelanto: lo de hoy (tenis o libre) pasa y la carrera viene a hoy. */
+export function aplicarAdelanto(movidas, dia, hoyIso, hoyEsTenis) {
+  const m = deshacer(movidas, dia.isoDate);
+  if (hoyEsTenis) m[hoyIso] = "pasa";
+  m[dia.isoDate] = hoyIso;
+  return m;
 }

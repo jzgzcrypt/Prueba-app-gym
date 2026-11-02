@@ -111,3 +111,9 @@ test("carreras esta semana: martes, jueves y domingo; la vispera no cuenta", () 
   const s8 = WEEKS.filter(w => w.bloque === 2)[7];
   assert.equal(carrerasSemana({ semana: s8, checked: {}, hoyIso: "2026-12-21" }).de, 3, "el sabado de activacion no es una carrera mas");
 });
+
+test("una carrera adelantada cuenta en el dia al que fue", () => {
+  const s1 = WEEKS.find(w => w.days[0].isoDate === "2026-11-02");
+  const r = carrerasSemana({ semana: s1, checked: {}, movidas: { "2026-11-02": "pasa", "2026-11-03": "2026-11-02" }, hoyIso: "2026-11-02" });
+  assert.deepEqual(r.dias.map(d => [d.dow, d.iso, d.clave]), [["Lunes", "2026-11-02", "2026-11-03"], ["Jueves", "2026-11-05", "2026-11-05"], ["Domingo", "2026-11-08", "2026-11-08"]]);
+});

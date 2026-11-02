@@ -3,10 +3,14 @@
 import { useState } from "react";
 import { A, C, TAP_MIN, TYPE } from "@/design/tokens";
 import { Boton, Check, Chevron, IconoCaja, Tarjeta } from "@/features/ui/aire";
-import { DATE_MAP, WEEKS, claveDia } from "@/domain/plan/calendario";
+import { DATE_MAP, FLAT_DAYS, WEEKS, claveDia } from "@/domain/plan/calendario";
 import { comidaDelDia } from "@/domain/nutricion/dias";
 import { KpiBlock } from "@/features/semana/KpiBlock";
-export function SemanaScreen({ weekIdx, setWeekIdx, jumpToDay, checked, todayIso, workoutWeights, ritmoReal, pausedRanges, setPausedRanges, aplicarDia = (d) => d }) {
+const DIAS_C = ["domingo", "lunes", "martes", "miércoles", "jueves", "viernes", "sábado"];
+/** "2026-11-02" -> "lunes 2". */
+const fechaCorta = (iso) => { const f = new Date(iso + "T12:00:00"); return DIAS_C[f.getDay()] + " " + f.getDate(); };
+
+export function SemanaScreen({ weekIdx, setWeekIdx, jumpToDay, checked, todayIso, workoutWeights, ritmoReal, pausedRanges, setPausedRanges, aplicarDia = (d) => d, movidas = {} }) {
   const week = WEEKS[weekIdx];
   const [kpiOpen, setKpiOpen] = useState(null);
   const [pauseMode, setPauseMode] = useState(false);
@@ -61,8 +65,17 @@ export function SemanaScreen({ weekIdx, setWeekIdx, jumpToDay, checked, todayIso
       </div>
 
       <Tarjeta data-dias style={{ marginTop: 14, overflow: "hidden" }}>
-        {week.days.map(aplicarDia).map((day, i) => {
-          const key = claveDia(day);
+        {week.days.map(aplicarDia).map((propio, i) => {
+          // Lo movido: si a este dia llego una sesion de otro, se ve esa; si la
+          // suya se fue o se dejo pasar, se dice.
+          const iso = propio.isoDate;
+          const origen = Object.keys(movidas || {}).find(o => movidas[o] === iso);
+          const llegada = origen && aplicarDia(FLAT_DAYS.find(d => d.isoDate === origen) || propio);
+          const day = llegada ? { ...llegada, isoDate: iso, date: propio.date, dow: propio.dow } : propio;
+          const salida = movidas && movidas[iso];
+          const notaMov = llegada ? "Viene del " + llegada.dow.toLowerCase().replace("miercoles", "miércoles").replace("sabado", "sábado") + " · "
+            : salida === "pasa" ? "Dejada pasar · " : /^\d{4}-/.test(salida || "") ? "Movida al " + fechaCorta(salida) + " · " : "";
+          const key = llegada ? origen : claveDia(day);
           const done = !!checked[key];
           const isT = DATE_MAP[day.date] === todayIso;
           const paused = isPaused(key);
@@ -83,7 +96,7 @@ export function SemanaScreen({ weekIdx, setWeekIdx, jumpToDay, checked, todayIso
                 <div style={{ fontSize: 15, fontWeight: 600, color: done || paused ? C.textDim : C.text, textDecoration: paused ? "line-through" : "none",
                               overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{tituloLargo(day)}</div>
                 <div style={{ fontSize: 12, fontWeight: 600, marginTop: 1, color: comida && comida.id === "comer" ? C.ok : C.textDim }}>
-                  {isT ? "Hoy · " : ""}{paused ? "Pausa" : comida ? (comida.id === "comer" ? "Comer más" : "Comer menos") : "Descanso"}
+                  {isT ? "Hoy · " : ""}{notaMov}{paused ? "Pausa" : comida ? (comida.id === "comer" ? "Comer más" : "Comer menos") : "Descanso"}
                   {day.tipo === "fuerza" && !paused ? <span style={{ color: C.textDim, fontWeight: 500 }}> · {day.ejercicios.length} ejercicios · {day.dur}</span> : null}
                 </div>
               </div>

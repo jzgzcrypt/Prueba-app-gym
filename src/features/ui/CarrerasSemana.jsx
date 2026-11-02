@@ -28,7 +28,7 @@ export function CarrerasSemana({ c, hoyIso }) {
       </div>
       <div style={{ display: "flex", gap: 6, flexShrink: 0 }}>
         {c.dias.map(d => (
-          <div key={d.iso} title={d.dow} style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 3 }}>
+          <div key={d.clave || d.iso} title={d.dow} style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 3 }}>
             <span style={{ width: 30, height: 30, borderRadius: 15, display: "flex", alignItems: "center", justifyContent: "center",
                            background: d.hecha ? A.verde : "transparent", color: "#fff", fontSize: 15, fontWeight: 800,
                            border: d.hecha ? "none" : "2px solid " + (d.iso === hoyIso ? A.azul : "#C7C7CC") }}>

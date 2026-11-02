@@ -15,7 +15,7 @@ import { A, C, CARD, CAT } from "@/design/tokens";
 import { ScreenHeader } from "@/features/ui/headers";
 import { Boton, Chevron, Fila, Icono, IconoCaja, Pastilla, Tarjeta } from "@/features/ui/aire";
 import { QuickFieldInput, SimpleLineChart } from "@/features/ui/charts";
-export function ProgresoScreen({ medidas, setMedidas, ritmoReal, weeks, checked, workoutWeights, workoutReps, onVerInforme, cuelloChecks, painLog, gps, pesosDiarios, avanzo, onAbrir }) {
+export function ProgresoScreen({ medidas, setMedidas, ritmoReal, weeks, checked, workoutWeights, workoutReps, onVerInforme, cuelloChecks, painLog, gps, pesosDiarios, avanzo, onAbrir, postponed }) {
   const [showForm, setShowForm] = useState(false);
   const [form, setForm] = useState({ peso: "", cintura: "", anchoHombro: "", cadera: "", hombro: "", cadenaPosterior: "", columna: "", caderaMov: "", foto: null });
   const [quickField, setQuickField] = useState(null); // "peso" | "cintura" | "cadera" | "hombro" | "cadenaPosterior" | "columna" | "caderaMov" | null (menu)
@@ -177,7 +177,7 @@ export function ProgresoScreen({ medidas, setMedidas, ritmoReal, weeks, checked,
           objetivo con su frase, los 4 objetivos (¿Avanzo?), la proxima
           prueba, el peso y la constancia. */}
       <div style={{ marginBottom: 12 }}>
-        <CarrerasSemana hoyIso={hoyIso} c={carrerasSemana({ semana: semanaActual, checked, gps, ritmoReal, hoyIso })} />
+        <CarrerasSemana hoyIso={hoyIso} c={carrerasSemana({ semana: semanaActual, checked, gps, ritmoReal, movidas: postponed, hoyIso })} />
       </div>
       <TuObjetivo veredicto={parte.veredicto} />
       {avanzo && <div style={{ marginBottom: 12 }}>{avanzo}</div>}
