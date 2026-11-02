@@ -74,11 +74,12 @@ export function eventoDelDia(dia, hora, horasCarrera) {
 /**
  * El calendario del bloque en formato .ics.
  * @param {Array} dias   los dias del bloque, con fecha (FLAT_DAYS)
- * @param {{hora?:string, desde?:string|null, horasCarrera?:object|null}} opciones
+ * @param {{hora?:string, desde?:string|null, horasCarrera?:object|null, original?:Array|null}} opciones
  *        hora: hora de las sesiones ("17:00"); desde: fecha ISO, se omite lo anterior;
- *        horasCarrera: la hora de cada carrera por indice de dia ({ "1": "17:30" })
+ *        horasCarrera: la hora de cada carrera por indice de dia ({ "1": "17:30" });
+ *        original: el calendario sin mover, para cancelar los avisos que ya no tocan
  */
-export function calendarioIcs(dias, { hora = "17:00", desde = null, horasCarrera = null } = {}) {
+export function calendarioIcs(dias, { hora = "17:00", desde = null, horasCarrera = null, original = null } = {}) {
   const lineas = [
     "BEGIN:VCALENDAR", "VERSION:2.0", "PRODID:-//Sistema 7K//Plan//ES", "CALSCALE:GREGORIAN",
     "METHOD:PUBLISH", "X-WR-CALNAME:Sistema 7K",
@@ -102,6 +103,19 @@ export function calendarioIcs(dias, { hora = "17:00", desde = null, horasCarrera
       "END:VALARM",
       "END:VEVENT",
     );
+  }
+  // Si el 5 km movio la fecha, los avisos del calendario original que ya no
+  // tienen sesion se cancelan con su mismo UID (sobre todo el viejo "EL DIA").
+  if (original) {
+    const conSesion = new Set(dias.filter(d => eventoDelDia(d, hora, horasCarrera)).map(d => d.isoDate));
+    for (const d of original) {
+      if ((desde && d.isoDate < desde) || conSesion.has(d.isoDate)) continue;
+      const ev = eventoDelDia(d, hora, horasCarrera);
+      if (!ev) continue;
+      lineas.push("BEGIN:VEVENT", "UID:" + d.isoDate + "@sistema7k", "DTSTAMP:" + sello, "STATUS:CANCELLED",
+        "DTSTART:" + fechaHora(d.isoDate, ev.inicio), "DTEND:" + fechaHora(d.isoDate, ev.inicio, ev.min),
+        "SUMMARY:" + esc("7K · " + ev.titulo + " (movida)"), "END:VEVENT");
+    }
   }
   lineas.push("END:VCALENDAR");
   return lineas.map(plegar).join("\r\n") + "\r\n";

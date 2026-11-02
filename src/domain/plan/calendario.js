@@ -110,24 +110,38 @@ const ASIGNADAS = (() => {
   return asignarSemanas({ plan: PLAN, extra: semanasExtraDe((DATOS.ritmoReal || {})[iso]) });
 })();
 
+/** Las semanas del calendario con sus fechas, para unas semanas asignadas. */
+function construirSemanas(asignadas) {
+  return asignadas.map((pi, wi) => {
+    const wk = PLAN[pi];
+    const days = wk.days.map((d, di) => {
+      const isoDate = sumarDias(FECHA_INICIO, wi * 7 + di);
+      const dia = { ...d, isoDate, date: etiquetaCorta(isoDate), dayIdx: di, weekN: wi + 1, bloque: wk.bloque };
+      // La semana sin deficit se marca en la semana, pero la comida se decide
+      // por dia: cada dia lleva la marca de su semana.
+      if (wk.sinDeficit) dia.sinDeficit = true;
+      if (wk.vuelta) dia.vueltaPlan = true;
+      return aplicarCompromiso(dia, di);
+    });
+    return { ...wk, n: wi + 1, planN: wk.n, extra: wi > 0 && asignadas[wi - 1] === pi, days,
+             dates: etiquetaRango(days[0].isoDate, days[days.length - 1].isoDate) };
+  });
+}
+
+/** Todos los dias del calendario con N semanas movidas por el 5 km (negativo:
+ *  adelantado). Lo usa el servidor, que no ve tus datos, para el .ics. */
+export function diasDelCalendario(extra = 0) {
+  const out = [];
+  construirSemanas(asignarSemanas({ plan: PLAN, extra })).forEach((wk, wi) =>
+    wk.days.forEach((d, di) => out.push({ ...d, weekIdx: wi, dayIdx: di, weekN: wk.n })));
+  return out;
+}
+
 /** El plan con sus fechas puestas. Es este WEEKS, y no el del plan, el que usa
  *  toda la app: incluye `date` por dia y `dates` por semana ya calculados.
  *  Cada semana del calendario lleva la del plan que le toca (`planN`); `n` es
  *  su numero en el calendario y `extra` dice si es una semana extra del 5 km. */
-export const WEEKS = ASIGNADAS.map((pi, wi) => {
-  const wk = PLAN[pi];
-  const days = wk.days.map((d, di) => {
-    const isoDate = sumarDias(FECHA_INICIO, wi * 7 + di);
-    const dia = { ...d, isoDate, date: etiquetaCorta(isoDate), dayIdx: di, weekN: wi + 1, bloque: wk.bloque };
-    // La semana sin deficit se marca en la semana, pero la comida se decide
-    // por dia: cada dia lleva la marca de su semana.
-    if (wk.sinDeficit) dia.sinDeficit = true;
-    if (wk.vuelta) dia.vueltaPlan = true;
-    return aplicarCompromiso(dia, di);
-  });
-  return { ...wk, n: wi + 1, planN: wk.n, extra: wi > 0 && ASIGNADAS[wi - 1] === pi, days,
-           dates: etiquetaRango(days[0].isoDate, days[days.length - 1].isoDate) };
-});
+export const WEEKS = construirSemanas(ASIGNADAS);
 
 /** Cuantas semanas extra ha metido el 5 km que decide la fecha (negativo: adelantado). */
 export const SEMANAS_MOVIDAS = WEEKS.length - PLAN.length;

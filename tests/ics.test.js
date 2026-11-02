@@ -55,3 +55,20 @@ test("con hora de carrera, la carrera va a su hora y avisa 15 min antes", async 
   assert.match(ev("2026-11-04"), /DTSTART:20261104T170000/, "la fuerza sigue a la hora general");
   assert.match(ev("2026-11-04"), /TRIGGER:-PT30M/);
 });
+
+test("si el 5 km mueve la fecha, el calendario sigue la nueva y cancela el viejo 7K", async () => {
+  const { calendarioIcs } = await import("../src/domain/plan/ics.js");
+  const { diasDelCalendario } = await import("../src/domain/plan/calendario.js");
+  const objetivo = (extra) => diasDelCalendario(extra).find(d => d.tipo === "objetivo").isoDate;
+  assert.equal(objetivo(0), "2027-01-31");
+  assert.equal(objetivo(4), "2027-02-28");
+  assert.equal(objetivo(-1), "2027-01-24");
+  const ics = calendarioIcs(diasDelCalendario(4), { desde: "2026-12-28", original: diasDelCalendario(0) });
+  const ev = (iso) => ics.split("BEGIN:VEVENT").filter(b => b.includes("UID:" + iso + "@"));
+  assert.match(ev("2027-02-28")[0], /EL DÍA/);
+  assert.equal(ev("2027-01-31").length, 1, "el 31 de enero lleva una sesion normal, no el 7K");
+  assert.doesNotMatch(ev("2027-01-31")[0], /EL DÍA/);
+  const adelantado = calendarioIcs(diasDelCalendario(-1), { desde: "2026-12-28", original: diasDelCalendario(0) });
+  const viejo = adelantado.split("BEGIN:VEVENT").find(b => b.includes("UID:2027-01-31@"));
+  assert.match(viejo, /STATUS:CANCELLED/, "el viejo dia del 7K se cancela");
+});

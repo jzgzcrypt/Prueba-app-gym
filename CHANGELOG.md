@@ -29,6 +29,7 @@ Todo cambio que se haga en la app se anota aquí. Sin excepciones.
 - Las semanas de vuelta del plan no se recortan otra vez por el parón.
 
 ### Añadido
+- **Los avisos siguen a la fecha.** Si el 5 km mueve o adelanta el 7K, HOY vuelve a enseñar la tarjeta de avisos («Tu 7K se ha movido al…») con las horas ya puestas. El calendario sale con las fechas nuevas y cancela los avisos viejos que ya no tocan. En iPhone puede duplicar en vez de actualizar: la tarjeta lo dice.
 - **Carreras esta semana: X de 3**, arriba en HOY y en Progreso. Es lo que predice si llegas; la previsión pasa a segundo plano.
 - **Las carreras son citas.** Eliges a qué hora sales el martes, el jueves y el domingo. El calendario del móvil avisa 15 min antes, y en HOY la fila de la carrera dice «Ropa puesta · móvil en la entrada · sales a las 17:30».
 - **Repaso del domingo, 2 minutos**: carreras hechas, qué falló y qué cambias. Dentro sigue la pregunta de cómo te has sentido.
@@ -44,7 +45,6 @@ Todo cambio que se haga en la app se anota aquí. Sin excepciones.
 - Contador de días, "Tu objetivo" ("Fecha movida N semanas: lo decidió tu 5 km"), previsión y textos usan la fecha que toque. Ya no hay fechas escritas a mano.
 - Un 5 km corrido como suave (en la vuelta) no decide nada.
 - Semana marca las semanas extra.
-- Limitación: el calendario descargable (.ics) sigue con las fechas originales.
 
 ### Arreglado
 - La vuelta tras un parón ya no se fija solo en el último hueco. También cuenta las carreras de las 4 semanas anteriores: cada semana sin correr cuenta como semana parada. Antes, una carrera suelta tras dos semanas paradas y luego 7 días sin correr daba "7 días, al 83 %" (tirada de 42 min). Ahora da "Pocas carreras en las últimas 4 semanas, salida 1 de 5, al 48 %" (24 min).
