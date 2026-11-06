@@ -675,7 +675,7 @@ export default function App() {
           <SemanaScreen weekIdx={weekIdx} setWeekIdx={setWeekIdx} jumpToDay={jumpToDay} aplicarDia={capas}
             checked={checked} todayIso={FLAT_DAYS[todayIdx].isoDate}
             workoutWeights={workoutWeights} ritmoReal={ritmoReal}
-            pausedRanges={pausedRanges} setPausedRanges={setPausedRanges} movidas={postponed} />
+            pausedRanges={pausedRanges} setPausedRanges={setPausedRanges} movidas={postponed} setMovidas={setPostponed} />
         )}
 
         {(screen === "ejercicios" || screen === "coach") && (

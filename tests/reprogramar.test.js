@@ -123,3 +123,29 @@ test("la tirada perdida del bloque 1 no se mete en el bloque 2", () => {
   assert.equal(p.mejor, null);
   assert.match(p.motivo, /bloque 1: se queda ahí/);
 });
+
+import { intercambiar, sePuedeIntercambiar } from "../src/domain/plan/reprogramar.js";
+
+test("intercambiar dos dias, y volver a intercambiarlos deja todo como estaba", () => {
+  const m = intercambiar({}, "2026-11-05", "2026-11-07");
+  assert.deepEqual(m, { "2026-11-05": "2026-11-07", "2026-11-07": "2026-11-05" });
+  assert.deepEqual(intercambiar(m, "2026-11-05", "2026-11-07"), {});
+});
+
+test("intercambiar con un dia que ya tenia algo movido mueve lo que se ve", () => {
+  // El jueves 5 y el sabado 7 cambiados; luego lo del sabado (ahora en el jueves) va al domingo 8.
+  const m1 = intercambiar({}, "2026-11-05", "2026-11-07");
+  const m2 = intercambiar(m1, "2026-11-05", "2026-11-08");
+  // El jueves enseña la tirada del domingo, el domingo lo del sabado, el sabado lo del jueves.
+  assert.deepEqual(m2, { "2026-11-05": "2026-11-07", "2026-11-07": "2026-11-08", "2026-11-08": "2026-11-05" });
+});
+
+test("lo dejado pasar vuelve al intercambiar, y el tenis, lo hecho y lo pasado no se mueven", () => {
+  assert.deepEqual(intercambiar({ "2026-11-05": "pasa" }, "2026-11-05", "2026-11-07"), { "2026-11-05": "2026-11-07", "2026-11-07": "2026-11-05" });
+  const dia = (iso) => FLAT_DAYS.find(d => d.isoDate === iso);
+  const ctx = { checked: { "2026-11-05": true }, hoyIso: "2026-11-04" };
+  assert.equal(sePuedeIntercambiar(dia("2026-11-09"), ctx), false, "tenis");
+  assert.equal(sePuedeIntercambiar(dia("2026-11-05"), ctx), false, "hecho");
+  assert.equal(sePuedeIntercambiar(dia("2026-11-03"), ctx), false, "pasado");
+  assert.equal(sePuedeIntercambiar(dia("2026-11-07"), ctx), true);
+});

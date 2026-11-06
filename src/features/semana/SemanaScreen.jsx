@@ -5,11 +5,13 @@ import { A, C, TAP_MIN, TYPE } from "@/design/tokens";
 import { Boton, Check, Chevron, IconoCaja, Tarjeta } from "@/features/ui/aire";
 import { DATE_MAP, FLAT_DAYS, WEEKS, claveDia } from "@/domain/plan/calendario";
 import { KpiBlock } from "@/features/semana/KpiBlock";
+import { useArrastrar } from "@/features/semana/arrastrar";
+import { intercambiar, sePuedeIntercambiar } from "@/domain/plan/reprogramar";
 const DIAS_C = ["domingo", "lunes", "martes", "miércoles", "jueves", "viernes", "sábado"];
 /** "2026-11-02" -> "lunes 2". */
 const fechaCorta = (iso) => { const f = new Date(iso + "T12:00:00"); return DIAS_C[f.getDay()] + " " + f.getDate(); };
 
-export function SemanaScreen({ weekIdx, setWeekIdx, jumpToDay, checked, todayIso, workoutWeights, ritmoReal, pausedRanges, setPausedRanges, aplicarDia = (d) => d, movidas = {} }) {
+export function SemanaScreen({ weekIdx, setWeekIdx, jumpToDay, checked, todayIso, workoutWeights, ritmoReal, pausedRanges, setPausedRanges, aplicarDia = (d) => d, movidas = {}, setMovidas }) {
   const week = WEEKS[weekIdx];
   const [kpiOpen, setKpiOpen] = useState(null);
   const [pauseMode, setPauseMode] = useState(false);
@@ -27,6 +29,22 @@ export function SemanaScreen({ weekIdx, setWeekIdx, jumpToDay, checked, todayIso
     setPauseSelection([]);
     setPauseMode(false);
   };
+
+  // Mantener pulsado un dia y soltarlo en otro los intercambia. El tenis, lo
+  // hecho y lo pasado no se mueven.
+  const muestra = (propio) => {
+    const origen = Object.keys(movidas || {}).find(o => movidas[o] === propio.isoDate);
+    return origen ? FLAT_DAYS.find(d => d.isoDate === origen) || propio : propio;
+  };
+  const movible = (i) => {
+    const propio = week.days[i], visto = muestra(propio);
+    return !pauseMode && !!setMovidas && propio.tipo !== "compromiso"
+      && sePuedeIntercambiar({ ...visto, isoDate: propio.isoDate }, { checked: { [propio.isoDate]: !!checked[visto.isoDate] }, hoyIso: todayIso });
+  };
+  const { arrastre, filaProps, tragarClic } = useArrastrar({
+    puede: movible,
+    alSoltar: (a, b) => setMovidas(intercambiar(movidas, week.days[a].isoDate, week.days[b].isoDate)),
+  });
 
   const iconoDe = (day) => day.tipo === "fuerza" ? ["mancuerna", "azul"] : day.tipo === "compromiso" ? ["tenis", "verde"]
     : day.tipo === "libre" ? ["reloj", "gris"] : day.tipo === "test" || day.tipo === "objetivo" ? ["meta", "naranja"] : ["correr", "rojo"];
@@ -62,7 +80,7 @@ export function SemanaScreen({ weekIdx, setWeekIdx, jumpToDay, checked, todayIso
         ))}
       </div>
 
-      <Tarjeta data-dias style={{ marginTop: 14, overflow: "hidden" }}>
+      <Tarjeta data-dias style={{ marginTop: 14, overflow: arrastre ? "visible" : "hidden" }}>
         {week.days.map(aplicarDia).map((propio, i) => {
           // Lo movido: si a este dia llego una sesion de otro, se ve esa; si la
           // suya se fue o se dejo pasar, se dice.
@@ -71,7 +89,8 @@ export function SemanaScreen({ weekIdx, setWeekIdx, jumpToDay, checked, todayIso
           const llegada = origen && aplicarDia(FLAT_DAYS.find(d => d.isoDate === origen) || propio);
           const day = llegada ? { ...llegada, isoDate: iso, date: propio.date, dow: propio.dow } : propio;
           const salida = movidas && movidas[iso];
-          const notaMov = llegada ? "Viene del " + llegada.dow.toLowerCase().replace("miercoles", "miércoles").replace("sabado", "sábado") + " · "
+          const notaMov = llegada && llegada.tipo === "libre" ? ""
+            : llegada ? "Viene del " + llegada.dow.toLowerCase().replace("miercoles", "miércoles").replace("sabado", "sábado") + " · "
             : salida === "pasa" ? "Dejada pasar · " : /^\d{4}-/.test(salida || "") ? "Movida al " + fechaCorta(salida) + " · " : "";
           const key = llegada ? origen : claveDia(day);
           const done = !!checked[key];
@@ -80,10 +99,14 @@ export function SemanaScreen({ weekIdx, setWeekIdx, jumpToDay, checked, todayIso
           const selected = pauseSelection.includes(key);
           const [ico, tono] = iconoDe(day);
           return (
-            <button key={i} className="btn" onClick={() => pauseMode ? toggleDaySelection(key) : jumpToDay(weekIdx, i)} style={{
+            <button key={i} className="btn" data-dia-semana={iso} {...filaProps(i)}
+              onClick={() => { if (tragarClic()) return; if (pauseMode) toggleDaySelection(key); else jumpToDay(weekIdx, i); }} style={{
               width: "100%", textAlign: "left", display: "flex", alignItems: "center", gap: 12, padding: "11px 16px", minHeight: 64,
-              borderTop: i ? "1px solid " + C.divider : "none", background: selected ? A.fondo.azul : isT ? "#F0F6FF" : "transparent",
-              opacity: paused ? 0.5 : 1 }}>
+              borderTop: i ? "1px solid " + C.divider : "none",
+              background: arrastre && arrastre.sobre === i ? A.fondo.azul : selected ? A.fondo.azul : isT ? "#F0F6FF" : C.card,
+              opacity: paused ? 0.5 : 1, position: "relative", userSelect: "none", WebkitUserSelect: "none", WebkitTouchCallout: "none",
+              ...(arrastre && arrastre.desde === i ? { transform: "translateY(" + arrastre.dy + "px) scale(1.02)", zIndex: 2,
+                  boxShadow: "0 8px 24px rgba(0,0,0,.15)", borderRadius: 14, transition: "none" } : { transition: "background .15s" }) }}>
               <div style={{ width: 34, textAlign: "center", flexShrink: 0 }}>
                 <div style={{ fontSize: 11, fontWeight: 600, color: C.textDim }}>{day.dow.slice(0, 3)}</div>
                 <div style={{ fontSize: 19, fontWeight: 800, color: isT ? A.azul : C.text }}>{String(day.date).split(" ")[0]}</div>

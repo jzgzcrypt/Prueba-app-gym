@@ -21,6 +21,9 @@ Todo cambio que se haga en la app se anota aquí. Sin excepciones.
 
 ## [Sin publicar]
 
+### Añadido
+- **Semana: mantener pulsado un día y arrastrarlo a otro los intercambia.** Volver a arrastrarlo lo deshace. El tenis, lo hecho y lo pasado no se mueven. HOY y «Carreras» siguen el cambio.
+
 ### Cambiado: simple como Apple Notes
 - Fuera taglines, texto de ayuda y etiquetas secundarias en HOY, Semana, Comida y Progreso. Cada fila dice qué es y su dato.
 - HOY: «Carreras 0/3» en una línea; la carrera lleva su hora y su ritmo («17:30 · 6:40–7:00/km»). Lo de la ropa va en el aviso del calendario. «Más» en vez de «Notas, molestias, magia y guerrero».

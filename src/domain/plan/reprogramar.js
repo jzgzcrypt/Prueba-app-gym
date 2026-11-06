@@ -227,3 +227,36 @@ export function aplicarAdelanto(movidas, dia, hoyIso, hoyEsTenis) {
   m[dia.isoDate] = hoyIso;
   return m;
 }
+
+/**
+ * INTERCAMBIAR DOS DIAS (arrastrar en Semana).
+ *
+ * Lo que se ve en `a` pasa a `b` y lo de `b` a `a`, contando lo ya movido:
+ * si arrastras a un dia que ya tenia otra sesion movida, se mueve esa. Volver
+ * a intercambiarlos deja las movidas como estaban. Lo que se dejo pasar en
+ * esos dias vuelve a su sitio.
+ */
+export function intercambiar(movidas, a, b) {
+  if (a === b) return movidas || {};
+  const m = { ...(movidas || {}) };
+  const esFecha = (v) => /^\d{4}-\d{2}-\d{2}$/.test(v || "");
+  // Que sesion se ve hoy en cada dia: la que llego, o la suya si no se fue.
+  const quienEsta = (dia) => Object.keys(m).find(o => m[o] === dia) || (esFecha(m[dia]) ? null : dia);
+  const enA = quienEsta(a), enB = quienEsta(b);
+  for (const d of [a, b]) {
+    if (m[d] === "pasa" || String(m[d]).startsWith("cede:")) delete m[d];
+    for (const k of Object.keys(m)) if (m[k] === "cede:" + d) delete m[k];
+  }
+  const poner = (origen, destino) => {
+    if (!origen) return;
+    if (origen === destino) delete m[origen]; else m[origen] = destino;
+  };
+  poner(enA, b);
+  poner(enB, a);
+  return m;
+}
+
+/** Si un dia se puede arrastrar o recibir: ni el tenis, ni lo hecho, ni lo pasado. */
+export function sePuedeIntercambiar(dia, { checked, hoyIso }) {
+  return !!dia && dia.tipo !== "compromiso" && dia.isoDate >= hoyIso && !(checked || {})[dia.isoDate];
+}
