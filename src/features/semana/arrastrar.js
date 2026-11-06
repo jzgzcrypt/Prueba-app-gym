@@ -7,19 +7,19 @@ import { useEffect, useRef, useState } from "react";
  *
  * Mantener 300 ms activa el arrastre (si antes el dedo se mueve, es scroll y
  * no pasa nada). Mientras se arrastra no hay scroll. Al soltar encima de otra
- * fila que acepta, se llama a `alSoltar(desde, hasta)`. El toque que termina
+ * fila que acepta (`acepta`), se llama a `alSoltar(desde, hasta)`. El toque que termina
  * un arrastre no cuenta como clic.
  *
- * @param {{ puede:(i:number)=>boolean, alSoltar:(desde:number,hasta:number)=>void }} p
+ * @param {{ puede:(i:number)=>boolean, acepta?:(desde:number,hasta:number)=>boolean, alSoltar:(desde:number,hasta:number)=>void }} p
  * @returns {{ arrastre:null|{desde:number,sobre:number|null,dy:number}, filaProps:(i:number)=>object, tragarClic:()=>boolean }}
  */
-export function useArrastrar({ puede, alSoltar }) {
+export function useArrastrar({ puede, acepta, alSoltar }) {
   const [arrastre, setArrastre] = useState(null);
   const filas = useRef([]);
   const gesto = useRef(null);
   const reciente = useRef(false);
   const ultimo = useRef(null);
-  ultimo.current = { puede, alSoltar, arrastre };
+  ultimo.current = { acepta: acepta || ((_, i) => puede(i)), alSoltar, arrastre };
 
   useEffect(() => {
     // La fila que se arrastra va encima de las demas: no cuenta como destino.
@@ -35,7 +35,7 @@ export function useArrastrar({ puede, alSoltar }) {
         return;
       }
       const sobre = sobreQue(e.clientY, g.desde);
-      setArrastre({ desde: g.desde, dy: e.clientY - g.y0, sobre: sobre !== null && sobre !== g.desde && ultimo.current.puede(sobre) ? sobre : null });
+      setArrastre({ desde: g.desde, dy: e.clientY - g.y0, sobre: sobre !== null && sobre !== g.desde && ultimo.current.acepta(g.desde, sobre) ? sobre : null });
     };
     const soltar = () => {
       const g = gesto.current;

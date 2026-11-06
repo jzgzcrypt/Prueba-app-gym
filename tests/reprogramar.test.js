@@ -124,24 +124,24 @@ test("la tirada perdida del bloque 1 no se mete en el bloque 2", () => {
   assert.match(p.motivo, /bloque 1: se queda ahí/);
 });
 
-import { intercambiar, sePuedeIntercambiar } from "../src/domain/plan/reprogramar.js";
+import { moverTarea, sePuedeIntercambiar } from "../src/domain/plan/reprogramar.js";
 
-test("intercambiar dos dias, y volver a intercambiarlos deja todo como estaba", () => {
-  const m = intercambiar({}, "2026-11-05", "2026-11-07");
-  assert.deepEqual(m, { "2026-11-05": "2026-11-07", "2026-11-07": "2026-11-05" });
-  assert.deepEqual(intercambiar(m, "2026-11-05", "2026-11-07"), {});
+test("mover una tarea: va al otro dia, el destino conserva la suya y nada vuelve", () => {
+  const m = moverTarea({}, "2026-11-05", "2026-11-06");
+  assert.deepEqual(m, { "2026-11-05": "2026-11-06" });
+  // Llevarla de vuelta a su dia lo deshace.
+  assert.deepEqual(moverTarea(m, "2026-11-06", "2026-11-05"), {});
+  // Moverla otra vez la lleva a otro sitio (se mueve la que llego, no la del viernes).
+  assert.deepEqual(moverTarea(m, "2026-11-06", "2026-11-07"), { "2026-11-05": "2026-11-07" });
 });
 
-test("intercambiar con un dia que ya tenia algo movido mueve lo que se ve", () => {
-  // El jueves 5 y el sabado 7 cambiados; luego lo del sabado (ahora en el jueves) va al domingo 8.
-  const m1 = intercambiar({}, "2026-11-05", "2026-11-07");
-  const m2 = intercambiar(m1, "2026-11-05", "2026-11-08");
-  // El jueves enseña la tirada del domingo, el domingo lo del sabado, el sabado lo del jueves.
-  assert.deepEqual(m2, { "2026-11-05": "2026-11-07", "2026-11-07": "2026-11-08", "2026-11-08": "2026-11-05" });
+test("un dia recibe como mucho una tarea, y un dia vacio no tiene nada que mover", () => {
+  const m = moverTarea({}, "2026-11-05", "2026-11-07");
+  assert.equal(moverTarea(m, "2026-11-04", "2026-11-07"), null, "el sabado ya recibe la del jueves");
+  assert.equal(moverTarea(m, "2026-11-05", "2026-11-06"), null, "el jueves ya no tiene nada");
 });
 
-test("lo dejado pasar vuelve al intercambiar, y el tenis, lo hecho y lo pasado no se mueven", () => {
-  assert.deepEqual(intercambiar({ "2026-11-05": "pasa" }, "2026-11-05", "2026-11-07"), { "2026-11-05": "2026-11-07", "2026-11-07": "2026-11-05" });
+test("el tenis, lo hecho y lo pasado no se mueven", () => {
   const dia = (iso) => FLAT_DAYS.find(d => d.isoDate === iso);
   const ctx = { checked: { "2026-11-05": true }, hoyIso: "2026-11-04" };
   assert.equal(sePuedeIntercambiar(dia("2026-11-09"), ctx), false, "tenis");

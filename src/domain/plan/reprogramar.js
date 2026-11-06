@@ -229,30 +229,22 @@ export function aplicarAdelanto(movidas, dia, hoyIso, hoyEsTenis) {
 }
 
 /**
- * INTERCAMBIAR DOS DIAS (arrastrar en Semana).
+ * MOVER UNA TAREA A OTRO DIA (arrastrar en Semana).
  *
- * Lo que se ve en `a` pasa a `b` y lo de `b` a `a`, contando lo ya movido:
- * si arrastras a un dia que ya tenia otra sesion movida, se mueve esa. Volver
- * a intercambiarlos deja las movidas como estaban. Lo que se dejo pasar en
- * esos dias vuelve a su sitio.
+ * Se mueve la sesion que se ve en `de`: la que llego ahi, o la suya. El dia
+ * de destino conserva la suya y suma esta; el de origen queda libre. Llevarla
+ * de vuelta a su dia deshace el movimiento. Un dia recibe como mucho una.
+ * @returns {object|null} las movidas nuevas, o null si no se puede
  */
-export function intercambiar(movidas, a, b) {
-  if (a === b) return movidas || {};
+export function moverTarea(movidas, de, a) {
+  if (de === a) return null;
   const m = { ...(movidas || {}) };
-  const esFecha = (v) => /^\d{4}-\d{2}-\d{2}$/.test(v || "");
-  // Que sesion se ve hoy en cada dia: la que llego, o la suya si no se fue.
-  const quienEsta = (dia) => Object.keys(m).find(o => m[o] === dia) || (esFecha(m[dia]) ? null : dia);
-  const enA = quienEsta(a), enB = quienEsta(b);
-  for (const d of [a, b]) {
-    if (m[d] === "pasa" || String(m[d]).startsWith("cede:")) delete m[d];
-    for (const k of Object.keys(m)) if (m[k] === "cede:" + d) delete m[k];
-  }
-  const poner = (origen, destino) => {
-    if (!origen) return;
-    if (origen === destino) delete m[origen]; else m[origen] = destino;
-  };
-  poner(enA, b);
-  poner(enB, a);
+  const llegadaA = (dia) => Object.keys(m).find(o => m[o] === dia) || null;
+  const quien = llegadaA(de) || (m[de] ? null : de);
+  if (!quien) return null;
+  const yaRecibe = llegadaA(a);
+  if (yaRecibe && yaRecibe !== quien) return null;
+  if (quien === a) delete m[quien]; else m[quien] = a;
   return m;
 }
 
