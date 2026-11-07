@@ -22,6 +22,10 @@ Todo cambio que se haga en la app se anota aquí. Sin excepciones.
 ## [Sin publicar]
 
 ### Añadido
+- **«Cómo se hace» en cada ejercicio de fuerza.** Un botón bajo las series abre los pasos, qué sentir y el error típico, sacados del catálogo. Hay una prueba que vigila que todo ejercicio del plan tenga su ficha.
+- **Semana marca lo que no se hizo:** una ✕ gris y el título tachado (dejado pasar, o día pasado sin hacer). Lo movido a otro día va sin círculo.
+
+### Añadido
 - **Semana: mantener pulsado un día y arrastrarlo a otro mueve esa tarea.** El día de destino conserva la suya y suma esta («+ Suave + progresivos»); el de origen queda libre. Llevarla de vuelta lo deshace. Un día recibe como mucho una. El tenis, lo hecho y lo pasado no se mueven. HOY y «Carreras» siguen el cambio.
 
 ### Cambiado: simple como Apple Notes

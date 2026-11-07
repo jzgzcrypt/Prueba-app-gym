@@ -102,9 +102,13 @@ export function SemanaScreen({ weekIdx, setWeekIdx, jumpToDay, checked, todayIso
           const deDonde = (d) => "viene del " + d.dow.toLowerCase().replace("miercoles", "miércoles").replace("sabado", "sábado");
           const notaMov = llegada && conSuya ? "+ " + llegada.titulo + " · "
             : llegada ? deDonde(llegada).replace(/^v/, "V") + " · "
-            : salida === "pasa" ? "Dejada pasar · " : /^\d{4}-/.test(salida || "") ? "Movida al " + fechaCorta(salida) + " · " : "";
+            : /^\d{4}-/.test(salida || "") ? "Movida al " + fechaCorta(salida) + " · " : "";
           const key = principal === llegada ? llegada.isoDate : claveDia(propio);
           const done = !!checked[key];
+          // Lo que no se hizo: dejado pasar, o un dia pasado sin hacer. Lo
+          // movido a otro dia no lleva circulo: esta en el otro dia.
+          const movida = principal === propio && /^\d{4}-/.test(salida || "");
+          const noHecha = !done && !movida && day.tipo !== "libre" && (salida === "pasa" || iso < todayIso);
           const isT = DATE_MAP[day.date] === todayIso;
           const paused = isPaused(key);
           const selected = pauseSelection.includes(key);
@@ -124,7 +128,7 @@ export function SemanaScreen({ weekIdx, setWeekIdx, jumpToDay, checked, todayIso
               </div>
               <IconoCaja nombre={ico} tono={tono} tam={34} />
               <div style={{ flex: 1, minWidth: 0 }}>
-                <div style={{ fontSize: 15, fontWeight: 600, color: done || paused || (!suya && !llegada) ? C.textDim : C.text, textDecoration: paused ? "line-through" : "none",
+                <div style={{ fontSize: 15, fontWeight: 600, color: done || paused || noHecha || (!suya && !llegada) ? C.textDim : C.text, textDecoration: paused || noHecha ? "line-through" : "none",
                               overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{day.titulo}</div>
                 {(() => {
                   // La duracion solo si el titulo no la dice ya ("Tirada 25 min").
@@ -133,7 +137,12 @@ export function SemanaScreen({ weekIdx, setWeekIdx, jumpToDay, checked, todayIso
                   return sub ? <div style={{ fontSize: 12.5, fontWeight: 500, marginTop: 1, color: C.textDim }}>{sub}</div> : null;
                 })()}
               </div>
-              {pauseMode ? <Check hecho={selected} color={A.azul} /> : day.tipo === "libre" ? <Chevron /> : <Check hecho={done} />}
+              {pauseMode ? <Check hecho={selected} color={A.azul} />
+                : day.tipo === "libre" ? <Chevron />
+                : movida ? null
+                : noHecha ? <span data-no-hecha aria-label="No hecha" style={{ width: 26, height: 26, borderRadius: 13, flexShrink: 0, display: "flex", alignItems: "center", justifyContent: "center",
+                    background: "#E5E5EA", color: "#8E8E93", fontSize: 14, fontWeight: 800 }}>✕</span>
+                : <Check hecho={done} />}
             </button>
           );
         })}

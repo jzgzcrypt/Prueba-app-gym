@@ -262,3 +262,9 @@ export const CATALOGO = {
     sensacion: "Trabajo completo del core desde varios ángulos en una sola serie.",
     errores: "No sacrifiques la técnica de una posición por acabar antes — mejor menos tiempo con buena forma.", youtube: "" },
 };
+
+const normal = (t) => String(t || "").normalize("NFD").replace(/[̀-ͯ]/g, "").toLowerCase().trim();
+const POR_NOMBRE = new Map(Object.values(CATALOGO).map(f => [normal(f.nombre), f]));
+
+/** La ficha de un ejercicio por su nombre en el plan (sin acentos ni mayusculas), o null. */
+export const fichaDe = (nombre) => POR_NOMBRE.get(normal(nombre)) || null;

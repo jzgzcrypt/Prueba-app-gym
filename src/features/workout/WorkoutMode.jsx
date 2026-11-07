@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import { CAT } from "@/design/tokens";
-import { CATALOGO } from "@/domain/fuerza/catalogo";
+import { CATALOGO, fichaDe } from "@/domain/fuerza/catalogo";
 import { parseSeries } from "@/domain/fuerza/series";
 import { descansoEntreSeries, objetivoSerie, pasoPeso, propuestaSerie, sugerenciaCarga, textoSeries } from "@/domain/fuerza/registro";
 import { getPatronesDeSesion } from "@/domain/salud/patrones";
@@ -41,6 +41,8 @@ export function WorkoutMode({ day, mov, progress, onUpdateProgress, onFinish, on
   });
   // Fin del descanso en curso (timestamp), o null.
   const [descansoHasta, setDescansoHasta] = useState(null);
+  // «Cómo se hace» abierto: el indice del ejercicio (asi al cambiar de ejercicio se cierra).
+  const [comoAbierto, setComoAbierto] = useState(null);
 
   const phase = phases[phaseIdx];
   const catColor = isFuerza ? CAT.fuerza : CAT.running;
@@ -295,6 +297,32 @@ export function WorkoutMode({ day, mov, progress, onUpdateProgress, onFinish, on
           <div style={{ fontSize: 13, color: "#4A4A47", marginBottom: 12 }}>
             <b>{totalSeries} series</b> · {objetivo.texto}
           </div>
+
+          {(() => {
+            const ficha = fichaDe(ejercicio.nombre);
+            if (!ficha) return null;
+            const abierto = comoAbierto === exIdx;
+            return (
+              <div data-como-se-hace style={{ marginTop: -6, marginBottom: 12 }}>
+                <button className="rb" onClick={() => setComoAbierto(abierto ? null : exIdx)}
+                  style={{ fontSize: 15, fontWeight: 600, color: "#0A84FF", minHeight: 40 }}>
+                  Cómo se hace {abierto ? "⌃" : "›"}
+                </button>
+                {abierto && (
+                  <div style={{ padding: "12px 14px", background: "#fff", border: "1px solid #E5E5E3", borderRadius: 12 }}>
+                    {ficha.pasos.map((p, i) => (
+                      <div key={i} style={{ display: "flex", gap: 8, marginBottom: 6 }}>
+                        <span style={{ fontSize: 14, fontWeight: 800, color: "#0A84FF", flexShrink: 0 }}>{i + 1}.</span>
+                        <span style={{ fontSize: 14.5, color: "#171717", lineHeight: 1.45 }}>{p}</span>
+                      </div>
+                    ))}
+                    {ficha.sensacion && <div style={{ fontSize: 13.5, color: "#4A4A47", lineHeight: 1.45, marginTop: 8 }}><b>Siente:</b> {ficha.sensacion}</div>}
+                    {ficha.errores && <div style={{ fontSize: 13.5, color: "#4A4A47", lineHeight: 1.45, marginTop: 4 }}><b>Ojo:</b> {ficha.errores}</div>}
+                  </div>
+                )}
+              </div>
+            );
+          })()}
 
           {flaggedExercises && flaggedExercises[ejercicio.nombre] && (
             <div style={{ display: "flex", gap: 8, padding: "10px 12px", background: "#FBF0EF", border: "1px solid #E8C9C6", borderRadius: 10, marginBottom: 12 }}>
