@@ -22,6 +22,9 @@ Todo cambio que se haga en la app se anota aquí. Sin excepciones.
 ## [Sin publicar]
 
 ### Cambiado
+- **Tus salidas, todas.** Progreso → Running → «Tus salidas» enseñaba solo las 5 últimas carreras con GPS. Ahora, debajo, «Ver todas (N)» despliega el resto, también las de antes del plan, y cada una abre su mapa.
+
+### Cambiado
 - **Las bandas van por color, no por kg.** En los ejercicios con banda se elige el color (amarilla, roja, verde, azul o negra) tocando su círculo. La primera vez propone la roja; al llegar al tope de reps, «Sube a Verde»; en la negra solo suben las reps. Las series, los récords y el cierre lo dicen con el color («Verde × 15»).
 
 ### Datos

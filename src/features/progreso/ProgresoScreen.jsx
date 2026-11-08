@@ -621,10 +621,16 @@ function PruebasCompactas({ ritmoReal }) {
 }
 
 /** Las ultimas salidas con GPS: una fila cada una; al tocarla, su mapa. */
+/** Todas tus salidas con GPS, de la mas nueva a la mas vieja: las 5 ultimas
+ *  a la vista y el resto con «Ver todas». Fuera del plan, con su fecha. */
 function TusSalidas({ gps }) {
   const [abierta, setAbierta] = useState(null);
-  const salidas = Object.keys(gps || {}).filter(k => gps[k] && gps[k].ruta).sort().reverse().slice(0, 5)
-    .map(k => ({ k, g: gps[k], day: FLAT_DAYS.find(d => claveDia(d) === k) })).filter(x => x.day);
+  const [todas, setTodas] = useState(false);
+  const MESES_C = ["Ene", "Feb", "Mar", "Abr", "May", "Jun", "Jul", "Ago", "Sep", "Oct", "Nov", "Dic"];
+  const todasLas = Object.keys(gps || {}).filter(k => gps[k] && gps[k].ruta && /^\d{4}-\d{2}-\d{2}$/.test(k)).sort().reverse()
+    .map(k => ({ k, g: gps[k], day: FLAT_DAYS.find(d => claveDia(d) === k)
+      || { date: +k.slice(8) + " " + MESES_C[+k.slice(5, 7) - 1], titulo: "Carrera", isoDate: k } }));
+  const salidas = todas ? todasLas : todasLas.slice(0, 5);
   if (!salidas.length) return null;
   return (
     <div style={{ marginTop: 14 }}>
@@ -641,6 +647,12 @@ function TusSalidas({ gps }) {
           {abierta === k && <div style={{ paddingBottom: 12 }}><MapaRuta ruta={g.ruta} objetivo={g.obj} titulo={day.titulo} fecha={day.isoDate} datos={g} /></div>}
         </div>
       ))}
+      {todasLas.length > 5 && (
+        <button className="btn" data-ver-todas onClick={() => setTodas(!todas)}
+          style={{ width: "100%", minHeight: 40, borderTop: "1px solid " + C.cardBorder, fontSize: 14, fontWeight: 600, color: A.azul }}>
+          {todas ? "Ver menos" : "Ver todas (" + todasLas.length + ")"}
+        </button>
+      )}
     </div>
   );
 }
