@@ -21,6 +21,12 @@ Todo cambio que se haga en la app se anota aquí. Sin excepciones.
 
 ## [Sin publicar]
 
+### Cambiado
+- **Las bandas van por color, no por kg.** En los ejercicios con banda se elige el color (amarilla, roja, verde, azul o negra) tocando su círculo. La primera vez propone la roja; al llegar al tope de reps, «Sube a Verde»; en la negra solo suben las reps. Las series, los récords y el cierre lo dicen con el color («Verde × 15»).
+
+### Datos
+- Con banda, el «peso» guardado es el nivel del color (1 amarilla … 5 negra), en el mismo sitio que los kg. Sin migración: hasta hoy esos ejercicios no tenían peso apuntado.
+
 ### Añadido
 - **«Cómo se hace» en cada ejercicio de fuerza.** Un botón bajo las series abre los pasos, qué sentir y el error típico, sacados del catálogo. Hay una prueba que vigila que todo ejercicio del plan tenga su ficha.
 - **Semana marca lo que no se hizo:** una ✕ gris y el título tachado (dejado pasar, o día pasado sin hacer). Lo movido a otro día va sin círculo.

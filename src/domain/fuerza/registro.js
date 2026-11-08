@@ -30,10 +30,26 @@ export function objetivoSerie(series) {
   };
 }
 
+/**
+ * LAS BANDAS NO PESAN: VAN POR COLOR. Se guardan como un nivel (1-5) en el
+ * mismo sitio que el peso, asi la progresion y los records siguen sirviendo:
+ * mas alto, mas dura. De la mas suave a la mas dura, las suyas.
+ */
+export const BANDAS = ["Amarilla", "Roja", "Verde", "Azul", "Negra"];
+export const esBanda = (nombre) => /banda/i.test(nombre || "");
+const nivelBanda = (v) => Math.min(BANDAS.length, Math.max(1, Math.round(v)));
+/** La carga como se dice: "Roja" con banda, "8 kg" con peso. */
+export function textoCarga(nombre, valor) {
+  if (valor == null) return "";
+  return esBanda(nombre) ? BANDAS[nivelBanda(valor) - 1] : valor + " kg";
+}
+
 /** El escalon de peso que existe en su gimnasio: mancuernas de 2 en 2 kg,
- *  barra de 2,5 en 2,5 (discos de 1,25 por lado), poleas y maquinas de 1 en 1. */
+ *  barra de 2,5 en 2,5 (discos de 1,25 por lado), poleas y maquinas de 1 en 1.
+ *  Con banda, un color. */
 export function pasoPeso(nombre) {
   const n = nombre || "";
+  if (esBanda(n)) return 1;
   if (/barra/i.test(n)) return 2.5;
   if (/mancuerna/i.test(n)) return 2;
   return 1;
@@ -106,14 +122,16 @@ export function ultimaVez(nombre, antesDe, dias, pesos, reps) {
 }
 
 /** Las series de una sesion en una linea: "8 kg × 14, 13, 12" si el peso no
- *  cambio, "8 × 14 · 9 × 12 kg" si cambio, "× 12, 11" sin peso. */
-export function textoSeries(series) {
+ *  cambio, "8 × 14 · 9 × 12 kg" si cambio, "× 12, 11" sin peso. Con banda,
+ *  el color: "Roja × 15, 15". */
+export function textoSeries(series, nombre) {
   const s = series || [];
   if (!s.length) return "";
   const pesos = s.map(x => x.peso);
   const reps = s.map(x => x.reps == null ? "?" : x.reps);
   if (pesos.every(p => p == null)) return "× " + reps.join(", ");
-  if (pesos.every(p => p === pesos[0])) return pesos[0] + " kg × " + reps.join(", ");
+  if (pesos.every(p => p === pesos[0])) return textoCarga(nombre, pesos[0]) + " × " + reps.join(", ");
+  if (esBanda(nombre)) return s.map(x => (x.peso != null ? textoCarga(nombre, x.peso) : "–") + " × " + (x.reps ?? "?")).join(" · ");
   return s.map(x => (x.peso ?? "–") + " × " + (x.reps ?? "?")).join(" · ") + " kg";
 }
 
@@ -142,10 +160,13 @@ export function sugerenciaCarga({ ultima, objetivo, nombre }) {
   const u = objetivo && objetivo.unidad === "s" ? " s" : "";
 
   if (!ultima || !ultima.series.length) {
+    if (esBanda(nombre)) return { peso: 2, reps: min, decision: "primera", titular: "Primera vez",
+      porque: "Empieza con la roja. Apunta la que uses: la próxima vez decido yo." };
     return { peso: null, reps: min, decision: "primera", titular: "Primera vez",
       porque: min != null ? "Elige un peso con el que llegues a " + min + u + " y apúntalo: la próxima vez decido yo." : "Apúntalo y la próxima vez decido yo." };
   }
-  const antes = textoSeries(ultima.series);
+  const antes = textoSeries(ultima.series, nombre);
+  const carga = (v) => textoCarga(nombre, v);
   const pesoTrabajo = Math.max(0, ...ultima.series.map(x => x.peso || 0)) || null;
 
   // Sin carga: solo reps.
@@ -161,23 +182,24 @@ export function sugerenciaCarga({ ultima, objetivo, nombre }) {
   const paso = pasoPeso(nombre);
 
   if (!conReps.length || min == null) {
-    return { peso: pesoTrabajo, reps: min, decision: "mantiene", titular: "Mantén " + pesoTrabajo + " kg",
+    return { peso: pesoTrabajo, reps: min, decision: "mantiene", titular: "Mantén " + carga(pesoTrabajo),
       porque: "La última vez no apuntaste las repeticiones: apúntalas y sabré cuándo subir." };
   }
-  if (conReps.length === aPeso.length && conReps.every(x => x.reps >= max)) {
+  const tope = esBanda(nombre) && pesoTrabajo >= BANDAS.length; // ya en la mas dura
+  if (!tope && conReps.length === aPeso.length && conReps.every(x => x.reps >= max)) {
     const nuevo = redondear(pesoTrabajo + paso);
-    return { peso: nuevo, reps: min, decision: "sube", titular: "Sube a " + nuevo + " kg",
+    return { peso: nuevo, reps: min, decision: "sube", titular: "Sube a " + carga(nuevo),
       porque: "La última vez: " + antes + ". Llegaste al tope (" + max + u + ") en todas: toca subir y volver a " + min + u + "." };
   }
   const bajo = conReps.filter(x => x.reps < min).length;
   if (bajo > conReps.length / 2 && pesoTrabajo - paso >= paso) {
     const nuevo = redondear(pesoTrabajo - paso);
-    return { peso: nuevo, reps: min, decision: "baja", titular: "Baja a " + nuevo + " kg",
+    return { peso: nuevo, reps: min, decision: "baja", titular: "Baja a " + carga(nuevo),
       porque: "La última vez: " + antes + ". No llegaste a " + min + u + ": con menos peso harás las repeticiones que construyen." };
   }
   const mejor = Math.max(...conReps.map(x => x.reps));
   const obj = Math.min(max, Math.max(min, mejor + 1));
-  return { peso: pesoTrabajo, reps: obj, decision: "mantiene", titular: "Mantén " + pesoTrabajo + " kg",
+  return { peso: pesoTrabajo, reps: obj, decision: "mantiene", titular: "Mantén " + carga(pesoTrabajo),
     porque: "La última vez: " + antes + ". Sube cuando llegues a " + max + u + " en todas. Hoy, a por " + obj + "." };
 }
 
@@ -239,7 +261,7 @@ export function recordsDelDia(dia, dias, pesos, reps) {
     const previas = seriesPrevias(ej.nombre, dia.isoDate, dias, pesos, reps);
     if (!previas.length) return;
     const antes = mejorSerie(previas);
-    const texto = (hoy.peso != null ? hoy.peso + " kg" : "") + (hoy.reps != null ? (hoy.peso != null ? " × " : "") + hoy.reps + " reps" : "");
+    const texto = (hoy.peso != null ? textoCarga(ej.nombre, hoy.peso) : "") + (hoy.reps != null ? (hoy.peso != null ? " × " : "") + hoy.reps + " reps" : "");
     if ((hoy.peso ?? -1) > (antes.peso ?? -1)) out.push({ nombre: ej.nombre, tipo: "peso", texto });
     else if ((hoy.peso ?? -1) === (antes.peso ?? -1) && (hoy.reps ?? 0) > (antes.reps ?? 0)) out.push({ nombre: ej.nombre, tipo: "reps", texto });
   });

@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { C, CAT, TAP_MIN } from "@/design/tokens";
 import { FLAT_DAYS, claveDia } from "@/domain/plan/calendario";
-import { progresion, recordsDelDia, seriesDe, textoSeries, ultimaVez } from "@/domain/fuerza/registro";
+import { esBanda, progresion, recordsDelDia, seriesDe, textoSeries, ultimaVez } from "@/domain/fuerza/registro";
 import { LecturaSesion, queApuntar } from "@/features/ui/lectura";
 import { textoTiempo } from "@/domain/running/gps";
 import { veredictoCadencia } from "@/domain/running/cadencia";
@@ -96,9 +96,9 @@ export function CierreSesion({ day: diaAjustado, dayKey, workoutWeights, workout
             {filas.map((f, i) => {
               const color = !f.prog ? C.textDim : f.prog.tipo === "peso" || f.prog.tipo === "reps" ? C.ok : C.textDim;
               const etiqueta = !f.prog ? (f.hoy.length ? "Primera vez" : "")
-                : f.prog.tipo === "peso" ? "+" + f.prog.valor + " kg"
+                : f.prog.tipo === "peso" ? "+" + f.prog.valor + (esBanda(f.nombre) ? " banda" : " kg")
                 : f.prog.tipo === "reps" ? "+" + f.prog.valor + " reps"
-                : f.prog.tipo === "baja" ? f.prog.valor + " kg" : "Igual";
+                : f.prog.tipo === "baja" ? f.prog.valor + (esBanda(f.nombre) ? " banda" : " kg") : "Igual";
               return (
                 <div key={i} style={{ padding: "11px 0", borderTop: i ? "1px solid " + C.divider : "none" }}>
                   <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", gap: 10 }}>
@@ -110,11 +110,11 @@ export function CierreSesion({ day: diaAjustado, dayKey, workoutWeights, workout
                     {etiqueta && <div style={{ fontSize: 12, fontWeight: 800, color, flexShrink: 0 }}>{etiqueta}</div>}
                   </div>
                   <div className="mono" style={{ fontSize: 14, fontWeight: 700, color: f.hoy.length ? C.text : C.textFaint, marginTop: 3 }}>
-                    {f.hoy.length ? textoSeries(f.hoy) : "sin apuntar"}
+                    {f.hoy.length ? textoSeries(f.hoy, f.nombre) : "sin apuntar"}
                   </div>
                   {f.antes && (
                     <div style={{ fontSize: 11.5, color: C.textDim, marginTop: 2 }}>
-                      Antes ({f.antes.fecha}): {textoSeries(f.antes.series)}
+                      Antes ({f.antes.fecha}): {textoSeries(f.antes.series, f.nombre)}
                     </div>
                   )}
                 </div>
@@ -189,7 +189,7 @@ export function CierreSesion({ day: diaAjustado, dayKey, workoutWeights, workout
 
         {(() => {
           // A tu calendario, como Runna: se abre Google Calendar relleno y le das a Guardar.
-          const ev = eventoSesion({ day, gps, ahora: Date.now(), series: filas.map(f => ({ nombre: f.nombre, texto: textoSeries(f.hoy) })) });
+          const ev = eventoSesion({ day, gps, ahora: Date.now(), series: filas.map(f => ({ nombre: f.nombre, texto: textoSeries(f.hoy, f.nombre) })) });
           const marcar = () => {
             try { window.localStorage.setItem(CLAVE_CAL, JSON.stringify({ ...enCalendario(), [dayKey]: true })); } catch { /* sin storage */ }
             setAnadido(true);

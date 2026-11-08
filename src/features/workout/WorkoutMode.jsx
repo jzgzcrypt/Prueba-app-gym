@@ -4,7 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import { CAT } from "@/design/tokens";
 import { CATALOGO, fichaDe } from "@/domain/fuerza/catalogo";
 import { parseSeries } from "@/domain/fuerza/series";
-import { descansoEntreSeries, objetivoSerie, pasoPeso, propuestaSerie, sugerenciaCarga, textoSeries } from "@/domain/fuerza/registro";
+import { BANDAS, descansoEntreSeries, esBanda, objetivoSerie, pasoPeso, propuestaSerie, sugerenciaCarga, textoCarga, textoSeries } from "@/domain/fuerza/registro";
 import { getPatronesDeSesion } from "@/domain/salud/patrones";
 import { IntervalTimer } from "@/features/workout/IntervalTimer";
 import { CarreraGps } from "@/features/workout/CarreraGps";
@@ -339,7 +339,7 @@ export function WorkoutMode({ day, mov, progress, onUpdateProgress, onFinish, on
               {ultima ? "LA ÚLTIMA VEZ · " + ultima.fecha : "LA ÚLTIMA VEZ"}
             </div>
             <div className="mono" style={{ fontSize: 15, color: "#171717", fontWeight: 700, marginTop: 2 }}>
-              {ultima ? textoSeries(ultima.series) : "Primera vez: apunta lo que hagas y la próxima tendrás con qué comparar."}
+              {ultima ? textoSeries(ultima.series, ejercicio.nombre) : "Primera vez: apunta lo que hagas y la próxima tendrás con qué comparar."}
             </div>
             {/* Lo que toca hoy, decidido y explicado: ya viene puesto en la serie. */}
             <div style={{ marginTop: 8, paddingTop: 8, borderTop: "1px solid #E5E5E3" }}>
@@ -367,7 +367,7 @@ export function WorkoutMode({ day, mov, progress, onUpdateProgress, onFinish, on
                                    display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>✓</span>
                     <span style={{ fontSize: 13, fontWeight: 700, color: "#171717" }}>Serie {si+1}</span>
                     <span className="mono" style={{ fontSize: 15, fontWeight: 700, color: "#171717", marginLeft: "auto" }}>
-                      {(pw ? pw + " kg" : "sin peso") + (rp != null ? " × " + rp : "")}
+                      {(pw ? textoCarga(ejercicio.nombre, Number(String(pw).replace(",", "."))) : "sin peso") + (rp != null ? " × " + rp : "")}
                     </span>
                   </button>
                 );
@@ -454,13 +454,35 @@ function SerieActiva({ si, ejercicio, objetivo, propuesta, onApuntar }) {
         <span style={{ fontSize: 11.5, color: "#8A8A87", fontWeight: 600 }}>objetivo: {objetivo.texto}</span>
       </div>
       <div style={{ display: "flex", gap: 8 }}>
-        <Paso valor={peso} setValor={setPeso} paso={pasoPeso(ejercicio.nombre)} unidad="kg" vacio="—" />
+        {esBanda(ejercicio.nombre)
+          ? <ColorBanda valor={peso} setValor={setPeso} />
+          : <Paso valor={peso} setValor={setPeso} paso={pasoPeso(ejercicio.nombre)} unidad="kg" vacio="—" />}
         <Paso valor={rep} setValor={setRep} paso={objetivo.unidad === "s" ? 5 : 1} unidad={unidadReps} vacio="—" min={1} />
       </div>
       <button className="nb" onClick={() => onApuntar({ peso, reps: rep })} style={{
         width: "100%", height: 52, marginTop: 10, borderRadius: 12, background: "#2F7D4F",
         fontSize: 15, fontWeight: 900, color: "#FAFAF9", letterSpacing: 0.3,
-      }}>✓ HECHA{peso != null || rep != null ? " · " + (peso != null ? peso + " kg" : "") + (rep != null ? (peso != null ? " × " : "× ") + rep : "") : ""}</button>
+      }}>✓ HECHA{peso != null || rep != null ? " · " + (peso != null ? textoCarga(ejercicio.nombre, peso) : "") + (rep != null ? (peso != null ? " × " : "× ") + rep : "") : ""}</button>
+    </div>
+  );
+}
+
+/** La banda de hoy: un circulo por color, de la mas suave a la mas dura. */
+const COLOR_BANDA = ["#F5C400", "#E5484D", "#2F9E44", "#1C7ED6", "#212529"];
+function ColorBanda({ valor, setValor }) {
+  return (
+    <div data-bandas style={{ flex: 1, display: "flex", flexDirection: "column", alignItems: "center", gap: 6 }}>
+      <div style={{ display: "flex", gap: 6, height: 52, alignItems: "center" }}>
+        {BANDAS.map((nombre, i) => {
+          const sel = valor === i + 1;
+          return (
+            <button key={nombre} className="nb" aria-label={nombre} aria-pressed={sel} data-banda={nombre} onClick={() => setValor(i + 1)} style={{
+              width: sel ? 36 : 30, height: sel ? 36 : 30, borderRadius: "50%", background: COLOR_BANDA[i],
+              boxShadow: sel ? "0 0 0 3px #fff, 0 0 0 5px #171717" : "none", transition: "all .12s" }} />
+          );
+        })}
+      </div>
+      <div style={{ fontSize: 10, fontWeight: 800, color: "#8A8A87", letterSpacing: 0.6 }}>{valor ? BANDAS[valor - 1].toUpperCase() : "BANDA"}</div>
     </div>
   );
 }

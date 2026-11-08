@@ -30,7 +30,7 @@ export function EjerciciosScreen({ selectedId, setSelectedId, youtubeLinks, setY
   // Lo ultimo que apuntaste de un ejercicio, en cualquier dia del plan.
   const ultimo = (nombre) => {
     const u = ultimaVez(nombre, "9999-12-31", FLAT_DAYS, workoutWeights, workoutReps);
-    return u ? textoSeries(u.series) : "";
+    return u ? textoSeries(u.series, nombre) : "";
   };
 
   if (selectedId) {

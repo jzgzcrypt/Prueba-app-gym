@@ -121,3 +121,22 @@ test("progresar es mas peso, o el mismo peso con mas reps", () => {
   assert.equal(progresion([{ peso: 8, reps: 14 }, { peso: 8, reps: 12 }], antes).tipo, "igual");
   assert.equal(progresion([], antes), null);
 });
+
+import { BANDAS, sugerenciaCarga as sugerir, textoCarga, textoSeries as series } from "../src/domain/fuerza/registro.js";
+
+test("las bandas van por color, de amarilla a negra", () => {
+  assert.deepEqual(BANDAS, ["Amarilla", "Roja", "Verde", "Azul", "Negra"]);
+  assert.equal(textoCarga("Clamshells con banda", 2), "Roja");
+  assert.equal(textoCarga("Press banca con barra", 40), "40 kg", "banca no es banda");
+  assert.equal(series([{ peso: 3, reps: 15 }, { peso: 3, reps: 14 }], "Rotacion externa con banda"), "Verde × 15, 14");
+});
+
+test("con banda: la primera vez, roja; al llegar al tope, la siguiente; en la negra, solo reps", () => {
+  const obj = { reps: 15, repsMax: 15 };
+  const n = "Clamshells con banda";
+  assert.equal(sugerir({ ultima: null, objetivo: obj, nombre: n }).peso, 2);
+  const sube = sugerir({ ultima: { series: [{ peso: 2, reps: 15 }, { peso: 2, reps: 15 }] }, objetivo: obj, nombre: n });
+  assert.deepEqual([sube.peso, sube.titular], [3, "Sube a Verde"]);
+  const negra = sugerir({ ultima: { series: [{ peso: 5, reps: 15 }, { peso: 5, reps: 15 }] }, objetivo: obj, nombre: n });
+  assert.equal(negra.peso, 5);
+});

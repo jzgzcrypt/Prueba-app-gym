@@ -9,7 +9,7 @@ import { GraficoPlan } from "@/features/ui/plan-vs-real";
 import { MapaRuta } from "@/features/ui/MapaRuta";
 import { textoTiempo } from "@/domain/running/gps";
 import { tendenciaPeso } from "@/domain/nutricion/adaptativo";
-import { tablaRecords } from "@/domain/fuerza/registro";
+import { tablaRecords, textoCarga } from "@/domain/fuerza/registro";
 import { A, C, CARD, CAT } from "@/design/tokens";
 import { ScreenHeader } from "@/features/ui/headers";
 import { Boton, Chevron, Fila, IconoCaja, Pastilla, Tarjeta } from "@/features/ui/aire";
@@ -437,7 +437,7 @@ function Records({ pesos, reps }) {
           <span style={{ fontSize: 12.5, fontWeight: 700, color: C.text, flex: 1, minWidth: 0 }}>{t.nombre}</span>
           <span style={{ textAlign: "right", flexShrink: 0 }}>
             <span className="mono" style={{ fontSize: 13.5, fontWeight: 800, color: C.text }}>
-              {(t.peso != null ? t.peso + " kg" : "") + (t.reps != null ? (t.peso != null ? " × " : "× ") + t.reps : "")}
+              {(t.peso != null ? textoCarga(t.nombre, t.peso) : "") + (t.reps != null ? (t.peso != null ? " × " : "× ") + t.reps : "")}
             </span>
             <span style={{ fontSize: 11, color: C.textDim, marginLeft: 6 }}>{t.fecha}</span>
           </span>
