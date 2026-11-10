@@ -252,3 +252,34 @@ export function moverTarea(movidas, de, a) {
 export function sePuedeIntercambiar(dia, { checked, hoyIso }) {
   return !!dia && dia.tipo !== "compromiso" && dia.isoDate >= hoyIso && !(checked || {})[dia.isoDate];
 }
+
+const sumarDias = (iso, n) => {
+  const [y, m, d] = iso.split("-").map(Number);
+  return new Date(Date.UTC(y, m - 1, d + n)).toISOString().slice(0, 10);
+};
+
+/**
+ * A QUE DIAS SE PUEDE LLEVAR la sesion que se ve en `desde` («¿Mover a otro dia?»).
+ *
+ *  - Desde hoy (tambien antes de `desde`, nunca al pasado) hasta 3 dias
+ *    despues de `desde`, como la propuesta de recolocar.
+ *  - Del mismo bloque, sin hacer, sin otra sesion recibida y libres (o con su
+ *    sesion dejada pasar): mover no le quita el sitio a nada.
+ *  - Su dia original siempre se ofrece (si no es pasado): llevarla ahi lo deshace.
+ * Se aplica con `moverTarea(movidas, desde, dia.isoDate)`.
+ */
+export function diasParaMover({ desde, dias, movidas, checked, hoyIso }) {
+  const m = movidas || {}, ch = checked || {};
+  const base = (dias || []).find(d => d.isoDate === desde);
+  if (!base) return [];
+  const origen = Object.keys(m).find(o => m[o] === desde) || desde;
+  const limite = sumarDias(desde, 3);
+  return dias.filter(d => {
+    const iso = d.isoDate;
+    if (iso === desde || iso < hoyIso || ch[iso]) return false;
+    if (iso === origen) return true;
+    if (iso > limite || (d.bloque || 0) !== (base.bloque || 0)) return false;
+    if (Object.keys(m).some(o => m[o] === iso)) return false;
+    return d.tipo === "libre" || m[iso] === "pasa";
+  });
+}

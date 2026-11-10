@@ -1,7 +1,7 @@
 "use client";
 
 import { claveDia, todayLocalIso } from "@/domain/plan/calendario";
-import { llegadasA, moverSesion } from "@/lib/estado/mover-sesion";
+import { diasParaMover, moverTarea } from "@/domain/plan/reprogramar";
 
 import { useState } from "react";
 import { A, C, CARD, CAT, R, SP, TAP_MIN, TYPE } from "@/design/tokens";
@@ -369,24 +369,18 @@ export function ListBlock({ id, expandedBlock, toggleBlock, icono, tono = "gris"
   );
 }
 
-export function MoveDayBlock({ dayKey, day, dias, checked, hoyIso, postponed, setPostponed }) {
+export function MoveDayBlock({ dayKey, dias, checked, hoyIso, postponed, setPostponed }) {
   const [open, setOpen] = useState(false);
   const [error, setError] = useState(null);
-  const ch = checked || {}, mov = postponed || {};
-  // Solo dias que de verdad pueden recibirla: de hoy en adelante, en los 7
-  // siguientes, sin hacer, libres (o cuya sesion se dejo pasar) y sin otra
-  // sesion recibida. Antes salian dias pasados, hechos u ocupados.
-  const libres = (dias || []).filter(d => {
-    const iso = claveDia(d);
-    if (iso === dayKey || iso < hoyIso || iso <= dayKey || iso > masDias(dayKey, 7) || ch[iso]) return false;
-    if (llegadasA(mov, iso).length) return false;
-    return d.tipo === "libre" || mov[iso] === "pasa";
-  });
+  const mov = postponed || {};
+  // Desde hoy (tambien antes de su dia) hasta 3 dias despues, libres, y su
+  // dia original para devolverla (ver diasParaMover).
+  const libres = diasParaMover({ desde: dayKey, dias, movidas: mov, checked, hoyIso });
 
   const mover = (dia) => {
-    const r = moverSesion(mov, dayKey, claveDia(dia));
-    if (!r.ok) { setError(r.motivo); return; }
-    setPostponed(r.movidas);
+    const m = moverTarea(mov, dayKey, claveDia(dia));
+    if (!m) { setError("Ese día ya no puede recibirla."); return; }
+    setPostponed(m);
     setError(null);
     setOpen(false);
   };
@@ -403,7 +397,7 @@ export function MoveDayBlock({ dayKey, day, dias, checked, hoyIso, postponed, se
           )}
           {libres.length === 0 && (
             <div style={{ fontSize: 13, color: C.textDim, padding: "2px 4px", lineHeight: 1.4 }}>
-              No hay ningún día libre en los próximos 7. Mejor dejarla pasar que juntar dos sesiones.
+              No hay ningún día libre.
             </div>
           )}
           {libres.map((d) => (
@@ -418,12 +412,6 @@ export function MoveDayBlock({ dayKey, day, dias, checked, hoyIso, postponed, se
       )}
     </div>
   );
-}
-
-/** "2026-10-27" + 7 dias, en UTC para que no baile con el cambio de hora. */
-function masDias(iso, n) {
-  const [y, m, d] = iso.split("-").map(Number);
-  return new Date(Date.UTC(y, m - 1, d + n)).toISOString().slice(0, 10);
 }
 
 export function BigBlock({ label, title, sub, accent, icon, children }) {

@@ -22,6 +22,9 @@ Todo cambio que se haga en la app se anota aquí. Sin excepciones.
 ## [Sin publicar]
 
 ### Cambiado
+- **«¿Mover a otro día?» también hacia atrás, hasta hoy.** Antes solo ofrecía días posteriores a la sesión, y una sesión movida no se podía devolver. Ahora ofrece días desde hoy hasta 3 días después (como la propuesta de recolocar), libres o con su sesión dejada pasar, y siempre su día original para devolverla. Sale también en una sesión que llegó de otro día. Mueve con la misma regla que el arrastre de Semana.
+
+### Cambiado
 - **Tus salidas, todas.** Progreso → Running → «Tus salidas» enseñaba solo las 5 últimas carreras con GPS. Ahora, debajo, «Ver todas (N)» despliega el resto, también las de antes del plan, y cada una abre su mapa.
 
 ### Cambiado

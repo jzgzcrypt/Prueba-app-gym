@@ -149,3 +149,25 @@ test("el tenis, lo hecho y lo pasado no se mueven", () => {
   assert.equal(sePuedeIntercambiar(dia("2026-11-03"), ctx), false, "pasado");
   assert.equal(sePuedeIntercambiar(dia("2026-11-07"), ctx), true);
 });
+
+import { diasParaMover, moverTarea as mover } from "../src/domain/plan/reprogramar.js";
+
+const isos = (l) => l.map(d => d.isoDate);
+
+test("mover: hacia atras hasta hoy, nunca al pasado, y solo a dias libres", () => {
+  // Martes 10: el suave se dejo pasar, asi que hoy esta libre. La fuerza del miercoles 11 puede venir hoy.
+  const r = diasParaMover({ desde: "2026-11-11", dias: FLAT_DAYS, movidas: { "2026-11-10": "pasa" }, checked: {}, hoyIso: "2026-11-10" });
+  assert.deepEqual(isos(r), ["2026-11-10", "2026-11-14"], "hoy y el sabado libre; el lunes 9 es pasado y el jueves y el viernes estan ocupados");
+});
+
+test("mover: nunca mas de 3 dias hacia delante", () => {
+  const r = diasParaMover({ desde: "2026-11-11", dias: FLAT_DAYS, movidas: {}, checked: {}, hoyIso: "2026-11-11" });
+  assert.ok(isos(r).every(iso => iso <= "2026-11-14"), isos(r).join(","));
+});
+
+test("mover: la sesion llevada al sabado ofrece volver a su dia, y llevarla ahi lo deshace", () => {
+  const m = mover({}, "2026-11-11", "2026-11-14");
+  const r = diasParaMover({ desde: "2026-11-14", dias: FLAT_DAYS, movidas: m, checked: {}, hoyIso: "2026-11-10" });
+  assert.ok(isos(r).includes("2026-11-11"), isos(r).join(","));
+  assert.deepEqual(mover(m, "2026-11-14", "2026-11-11"), {});
+});

@@ -221,8 +221,8 @@ export function HoyScreen(props) {
           {noHecha && (llegadaPend || (!movidaA && !checked[dayKey])) && (
             <Recolocar dias={diasPlan} key={"nh" + diaSesion.isoDate} dia={diaSesion} movidas={props.postponed} setMovidas={props.setPostponed} checked={checked}
               abiertaInicial onCerrar={() => setNoHecha(false)}>
-              {!esClave(diaSesion) && t !== "compromiso" && !llegadaPend && (
-                <MoveDayBlock dayKey={dayKey} day={day} dias={diasPlan} checked={checked} hoyIso={hoyIso}
+              {!esClave(diaSesion) && t !== "compromiso" && (
+                <MoveDayBlock dayKey={dayKey} dias={diasPlan} checked={checked} hoyIso={hoyIso}
                   postponed={props.postponed} setPostponed={props.setPostponed} />
               )}
             </Recolocar>
