@@ -85,15 +85,25 @@ const BULGARA = { grupo: "Pierna", nombre: "Sentadilla bulgara", series: "2x8/la
 
 const CALENTAR = "15 min suave + 3 progresivos de 100 m.";
 
-/** Miercoles: hombro y empuje, con la prevencion de gemelo y core. 30 min. */
-const MIERCOLES = (n, pecho) => ({
-  dow: "Miercoles", tipo: "fuerza", cat: "empuje", titulo: "Hombro + empuje", dur: "30 min", patrones: ["hombro", "cadenaPosterior"],
-  ejercicios: [LAT_POLEA(n), pecho, FACE_PULL, GEMELO, PLANCHA_LAT],
+// CAÑA (S3-S7, S9-S10): el tren superior no le quita nada a las carreras, asi
+// que ahi se aprieta: pecho y espalda a 4 series, brazos los dos dias y la
+// ultima serie a 1 rep del fallo (menos face pull y rotacion: cargan el cuello).
+// Mas una segunda de pecho y de espalda. De ~29 a ~43 series por semana. La pierna no sube: compite con correr.
+const FUERTE = (ej) => ({ ...ej, series: "4x8-10 (última a 1 del fallo)" });
+const TRICEPS = { grupo: "Triceps", nombre: "Extension polea alta agarre en V", series: "3x12 (última a 1 del fallo)" };
+const BICEPS = { grupo: "Biceps", nombre: "Curl bilateral con mancuernas", series: "3x12 (última a 1 del fallo)" };
+const APERTURAS = { grupo: "Pecho", nombre: "Aperturas con mancuernas en banco", series: "3x12" };
+
+/** Miercoles: hombro y empuje, con la prevencion de gemelo y core. 30 min; 50 con caña. */
+const MIERCOLES = (n, pecho, cana = false) => ({
+  dow: "Miercoles", tipo: "fuerza", cat: "empuje", titulo: "Hombro + empuje", dur: cana ? "50 min" : "30 min", patrones: ["hombro", "cadenaPosterior"],
+  ejercicios: cana ? [LAT_POLEA(n), FUERTE(pecho), APERTURAS, TRICEPS, FACE_PULL, GEMELO, PLANCHA_LAT] : [LAT_POLEA(n), pecho, FACE_PULL, GEMELO, PLANCHA_LAT],
 });
-/** Viernes: hombro y tiron, con gluteo medio. 30 min. */
-const VIERNES = (n, espalda, conBulgara = true) => ({
-  dow: "Viernes", tipo: "fuerza", cat: "tiron", titulo: "Hombro + tirón", dur: "30 min", patrones: ["columna", "cadera"],
-  ejercicios: [LAT_MANC(n), espalda, ROT_EXT, CLAMSHELL, ...(conBulgara ? [BULGARA] : [])],
+/** Viernes: hombro y tiron, con gluteo medio. 30 min; 50 con caña. */
+const VIERNES = (n, espalda, conBulgara = true, cana = false) => ({
+  dow: "Viernes", tipo: "fuerza", cat: "tiron", titulo: "Hombro + tirón", dur: cana ? "50 min" : "30 min", patrones: ["columna", "cadera"],
+  // Con caña, la otra espalda tambien (jalon y remo): vertical y horizontal.
+  ejercicios: [LAT_MANC(n), cana ? FUERTE(espalda) : espalda, ...(cana ? [espalda === JALON ? REMO : JALON, BICEPS] : []), ROT_EXT, CLAMSHELL, ...(conBulgara ? [BULGARA] : [])],
 });
 const PRESS_INC = { grupo: "Pecho", nombre: "Press inclinado con mancuernas", series: "3x10" };
 const PRESS_BANCA = { grupo: "Pecho", nombre: "Press banca con barra", series: "3x8" };
@@ -140,11 +150,11 @@ export const WEEKS = [
     days: [
       LUNES_TENIS,
       suave("Martes", 25, 25, "Vienes del tenis: para soltar."),
-      MIERCOLES(5, PRESS_BANCA),
+      MIERCOLES(5, PRESS_BANCA, true),
       { dow: "Jueves", tipo: "run", cat: "runQ", titulo: "Fartlek 6x[1 min/2 min]", dur: "28 min", rpe: "5-6/10", esCalidad: true,
         what: "8 min suave. 6x[1 min algo vivo / 2 min suave]. 2 min suave para acabar. Vivo es incómodo pero controlado, no a tope.",
         intervalos: [{ r: 6, s: [["rapido", 60], ["suave", 120]] }] },
-      VIERNES(5, JALON),
+      VIERNES(5, JALON, true, true),
       SABADO_LIBRE,
       tirada(33, 33, "Un poco más que la semana pasada, igual de suave."),
     ]},
@@ -154,11 +164,11 @@ export const WEEKS = [
     days: [
       LUNES_TENIS,
       suave("Martes", 22, 22, "Suave de verdad: el jueves es la prueba."),
-      MIERCOLES(5, PRESS_INC),
+      MIERCOLES(5, PRESS_INC, true),
       { dow: "Jueves", tipo: "test", cat: "runQ", titulo: "Prueba 3 km a tope", dur: "40 min", rpe: "9/10", esCalidad: true,
         prueba: { distKm: 3, enLinea: 870 },
         what: CALENTAR + " Luego 3 km a tope, en llano y lo más regular que puedas: sal algo por debajo de lo que crees y aprieta el último km. 10 min suave para acabar. Apunta el tiempo total: de aquí salen los ritmos de las series. Orientativo: por debajo de ~14:30 vas en línea con 4:45." },
-      VIERNES(5, REMO),
+      VIERNES(5, REMO, true, true),
       SABADO_LIBRE,
       tirada(35, 35, "Tras la prueba, suave y sin mirar el reloj."),
     ]},
@@ -168,11 +178,11 @@ export const WEEKS = [
     days: [
       LUNES_TENIS,
       suave("Martes", 25, 25, "Vienes del tenis: para soltar."),
-      MIERCOLES(5, PRESS_BANCA),
+      MIERCOLES(5, PRESS_BANCA, true),
       { dow: "Jueves", tipo: "run", cat: "runQ", titulo: "Series 6x400m a 4:35", dur: "40 min", rpe: "7/10", esCalidad: true, ritmo: 275, tramoM: 400,
         what: CALENTAR + " 6x400 m a 4:35/km (~1:50 cada una) con 90 s de trote suave entre series. 10 min suave. Si el 3 km salió más lento de 4:50/km, la app ajusta el ritmo a tu prueba.",
         intervalos: [{ r: 6, s: [["rapido", 110], ["suave", 90]] }] },
-      VIERNES(5, JALON),
+      VIERNES(5, JALON, true, true),
       SABADO_LIBRE,
       tirada(45, 45, "Primera tirada larga de verdad."),
     ]},
@@ -182,11 +192,11 @@ export const WEEKS = [
     days: [
       LUNES_TENIS,
       suave("Martes", 28, 28, "Vienes del tenis: para soltar."),
-      MIERCOLES(5, PRESS_INC),
+      MIERCOLES(5, PRESS_INC, true),
       { dow: "Jueves", tipo: "run", cat: "runQ", titulo: "Series 5x800m a 4:45", dur: "45 min", rpe: "7/10", esCalidad: true, ritmo: 285, tramoM: 800,
         what: CALENTAR + " 5x800 m a 4:45/km (~3:48 cada una) con 2 min de trote suave entre series. 10 min suave. La primera vez al ritmo del objetivo: en tramos cortos, para aprenderlo.",
         intervalos: [{ r: 5, s: [["rapido", 228], ["suave", 120]] }] },
-      VIERNES(5, REMO),
+      VIERNES(5, REMO, true, true),
       SABADO_LIBRE,
       tirada(50, 50, "Ya corres más tiempo del que dura el objetivo."),
     ]},
@@ -196,11 +206,11 @@ export const WEEKS = [
     days: [
       LUNES_TENIS,
       suave("Martes", 30, 30, "Vienes del tenis: para soltar."),
-      MIERCOLES(5, PRESS_BANCA),
+      MIERCOLES(5, PRESS_BANCA, true),
       { dow: "Jueves", tipo: "run", cat: "runQ", titulo: "Series 6x800m a 4:45", dur: "48 min", rpe: "7-8/10", esCalidad: true, ritmo: 285, tramoM: 800,
         what: CALENTAR + " 6x800 m a 4:45/km con 2 min de trote suave entre series. 10 min suave. Una más que la semana pasada.",
         intervalos: [{ r: 6, s: [["rapido", 228], ["suave", 120]] }] },
-      VIERNES(5, JALON),
+      VIERNES(5, JALON, true, true),
       SABADO_LIBRE,
       tirada(55, 55, "La más larga hasta ahora, igual de suave."),
     ]},
@@ -225,11 +235,11 @@ export const WEEKS = [
     days: [
       LUNES_TENIS,
       suave("Martes", 25, 25, "Vienes de la prueba y del tenis: muy suave."),
-      MIERCOLES(5, PRESS_BANCA),
+      MIERCOLES(5, PRESS_BANCA, true),
       { dow: "Jueves", tipo: "run", cat: "runQ", titulo: "Series 4x1km a 4:45", dur: "45 min", rpe: "7-8/10", esCalidad: true, ritmo: 285, tramoM: 1000,
         what: CALENTAR + " 4x1 km a 4:45/km con 90 s de trote suave entre series. 10 min suave. Cuatro de los siete kilómetros, a su ritmo.",
         intervalos: [{ r: 4, s: [["rapido", 285], ["suave", 90]] }] },
-      VIERNES(5, JALON),
+      VIERNES(5, JALON, true, true),
       SABADO_LIBRE,
       tirada(55, 55, "Suave: el ritmo se trabaja el jueves, no hoy."),
     ]},
@@ -239,11 +249,11 @@ export const WEEKS = [
     days: [
       LUNES_TENIS,
       suave("Martes", 28, 28, "Vienes del tenis: para soltar."),
-      MIERCOLES(5, PRESS_INC),
+      MIERCOLES(5, PRESS_INC, true),
       { dow: "Jueves", tipo: "run", cat: "runQ", titulo: "Series 3x2km a 4:45", dur: "55 min", rpe: "8/10", esCalidad: true, ritmo: 285, tramoM: 2000,
         what: CALENTAR + " 3x2 km a 4:45/km con 2 min de trote suave entre series. 10 min suave. La sesión más dura del bloque: 6 km al ritmo del objetivo.",
         intervalos: [{ r: 3, s: [["rapido", 570], ["suave", 120]] }] },
-      VIERNES(5, REMO),
+      VIERNES(5, REMO, true, true),
       SABADO_LIBRE,
       tirada(60, 60, "La tirada más larga del bloque. Que el día D los 7 km se te hagan cortos."),
     ]},

@@ -241,3 +241,26 @@ test("el historial guardado con el bloque 1 activo lo cierra el 1 de noviembre y
   assert.equal(conBloqueEnCurso(h), h, "si ya esta el bloque 2, no se toca");
   assert.equal(conBloqueEnCurso(null).length, 1);
 });
+
+test("caña en pesas: de la S3 a la S10 (menos la S8), 40+ series con brazos los dos dias; luego baja", () => {
+  const B2 = WEEKS.filter(w => w.bloque === 2);
+  const series = (wk) => wk.days.flatMap(d => d.ejercicios || []).reduce((s, e) => s + parseInt(e.series, 10), 0);
+  for (const wk of B2) {
+    const n = wk.planN;
+    const fuerza = wk.days.filter(d => d.tipo === "fuerza");
+    if ([3, 4, 5, 6, 7, 9, 10].includes(n)) {
+      assert.ok(series(wk) >= 40, `S${n}: ${series(wk)} series`);
+      assert.ok(fuerza.find(d => d.dow === "Miercoles").ejercicios.some(e => e.grupo === "Triceps"), `S${n} sin triceps`);
+      assert.ok(fuerza.find(d => d.dow === "Viernes").ejercicios.some(e => e.grupo === "Biceps"), `S${n} sin biceps`);
+    } else {
+      assert.ok(series(wk) < 30, `S${n} deberia ser ligera: ${series(wk)}`);
+    }
+  }
+});
+
+test("la pierna no sube con la caña: solo la bulgara, 2 series, los viernes", () => {
+  for (const wk of WEEKS.filter(w => w.bloque === 2)) {
+    const bul = wk.days.flatMap(d => d.ejercicios || []).filter(e => /bulgara/i.test(e.nombre));
+    assert.ok(bul.length <= 1 && bul.every(e => parseInt(e.series, 10) === 2), `S${wk.planN}`);
+  }
+});

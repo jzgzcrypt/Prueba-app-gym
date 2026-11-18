@@ -22,6 +22,9 @@ Todo cambio que se haga en la app se anota aquí. Sin excepciones.
 ## [Sin publicar]
 
 ### Cambiado
+- **Caña en pesas desde la semana 3 hasta la 10 (menos la del 5 km).** Sesiones de 50 min. Pecho y espalda a 4×8-10, una segunda de pecho (aperturas) y de espalda (jalón y remo), y brazos los dos días (tríceps el miércoles, bíceps el viernes). La última serie, a 1 rep del fallo. De ~29 a ~43 series por semana. La pierna y el running no suben: compiten con correr y el riesgo es lesión.
+
+### Cambiado
 - **«¿Mover a otro día?» también hacia atrás, hasta hoy.** Antes solo ofrecía días posteriores a la sesión, y una sesión movida no se podía devolver. Ahora ofrece días desde hoy hasta 3 días después (como la propuesta de recolocar), libres o con su sesión dejada pasar, y siempre su día original para devolverla. Sale también en una sesión que llegó de otro día. Mueve con la misma regla que el arrastre de Semana.
 
 ### Cambiado
