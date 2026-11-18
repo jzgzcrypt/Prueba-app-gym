@@ -40,6 +40,17 @@ import { semanaNutricion } from "@/domain/nutricion/pegar-ia";
 import { simplificar, sinSimplificar } from "@/domain/running/ruta";
 import { resumenSemana, semanasCumplidas } from "@/domain/progreso/resumen";
 
+/** Descarga la copia como archivo. Devuelve "descargada". */
+function descargar(texto, nombre, hecha) {
+  const url = URL.createObjectURL(new Blob([texto], { type: "application/json" }));
+  const a = document.createElement("a");
+  a.href = url; a.download = nombre + ".json";
+  document.body.appendChild(a); a.click(); document.body.removeChild(a);
+  setTimeout(() => URL.revokeObjectURL(url), 60000);
+  hecha();
+  return "descargada";
+}
+
 export default function App() {
   const todayIdx = findTodayIndex();
   const [flatIdx, setFlatIdx] = useState(todayIdx);
@@ -417,7 +428,7 @@ export default function App() {
   };
 
   // ─── Exportar / Importar todos los datos como JSON ─────────────────────
-  const exportData = () => {
+  const exportData = (modo) => {
     const payload = {
       version: VERSION_ESQUEMA, exportedAt: new Date().toISOString(),
       checked, cuelloChecks, notes, youtubeLinks, customExercises, painLog,
@@ -426,25 +437,28 @@ export default function App() {
       comidasLog, comidasHabituales, pruebaSemana, semanaSentir, noHechas, cambiosMenu, menuEditado, compraMarcada, comidasFuera, magiaProgress, magiaRepaso,
       magiaLog, guerreroLog, bloquesHistorial, ultimoBackup, cuelloFaseManual, onboardingVisto, horasCarrera,
     };
-    const nombre = "programa-7k-backup-" + todayLocalIso() + ".json";
-    const blob = new Blob([JSON.stringify(payload, null, 2)], { type: "application/json" });
-    // En el movil, compartir deja guardarla en Archivos o iCloud, que es donde
-    // sobrevive a un cambio de telefono. Una descarga en Safari se pierde.
-    try {
-      const archivo = new File([blob], nombre, { type: "application/json" });
-      if (navigator.canShare && navigator.canShare({ files: [archivo] })) {
-        navigator.share({ files: [archivo], title: "Copia del Programa 7K" })
-          .then(() => setUltimoBackup(todayLocalIso()))
-          .catch(() => { /* cancelada: no cuenta como copia */ });
-        return;
-      }
-    } catch { /* sin Web Share: se descarga */ }
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url; a.download = nombre;
-    document.body.appendChild(a); a.click(); document.body.removeChild(a);
-    URL.revokeObjectURL(url);
-    setUltimoBackup(todayLocalIso());
+    const texto = JSON.stringify(payload, null, 2);
+    const nombre = "programa-7k-backup-" + todayLocalIso();
+    const hecha = () => setUltimoBackup(todayLocalIso());
+    // Copiar: siempre funciona, y es lo que hace falta para pegarla en un chat.
+    if (modo === "copiar") {
+      return navigator.clipboard.writeText(texto).then(() => { hecha(); return "copiada"; }, () => "error");
+    }
+    // 1. Compartir como .json (iPhone: Guardar en Archivos). 2. Si el movil no
+    // comparte .json (Chrome en Android solo deja ciertos tipos), como .txt.
+    // 3. Si no se puede compartir, descarga. El enlace se libera un minuto
+    // despues: liberarlo al momento cancelaba la descarga en el movil.
+    for (const [tipo, ext] of [["application/json", ".json"], ["text/plain", ".txt"]]) {
+      try {
+        const archivo = new File([texto], nombre + ext, { type: tipo });
+        if (navigator.canShare && navigator.canShare({ files: [archivo] })) {
+          return navigator.share({ files: [archivo], title: "Copia del Programa 7K" })
+            .then(() => { hecha(); return "compartida"; },
+                  (e) => (e && e.name === "AbortError" ? "cancelada" : descargar(texto, nombre, hecha)));
+        }
+      } catch { /* sigue con el siguiente */ }
+    }
+    return Promise.resolve(descargar(texto, nombre, hecha));
   };
 
   const importData = (file) => {
@@ -647,7 +661,7 @@ export default function App() {
             resumenSemana={isToday && currentDay.dayIdx <= 2 && currentDay.weekIdx > 0
               ? resumenSemana(WEEKS[currentDay.weekIdx - 1], { checked, ritmoReal, pesos: workoutWeights, reps: workoutReps }, FLAT_DAYS)
               : null}
-            onCopia={exportData}
+            onCopia={() => exportData()}
             postponed={postponed} setPostponed={setPostponed}
             expandedBlock={expandedBlock} setExpandedBlock={setExpandedBlock}
             painLog={painLog} setPainLog={setPainLog}

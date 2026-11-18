@@ -17,6 +17,7 @@ function diasDesde(iso) {
 
 export function PhaseAdjustContent({ currentWeekN, currentWeekOverride, setCurrentWeekOverride, phaseAdjustNote, setPhaseAdjustNote, exportData, importData, storageStatus, ultimoBackup, ultimoGuardado, horasCarrera, setHorasCarrera }) {
   const [noteDraft, setNoteDraft] = useState(phaseAdjustNote);
+  const [avisoCopia, setAvisoCopia] = useState(null);
   const autoWeek = (() => {
     const todayIso = todayLocalIso();
     let w = WEEKS[0].n;
@@ -126,15 +127,26 @@ export function PhaseAdjustContent({ currentWeekN, currentWeekOverride, setCurre
             </div>
           );
         })()}
-        <button className="btn" onClick={exportData} style={{
-          width: "100%", padding: SP.sm + 2 + "px", borderRadius: R.md, background: C.accent, color: "#FAFAF9", fontWeight: 800, fontSize: 12.5, marginBottom: SP.sm,
-        }}>DESCARGAR COPIA (.json)</button>
+        <div style={{ display: "flex", gap: SP.sm, marginBottom: SP.sm }}>
+          <button className="btn" data-guardar-copia onClick={() => exportData().then(r => setAvisoCopia(r))} style={{
+            flex: 1, padding: SP.sm + 2 + "px", borderRadius: R.md, background: C.accent, color: "#FAFAF9", fontWeight: 800, fontSize: 12.5,
+          }}>GUARDAR COPIA</button>
+          <button className="btn" data-copiar-copia onClick={() => exportData("copiar").then(r => setAvisoCopia(r))} style={{
+            flex: 1, padding: SP.sm + 2 + "px", borderRadius: R.md, background: C.surfaceMuted, color: C.text, fontWeight: 800, fontSize: 12.5,
+          }}>COPIAR</button>
+        </div>
+        {avisoCopia && (
+          <div data-aviso-copia style={{ fontSize: 12.5, color: avisoCopia === "error" ? CAT.running : C.textDim, marginBottom: SP.sm, textAlign: "center" }}>
+            {{ compartida: "Copia guardada.", descargada: "Copia descargada: mira en Descargas.", copiada: "Copiada: pégala en el chat.",
+               cancelada: "Cancelada.", error: "No se pudo copiar." }[avisoCopia]}
+          </div>
+        )}
         <label style={{
           display: "block", textAlign: "center", padding: SP.sm + 2 + "px", borderRadius: R.md,
           background: C.surfaceMuted, border: "1px dashed #D4D4D1", fontSize: 12.5, color: C.textDim, fontWeight: 700, cursor: "pointer",
         }}>
-          IMPORTAR COPIA (.json)
-          <input type="file" accept="application/json" onChange={handleImportFile} style={{ display: "none" }} />
+          IMPORTAR COPIA
+          <input type="file" accept="application/json,.json,text/plain,.txt" onChange={handleImportFile} style={{ display: "none" }} />
         </label>
       </div>
     </div>

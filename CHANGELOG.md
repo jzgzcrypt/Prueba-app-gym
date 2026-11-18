@@ -21,6 +21,9 @@ Todo cambio que se haga en la app se anota aquí. Sin excepciones.
 
 ## [Sin publicar]
 
+### Arreglado
+- **La copia no descargaba nada en algunos móviles.** Ahora prueba a compartir como .json; si el móvil no lo deja (Chrome en Android), como .txt; y si no, la descarga. La descarga ya no se cancela antes de empezar. Nuevo botón «Copiar», que deja la copia en el portapapeles para pegarla en un chat, y un aviso que dice qué ha pasado. Importar acepta .json y .txt.
+
 ### Cambiado
 - **Caña en pesas desde la semana 3 hasta la 10 (menos la del 5 km).** Sesiones de 50 min. Pecho y espalda a 4×8-10, una segunda de pecho (aperturas) y de espalda (jalón y remo), y brazos los dos días (tríceps el miércoles, bíceps el viernes). La última serie, a 1 rep del fallo. De ~29 a ~43 series por semana. La pierna y el running no suben: compiten con correr y el riesgo es lesión.
 
